@@ -1,0 +1,851 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="externals\DirectXTex\DirectXTexCompress.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexCompressGPU.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexConvert.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexD3D11.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexD3D12.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexDDS.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexFlipRotate.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexHDR.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexImage.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexMipmaps.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexMisc.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexNormalMaps.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexPMAlpha.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexResize.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexTGA.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexUtil.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\DirectXTexWIC.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC4BC5.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BC6HBC7.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\DirectXTex\BCDirectCompute.cpp">
+      <Filter>externals\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_demo.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_draw.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_impl_dx12.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_impl_win32.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_tables.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imguidocking\imgui_widgets.cpp">
+      <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="externals\json\json.hpp">
+      <Filter>externals\json</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\DirectXTexP.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\filters.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\scoped.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\BC.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\BCDirectCompute.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\d3dx12.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\DDS.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\DirectXTex\DirectXTex.h">
+      <Filter>externals\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\poppack1.h">
+      <Filter>externals\assimp\include\assimp\Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\pstdint.h">
+      <Filter>externals\assimp\include\assimp\Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Compiler\pushpack1.h">
+      <Filter>externals\assimp\include\assimp\Compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\port\AndroidJNI\AndroidJNIIOSystem.h">
+      <Filter>externals\assimp\include\assimp\port\AndroidJNI</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\port\AndroidJNI\BundledAssetIOSystem.h">
+      <Filter>externals\assimp\include\assimp\port\AndroidJNI</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\aabb.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ai_assert.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\anim.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\AssertHandler.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Base64.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BaseImporter.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Bitmap.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\BlobIOSystem.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ByteSwapper.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\camera.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cexport.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cfileio.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\cimport.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ColladaMetaData.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\color4.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\commonMetaData.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\config.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\CreateAnimMesh.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOStream.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultIOSystem.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\DefaultLogger.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\defs.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exceptional.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Exporter.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\fast_atof.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GenericProperty.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\GltfMaterial.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Hash.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Importer.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\importerdesc.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStream.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOStreamBuffer.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\IOSystem.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\light.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LineSplitter.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogAux.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Logger.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\LogStream.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\material.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MathFunctions.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix3x3.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\matrix4x4.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\MemoryIOWrapper.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\mesh.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\metadata.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\NullLogger.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ObjMaterial.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ParsingUtils.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\pbrmaterial.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\postprocess.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Profiler.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ProgressHandler.hpp">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\qnan.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\quaternion.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\RemoveComments.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\scene.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SceneCombiner.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SGSpatialSort.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SkeletonMeshBuilder.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmallVector.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SmoothingGroups.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\SpatialSort.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StandardShapes.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamReader.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StreamWriter.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringComparison.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\StringUtils.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Subdivision.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\texture.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\TinyFormatter.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\types.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector2.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\vector3.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\version.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\Vertex.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XmlParser.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\XMLTools.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\assimp\include\assimp\ZipArchiveIOSystem.h">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imconfig.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imgui.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imgui_impl_dx12.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imgui_impl_win32.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imgui_internal.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imstb_rectpack.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imstb_textedit.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imguidocking\imstb_truetype.h">
+      <Filter>externals\imguidocking</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\LuaJIT\lualib.h">
+      <Filter>externals\LuaJIT</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\LuaJIT\lauxlib.h">
+      <Filter>externals\LuaJIT</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\LuaJIT\lua.h">
+      <Filter>externals\LuaJIT</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\LuaJIT\lua.hpp">
+      <Filter>externals\LuaJIT</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\LuaJIT\luajit.h">
+      <Filter>externals\LuaJIT</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{9280d76c-102c-4763-995d-ee28da8cbf8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders">
+      <UniqueIdentifier>{4f645de7-a620-4508-bf35-14ad248671b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\CPUParticle">
+      <UniqueIdentifier>{eda3588c-2792-4b92-8247-8b4e4ad3f8f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Math">
+      <UniqueIdentifier>{234081a7-76af-48e5-8646-5901f934ab0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Object3d">
+      <UniqueIdentifier>{258711f2-d159-4a52-a9e4-a17fa87461dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect">
+      <UniqueIdentifier>{b006b47a-7452-47fe-a9b2-47e892fb66f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Skinning">
+      <UniqueIdentifier>{ce0ca144-e7fd-452c-bdac-9386f0978462}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Skybox">
+      <UniqueIdentifier>{7c6c6086-1183-42ef-a5a1-78e3e61154f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle">
+      <UniqueIdentifier>{93c5e513-17f3-4b1d-a4a0-a4a937efb16e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle\Draw">
+      <UniqueIdentifier>{4211dbbf-3b9d-4d85-a289-c9fb18f1dd1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle\Init">
+      <UniqueIdentifier>{c49412e8-39e7-4537-83fc-eb8d73aafebb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Object2d">
+      <UniqueIdentifier>{fc4586f8-0baf-4c70-b134-72668086ed3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\BoxFilter">
+      <UniqueIdentifier>{e29cf043-93b4-439f-a811-8eafdbaa0b0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Absent">
+      <UniqueIdentifier>{d9c231e0-88e0-4be8-8514-81083851cf11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\ColorGrading">
+      <UniqueIdentifier>{560c67a5-2fe1-4525-8639-38367391fb17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Dissolve">
+      <UniqueIdentifier>{674b6cb1-9dec-4c75-8627-cf3062378f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\GaussianFilter">
+      <UniqueIdentifier>{4479c72a-c789-4b46-a1b3-f18032dd1a65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Glitch">
+      <UniqueIdentifier>{a8e7f16e-0e68-4da3-94d5-12edee24e296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Grain">
+      <UniqueIdentifier>{df311ef2-495c-4fbc-bd35-00089317b361}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\HSV">
+      <UniqueIdentifier>{9a8a7b87-db45-4a94-a605-5b4ffafa59ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\OutLine">
+      <UniqueIdentifier>{e7f52c45-646a-480f-b5fd-76bc4fa882a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\RadialBlur">
+      <UniqueIdentifier>{73e03312-dfab-4dde-b247-2beaac2e809c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\RetroCRT">
+      <UniqueIdentifier>{06d76f42-b76b-4150-b919-aefdf6d1b883}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\SepiaTone">
+      <UniqueIdentifier>{a9bcf955-d534-42ab-bf7d-2525f8bfac48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Vignetting">
+      <UniqueIdentifier>{61317961-657b-4b86-9399-3c801e24bf48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\GrayScale">
+      <UniqueIdentifier>{f1a87e57-f2f5-4407-a779-1b4f3b664ecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\PostEffect\Random">
+      <UniqueIdentifier>{dde56324-8a47-4a2e-b79c-b6c183e7e95f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals">
+      <UniqueIdentifier>{12588cfb-4f23-4d3f-8926-cb473afeda33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp">
+      <UniqueIdentifier>{cb777b06-7d37-4d4d-9d0f-74aad0c6368f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\DirectXTex">
+      <UniqueIdentifier>{5a8113d7-68d9-4339-96c6-1cbb66cbdda0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\json">
+      <UniqueIdentifier>{b2256fc3-c53d-44b4-b4a2-fab0cdba7e71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\DirectXTex\Shaders">
+      <UniqueIdentifier>{afb78d09-209a-45af-b187-83fea3ebeeca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\DirectXTex\Shaders\Compiled">
+      <UniqueIdentifier>{e6ffd386-ad82-4567-b5c7-807cc3758dc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\include">
+      <UniqueIdentifier>{c2596da5-6903-4c6d-af95-d2528fc36c55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\lib">
+      <UniqueIdentifier>{6650c64f-bc7a-412b-a99e-5cb5e7367b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\include\assimp">
+      <UniqueIdentifier>{eb5a2754-0d6d-40df-9087-bf2599f53aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\include\assimp\Compiler">
+      <UniqueIdentifier>{44533548-7eb7-4b92-abb1-8677a6a749af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\include\assimp\port">
+      <UniqueIdentifier>{be487bef-22a5-4d93-a9eb-28beaf961449}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\include\assimp\port\AndroidJNI">
+      <UniqueIdentifier>{5849569f-e3c3-46c3-9bb5-6f4edb0655a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\lib\Debug">
+      <UniqueIdentifier>{ec4b4f23-16a1-4208-b225-1f124c755f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\assimp\lib\Release">
+      <UniqueIdentifier>{0c5c0f2c-d877-451a-81a1-ea0314ca0443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Decal">
+      <UniqueIdentifier>{1375d1c5-8960-4367-988a-2d7960974969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Emitter">
+      <UniqueIdentifier>{13f4739c-9b3e-462b-b6e8-3c93dc3a5cf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Emitter\Sphere">
+      <UniqueIdentifier>{743485ea-7345-453d-b770-1128abf2b8a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Field">
+      <UniqueIdentifier>{a11d3dca-96a4-44e7-bab5-0077fb998839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Field\Constant">
+      <UniqueIdentifier>{a779855f-4403-47fe-aa10-9bb9a08bf346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle\Material">
+      <UniqueIdentifier>{9d86b921-f430-4c87-8c48-bc9eeaea7afd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle\Material\FadeOut">
+      <UniqueIdentifier>{29992ee3-c693-43c0-8f1e-230981567a94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GPUParticle\Update">
+      <UniqueIdentifier>{b6ee2490-a4c4-4324-b856-b950ea63ebd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Random">
+      <UniqueIdentifier>{2ed110d4-c985-48dc-a3fa-96dbab07d421}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\imguidocking">
+      <UniqueIdentifier>{13486d5b-f825-4f04-8713-0fcf8d25a73e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\LuaJIT">
+      <UniqueIdentifier>{773f920a-2b96-4c78-9aca-759bdabb1e91}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\CPUParticle\CPUParticle.hlsli">
+      <Filter>Resources\Shaders\CPUParticle</Filter>
+    </None>
+    <None Include="Resources\Shaders\Math\Math.hlsli">
+      <Filter>Resources\Shaders\Math</Filter>
+    </None>
+    <None Include="Resources\Shaders\GPUParticle\GPUParticle.hlsli">
+      <Filter>Resources\Shaders\GPUParticle</Filter>
+    </None>
+    <None Include="Resources\Shaders\Object2d\Object2d.hlsli">
+      <Filter>Resources\Shaders\Object2d</Filter>
+    </None>
+    <None Include="Resources\Shaders\Skybox\Skybox.hlsli">
+      <Filter>Resources\Shaders\Skybox</Filter>
+    </None>
+    <None Include="Resources\Shaders\Skinning\SkinningObject3d.hlsli">
+      <Filter>Resources\Shaders\Skinning</Filter>
+    </None>
+    <None Include="Resources\Shaders\Object3d\Object3d.hlsli">
+      <Filter>Resources\Shaders\Object3d</Filter>
+    </None>
+    <None Include="Resources\Shaders\PostEffect\PostEffect.hlsli">
+      <Filter>Resources\Shaders\PostEffect</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_EncodeBlockCS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_EncodeBlockCS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_EncodeBlockCS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_EncodeBlockCS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode02CS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode02CS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode02CS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode137CS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode137CS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode137CS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode137CS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS_cs40.inc">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\Compiled\BC7Encode_TryMode456CS_cs40.pdb">
+      <Filter>externals\DirectXTex\Shaders\Compiled</Filter>
+    </None>
+    <None Include="externals\DirectXTex\Shaders\CompileShaders.cmd">
+      <Filter>externals\DirectXTex\Shaders</Filter>
+    </None>
+    <None Include="externals\DirectXTex\DirectXTex.inl">
+      <Filter>externals\DirectXTex</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\.editorconfig">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\color4.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\config.h.in">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\material.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix3x3.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\matrix4x4.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\quaternion.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\SmoothingGroups.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector2.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="externals\assimp\include\assimp\vector3.inl">
+      <Filter>externals\assimp\include\assimp</Filter>
+    </None>
+    <None Include="Resources\Shaders\Decal\Decal.hlsli">
+      <Filter>Resources\Shaders\Decal</Filter>
+    </None>
+    <None Include="Resources\Shaders\Emitter\Emitter.hlsli">
+      <Filter>Resources\Shaders\Emitter</Filter>
+    </None>
+    <None Include="Resources\Shaders\Field\Field.hlsli">
+      <Filter>Resources\Shaders\Field</Filter>
+    </None>
+    <None Include="Resources\Shaders\Random\Random.hlsli">
+      <Filter>Resources\Shaders\Random</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shaders\CPUParticle\CPUParticle.PS.hlsl">
+      <Filter>Resources\Shaders\CPUParticle</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\CPUParticle\CPUParticle.VS.hlsl">
+      <Filter>Resources\Shaders\CPUParticle</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GPUParticle\Draw\GPUParticle_Draw.PS.hlsl">
+      <Filter>Resources\Shaders\GPUParticle\Draw</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GPUParticle\Draw\GPUParticle_Draw.VS.hlsl">
+      <Filter>Resources\Shaders\GPUParticle\Draw</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GPUParticle\Init\GPUParticle_Init.CS.hlsl">
+      <Filter>Resources\Shaders\GPUParticle\Init</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object2d\Object2d.PS.hlsl">
+      <Filter>Resources\Shaders\Object2d</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object2d\Object2d.VS.hlsl">
+      <Filter>Resources\Shaders\Object2d</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Skybox\Skybox.PS.hlsl">
+      <Filter>Resources\Shaders\Skybox</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Skybox\Skybox.VS.hlsl">
+      <Filter>Resources\Shaders\Skybox</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Skinning\SkinningObject3d.PS.hlsl">
+      <Filter>Resources\Shaders\Skinning</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Skinning\SkinningObject3d.VS.hlsl">
+      <Filter>Resources\Shaders\Skinning</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object3d\Object3d.PS.hlsl">
+      <Filter>Resources\Shaders\Object3d</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object3d\Object3d.VS.hlsl">
+      <Filter>Resources\Shaders\Object3d</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Absent\Absent.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Absent</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\BoxFilter\BoxFilter.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\BoxFilter</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\ColorGrading\ColorGrading.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\ColorGrading</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Dissolve\Dissolve.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Dissolve</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\GaussianFilter\GaussianFilter.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\GaussianFilter</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Glitch\Glitch.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Glitch</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Grain\Grain.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Grain</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\GrayScale\GrayScale.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\GrayScale</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\HSV\HSV.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\HSV</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Random\Random.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Random</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\Vignetting\Vignetting.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\Vignetting</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\SepiaTone\SepiaTone.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\SepiaTone</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\RetroCRT\RetroCRT.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\RetroCRT</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\RadialBlur\RadialBlur.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\RadialBlur</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\OutLine\OutLine.PS.hlsl">
+      <Filter>Resources\Shaders\PostEffect\OutLine</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect\PostEffect.VS.hlsl">
+      <Filter>Resources\Shaders\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
+      <Filter>externals\DirectXTex\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl">
+      <Filter>externals\DirectXTex\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Decal\Decal.PS.hlsl">
+      <Filter>Resources\Shaders\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Decal\Decal.VS.hlsl">
+      <Filter>Resources\Shaders\Decal</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Emitter\Sphere\SphereEmitter.CS.hlsl">
+      <Filter>Resources\Shaders\Emitter\Sphere</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Field\Constant\ConstantField.CS.hlsl">
+      <Filter>Resources\Shaders\Field\Constant</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GPUParticle\Material\FadeOut\GPUParticle_FadeOut.CS.hlsl">
+      <Filter>Resources\Shaders\GPUParticle\Material\FadeOut</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GPUParticle\Update\GPUParticle_Update.CS.hlsl">
+      <Filter>Resources\Shaders\GPUParticle\Update</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="externals\assimp\lib\Debug\assimp-vc143-mdd.lib">
+      <Filter>externals\assimp\lib\Debug</Filter>
+    </Library>
+    <Library Include="externals\assimp\lib\Debug\assimp-vc143-mtd.lib">
+      <Filter>externals\assimp\lib\Debug</Filter>
+    </Library>
+    <Library Include="externals\assimp\lib\Release\assimp-vc143-md.lib">
+      <Filter>externals\assimp\lib\Release</Filter>
+    </Library>
+    <Library Include="externals\assimp\lib\Release\assimp-vc143-mt.lib">
+      <Filter>externals\assimp\lib\Release</Filter>
+    </Library>
+  </ItemGroup>
+</Project>

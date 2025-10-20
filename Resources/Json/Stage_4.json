@@ -1,0 +1,515 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "Floor",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    -2.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    50.0,
+                    50.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "Player",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -30.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "PLAYER"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BarrierBox",
+            "transform": {
+                "translation": [
+                    -20.0,
+                    -15.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.5
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BarrierBox.001",
+            "transform": {
+                "translation": [
+                    20.0,
+                    -15.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.5
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BarrierBox.002",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -15.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.5
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BarrierBox.003",
+            "transform": {
+                "translation": [
+                    40.0,
+                    -15.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.5
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BarrierBox.004",
+            "transform": {
+                "translation": [
+                    -40.0,
+                    -15.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.5
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "NONE"
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy",
+            "transform": {
+                "translation": [
+                    -14.0,
+                    26.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy.001",
+            "transform": {
+                "translation": [
+                    14.0,
+                    26.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy.002",
+            "transform": {
+                "translation": [
+                    7.0,
+                    13.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy.003",
+            "transform": {
+                "translation": [
+                    -7.0,
+                    13.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BossEnemy",
+            "transform": {
+                "translation": [
+                    0.0,
+                    20.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "RANDOM",
+                "bullet_behavior": "RANDOM",
+                "shoot_interval": 30,
+                "move_behavior": "HORIZONTAL",
+                "tilt_body": true,
+                "move_speed": 10.0,
+                "horizontal_start": [
+                    -30.0,
+                    -10.0,
+                    0.0
+                ],
+                "horizontal_end": [
+                    30.0,
+                    -10.0,
+                    0.0
+                ]
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "StaticEnemy",
+            "transform": {
+                "translation": [
+                    -30.0,
+                    -20.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "CROSS",
+                "bullet_behavior": "RESISTANT",
+                "shoot_interval": 35,
+                "move_behavior": "STATIC",
+                "tilt_body": false
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "StaticEnemy.001",
+            "transform": {
+                "translation": [
+                    30.0,
+                    -20.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99997768819966
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "CROSS",
+                "bullet_behavior": "RESISTANT",
+                "shoot_interval": 35,
+                "move_behavior": "STATIC",
+                "tilt_body": false
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy.004",
+            "transform": {
+                "translation": [
+                    30.0,
+                    -40.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    63.08952845768066
+                ],
+                "scaling": [
+                    0.9999999403953552,
+                    0.9999999403953552,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        },
+        {
+            "type": "MESH",
+            "name": "BasicEnemy.005",
+            "transform": {
+                "translation": [
+                    -30.0,
+                    -40.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    -45.938373621550454
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "collider": {
+                "type": "NONE"
+            },
+            "category": {
+                "type": "ENEMY",
+                "shot_direction": "FORWARD",
+                "bullet_behavior": "COMMON",
+                "shoot_interval": 30,
+                "move_behavior": "FOLLOW",
+                "tilt_body": true,
+                "move_speed": 5.0
+            },
+            "children": []
+        }
+    ]
+}
