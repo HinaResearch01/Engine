@@ -19,8 +19,6 @@ Application::~Application()
 
 void Application::Run()
 {
-	Init();
-
 	if (gameApp_) gameApp_->OnInit();
 
 	MSG msg{};

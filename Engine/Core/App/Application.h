@@ -14,6 +14,7 @@ struct AppDesc {
     HINSTANCE hInstance = nullptr;
 };
 
+/* ウィンドウ・DirectX初期化・メインループ管理 */
 class Application {
 
 public:
