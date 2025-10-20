@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="externals\DirectXTex\DirectXTexCompress.cpp">
       <Filter>externals\DirectXTex</Filter>
     </ClCompile>
@@ -86,6 +85,15 @@
     </ClCompile>
     <ClCompile Include="externals\imguidocking\imgui_widgets.cpp">
       <Filter>externals\imguidocking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\App\Application.cpp">
+      <Filter>Engine\Core\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\main.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\MyGame.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -404,6 +412,18 @@
     <ClInclude Include="externals\LuaJIT\luajit.h">
       <Filter>externals\LuaJIT</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Core\App\Application.h">
+      <Filter>Engine\Core\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\EntryPoint.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\GameApp.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\MyGame.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -561,6 +581,18 @@
     </Filter>
     <Filter Include="externals\LuaJIT">
       <UniqueIdentifier>{773f920a-2b96-4c78-9aca-759bdabb1e91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{c64d0a9f-94fb-45fb-b975-6531405dde5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Core">
+      <UniqueIdentifier>{b8a71a63-9576-40f2-94fb-05f4cf4bac67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Core\App">
+      <UniqueIdentifier>{d103bd4f-232d-464f-b8cd-c329132e6368}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{bf7bbfe8-2f89-4ecf-873e-d28399ff1a9e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
