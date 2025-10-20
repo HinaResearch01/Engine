@@ -782,6 +782,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\LuaJIT\luajit.h" />
     <ClInclude Include="externals\LuaJIT\lualib.h" />
     <ClInclude Include="Game\MyGame.h" />
+    <ClInclude Include="UtilsLog.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\assimp\include\assimp\.editorconfig">

@@ -433,6 +433,9 @@
     <ClInclude Include="Engine\Test\TestScene.h">
       <Filter>Engine\Test</Filter>
     </ClInclude>
+    <ClInclude Include="UtilsLog.h">
+      <Filter>Engine\Utils\Log</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -608,6 +611,12 @@
     </Filter>
     <Filter Include="Engine\Test">
       <UniqueIdentifier>{43d4c384-6a08-426d-ae97-63137e25ad18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils">
+      <UniqueIdentifier>{9c7fbf6d-bb18-4efe-a7f1-37b3a4e17071}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\Log">
+      <UniqueIdentifier>{d002f3da-3379-45ac-83ba-a246dc604341}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
