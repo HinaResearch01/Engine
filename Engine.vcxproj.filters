@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="externals\DirectXTex\DirectXTexCompress.cpp">
       <Filter>externals\DirectXTex</Filter>
     </ClCompile>
@@ -94,6 +93,9 @@
     </ClCompile>
     <ClCompile Include="Game\MyGame.cpp">
       <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Test\TestScene.cpp">
+      <Filter>Engine\Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -424,6 +426,15 @@
     <ClInclude Include="Game\MyGame.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Scene\IScene.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Scene\SceneManager.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Test\TestScene.h">
+      <Filter>Engine\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -593,6 +604,12 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{bf7bbfe8-2f89-4ecf-873e-d28399ff1a9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Scene">
+      <UniqueIdentifier>{0937fdad-9e5c-4c74-919d-e1071356bf22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Test">
+      <UniqueIdentifier>{43d4c384-6a08-426d-ae97-63137e25ad18}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
