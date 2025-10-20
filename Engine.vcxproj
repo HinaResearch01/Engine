@@ -302,8 +302,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imguidocking\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imguidocking\imgui_tables.cpp" />
     <ClCompile Include="externals\imguidocking\imgui_widgets.cpp" />
-    <ClCompile Include="Game\main.cpp" />
     <ClCompile Include="Game\MyGame.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\App\Application.h" />

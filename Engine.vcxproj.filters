@@ -88,15 +88,13 @@
     <ClCompile Include="Engine\Core\App\Application.cpp">
       <Filter>Engine\Core\App</Filter>
     </ClCompile>
-    <ClCompile Include="Game\main.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="Game\MyGame.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Test\TestScene.cpp">
       <Filter>Engine\Test</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
