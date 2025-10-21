@@ -104,7 +104,7 @@
     <ClCompile Include="Engine\DX12\Device\DX12Device.cpp">
       <Filter>Engine\DX12\Device</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Win32\Win32Window.cpp">
+    <ClCompile Include="Engine\Win\Win32Window.cpp">
       <Filter>Engine\Wind32</Filter>
     </ClCompile>
   </ItemGroup>
@@ -448,7 +448,7 @@
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Utils\Log\UtilsLog.h">
+    <ClInclude Include="Engine\Utils\Logger\UtilsLog.h">
       <Filter>Engine\Utils\Log</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DX12\DX12Manager.h">
@@ -460,7 +460,7 @@
     <ClInclude Include="Engine\DX12\Device\DX12Device.h">
       <Filter>Engine\DX12\Device</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Win32\Win32Window.h">
+    <ClInclude Include="Engine\Win\Win32Window.h">
       <Filter>Engine\Wind32</Filter>
     </ClInclude>
   </ItemGroup>

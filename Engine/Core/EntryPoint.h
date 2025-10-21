@@ -1,7 +1,7 @@
 #pragma once
 
 #include "App/Application.h"
-#include "Win32/Win32Window.h"
+#include "Win/Win32Window.h"
 #include <memory>
 
 #define STRINGIZE(x) #x

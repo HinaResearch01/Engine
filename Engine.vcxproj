@@ -193,7 +193,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
-    <ClCompile Include="Engine\Win32\Win32Window.cpp" />
+    <ClCompile Include="Engine\Win\Win32Window.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
@@ -320,8 +320,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />
-    <ClInclude Include="Engine\Utils\Log\UtilsLog.h" />
-    <ClInclude Include="Engine\Win32\Win32Window.h" />
+    <ClInclude Include="Engine\Utils\Logger\UtilsLog.h" />
+    <ClInclude Include="Engine\Win\Win32Window.h" />
     <ClInclude Include="externals\assimp\include\assimp\aabb.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
