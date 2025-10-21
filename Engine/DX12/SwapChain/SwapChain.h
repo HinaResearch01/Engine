@@ -16,9 +16,9 @@ public:
 
 	/// <summary>
 	/// コンストラクタ
+	/// コピー禁止
 	/// </summary>
 	SwapChain() = default;
-	// コピー禁止
 	SwapChain(const SwapChain&) = delete;
 	SwapChain& operator=(const SwapChain&) = delete;
 
@@ -27,10 +27,15 @@ public:
 	/// </summary>
 	~SwapChain() = default;
 
+	/// <summary>
+	/// 生成
+	/// </summary>
+	void Create();
 
-	bool Init();
-
-	void Present();
+	/// <summary>
+	/// Present
+	/// </summary>
+	void Present(UINT syncInterval, UINT flags);
 
 #pragma region Accessor
 
@@ -41,8 +46,19 @@ public:
 
 private:
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	bool Init();
 
 
+private:
+	ComPtr<IDXGISwapChain4> swapChain_;
+	DXGI_SWAP_CHAIN_DESC1 desc_{};
+	UINT bufferCount_ = 2;
+
+	// バッファは最大 3 をサポートする配列にしておく
+	ComPtr<ID3D12Resource> backBuffers_[3];
 };
 
 }

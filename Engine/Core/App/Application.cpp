@@ -4,8 +4,7 @@
 
 using namespace Tsumi;
 
-Application::Application(const AppDesc& desc)
-	: desc_(desc)
+Application::Application()
 {
 	Init();
 }

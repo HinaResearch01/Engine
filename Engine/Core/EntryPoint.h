@@ -14,9 +14,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) \
     desc.windowTitle = Title; \
     desc.windowWidth = 1280; \
     desc.windowHeight = 720; \
-    Tsumi::Application app(desc); \
     auto game = std::make_unique<AppClass>(); \
-    app.SetGameApp(std::move(game)); \
-    app.Run(); \
+    auto app = Tsumi::Application::GetInstance();\
+    app->SetAppDesc(desc); \
+    app->SetGameApp(std::move(game)); \
+    app->Run(); \
     return 0; \
 }

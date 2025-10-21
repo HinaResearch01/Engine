@@ -17,18 +17,23 @@ struct AppDesc {
 /* ウィンドウ・DirectX初期化・メインループ管理 */
 class Application {
 
+private: // シングルトン
+
+    Application();
+    ~Application();
+    Application(const Application&) = delete;
+    const Application& operator=(const Application&) = delete;
+
 public:
 
     /// <summary>
-    /// コンストラクタ
+    /// インスタンスの取得
     /// </summary>
-    /// <param name="desc">appデータ</param>
-    Application(const AppDesc& desc);
-
-    /// <summary>
-    /// コンストラクタ
-    /// </summary>
-    ~Application();
+    /// <returns></returns>
+    static Application* GetInstance() {
+        static Application instance;
+        return &instance;
+    }
 
     /// <summary>
     /// メインループ処理
@@ -44,6 +49,13 @@ public:
 
     const AppDesc& GetAppDesc() const {
         return desc_;
+    }
+    void SetAppDesc(const AppDesc& desc) {
+        this->desc_ = desc;
+    }
+
+    const HWND& GetHwnd() const {
+        return hwnd_;
     }
 
 #pragma endregion
@@ -65,6 +77,9 @@ private:
     /// ウィンドウプロシージャ
     /// </summary>
     static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+    
+public:
 
 
 private:
