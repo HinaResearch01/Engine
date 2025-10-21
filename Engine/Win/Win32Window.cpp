@@ -16,6 +16,8 @@ void Win32Window::CreateMainWindow(const Win32Desc& desc)
 	wc.hInstance = desc_.hInstance;
 	wc.lpszClassName = L"EngineWindowClass";
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	// 背景を白にする。これがないと未描画領域が黒く見えることがある
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	// wc.style = CS_HREDRAW | CS_VREDRAW; // 必要なら
 	if (!RegisterClass(&wc)) {
 		throw std::runtime_error("Failed to register window class.");
@@ -98,7 +100,6 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_SIZING:
 		{
 			RECT* prc = reinterpret_cast<RECT*>(lParam);
-			// <- 修正: nullptr のときは break ではなく明示的に戻す
 			if (!prc) {
 				return DefWindowProc(hwnd_, msg, wParam, lParam);
 			}
@@ -197,6 +198,9 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 					break;
 			}
 
+			// リサイズ中に再描画を促す（必要に応じてコメントアウト可）
+			InvalidateRect(hwnd_, nullptr, TRUE);
+
 			return TRUE;
 		}
 
@@ -215,6 +219,16 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 				info->ptMinTrackSize.x = minClientWidth_ + borderW;
 				info->ptMinTrackSize.y = minClientHeight_ + borderH;
 			}
+			return 0;
+		}
+
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd_, &ps);
+			// 背景を白で塗る（ウィンドウクラスの背景が効かないケース向けの保険）
+			FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+			EndPaint(hwnd_, &ps);
 			return 0;
 		}
 
