@@ -1,102 +1,48 @@
 #include "Application.h"
 #include <stdexcept>
 #include <memory>
+#include "Win32/Win32Window.h"
 
 using namespace Tsumi;
 
 Application::Application()
 {
-	Init();
+    window_ = Win32::Win32Window::GetInstance();
 }
 
 Application::~Application()
 {
 	if (gameApp_) gameApp_->OnFinalize();
-	DestroyWindow(hwnd_);
-	UnregisterClass(L"EngineWindowClass", desc_.hInstance);
+    window_->OnFinalize();
+}
+
+void Application::Init(const Win32::Win32Desc& windowDesc)
+{
+    window_->CreateMainWindow(windowDesc);
 }
 
 void Application::Run()
 {
-	if (gameApp_) gameApp_->OnInit();
+    if (!gameApp_) {
+        throw std::runtime_error("GameApp is not set. Call SetGameApp() before Run().");
+    }
 
-	MSG msg{};
-	while (isRunning_) {
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			if (msg.message == WM_QUIT) {
-				isRunning_ = false;
-				break;
-			}
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+    gameApp_->OnInit();
 
-		if (!isRunning_) break;
+    // メインループ
+    while (!window_->ShouldClose()) {
+        // メッセージ処理
+        window_->ProcessMessages();
 
-		if (gameApp_) {
-			gameApp_->OnUpdate();
-			gameApp_->OnRender();
-		}
-	}
+        // ゲーム処理
+        gameApp_->OnUpdate();
+        gameApp_->OnRender();
+    }
+
+    gameApp_->OnFinalize();
 }
 
 void Application::SetGameApp(std::unique_ptr<GameApp> game)
 {
 	gameApp_ = std::move(game);
-}
-
-void Application::Init()
-{
-	WNDCLASS wc = {};
-	wc.lpfnWndProc = WndProc;
-	wc.hInstance = desc_.hInstance;
-	wc.lpszClassName = L"EngineWindowClass";
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	RegisterClass(&wc);
-
-	hwnd_ = CreateWindowEx(
-		0,
-		wc.lpszClassName,
-		desc_.windowTitle.c_str(),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		desc_.windowWidth, desc_.windowHeight,
-		nullptr, nullptr, desc_.hInstance, nullptr
-	);
-
-	if (!hwnd_) {
-		throw std::runtime_error("Failed to create window.");
-	}
-
-	ShowWindow(hwnd_, SW_SHOW);
-	UpdateWindow(hwnd_);
-}
-
-void Application::ProcessMessages()
-{
-	MSG msg = {};
-	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-		if (msg.message == WM_QUIT) {
-			isRunning_ = false; // 終了指示
-			break;
-		}
-
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-}
-
-LRESULT Application::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (msg) {
-		case WM_DESTROY:
-		{
-			PostQuitMessage(0);
-			return 0;
-		}
-		default:
-		{
-			return DefWindowProc(hwnd, msg, wParam, lParam);
-		}
-	}
 }

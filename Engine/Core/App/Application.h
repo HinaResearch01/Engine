@@ -7,25 +7,22 @@
 
 namespace Tsumi {
 
-struct AppDesc {
-    std::wstring windowTitle = L"Engine";
-    uint32_t windowWidth = 1280;
-    uint32_t windowHeight = 720;
-    HINSTANCE hInstance = nullptr;
-};
+// 前方宣言
+namespace Win32 {
+class Win32Window;
+struct Win32Desc;
+}
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
 class Application {
 
 private: // シングルトン
-
     Application();
     ~Application();
     Application(const Application&) = delete;
     const Application& operator=(const Application&) = delete;
 
 public:
-
     /// <summary>
     /// インスタンスの取得
     /// </summary>
@@ -34,6 +31,11 @@ public:
         static Application instance;
         return &instance;
     }
+
+    /// <summary>
+    /// 初期化処理
+    /// </summary>
+    void Init(const Win32::Win32Desc& windowDesc);
 
     /// <summary>
     /// メインループ処理
@@ -45,47 +47,11 @@ public:
     /// </summary>
     void SetGameApp(std::unique_ptr<GameApp> game);
 
-#pragma region Accessor
-
-    const AppDesc& GetAppDesc() const {
-        return desc_;
-    }
-    void SetAppDesc(const AppDesc& desc) {
-        this->desc_ = desc;
-    }
-
-    const HWND& GetHwnd() const {
-        return hwnd_;
-    }
-
-#pragma endregion
-
-
 private:
-
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
-    void Init();
-
-    /// <summary>
-    /// Windowsのメッセージキュー
-    /// </summary>
-    void ProcessMessages();
-
-    /// <summary>
-    /// ウィンドウプロシージャ
-    /// </summary>
-    static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-    
-public:
-
-
-private:
-    HWND hwnd_ = nullptr;
-    AppDesc desc_;
     bool isRunning_ = true;
     std::unique_ptr<GameApp> gameApp_;
+
+    Win32::Win32Window* window_ = nullptr;
+
 };
 }

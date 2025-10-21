@@ -95,13 +95,18 @@
       <Filter>Engine\Test</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine\DX12\Device\GraphicsDevice.cpp">
-      <Filter>Engine\DX12\Device</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
+    <ClCompile Include="Engine\DX12\DX12Manager.cpp">
+      <Filter>Engine\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\Device\DX12Device.cpp">
+      <Filter>Engine\DX12\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Win32\Win32Window.cpp">
+      <Filter>Engine\Wind32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -440,15 +445,23 @@
     <ClInclude Include="Engine\Test\TestScene.h">
       <Filter>Engine\Test</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\Device\GraphicsDevice.h">
-      <Filter>Engine\DX12\Device</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\Utils\Log\UtilsLog.h">
       <Filter>Engine\Utils\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\DX12Manager.h">
+      <Filter>Engine\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utils\DxException\DxException.h">
+      <Filter>Engine\Utils\DxException</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\Device\DX12Device.h">
+      <Filter>Engine\DX12\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Win32\Win32Window.h">
+      <Filter>Engine\Wind32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -635,11 +648,17 @@
     <Filter Include="Engine\DX12">
       <UniqueIdentifier>{f2aee92f-53ad-4593-bcc2-c694deb9decd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\DX12\Device">
-      <UniqueIdentifier>{cf2b7307-2f6e-43ae-96a7-1a9670ce58f6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\DX12\SwapChain">
       <UniqueIdentifier>{790c965f-dc55-4680-85da-e6beae648305}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\DxException">
+      <UniqueIdentifier>{1581d04d-637e-476a-92a8-307e1363b6b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\Device">
+      <UniqueIdentifier>{19270148-9351-4b06-8e9c-b26e7dfdb6b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Wind32">
+      <UniqueIdentifier>{91e3d93b-ffbd-4196-a3dc-66bced151c5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

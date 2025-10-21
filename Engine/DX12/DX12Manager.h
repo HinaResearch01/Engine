@@ -1,5 +1,16 @@
 #pragma once
 
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <d3dcompiler.h>
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
+
+#include "Utils/DxException/DxException.h"
+#include "Device/DX12Device.h"
+
 namespace Tsumi::DX12 {
 
 class DX12Manager {
@@ -48,10 +59,17 @@ public:
 	void PostDraw4SC();
 
 
+#pragma region Accessor
+
+
+
+#pragma endregion
+
+
 private:
 
+	std::unique_ptr<DX12Device> dx12Device_;
 
 };
 
 }
-

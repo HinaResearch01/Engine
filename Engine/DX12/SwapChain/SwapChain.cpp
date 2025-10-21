@@ -5,12 +5,9 @@ using namespace Tsumi::DX12;
 
 void SwapChain::Create()
 {
-    HWND hwnd = Application::GetInstance()->GetHwnd();
-
     // 画面のクライアント領域
-    desc_.Width = Application::GetInstance()->GetAppDesc().windowWidth;
-    desc_.Height = Application::GetInstance()->GetAppDesc().windowHeight; 
-
+    desc_.Width = 1280;
+    desc_.Height = 720; 
     // 色の形式
     desc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     // マルチサンプルしない

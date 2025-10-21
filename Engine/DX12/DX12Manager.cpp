@@ -4,12 +4,22 @@ using namespace Tsumi::DX12;
 
 DX12Manager::DX12Manager()
 {
-
+	dx12Device_ = std::make_unique<DX12Device>();
 }
 
 void DX12Manager::Init()
 {
+	try {
+		DX_CALL(dx12Device_->Create());
+	}
+	catch (const DxException& e) {
+		// Visual Studio の出力ウィンドウにメッセージを出す
+		OutputDebugStringA(e.what());
 
+		// ユーザーに通知して終了
+		MessageBoxA(nullptr, e.what(), "Fatal DirectX Error", MB_OK | MB_ICONERROR);
+		std::terminate();
+	}
 }
 
 void DX12Manager::PreDraw4PE()

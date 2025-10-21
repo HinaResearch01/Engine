@@ -189,10 +189,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Core\App\Application.cpp" />
-    <ClCompile Include="Engine\DX12\Device\GraphicsDevice.cpp" />
+    <ClCompile Include="Engine\DX12\Device\DX12Device.cpp" />
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
+    <ClCompile Include="Engine\Win32\Win32Window.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
@@ -312,13 +313,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\App\Application.h" />
     <ClInclude Include="Engine\Core\EntryPoint.h" />
     <ClInclude Include="Engine\Core\GameApp.h" />
-    <ClInclude Include="Engine\DX12\Device\GraphicsDevice.h" />
+    <ClInclude Include="Engine\DX12\Device\DX12Device.h" />
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
+    <ClInclude Include="Engine\Utils\DxException\DxException.h" />
     <ClInclude Include="Engine\Utils\Log\UtilsLog.h" />
+    <ClInclude Include="Engine\Win32\Win32Window.h" />
     <ClInclude Include="externals\assimp\include\assimp\aabb.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
