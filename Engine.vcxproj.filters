@@ -105,7 +105,7 @@
       <Filter>Engine\DX12\Device</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Win\Win32Window.cpp">
-      <Filter>Engine\Wind32</Filter>
+      <Filter>Engine\Win</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -449,7 +449,7 @@
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utils\Logger\UtilsLog.h">
-      <Filter>Engine\Utils\Log</Filter>
+      <Filter>Engine\Utils\Logger</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DX12\DX12Manager.h">
       <Filter>Engine\DX12</Filter>
@@ -461,7 +461,7 @@
       <Filter>Engine\DX12\Device</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Win\Win32Window.h">
-      <Filter>Engine\Wind32</Filter>
+      <Filter>Engine\Win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -642,9 +642,6 @@
     <Filter Include="Engine\Utils">
       <UniqueIdentifier>{9c7fbf6d-bb18-4efe-a7f1-37b3a4e17071}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Utils\Log">
-      <UniqueIdentifier>{d002f3da-3379-45ac-83ba-a246dc604341}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\DX12">
       <UniqueIdentifier>{f2aee92f-53ad-4593-bcc2-c694deb9decd}</UniqueIdentifier>
     </Filter>
@@ -657,7 +654,10 @@
     <Filter Include="Engine\DX12\Device">
       <UniqueIdentifier>{19270148-9351-4b06-8e9c-b26e7dfdb6b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Wind32">
+    <Filter Include="Engine\Utils\Logger">
+      <UniqueIdentifier>{d002f3da-3379-45ac-83ba-a246dc604341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Win">
       <UniqueIdentifier>{91e3d93b-ffbd-4196-a3dc-66bced151c5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
