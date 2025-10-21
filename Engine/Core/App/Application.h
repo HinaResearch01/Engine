@@ -40,6 +40,15 @@ public:
     /// </summary>
     void SetGameApp(std::unique_ptr<GameApp> game);
 
+#pragma region Accessor
+
+    const AppDesc& GetAppDesc() const {
+        return desc_;
+    }
+
+#pragma endregion
+
+
 private:
 
     /// <summary>
@@ -55,16 +64,10 @@ private:
     /// <summary>
     /// ウィンドウプロシージャ
     /// </summary>
-    /// <param name="hwnd">メッセージが送られたウィンドウのハンドル</param>
-    /// <param name="msg">メッセージの種類を識別する定数（例: WM_PAINT, WM_DESTROY）</param>
-    /// <param name="wParam">メッセージに付随する追加情報（メッセージに依存）</param>
-    /// <param name="lParam">メッセージに付随する追加情報（メッセージに依存）</param>
-    /// <returns>メッセージ処理の結果。通常はメッセージによって異なる</returns>
     static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 private:
-
     HWND hwnd_ = nullptr;
     AppDesc desc_;
     bool isRunning_ = true;

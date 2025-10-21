@@ -95,6 +95,13 @@
       <Filter>Engine\Test</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Engine\DX12\Device\GraphicsDevice.cpp">
+      <Filter>Engine\DX12\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp">
+      <Filter>Engine\DX12\SwapChain</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -433,7 +440,14 @@
     <ClInclude Include="Engine\Test\TestScene.h">
       <Filter>Engine\Test</Filter>
     </ClInclude>
-    <ClInclude Include="UtilsLog.h">
+    <ClInclude Include="Engine\DX12\Device\GraphicsDevice.h">
+      <Filter>Engine\DX12\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
+      <Filter>Engine\DX12\SwapChain</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\DX12Manager.h" />
+    <ClInclude Include="Engine\Utils\Log\UtilsLog.h">
       <Filter>Engine\Utils\Log</Filter>
     </ClInclude>
   </ItemGroup>
@@ -617,6 +631,15 @@
     </Filter>
     <Filter Include="Engine\Utils\Log">
       <UniqueIdentifier>{d002f3da-3379-45ac-83ba-a246dc604341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12">
+      <UniqueIdentifier>{f2aee92f-53ad-4593-bcc2-c694deb9decd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\Device">
+      <UniqueIdentifier>{cf2b7307-2f6e-43ae-96a7-1a9670ce58f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\SwapChain">
+      <UniqueIdentifier>{790c965f-dc55-4680-85da-e6beae648305}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
