@@ -5,12 +5,14 @@ using namespace Tsumi::DX12;
 DX12Manager::DX12Manager()
 {
 	dx12Device_ = std::make_unique<DX12Device>();
+	cmdContext_ = std::make_unique<CommandContext>();
 }
 
 void DX12Manager::Init()
 {
 	try {
 		DX_CALL(dx12Device_->Create());
+		DX_CALL(cmdContext_->Create());
 	}
 	catch (const DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す

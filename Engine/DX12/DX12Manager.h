@@ -10,6 +10,7 @@
 
 #include "Utils/DxException/DxException.h"
 #include "Device/DX12Device.h"
+#include "Cmd/CommandContext.h"
 
 namespace Tsumi::DX12 {
 
@@ -71,7 +72,7 @@ public:
 
 private:
 	std::unique_ptr<DX12Device> dx12Device_;
-
+	std::unique_ptr<CommandContext> cmdContext_;
 };
 
 }

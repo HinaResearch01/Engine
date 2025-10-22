@@ -17,10 +17,8 @@ CommandContext::~CommandContext()
 {
 	// GPU の処理が残っていれば待つ（安全にリソースを破棄するため）
 	if (queue_.Get() && fence_.Get()) {
-		// Signal with next fence value and wait
-		const UINT64 value = ++fenceValue_;
-		HRESULT hr = queue_->Signal(fence_.Get(), value);
-		if (SUCCEEDED(hr)) {
+		const UINT64 value = ++globalFenceValue_;
+		if (SUCCEEDED(queue_->Signal(fence_.Get(), value))) {
 			if (fence_->GetCompletedValue() < value) {
 				fence_->SetEventOnCompletion(value, fenceEvent_);
 				WaitForSingleObject(fenceEvent_, INFINITE);
@@ -35,9 +33,11 @@ CommandContext::~CommandContext()
 
 	// ComPtr の Reset
 	queue_.Reset();
-	allocator_.Reset();
 	list_.Reset();
 	fence_.Reset();
+	for (auto& a : allocators_) a.Reset();
+	allocators_.clear();
+	fenceValues_.clear();
 }
 
 HRESULT CommandContext::Create()
@@ -50,9 +50,9 @@ HRESULT CommandContext::Create()
 		return hr;
 	}
 
-	hr = CreateAllocator();
+	hr = CreateAllocators(frameCount_);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: CreateAllocator failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Log(std::format(L"Error: CreateAllocators failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
@@ -73,51 +73,108 @@ HRESULT CommandContext::Create()
 
 HRESULT Tsumi::DX12::CommandContext::ExecuteAndWait()
 {
-	if (!queue_.Get() || !list_.Get() || !allocator_.Get() || !fence_.Get() || !fenceEvent_) {
+	if (!queue_.Get() || !list_.Get() || allocators_.empty() || !fence_.Get() || !fenceEvent_) {
 		return E_POINTER;
 	}
 
 	HRESULT hr = S_OK;
 
-	// コマンドリストを閉じる（既に閉じている場合は無視）
+	// Close してから実行
 	hr = list_->Close();
 	if (FAILED(hr)) {
-		// Close に失敗してもログは出すが続行を試みる
 		Utils::Log(std::format(L"Warning: Close command list failed before execute (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 	}
 
-	// Execute
 	ID3D12CommandList* lists[] = { list_.Get() };
 	queue_->ExecuteCommandLists(1, lists);
 
-	// Signal
-	const UINT64 signalValue = ++fenceValue_;
+	const UINT64 signalValue = ++globalFenceValue_;
 	hr = queue_->Signal(fence_.Get(), signalValue);
 	if (FAILED(hr)) {
 		Utils::Log(std::format(L"Error: queue->Signal failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
-	// Wait
-	hr = WaitForGpu();
+	// すぐ待つ（同期）
+	hr = fence_->SetEventOnCompletion(signalValue, fenceEvent_);
+	if (FAILED(hr)) return hr;
+	WaitForSingleObject(fenceEvent_, INFINITE);
+
+	// Reset allocator/list for current frame after GPU done
+	hr = allocators_[currentFrameIndex_]->Reset();
+	if (FAILED(hr)) Utils::Log(std::format(L"Warning: allocator->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+	else {
+		hr = list_->Reset(allocators_[currentFrameIndex_].Get(), nullptr);
+		if (FAILED(hr)) Utils::Log(std::format(L"Warning: list_->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+	}
+
+	return S_OK;
+}
+
+HRESULT Tsumi::DX12::CommandContext::ExecuteAndSignal()
+{
+	if (!queue_.Get() || !list_.Get() || allocators_.empty() || !fence_.Get()) {
+		return E_POINTER;
+	}
+
+	HRESULT hr = S_OK;
+
+	// Close (無視可能)
+	hr = list_->Close();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: WaitForGpu failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Log(std::format(L"Warning: Close command list failed before execute (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+	}
+
+	ID3D12CommandList* lists[] = { list_.Get() };
+	queue_->ExecuteCommandLists(1, lists);
+
+	// シグナルしてその値をこのフレーム用に記録
+	const UINT64 signalValue = ++globalFenceValue_;
+	hr = queue_->Signal(fence_.Get(), signalValue);
+	if (FAILED(hr)) {
+		Utils::Log(std::format(L"Error: queue->Signal failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
-	// コマンドリストを再利用できるように Reset を試みる（呼び出し側が Reset を行う設計ならこの部分は不要）
-	hr = allocator_->Reset();
+	fenceValues_[currentFrameIndex_] = signalValue;
+
+	// 呼び出し側は MoveToNextFrame() を呼んでフレームを進める
+	return S_OK;
+}
+
+HRESULT Tsumi::DX12::CommandContext::MoveToNextFrame()
+{
+	if (!queue_.Get() || !fence_.Get() || allocators_.empty()) {
+		return E_POINTER;
+	}
+
+	// advance index
+	UINT nextIndex = (currentFrameIndex_ + 1) % frameCount_;
+
+	// この nextIndex の allocator を再利用する前に、GPU がそのフレームの作業を終えていることを確認
+	const UINT64 expectedFence = fenceValues_[nextIndex];
+	if (expectedFence != 0 && fence_->GetCompletedValue() < expectedFence) {
+		// GPU が終わっていなければ待つ
+		HRESULT hr = fence_->SetEventOnCompletion(expectedFence, fenceEvent_);
+		if (FAILED(hr)) return hr;
+		WaitForSingleObject(fenceEvent_, INFINITE);
+	}
+
+	// allocator をクリアして、コマンドリストをその allocator で Reset しておく
+	HRESULT hr = allocators_[nextIndex]->Reset();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: allocator->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-		// 続行
+		Utils::Log(std::format(L"Warning: allocator->Reset failed for frame {} (hr=0x{:08X})\n", nextIndex, static_cast<unsigned>(hr)));
+		// 続行は試みる
 	}
-	else {
-		hr = list_->Reset(allocator_.Get(), nullptr); // nullptr の代わりに初期 PSO を渡す場合はここを変更
-		if (FAILED(hr)) {
-			Utils::Log(std::format(L"Warning: list_->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-			// 続行
-		}
+
+	hr = list_->Reset(allocators_[nextIndex].Get(), nullptr);
+	if (FAILED(hr)) {
+		Utils::Log(std::format(L"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n", nextIndex, static_cast<unsigned>(hr)));
+		// 続行は試みる
 	}
+
+	// 現フレームを next に更新
+	currentFrameIndex_ = nextIndex;
 
 	return S_OK;
 }
@@ -129,14 +186,12 @@ HRESULT Tsumi::DX12::CommandContext::WaitForGpu()
 	}
 
 	const UINT64 completed = fence_->GetCompletedValue();
-	// fenceValue_ が 0 の場合はまだ Signal されていない可能性がある
-	if (completed >= fenceValue_) {
+	// globalFenceValue_ が 0 の場合はまだ Signal されていない可能性がある
+	if (completed >= globalFenceValue_) {
 		return S_OK;
 	}
 
-	// 待機対象は fenceValue_
-	HRESULT hr = S_OK;
-	hr = fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+	HRESULT hr = fence_->SetEventOnCompletion(globalFenceValue_, fenceEvent_);
 	if (FAILED(hr)) {
 		return hr;
 	}
@@ -153,7 +208,6 @@ HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 {
 	HRESULT hr = S_OK;
 
-	// 安全のため device の有無をチェック
 	ID3D12Device* device = nullptr;
 	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
 	if (!device) {
@@ -161,7 +215,6 @@ HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 	}
 
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	// 明示的に設定（デフォルトで DIRECT になるが明記しておく）
 	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	commandQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -176,7 +229,7 @@ HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::CreateAllocator()
+HRESULT Tsumi::DX12::CommandContext::CreateAllocators(UINT frameCount)
 {
 	HRESULT hr = S_OK;
 
@@ -186,12 +239,18 @@ HRESULT Tsumi::DX12::CommandContext::CreateAllocator()
 		return E_POINTER;
 	}
 
-	hr = device->CreateCommandAllocator(
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		IID_PPV_ARGS(&allocator_));
+	allocators_.resize(frameCount);
+	fenceValues_.assign(frameCount, 0);
+	frameCount_ = frameCount;
+	currentFrameIndex_ = 0;
 
-	if (FAILED(hr)) {
-		return hr;
+	for (UINT i = 0; i < frameCount; ++i) {
+		hr = device->CreateCommandAllocator(
+			D3D12_COMMAND_LIST_TYPE_DIRECT,
+			IID_PPV_ARGS(&allocators_[i]));
+		if (FAILED(hr)) {
+			return hr;
+		}
 	}
 
 	return S_OK;
@@ -209,7 +268,7 @@ HRESULT Tsumi::DX12::CommandContext::CreateList()
 
 	hr = device->CreateCommandList(
 		0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-		allocator_.Get(),
+		allocators_[currentFrameIndex_].Get(),
 		nullptr,
 		IID_PPV_ARGS(&list_));
 
@@ -217,11 +276,10 @@ HRESULT Tsumi::DX12::CommandContext::CreateList()
 		return hr;
 	}
 
-	// CreateCommandList は "recording" 状態で返るので
-	// Reset/Close の前提に合わせてここで一旦 Close しておく。
+	// CreateCommandList は "recording" 状態で返るので、ここで一旦 Close しておく（呼び出し側で Reset して再利用）
 	hr = list_->Close();
 	if (FAILED(hr)) {
-		return hr;
+		Utils::Log(std::format(L"Warning: Close initial command list failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 	}
 
 	return S_OK;
@@ -248,8 +306,8 @@ HRESULT Tsumi::DX12::CommandContext::CreateFence()
 		return HRESULT_FROM_WIN32(GetLastError());
 	}
 
-	// 初期フェンス値
-	fenceValue_ = 0;
+	globalFenceValue_ = 0;
+	for (UINT i = 0; i < frameCount_; ++i) fenceValues_[i] = 0;
 
 	return S_OK;
 }
