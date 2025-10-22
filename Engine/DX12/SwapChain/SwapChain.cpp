@@ -15,31 +15,30 @@ HRESULT SwapChain::Create()
     HWND hwnd = Win32::Win32Window::GetInstance()->GetHWND();
     Win32::Win32Desc winDesc = Win32::Win32Window::GetInstance()->GetDesc();
 
-    // 画面のクライアント領域
-    desc_.Width = winDesc.windowWidth;
-    desc_.Height = winDesc.windowHeight;
-    // 色の形式
-    desc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    // マルチサンプルしない
-    desc_.SampleDesc.Count = 1;
-    // 描画のターゲットとして利用する
-    desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; 
-    // ダブルバッファ
-    desc_.BufferCount = 2;
-    // モニタにうつしたら、中身を破棄
-    desc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; 
+    DXGI_SWAP_CHAIN_DESC1 desc = {};
+    desc.Width = winDesc.windowWidth;
+    desc.Height = winDesc.windowHeight;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc = { 1, 0 };
+    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    desc.BufferCount = 2;
+    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    desc.Scaling = DXGI_SCALING_STRETCH;
+    desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
-
-    // コマンドキューに設定を渡して生成
-    HRESULT hr = S_OK;
-    hr = dx12Mgr_->GetFactory()->CreateSwapChainForHwnd(
+    ComPtr<IDXGISwapChain1> swapChain1;
+    HRESULT hr = dx12Mgr_->GetFactory()->CreateSwapChainForHwnd(
         dx12Mgr_->GetCmdQueue(),
-        hwnd, &desc_, nullptr, nullptr,
-        reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
+        hwnd,
+        &desc,
+        nullptr,
+        nullptr,
+        &swapChain1);
 
-    if (FAILED(hr)) {
-        return hr;
-    }
+    if (FAILED(hr)) return hr;
+
+    swapChain1.As(&swapChain_); // IDXGISwapChain4にアップキャスト
+    desc_ = desc;
 
     return S_OK;
 }
