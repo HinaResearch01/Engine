@@ -59,10 +59,12 @@ public:
 
 #pragma region Accessor
 
-	ID3D12Device* GetDevice() const { 
-		if(dx12Device_) return dx12Device_->GetDevice(); }
-	IDXGIFactory7* GetFactory() const { 
-		if(dx12Device_) return dx12Device_->GetFactory(); }
+	ID3D12Device* GetDevice() const {
+		return dx12Device_ ? dx12Device_->GetDevice() : nullptr;
+	}
+	IDXGIFactory7* GetFactory() const {
+		return dx12Device_ ? dx12Device_->GetFactory() : nullptr;
+	}
 
 #pragma endregion
 

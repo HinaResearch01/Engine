@@ -45,10 +45,22 @@ HRESULT CommandContext::Create()
 HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 {
 	HRESULT hr = S_OK;
+
+	// 安全のため device の有無をチェック
+	ID3D12Device* device = nullptr;
+	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
+	if (!device) {
+		return E_POINTER;
+	}
+
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	hr = dx12Mgr_->GetDevice()->CreateCommandQueue(
-		&commandQueueDesc,
-		IID_PPV_ARGS(&queue_));
+	// 明示的に設定（デフォルトで DIRECT になるが明記しておく）
+	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	commandQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	commandQueueDesc.NodeMask = 0;
+
+	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&queue_));
 
 	if (FAILED(hr)) {
 		return hr;
@@ -60,7 +72,14 @@ HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 HRESULT Tsumi::DX12::CommandContext::CreateAllocator()
 {
 	HRESULT hr = S_OK;
-	hr = dx12Mgr_->GetDevice()->CreateCommandAllocator(
+
+	ID3D12Device* device = nullptr;
+	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
+	if (!device) {
+		return E_POINTER;
+	}
+
+	hr = device->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		IID_PPV_ARGS(&allocator_));
 
@@ -74,12 +93,26 @@ HRESULT Tsumi::DX12::CommandContext::CreateAllocator()
 HRESULT Tsumi::DX12::CommandContext::CreateList()
 {
 	HRESULT hr = S_OK;
-	hr = dx12Mgr_->GetDevice()->CreateCommandList(
+
+	ID3D12Device* device = nullptr;
+	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
+	if (!device) {
+		return E_POINTER;
+	}
+
+	hr = device->CreateCommandList(
 		0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 		allocator_.Get(),
 		nullptr,
 		IID_PPV_ARGS(&list_));
 
+	if (FAILED(hr)) {
+		return hr;
+	}
+
+	// CreateCommandList は "recording" 状態で返るので
+	// Reset/Close の前提に合わせてここで一旦 Close しておく。
+	hr = list_->Close();
 	if (FAILED(hr)) {
 		return hr;
 	}
