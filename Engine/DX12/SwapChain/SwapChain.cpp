@@ -7,8 +7,8 @@
 using namespace Tsumi::DX12;
 
 SwapChain::SwapChain(DX12Manager* ptr)
+    : dx12Mgr_(ptr)
 {
-    dx12Mgr_ = ptr;
 }
 
 HRESULT SwapChain::Create()

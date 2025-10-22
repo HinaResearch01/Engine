@@ -12,6 +12,7 @@
 #include "Device/DX12Device.h"
 #include "Cmd/CommandContext.h"
 #include "SwapChain/SwapChain.h"
+#include "Framebuf/Framebuffer.h"
 
 namespace Tsumi::DX12 {
 
@@ -89,6 +90,7 @@ private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> cmdContext_;
 	std::unique_ptr<SwapChain> swapChain_;
+	std::unique_ptr<Framebuffer> framebuf_;
 
 	// デフォルトはトリプルバッファ
 	UINT bufferCount_ = 3;

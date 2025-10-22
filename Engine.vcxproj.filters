@@ -110,6 +110,9 @@
     <ClCompile Include="Engine\DX12\Cmd\CommandContext.cpp">
       <Filter>Engine\DX12\Cmd</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp">
+      <Filter>Engine\DX12\Framebuf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -469,6 +472,9 @@
     <ClInclude Include="Engine\DX12\Cmd\CommandContext.h">
       <Filter>Engine\DX12\Cmd</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h">
+      <Filter>Engine\DX12\Framebuf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -668,6 +674,9 @@
     </Filter>
     <Filter Include="Engine\DX12\Cmd">
       <UniqueIdentifier>{075855fe-faf6-4380-8981-7ac2336d4bff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\Framebuf">
+      <UniqueIdentifier>{1d658c06-ec61-4e5a-bd00-eabb2c71bfe2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

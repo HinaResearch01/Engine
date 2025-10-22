@@ -192,6 +192,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\Cmd\CommandContext.cpp" />
     <ClCompile Include="Engine\DX12\Device\DX12Device.cpp" />
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
+    <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
@@ -317,6 +318,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\Cmd\CommandContext.h" />
     <ClInclude Include="Engine\DX12\Device\DX12Device.h" />
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
+    <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />

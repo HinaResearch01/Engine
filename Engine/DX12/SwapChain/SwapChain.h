@@ -20,7 +20,6 @@ public:
 	/// コンストラクタ
 	/// コピー禁止
 	/// </summary>
-	SwapChain() = default;
 	SwapChain(DX12Manager* ptr);
 	SwapChain(const SwapChain&) = delete;
 	SwapChain& operator=(const SwapChain&) = delete;
