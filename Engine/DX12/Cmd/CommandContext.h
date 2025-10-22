@@ -31,6 +31,16 @@ public:
 	/// </summary>
 	HRESULT Create();
 
+	/// <summary>
+	/// コマンドリストを実行して GPU の完了を待つ（ユーティリティ）
+	/// </summary>
+	HRESULT ExecuteAndWait();
+
+	/// <summary>
+	/// 現在のキューでフェンスが到達するまで待つ
+	/// </summary>
+	HRESULT WaitForGpu();
+
 #pragma region Accessor
 
 	ID3D12CommandQueue* const GetQueue() { return queue_.Get(); }
@@ -55,10 +65,20 @@ private:
 	/// </summary>
 	HRESULT CreateList();
 
+	/// <summary>
+	/// フェンスの生成
+	/// </summary>
+	HRESULT CreateFence();
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> queue_;		   // コマンドキュー
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator_; // コマンドアロケータ
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list_;   // コマンドリスト
+
+	// フェンス同期
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
+	HANDLE fenceEvent_ = nullptr;
+	UINT64 fenceValue_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };
