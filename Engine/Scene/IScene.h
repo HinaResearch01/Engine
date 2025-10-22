@@ -9,7 +9,6 @@ class SceneManager;
 class IScene {
 
 public:
-
 	/// <summary>
 	/// 仮想デストラクタ
 	/// </summary>

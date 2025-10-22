@@ -107,6 +107,9 @@
     <ClCompile Include="Engine\Win\Win32Window.cpp">
       <Filter>Engine\Win</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\DX12\Cmd\CommandContext.cpp">
+      <Filter>Engine\DX12\Cmd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -463,6 +466,9 @@
     <ClInclude Include="Engine\Win\Win32Window.h">
       <Filter>Engine\Win</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\DX12\Cmd\CommandContext.h">
+      <Filter>Engine\DX12\Cmd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -659,6 +665,9 @@
     </Filter>
     <Filter Include="Engine\Win">
       <UniqueIdentifier>{91e3d93b-ffbd-4196-a3dc-66bced151c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\Cmd">
+      <UniqueIdentifier>{075855fe-faf6-4380-8981-7ac2336d4bff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

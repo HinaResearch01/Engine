@@ -16,7 +16,6 @@ namespace Tsumi::DX12 {
 class DX12Manager {
 
 private: // シングルトン
-
 	// コンストラクタ、デストラクタ
 	DX12Manager();
 	~DX12Manager() = default;
@@ -24,7 +23,6 @@ private: // シングルトン
 	const DX12Manager& operator=(const DX12Manager&) = delete;
 
 public:
-
 	/// <summary>
 	/// インスタンスの取得
 	/// </summary>
@@ -61,13 +59,15 @@ public:
 
 #pragma region Accessor
 
-
+	ID3D12Device* GetDevice() const { 
+		if(dx12Device_) return dx12Device_->GetDevice(); }
+	IDXGIFactory7* GetFactory() const { 
+		if(dx12Device_) return dx12Device_->GetFactory(); }
 
 #pragma endregion
 
 
 private:
-
 	std::unique_ptr<DX12Device> dx12Device_;
 
 };

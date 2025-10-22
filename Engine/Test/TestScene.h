@@ -6,7 +6,6 @@
 class TestScene : public Tsumi::IScene {
 
 public:
-
 	TestScene() = default;
 	~TestScene() = default;
 

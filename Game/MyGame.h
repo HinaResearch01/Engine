@@ -9,7 +9,6 @@ namespace  Tsumi {
 class MyGame : public GameApp {
 
 public:
-
     /// <summary>
     /// コンストラクタ
     /// </summary>

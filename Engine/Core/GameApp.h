@@ -6,7 +6,6 @@ namespace Tsumi {
 class GameApp {
 
 public:
-
     /// <summary>
     /// 仮想デストラクタ
     /// </summary>

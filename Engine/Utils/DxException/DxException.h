@@ -40,7 +40,6 @@ public:
 
 
 private:
-
     static std::string WideToUTF8(const std::wstring& wstr)
     {
         if (wstr.empty()) return {};

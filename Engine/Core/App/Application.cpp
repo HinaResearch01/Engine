@@ -1,7 +1,7 @@
 #include "Application.h"
 #include <stdexcept>
 #include <memory>
-#include "Win32/Win32Window.h"
+#include "Win/Win32Window.h"
 
 using namespace Tsumi;
 

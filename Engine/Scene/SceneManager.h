@@ -11,7 +11,6 @@ namespace Tsumi {
 class SceneManager {
 
 public:
-
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>

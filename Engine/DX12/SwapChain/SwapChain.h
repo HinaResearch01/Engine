@@ -13,7 +13,6 @@ using Microsoft::WRL::ComPtr;
 class SwapChain {
 
 public:
-
 	/// <summary>
 	/// コンストラクタ
 	/// コピー禁止
@@ -45,7 +44,6 @@ public:
 
 
 private:
-
 	/// <summary>
 	/// 初期化処理
 	/// </summary>

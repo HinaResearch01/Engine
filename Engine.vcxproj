@@ -189,6 +189,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Core\App\Application.cpp" />
+    <ClCompile Include="Engine\DX12\Cmd\CommandContext.cpp" />
     <ClCompile Include="Engine\DX12\Device\DX12Device.cpp" />
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
@@ -313,6 +314,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\App\Application.h" />
     <ClInclude Include="Engine\Core\EntryPoint.h" />
     <ClInclude Include="Engine\Core\GameApp.h" />
+    <ClInclude Include="Engine\DX12\Cmd\CommandContext.h" />
     <ClInclude Include="Engine\DX12\Device\DX12Device.h" />
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
