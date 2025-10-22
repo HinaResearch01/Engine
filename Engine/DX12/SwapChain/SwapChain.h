@@ -9,6 +9,9 @@ namespace Tsumi::DX12 {
 
 using Microsoft::WRL::ComPtr;
 
+// 前方宣言
+class DX12Manager;
+
 /* スワップチェーン */
 class SwapChain {
 
@@ -18,6 +21,7 @@ public:
 	/// コピー禁止
 	/// </summary>
 	SwapChain() = default;
+	SwapChain(DX12Manager* ptr);
 	SwapChain(const SwapChain&) = delete;
 	SwapChain& operator=(const SwapChain&) = delete;
 
@@ -29,7 +33,7 @@ public:
 	/// <summary>
 	/// 生成
 	/// </summary>
-	void Create();
+	HRESULT Create();
 
 	/// <summary>
 	/// Present
@@ -38,17 +42,13 @@ public:
 
 #pragma region Accessor
 
-
+	IDXGISwapChain4* const GetSwapChain() { return swapChain_.Get(); }
 
 #pragma endregion 
 
 
 private:
-	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	bool Init();
-
+	
 
 private:
 	ComPtr<IDXGISwapChain4> swapChain_;
@@ -57,6 +57,8 @@ private:
 
 	// バッファは最大 3 をサポートする配列にしておく
 	ComPtr<ID3D12Resource> backBuffers_[3];
+
+	DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

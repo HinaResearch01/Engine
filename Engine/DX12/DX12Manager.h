@@ -11,6 +11,7 @@
 #include "Utils/DxException/DxException.h"
 #include "Device/DX12Device.h"
 #include "Cmd/CommandContext.h"
+#include "SwapChain/SwapChain.h"
 
 namespace Tsumi::DX12 {
 
@@ -66,6 +67,18 @@ public:
 	IDXGIFactory7* GetFactory() const {
 		return dx12Device_ ? dx12Device_->GetFactory() : nullptr;
 	}
+	ID3D12CommandQueue* const GetCmdQueue() { 
+		return cmdContext_ ? cmdContext_->GetQueue() : nullptr;
+	}
+	ID3D12CommandAllocator* GetCurrentCmdAllocator() const {
+		return cmdContext_ ? cmdContext_->GetCurrentAllocator() : nullptr;
+	}
+	ID3D12GraphicsCommandList* GetCmdList() const { 
+		return cmdContext_ ? cmdContext_->GetList() : nullptr;
+	}
+	IDXGISwapChain4* GetSwapChain() const {
+		return swapChain_ ? swapChain_->GetSwapChain() : nullptr;
+	}
 
 #pragma endregion
 
@@ -73,6 +86,7 @@ public:
 private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> cmdContext_;
+	std::unique_ptr<SwapChain> swapChain_;
 };
 
 }

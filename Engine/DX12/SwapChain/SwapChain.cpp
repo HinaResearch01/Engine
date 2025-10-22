@@ -1,13 +1,23 @@
 #include "SwapChain.h"
-#include "../../Core/App/Application.h"
+#include "Core/App/Application.h"
+#include "Win/Win32Window.h"
+#include "DX12/DX12Manager.h"
 
 using namespace Tsumi::DX12;
 
-void SwapChain::Create()
+SwapChain::SwapChain(DX12Manager* ptr)
 {
+    dx12Mgr_ = ptr;
+}
+
+HRESULT SwapChain::Create()
+{
+    HWND hwnd = Win32::Win32Window::GetInstance()->GetHWND();
+    Win32::Win32Desc winDesc = Win32::Win32Window::GetInstance()->GetDesc();
+
     // 画面のクライアント領域
-    desc_.Width = 1280;
-    desc_.Height = 720; 
+    desc_.Width = winDesc.windowWidth;
+    desc_.Height = winDesc.windowHeight;
     // 色の形式
     desc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     // マルチサンプルしない
@@ -21,7 +31,17 @@ void SwapChain::Create()
 
 
     // コマンドキューに設定を渡して生成
+    HRESULT hr = S_OK;
+    hr = dx12Mgr_->GetFactory()->CreateSwapChainForHwnd(
+        dx12Mgr_->GetCmdQueue(),
+        hwnd, &desc_, nullptr, nullptr,
+        reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
 
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    return S_OK;
 }
 
 void Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)

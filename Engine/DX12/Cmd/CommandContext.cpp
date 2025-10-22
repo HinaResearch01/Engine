@@ -8,9 +8,9 @@
 using namespace Tsumi::DX12;
 using Microsoft::WRL::ComPtr;
 
-CommandContext::CommandContext()
+CommandContext::CommandContext(DX12Manager* ptr)
 {
-	dx12Mgr_ = DX12Manager::GetInstance();
+	dx12Mgr_ = ptr;
 }
 
 CommandContext::~CommandContext()

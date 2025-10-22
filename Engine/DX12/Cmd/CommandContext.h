@@ -19,7 +19,8 @@ public:
 	/// コンストラクタ
 	/// コピー禁止
 	/// </summary>
-	CommandContext();
+	CommandContext() = default;
+	CommandContext(DX12Manager* ptr);
 	CommandContext(const CommandContext&) = delete;
 	CommandContext& operator=(const CommandContext&) = delete;
 
