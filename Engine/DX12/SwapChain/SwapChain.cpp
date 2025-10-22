@@ -75,7 +75,6 @@ HRESULT SwapChain::Create()
     }
 
     desc_ = desc;
-    bufferCount_ = desc.BufferCount;
 
     // Alt+Enterによる全画面切り替えを無効化
     factory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
@@ -83,13 +82,55 @@ HRESULT SwapChain::Create()
     return S_OK;
 }
 
-void Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)
+HRESULT Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)
 {
-    if (swapChain_) {
-        HRESULT hr = swapChain_->Present(syncInterval, flags);
-        if (FAILED(hr)) {
-            // デバイスロスト（GPUリセット）などが起きた場合のエラーハンドリング
-            Utils::Log(std::format(L"Warning: swapChain->Present failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-        }
+    if (!swapChain_) return E_POINTER;
+
+    HRESULT hr = swapChain_->Present(syncInterval, flags);
+    if (FAILED(hr)) {
+        Utils::Log(std::format(L"SwapChain::Present failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
     }
+    return hr;
+}
+
+UINT Tsumi::DX12::SwapChain::GetCurrentBackBufferIndex() const
+{
+    if (!swapChain_) return 0;
+    return swapChain_->GetCurrentBackBufferIndex();
+}
+
+HRESULT SwapChain::GetBuffer(UINT index, ID3D12Resource** outResource) const
+{
+    if (!swapChain_) return E_POINTER;
+    if (!outResource) return E_POINTER;
+    if (index >= desc_.BufferCount) return E_INVALIDARG;
+
+    HRESULT hr = swapChain_->GetBuffer(index, IID_PPV_ARGS(outResource));
+    if (FAILED(hr)) {
+        Utils::Log(std::format(L"SwapChain::GetBuffer failed for index {} (hr=0x{:08X})\n", index, static_cast<unsigned>(hr)));
+    }
+    return hr;
+}
+
+HRESULT SwapChain::Resize(UINT width, UINT height)
+{
+    if (!swapChain_) return E_POINTER;
+
+    for (UINT i = 0; i < _countof(backBuffers_); ++i) backBuffers_[i].Reset();
+
+    // Use DX12Manager's authoritative buffer count via dx12Mgr_->GetBufferCount()
+    UINT bufCount = 2;
+    if (dx12Mgr_) bufCount = dx12Mgr_->GetBufferCount();
+    if (bufCount < 2) bufCount = 2;
+
+    HRESULT hr = swapChain_->ResizeBuffers(bufCount, width, height, desc_.Format, 0);
+    if (FAILED(hr)) {
+        Utils::Log(std::format(L"SwapChain::Resize - ResizeBuffers failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        return hr;
+    }
+
+    desc_.Width = width;
+    desc_.Height = height;
+    Utils::Log(std::format(L"SwapChain resized: {}x{}\n", width, height));
+    return S_OK;
 }

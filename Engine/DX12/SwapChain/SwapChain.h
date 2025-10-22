@@ -38,22 +38,34 @@ public:
 	/// <summary>
 	/// Present
 	/// </summary>
-	void Present(UINT syncInterval, UINT flags);
+	HRESULT Present(UINT syncInterval, UINT flags);
+
+	/// <summary>
+	/// 現在のバックバッファインデックスを返す
+	/// </summary>
+	UINT GetCurrentBackBufferIndex() const;
+
+	/// <summary>
+	/// バックバッファリソースを取得する
+	/// </summary>
+	HRESULT GetBuffer(UINT index, ID3D12Resource** outResource) const;
+
+	/// <summary>
+	/// スワップチェーンをリサイズ
+	/// </summary>
+	HRESULT Resize(UINT width, UINT height);
 
 #pragma region Accessor
 
 	IDXGISwapChain4* const GetSwapChain() { return swapChain_.Get(); }
+	const DXGI_SWAP_CHAIN_DESC1& GetDesc() const { return desc_; }
 
 #pragma endregion 
 
 
 private:
-	
-
-private:
 	ComPtr<IDXGISwapChain4> swapChain_;
 	DXGI_SWAP_CHAIN_DESC1 desc_{};
-	UINT bufferCount_ = 2;
 
 	// バッファは最大 3 をサポートする配列にしておく
 	ComPtr<ID3D12Resource> backBuffers_[3];
