@@ -13,6 +13,7 @@ void DX12Manager::Init()
 {
 	try {
 		DX_CALL(dx12Device_->Create());
+		if(cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
 		DX_CALL(cmdContext_->Create());
 		DX_CALL(swapChain_->Create());
 	}

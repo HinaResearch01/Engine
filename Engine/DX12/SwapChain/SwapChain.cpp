@@ -21,7 +21,12 @@ HRESULT SwapChain::Create()
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     desc.SampleDesc = { 1, 0 };
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.BufferCount = 2;
+
+    // DX12Manager 側の bufferCount を尊重する（最小 2）
+    UINT bufCount = 2;
+    if (dx12Mgr_) bufCount = dx12Mgr_->GetBufferCount();
+    desc.BufferCount = bufCount;
+
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     desc.Scaling = DXGI_SCALING_STRETCH;
     desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;

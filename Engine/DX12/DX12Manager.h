@@ -79,6 +79,8 @@ public:
 	IDXGISwapChain4* GetSwapChain() const {
 		return swapChain_ ? swapChain_->GetSwapChain() : nullptr;
 	}
+	UINT GetBufferCount() const { return bufferCount_; }
+	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
 
 #pragma endregion
 
@@ -87,6 +89,9 @@ private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> cmdContext_;
 	std::unique_ptr<SwapChain> swapChain_;
+
+	// デフォルトはトリプルバッファ
+	UINT bufferCount_ = 3;
 };
 
 }

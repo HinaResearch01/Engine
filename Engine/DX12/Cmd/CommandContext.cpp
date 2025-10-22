@@ -307,7 +307,10 @@ HRESULT Tsumi::DX12::CommandContext::CreateFence()
 	}
 
 	globalFenceValue_ = 0;
-	for (UINT i = 0; i < frameCount_; ++i) fenceValues_[i] = 0;
+	// fenceValues_ は CreateAllocators で assign しているので、ここでは冗長に初期化しないか、確実にサイズを合わせる:
+	if (fenceValues_.size() != frameCount_) {
+		fenceValues_.assign(frameCount_, 0);
+	}
 
 	return S_OK;
 }

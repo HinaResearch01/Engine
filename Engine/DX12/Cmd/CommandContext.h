@@ -30,6 +30,11 @@ public:
 	~CommandContext();
 
 	/// <summary>
+	/// 明示的にフレーム数を設定する（Create の前に呼ぶ）
+	/// </summary>
+	void SetFrameCount(UINT frameCount) { frameCount_ = (frameCount >= 2) ? frameCount : 2; }
+
+	/// <summary>
 	/// 生成
 	/// </summary>
 	HRESULT Create();
@@ -99,7 +104,7 @@ private:
 
 	// フレーム管理
 	UINT currentFrameIndex_ = 0;
-	UINT frameCount_ = 3; // デフォルト 3 フレーム。必要なら変更可能。
+	UINT frameCount_ = 3; // デフォルトは 3（>=2）
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };
