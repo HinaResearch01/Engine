@@ -678,6 +678,24 @@
     <Filter Include="Engine\DX12\Framebuf">
       <UniqueIdentifier>{1d658c06-ec61-4e5a-bd00-eabb2c71bfe2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="externals\spdlog">
+      <UniqueIdentifier>{ee8b6887-fdd0-4e7a-92fb-f2cf3ca54fb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\spdlog\cfg">
+      <UniqueIdentifier>{64497f54-0cd9-4281-871e-f2d49d0e6d93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\spdlog\details">
+      <UniqueIdentifier>{57f735b8-f176-4c36-a742-c558ca52ef06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\spdlog\fmt">
+      <UniqueIdentifier>{64c03810-18b2-49aa-975f-fa9b1e0c410f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\spdlog\fmt\bundled">
+      <UniqueIdentifier>{cafa1ce5-38fe-49cf-a526-9787bbd78965}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\spdlog\sinks">
+      <UniqueIdentifier>{b87a595a-38b0-4630-865f-1f7c4cf9c157}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\CPUParticle\CPUParticle.hlsli">

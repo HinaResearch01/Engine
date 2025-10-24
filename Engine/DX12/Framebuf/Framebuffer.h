@@ -64,7 +64,18 @@ public:
 	void ClearRenderTarget(ID3D12GraphicsCommandList* cmdList, UINT rtvIndex, const FLOAT clearColor[4]);
 	void ClearDepthStencil(ID3D12GraphicsCommandList* cmdList, FLOAT depth = 1.0f, UINT8 stencil = 0);
 
+	/// <summary>
+	/// バックバッファのリソースステート取得/設定
+	/// </summary>
+	D3D12_RESOURCE_STATES GetBackBufferState(UINT index) const;
+	void SetBackBufferState(UINT index, D3D12_RESOURCE_STATES state);
+
 #pragma region Accessor
+	
+	UINT GetWidth() const { return width_; }
+	UINT GetHeight() const { return height_; }
+
+	UINT GetBackBufferCount() const { return static_cast<UINT>(backBuffers_.size()); }
 
 #pragma endregion
 
@@ -90,6 +101,7 @@ private:
 
 	// Back buffers and depth
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	std::vector<D3D12_RESOURCE_STATES> backBufferStates_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencil_;
 
 	// Formats / size

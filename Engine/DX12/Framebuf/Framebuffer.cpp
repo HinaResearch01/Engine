@@ -115,6 +115,18 @@ void Framebuffer::ClearDepthStencil(ID3D12GraphicsCommandList* cmdList, FLOAT de
     cmdList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil, 0, nullptr);
 }
 
+D3D12_RESOURCE_STATES Framebuffer::GetBackBufferState(UINT index) const
+{
+    if (index >= backBufferStates_.size()) return D3D12_RESOURCE_STATE_COMMON;
+    return backBufferStates_[index];
+}
+
+void Framebuffer::SetBackBufferState(UINT index, D3D12_RESOURCE_STATES state)
+{
+    if (index >= backBufferStates_.size()) return;
+    backBufferStates_[index] = state;
+}
+
 HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 {
     if (!dx12Mgr_) return E_POINTER;
@@ -218,6 +230,8 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
     device->CreateDepthStencilView(depthStencil_.Get(), nullptr, dsvHandle);
 
+    backBufferStates_.resize(bufferCount, D3D12_RESOURCE_STATE_PRESENT);
+
     Utils::Log(std::format(L"Framebuffer initialized: {}x{}, buffers={}\n", width, height, bufferCount));
     return S_OK;
 }
@@ -231,4 +245,5 @@ void Framebuffer::ReleaseViews()
     dsvHeap_.Reset();
     rtvDescriptorSize_ = 0;
     dsvDescriptorSize_ = 0;
+    backBufferStates_.clear();
 }

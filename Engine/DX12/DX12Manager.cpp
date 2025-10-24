@@ -8,7 +8,7 @@ DX12Manager::DX12Manager()
 {
 	dx12Device_ = std::make_unique<DX12Device>();
 	cmdContext_ = std::make_unique<CommandContext>(this);
-	swapChain_ = std::make_unique<SwapChain> (this);
+	swapChain_ = std::make_unique<SwapChain>(this);
 	framebuf_ = std::make_unique<Framebuffer>(this);
 }
 
@@ -38,56 +38,75 @@ void DX12Manager::OnFinalize()
 
 HRESULT DX12Manager::StartFrame()
 {
-	// compute a simple animated clear color (kept for backward compatibility)
+	// --- 動的クリア色（お試し用） ---
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto now = std::chrono::high_resolution_clock::now();
 	float t = std::chrono::duration<float>(now - start_time).count();
-	FLOAT clearColor[4] = { 0.2f + 0.3f * std::sinf(t), 0.3f + 0.2f * std::cosf(t * 0.7f), 0.4f, 1.0f };
+	FLOAT clearColor[4] = {
+		0.2f + 0.3f * std::sinf(t),
+		0.3f + 0.2f * std::cosf(t * 0.7f),
+		0.4f,
+		1.0f
+	};
 
+	// --- 必須サブシステムチェック ---
 	if (!cmdContext_ || !framebuf_ || !swapChain_) {
-		Utils::Log(L"DX12Manager::StartFrame - required subsystem missing\n");
+		Utils::Log(L"DX12Manager::StartFrame - 必要なサブシステムが存在しません\n");
 		return E_POINTER;
 	}
 
-	// Prepare allocator / command list for this frame
+	// --- 次フレームの準備（アロケータ／リストリセット） ---
 	HRESULT hr = cmdContext_->MoveToNextFrame();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"DX12Manager::StartFrame - MoveToNextFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Log(std::format(L"DX12Manager::StartFrame - MoveToNextFrame 失敗 (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
-	// Get command list in recording state
+	// --- コマンドリスト取得（記録状態であること） ---
 	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
 	if (!list) {
-		Utils::Log(L"DX12Manager::StartFrame - command list is null\n");
+		Utils::Log(L"DX12Manager::StartFrame - コマンドリストが無効\n");
 		return E_FAIL;
 	}
 
-	// Transition back buffer (PRESENT/COMMON -> RENDER_TARGET)
+	// --- SwapChain が指す現在のバックバッファを一度だけ取得して使い回す ---
 	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
 	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
+
 	if (!backBuffer) {
-		Utils::Log(L"DX12Manager::StartFrame - backBuffer is null\n");
+		Utils::Log(std::format(L"DX12Manager::StartFrame - バックバッファが無効 (index={})\n", currIndex));
 		return E_FAIL;
 	}
 
+	// --- tracked state（CPU側の追跡値）を取得してログ ---
+	D3D12_RESOURCE_STATES tracked = framebuf_->GetBackBufferState(currIndex);
+
+	// --- Present -> RenderTarget への遷移バリアを構築 ---
 	D3D12_RESOURCE_BARRIER barrierToRT{};
 	barrierToRT.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrierToRT.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	barrierToRT.Transition.pResource = backBuffer;
-	// Most commonly the swapchain resource is in PRESENT state; if it's in COMMON this transition will still be valid for typical usage.
-	barrierToRT.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrierToRT.Transition.StateBefore = tracked;
 	barrierToRT.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrierToRT.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-	list->ResourceBarrier(1, &barrierToRT);
+	if (barrierToRT.Transition.StateBefore != barrierToRT.Transition.StateAfter) {
+		list->ResourceBarrier(1, &barrierToRT);
+	}
+	else {
+		Utils::Log(L"StartFrame: skipped ResourceBarrier (already in target state)\n");
+	}
 
-	// Bind RTV/DSV
+	// --- CPU側の tracked state を更新（バリアの有無に関わらず） ---
+	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// --- RTV/DSV のハンドル確認とバインド ---
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = framebuf_->GetRtvHandle(currIndex);
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = framebuf_->GetDsvHandle();
+
 	list->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
 
-	// Clear current backbuffer and depth using Framebuffer helper
+	// --- 画面クリア ---
 	framebuf_->ClearRenderTarget(list, currIndex, clearColor);
 	framebuf_->ClearDepthStencil(list);
 
@@ -96,46 +115,61 @@ HRESULT DX12Manager::StartFrame()
 
 HRESULT DX12Manager::EndFrame()
 {
+	// --- 必須サブシステムチェック ---
 	if (!cmdContext_ || !swapChain_ || !framebuf_) {
-		Utils::Log(L"DX12Manager::EndFrame - required subsystem missing\n");
+		Utils::Log(L"DX12Manager::EndFrame - 必要なサブシステムが存在しません\n");
 		return E_POINTER;
 	}
 
-	// Transition back buffer (RENDER_TARGET -> PRESENT)
+	// --- SwapChain が指す現在のバックバッファを一度だけ取得 ---
 	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
 	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
+
 	if (!backBuffer) {
-		Utils::Log(L"DX12Manager::EndFrame - backBuffer is null\n");
+		Utils::Log(std::format(L"DX12Manager::EndFrame - バックバッファが無効 (index={})\n", currIndex));
 		return E_FAIL;
 	}
 
+	// --- コマンドリスト取得 ---
 	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
 	if (!list) {
-		Utils::Log(L"DX12Manager::EndFrame - command list is null\n");
+		Utils::Log(L"DX12Manager::EndFrame - コマンドリストが無効\n");
 		return E_FAIL;
 	}
 
+	// --- tracked state を取得してログ ---
+	D3D12_RESOURCE_STATES tracked = framebuf_->GetBackBufferState(currIndex);
+
+	// --- RenderTarget -> Present の遷移バリアを作り、ログを出して発行 ---
 	D3D12_RESOURCE_BARRIER barrierToPresent{};
 	barrierToPresent.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrierToPresent.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	barrierToPresent.Transition.pResource = backBuffer;
-	barrierToPresent.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrierToPresent.Transition.StateBefore = tracked;
 	barrierToPresent.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	barrierToPresent.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-	list->ResourceBarrier(1, &barrierToPresent);
+	if (barrierToPresent.Transition.StateBefore != barrierToPresent.Transition.StateAfter) {
+		list->ResourceBarrier(1, &barrierToPresent);
+	}
+	else {
+		Utils::Log(L"EndFrame: skipped ResourceBarrier (already in target state)\n");
+	}
 
-	// Submit command list and signal fence
+	// --- tracked state を更新（バリアの有無に関わらず） ---
+	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_PRESENT);
+
+	// --- コマンド送信とフェンスシグナル ---
 	HRESULT hr = cmdContext_->ExecuteAndSignal();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"DX12Manager::EndFrame - ExecuteAndSignal failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Log(std::format(L"DX12Manager::EndFrame - ExecuteAndSignal 失敗 (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
-	// Present
+	// --- 表示 ---
 	hr = swapChain_->Present(1, 0);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"DX12Manager::EndFrame - Present failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Log(std::format(L"DX12Manager::EndFrame - Present 失敗 (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
 		return hr;
 	}
 
