@@ -1,6 +1,7 @@
 #include "CommandContext.h"
 #include "Utils/Logger/UtilsLog.h"
 #include "DX12/DX12Manager.h"
+#include "../Framebuf/Framebuffer.h"
 #include <format>
 #include <cassert>
 #include <stdexcept>
@@ -71,7 +72,7 @@ HRESULT CommandContext::Create()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::ExecuteAndWait()
+HRESULT CommandContext::ExecuteAndWait()
 {
 	if (!queue_.Get() || !list_.Get() || allocators_.empty() || !fence_.Get() || !fenceEvent_) {
 		return E_POINTER;
@@ -111,7 +112,7 @@ HRESULT Tsumi::DX12::CommandContext::ExecuteAndWait()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::ExecuteAndSignal()
+HRESULT CommandContext::ExecuteAndSignal()
 {
 	if (!queue_.Get() || !list_.Get() || allocators_.empty() || !fence_.Get()) {
 		return E_POINTER;
@@ -142,44 +143,51 @@ HRESULT Tsumi::DX12::CommandContext::ExecuteAndSignal()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::MoveToNextFrame()
+HRESULT CommandContext::MoveToNextFrame()
 {
 	if (!queue_.Get() || !fence_.Get() || allocators_.empty()) {
-		return E_POINTER;
+		return E_POINTER; // 必要なオブジェクトが存在しない
 	}
 
-	// advance index
+	// 次フレームインデックスを算出
 	UINT nextIndex = (currentFrameIndex_ + 1) % frameCount_;
 
-	// この nextIndex の allocator を再利用する前に、GPU がそのフレームの作業を終えていることを確認
+	// GPU が該当アロケータを使い終わるまで待機
 	const UINT64 expectedFence = fenceValues_[nextIndex];
 	if (expectedFence != 0 && fence_->GetCompletedValue() < expectedFence) {
-		// GPU が終わっていなければ待つ
 		HRESULT hr = fence_->SetEventOnCompletion(expectedFence, fenceEvent_);
 		if (FAILED(hr)) return hr;
 		WaitForSingleObject(fenceEvent_, INFINITE);
 	}
 
-	// allocator をクリアして、コマンドリストをその allocator で Reset しておく
+	// --- コマンドアロケータをリセット ---
 	HRESULT hr = allocators_[nextIndex]->Reset();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: allocator->Reset failed for frame {} (hr=0x{:08X})\n", nextIndex, static_cast<unsigned>(hr)));
-		// 続行は試みる
+		Utils::Log(std::format(
+			L"Warning: allocator->Reset failed for frame {} (hr=0x{:08X})\n",
+			nextIndex, static_cast<unsigned>(hr)
+		));
 	}
 
+	// --- コマンドリストをリセット ---
 	hr = list_->Reset(allocators_[nextIndex].Get(), nullptr);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n", nextIndex, static_cast<unsigned>(hr)));
-		// 続行は試みる
+		Utils::Log(std::format(
+			L"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n",
+			nextIndex, static_cast<unsigned>(hr)
+		));
 	}
 
-	// 現フレームを next に更新
+	// --- ビューポート／シザー状態を初期化 ---
+	ResetCachedRasterState();
+
+	// 現在のフレームインデックスを更新
 	currentFrameIndex_ = nextIndex;
 
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::WaitForGpu()
+HRESULT CommandContext::WaitForGpu()
 {
 	if (!fence_.Get() || !fenceEvent_) {
 		return E_POINTER;
@@ -204,7 +212,73 @@ HRESULT Tsumi::DX12::CommandContext::WaitForGpu()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::CreateQueue()
+void CommandContext::SetViewport(const Viewport& vp)
+{
+	if (!list_) return;
+	if (!viewportSet_ || currentViewport_ != vp) {
+		D3D12_VIEWPORT d3dvp = vp.ToD3D();
+		list_->RSSetViewports(1, &d3dvp);
+		currentViewport_ = vp;
+		viewportSet_ = true;
+	}
+}
+
+void CommandContext::SetScissor(const Scissor& sc)
+{
+	if (!list_) return;
+	if (!scissorSet_ || currentScissor_ != sc) {
+		D3D12_RECT rect = sc.ToD3D();
+		list_->RSSetScissorRects(1, &rect);
+		currentScissor_ = sc;
+		scissorSet_ = true;
+	}
+}
+
+void CommandContext::SetFullViewportFromFramebuffer()
+{
+	if (!dx12Mgr_) return;
+
+	Framebuffer* fb = dx12Mgr_->GetFramebuffer();
+	if (!fb) return;
+
+	// バックバッファ情報からサイズを取得
+	UINT w = static_cast<UINT>(fb->GetBufferCount() > 0 ? fb->GetBackBuffer(0)->GetDesc().Width : 0);
+	UINT h = static_cast<UINT>(fb->GetBufferCount() > 0 ? fb->GetBackBuffer(0)->GetDesc().Height : 0);
+
+	if (w == 0 || h == 0) {
+		return;
+	}
+
+	Viewport vp{};
+	vp.TopLeftX = 0.f;
+	vp.TopLeftY = 0.f;
+	vp.Width = static_cast<float>(w);
+	vp.Height = static_cast<float>(h);
+	vp.MinDepth = 0.f;
+	vp.MaxDepth = 1.f;
+	SetViewport(vp);
+}
+
+void CommandContext::SetFullScissorFromFramebuffer()
+{
+	if (!dx12Mgr_) return;
+
+	Framebuffer* fb = dx12Mgr_->GetFramebuffer();
+	if (!fb) return;
+
+	// サイズ取得
+	UINT w = static_cast<UINT>(fb->GetBufferCount() > 0 ? fb->GetBackBuffer(0)->GetDesc().Width : 0); 
+	UINT h = static_cast<UINT>(fb->GetBufferCount() > 0 ? fb->GetBackBuffer(0)->GetDesc().Height : 0);
+
+	if (w == 0 || h == 0) return;
+
+	Scissor sc{};
+	sc.Left = 0; sc.Top = 0; sc.Right = static_cast<LONG>(w); sc.Bottom = static_cast<LONG>(h);
+
+	SetScissor(sc);
+}
+
+HRESULT CommandContext::CreateQueue()
 {
 	HRESULT hr = S_OK;
 
@@ -229,7 +303,7 @@ HRESULT Tsumi::DX12::CommandContext::CreateQueue()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::CreateAllocators(UINT frameCount)
+HRESULT CommandContext::CreateAllocators(UINT frameCount)
 {
 	HRESULT hr = S_OK;
 
@@ -256,7 +330,7 @@ HRESULT Tsumi::DX12::CommandContext::CreateAllocators(UINT frameCount)
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::CreateList()
+HRESULT CommandContext::CreateList()
 {
 	HRESULT hr = S_OK;
 
@@ -285,7 +359,7 @@ HRESULT Tsumi::DX12::CommandContext::CreateList()
 	return S_OK;
 }
 
-HRESULT Tsumi::DX12::CommandContext::CreateFence()
+HRESULT CommandContext::CreateFence()
 {
 	HRESULT hr = S_OK;
 
@@ -313,4 +387,14 @@ HRESULT Tsumi::DX12::CommandContext::CreateFence()
 	}
 
 	return S_OK;
+}
+
+void CommandContext::ResetCachedRasterState()
+{
+	viewportSet_ = false;
+	scissorSet_ = false;
+
+	// 明示的に初期値をクリア（デバッグ時の安全策）
+	currentViewport_ = Viewport{};
+	currentScissor_ = Scissor{};
 }
