@@ -31,11 +31,17 @@ void DX12Manager::Init()
 	}
 }
 
+void DX12Manager::OnFinalize()
+{
+	if (cmdContext_) cmdContext_->WaitForGpu();
+}
+
 HRESULT DX12Manager::StartFrame()
 {
-	const auto t0 = std::chrono::high_resolution_clock::now();
+	// compute a simple animated clear color (kept for backward compatibility)
+	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto now = std::chrono::high_resolution_clock::now();
-	float t = std::chrono::duration<float>(now - t0).count();
+	float t = std::chrono::duration<float>(now - start_time).count();
 	FLOAT clearColor[4] = { 0.2f + 0.3f * std::sinf(t), 0.3f + 0.2f * std::cosf(t * 0.7f), 0.4f, 1.0f };
 
 	if (!cmdContext_ || !framebuf_ || !swapChain_) {
@@ -57,15 +63,32 @@ HRESULT DX12Manager::StartFrame()
 		return E_FAIL;
 	}
 
-	// Clear current backbuffer and depth using Framebuffer helper
+	// Transition back buffer (PRESENT/COMMON -> RENDER_TARGET)
 	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
-	if (!clearColor) {
-		FLOAT defaultClear[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-		framebuf_->ClearRenderTarget(list, currIndex, defaultClear);
+	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
+	if (!backBuffer) {
+		Utils::Log(L"DX12Manager::StartFrame - backBuffer is null\n");
+		return E_FAIL;
 	}
-	else {
-		framebuf_->ClearRenderTarget(list, currIndex, clearColor);
-	}
+
+	D3D12_RESOURCE_BARRIER barrierToRT{};
+	barrierToRT.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrierToRT.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrierToRT.Transition.pResource = backBuffer;
+	// Most commonly the swapchain resource is in PRESENT state; if it's in COMMON this transition will still be valid for typical usage.
+	barrierToRT.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrierToRT.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrierToRT.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	list->ResourceBarrier(1, &barrierToRT);
+
+	// Bind RTV/DSV
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = framebuf_->GetRtvHandle(currIndex);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = framebuf_->GetDsvHandle();
+	list->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+	// Clear current backbuffer and depth using Framebuffer helper
+	framebuf_->ClearRenderTarget(list, currIndex, clearColor);
 	framebuf_->ClearDepthStencil(list);
 
 	return S_OK;
@@ -73,10 +96,34 @@ HRESULT DX12Manager::StartFrame()
 
 HRESULT DX12Manager::EndFrame()
 {
-	if (!cmdContext_ || !swapChain_) {
+	if (!cmdContext_ || !swapChain_ || !framebuf_) {
 		Utils::Log(L"DX12Manager::EndFrame - required subsystem missing\n");
 		return E_POINTER;
 	}
+
+	// Transition back buffer (RENDER_TARGET -> PRESENT)
+	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
+	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
+	if (!backBuffer) {
+		Utils::Log(L"DX12Manager::EndFrame - backBuffer is null\n");
+		return E_FAIL;
+	}
+
+	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
+	if (!list) {
+		Utils::Log(L"DX12Manager::EndFrame - command list is null\n");
+		return E_FAIL;
+	}
+
+	D3D12_RESOURCE_BARRIER barrierToPresent{};
+	barrierToPresent.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrierToPresent.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrierToPresent.Transition.pResource = backBuffer;
+	barrierToPresent.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrierToPresent.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	barrierToPresent.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	list->ResourceBarrier(1, &barrierToPresent);
 
 	// Submit command list and signal fence
 	HRESULT hr = cmdContext_->ExecuteAndSignal();
@@ -108,9 +155,5 @@ void DX12Manager::PreDraw4SC()
 }	 
 	 
 void DX12Manager::PostDraw4SC()
-{
-}
-
-void DX12Manager::OnFinalize()
 {
 }

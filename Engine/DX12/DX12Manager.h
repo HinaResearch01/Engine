@@ -40,6 +40,11 @@ public:
 	void Init();
 
 	/// <summary>
+	/// 解放処理
+	/// </summary>
+	void OnFinalize();
+
+	/// <summary>
 	/// フレーム開始処理
 	/// </summary>
 	HRESULT StartFrame();
@@ -69,10 +74,6 @@ public:
 	/// </summary>
 	void PostDraw4SC();
 
-	/// <summary>
-	/// 解放処理
-	/// </summary>
-	void OnFinalize();
 
 #pragma region Accessor
 
