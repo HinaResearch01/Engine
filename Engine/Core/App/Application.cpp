@@ -32,7 +32,7 @@ void Application::Run()
         throw std::runtime_error("GameApp is not set. Call SetGameApp() before Run().");
     }
 
-    gameApp_->OnInit();
+    gameApp_->OnInit(); // 初期化処理
 
     // メインループ
     while (!window_->ShouldClose()) {
@@ -46,10 +46,7 @@ void Application::Run()
             break;
         }
 
-        // 更新処理
-        gameApp_->OnUpdate();
-
-        // 描画処理
+        gameApp_->OnUpdate(); // 更新処理
         gameApp_->OnBKSpriteRender(); // 背景画像
         gameApp_->OnEntityRender(); // 3Dオブジェクト
         gameApp_->OnFTSpriteRender(); // 前景画像
@@ -66,7 +63,7 @@ void Application::Run()
 
     dx12_->GetCommandContext()->WaitForGpu();
 
-    gameApp_->OnFinalize();
+    gameApp_->OnFinalize(); // 解放処理
 }
 
 void Application::SetGameApp(std::unique_ptr<GameApp> game)
