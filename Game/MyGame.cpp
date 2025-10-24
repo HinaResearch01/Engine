@@ -21,10 +21,18 @@ void MyGame::OnUpdate()
 	sceneMgr_->Update();
 }
 
-void MyGame::OnRender()
+void Tsumi::MyGame::OnBKSpriteRender()
 {
 	sceneMgr_->RenderBackSprite();
+}
+
+void MyGame::OnEntityRender()
+{
 	sceneMgr_->RendRenderModeler();
+}
+
+void Tsumi::MyGame::OnFTSpriteRender()
+{
 	sceneMgr_->RenderFrontSprite();
 }
 

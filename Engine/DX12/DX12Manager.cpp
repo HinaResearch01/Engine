@@ -44,3 +44,7 @@ void DX12Manager::PreDraw4SC()
 void DX12Manager::PostDraw4SC()
 {
 }
+
+void DX12Manager::OnFinalize()
+{
+}

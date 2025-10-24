@@ -24,7 +24,10 @@ public:
     /// <summary>
     /// 描画処理
     /// </summary>
-    virtual void OnRender() {}
+    virtual void OnBKSpriteRender() {}
+    virtual void OnEntityRender() {}
+    virtual void OnFTSpriteRender() {}
+
 
     /// <summary>
     /// 解放処理

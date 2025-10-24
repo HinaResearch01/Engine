@@ -32,7 +32,9 @@ public:
     /// <summary>
     /// 描画処理
     /// </summary>
-    void OnRender() override;
+    void OnBKSpriteRender() override;
+    void OnEntityRender() override;
+    void OnFTSpriteRender() override;
     
     /// <summary>
     /// 解放処理

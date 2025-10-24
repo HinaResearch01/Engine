@@ -59,6 +59,10 @@ public:
 	/// </summary>
 	void PostDraw4SC();
 
+	/// <summary>
+	/// 解放処理
+	/// </summary>
+	void OnFinalize();
 
 #pragma region Accessor
 
@@ -82,6 +86,9 @@ public:
 	}
 	UINT GetBufferCount() const { return bufferCount_; }
 	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
+
+	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
+	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
 
 #pragma endregion
 

@@ -12,6 +12,9 @@ namespace Win32 {
 class Win32Window;
 struct Win32Desc;
 }
+namespace DX12 {
+class DX12Manager;
+}
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
 class Application {
@@ -52,6 +55,6 @@ private:
     std::unique_ptr<GameApp> gameApp_;
 
     Win32::Win32Window* window_ = nullptr;
-
+    DX12::DX12Manager* dx12_ = nullptr;
 };
 }

@@ -2,18 +2,21 @@
 #include <stdexcept>
 #include <memory>
 #include "Win/Win32Window.h"
+#include "DX12/DX12Manager.h"
 
 using namespace Tsumi;
 
 Application::Application()
 {
     window_ = Win32::Win32Window::GetInstance();
+    dx12_ = DX12::DX12Manager::GetInstance();
 }
 
 Application::~Application()
 {
 	if (gameApp_) gameApp_->OnFinalize();
     window_->OnFinalize();
+    dx12_->OnFinalize();
 }
 
 void Application::Init(const Win32::Win32Desc& windowDesc)
@@ -34,9 +37,13 @@ void Application::Run()
         // メッセージ処理
         window_->ProcessMessages();
 
-        // ゲーム処理
+        // 更新処理
         gameApp_->OnUpdate();
-        gameApp_->OnRender();
+
+        // 描画処理
+        gameApp_->OnBKSpriteRender(); // 背景画像
+        gameApp_->OnEntityRender(); // 3Dオブジェクト
+        gameApp_->OnFTSpriteRender(); // 前景画像
     }
 
     gameApp_->OnFinalize();
