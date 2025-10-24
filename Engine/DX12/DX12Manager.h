@@ -40,6 +40,16 @@ public:
 	void Init();
 
 	/// <summary>
+	/// フレーム開始処理
+	/// </summary>
+	HRESULT StartFrame();
+
+	/// <summary>
+	/// フレーム終了処理
+	/// </summary>
+	HRESULT EndFrame();
+
+	/// <summary>
 	/// 描画前処理 PostEffect
 	/// </summary>
 	void PreDraw4PE();
