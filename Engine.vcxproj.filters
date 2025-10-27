@@ -113,6 +113,9 @@
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp">
       <Filter>Engine\DX12\Framebuf</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\DX12\Desc\DescriptorAllocator.cpp">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -475,6 +478,9 @@
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h">
       <Filter>Engine\DX12\Framebuf</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\DX12\Desc\DescriptorAllocator.h">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -695,6 +701,9 @@
     </Filter>
     <Filter Include="externals\spdlog\sinks">
       <UniqueIdentifier>{b87a595a-38b0-4630-865f-1f7c4cf9c157}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\Desc">
+      <UniqueIdentifier>{646edf6c-a59e-48f3-bae0-d493572ab8c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
