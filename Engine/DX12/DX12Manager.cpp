@@ -1,6 +1,7 @@
 #include "DX12Manager.h"
 #include "Utils/Logger/UtilsLog.h"
 #include <chrono>
+#include <format>
 
 using namespace Tsumi::DX12;
 
@@ -90,15 +91,20 @@ HRESULT DX12Manager::StartFrame()
 	barrierToRT.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrierToRT.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
+	bool issuedBarrier = false;
+
 	if (barrierToRT.Transition.StateBefore != barrierToRT.Transition.StateAfter) {
 		list->ResourceBarrier(1, &barrierToRT);
+		issuedBarrier = true;
 	}
 	else {
-		Utils::Log(L"StartFrame: skipped ResourceBarrier (already in target state)\n");
+		Utils::Log(std::format(L"StartFrame: skipped barrier idx={} (state=0x{:08X})\n", currIndex, static_cast<unsigned>(barrierToRT.Transition.StateBefore)));
 	}
 
-	// --- CPU側の tracked state を更新（バリアの有無に関わらず） ---
-	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// --- tracked state を更新（バリアを記録したときのみ） ---
+	if (issuedBarrier) {
+		framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	}
 
 	// --- RTV/DSV のハンドル確認とバインド ---
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = framebuf_->GetRtvHandle(currIndex);
@@ -140,7 +146,7 @@ HRESULT DX12Manager::EndFrame()
 	// --- tracked state を取得してログ ---
 	D3D12_RESOURCE_STATES tracked = framebuf_->GetBackBufferState(currIndex);
 
-	// --- RenderTarget -> Present の遷移バリアを作り、ログを出して発行 ---
+	// --- RenderTarget -> Present の遷移バリアを作り、発行するか判定 ---
 	D3D12_RESOURCE_BARRIER barrierToPresent{};
 	barrierToPresent.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrierToPresent.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
@@ -149,15 +155,19 @@ HRESULT DX12Manager::EndFrame()
 	barrierToPresent.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	barrierToPresent.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
+	bool issuedBarrier = false;
 	if (barrierToPresent.Transition.StateBefore != barrierToPresent.Transition.StateAfter) {
 		list->ResourceBarrier(1, &barrierToPresent);
+		issuedBarrier = true;
 	}
 	else {
-		Utils::Log(L"EndFrame: skipped ResourceBarrier (already in target state)\n");
+		Utils::Log(std::format(L"EndFrame: skipped barrier idx={} (state=0x{:08X})\n", currIndex, static_cast<unsigned>(barrierToPresent.Transition.StateBefore)));
 	}
 
-	// --- tracked state を更新（バリアの有無に関わらず） ---
-	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_PRESENT);
+	// --- tracked state を更新（バリアを記録したときのみ） ---
+	if (issuedBarrier) {
+		framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_PRESENT);
+	}
 
 	// --- コマンド送信とフェンスシグナル ---
 	HRESULT hr = cmdContext_->ExecuteAndSignal();

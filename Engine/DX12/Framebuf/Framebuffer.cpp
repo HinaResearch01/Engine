@@ -62,7 +62,13 @@ HRESULT Framebuffer::Resize(UINT width, UINT height)
     height_ = height;
 
     // 新しいサイズでRTV/DSVを作成し直す
-    return CreateHeapsAndViews(width, height);
+    return CreateHeapsAndViews(width, height);	hr = CreateHeapsAndViews(width, height);
+
+    // リサイズ後、バックバッファのステートを PRESENT に設定しておく
+    if (SUCCEEDED(hr)) {
+        backBufferStates_.assign(backBuffers_.size(), D3D12_RESOURCE_STATE_PRESENT);
+    }
+    return hr;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetRtvHandle(UINT index) const
