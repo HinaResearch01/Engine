@@ -62,7 +62,7 @@ HRESULT Framebuffer::Resize(UINT width, UINT height)
     height_ = height;
 
     // 新しいサイズでRTV/DSVを作成し直す
-    return CreateHeapsAndViews(width, height);	hr = CreateHeapsAndViews(width, height);
+    CreateHeapsAndViews(width, height);	hr = CreateHeapsAndViews(width, height);
 
     // リサイズ後、バックバッファのステートを PRESENT に設定しておく
     if (SUCCEEDED(hr)) {
