@@ -61,11 +61,11 @@ public:
 
 
 private:
-	ComPtr<IDXGISwapChain4> swapChain_;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
 	DXGI_SWAP_CHAIN_DESC1 desc_{};
 
 	// バッファは最大 3 をサポートする配列にしておく
-	ComPtr<ID3D12Resource> backBuffers_[3];
+	Microsoft::WRL::ComPtr<ID3D12Resource> backBuffers_[3];
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };

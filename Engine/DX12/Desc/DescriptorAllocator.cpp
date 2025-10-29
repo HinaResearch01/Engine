@@ -85,5 +85,5 @@ DescriptorAllocation DescriptorAllocator::Allocate(UINT count)
 void DescriptorAllocator::Reset()
 {
     std::lock_guard lock(mutex_);
-    std::fill(used_.begin(), used_.end(), 0);
+    std::fill(used_.begin(), used_.end(), static_cast<uint8_t>(0));
 }

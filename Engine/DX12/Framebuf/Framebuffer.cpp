@@ -4,6 +4,7 @@
 #include "Win/Win32Window.h"
 
 using namespace Tsumi::DX12;
+using namespace Microsoft::WRL;
 
 Framebuffer::Framebuffer(DX12Manager* ptr) 
 	: dx12Mgr_(ptr)
