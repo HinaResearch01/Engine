@@ -15,6 +15,9 @@ struct Win32Desc;
 namespace DX12 {
 class DX12Manager;
 }
+namespace Graphic {
+class ShaderLibrary;
+}
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
 class Application {
@@ -56,5 +59,6 @@ private:
 
     Win32::Win32Window* window_ = nullptr;
     DX12::DX12Manager* dx12_ = nullptr;
+    std::unique_ptr<Graphic::ShaderLibrary> shaderLibrary_;
 };
 }

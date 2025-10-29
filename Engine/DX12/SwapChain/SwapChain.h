@@ -7,8 +7,6 @@
 
 namespace Tsumi::DX12 {
 
-using Microsoft::WRL::ComPtr;
-
 // 前方宣言
 class DX12Manager;
 

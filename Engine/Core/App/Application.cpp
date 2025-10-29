@@ -4,6 +4,7 @@
 #include <Utils/Logger/UtilsLog.h>
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
+#include "Graphic/Shader/ShaderLibrary.h"
 
 using namespace Tsumi;
 
@@ -11,6 +12,7 @@ Application::Application()
 {
     window_ = Win32::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
+    shaderLibrary_ = std::make_unique<Graphic::ShaderLibrary>();
 }
 
 Application::~Application()
@@ -24,6 +26,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
+    shaderLibrary_->LoadAllShaders();
 }
 
 void Application::Run()

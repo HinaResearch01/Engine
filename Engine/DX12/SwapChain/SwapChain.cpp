@@ -5,6 +5,7 @@
 #include "Utils/Logger/UtilsLog.h"
 
 using namespace Tsumi::DX12;
+using Microsoft::WRL::ComPtr;
 
 SwapChain::SwapChain(DX12Manager* ptr)
     : dx12Mgr_(ptr)

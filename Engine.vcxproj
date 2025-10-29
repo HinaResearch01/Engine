@@ -195,6 +195,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Engine\Graphic\Shader\ShaderCompiler.cpp" />
+    <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
+    <ClCompile Include="Engine\Graphic\Shader\ShaderModule.cpp" />
+    <ClCompile Include="Engine\Graphic\Shader\ShaderProgram.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp">
@@ -322,6 +326,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
+    <ClInclude Include="Engine\Graphic\Shader\ShaderCompiler.h" />
+    <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Engine\Graphic\Shader\ShaderModule.h" />
+    <ClInclude Include="Engine\Graphic\Shader\ShaderProgram.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />

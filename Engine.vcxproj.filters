@@ -116,6 +116,18 @@
     <ClCompile Include="Engine\DX12\Desc\DescriptorAllocator.cpp">
       <Filter>Engine\DX12\Desc</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\Shader\ShaderCompiler.cpp">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\Shader\ShaderModule.cpp">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\Shader\ShaderProgram.cpp">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -481,6 +493,18 @@
     <ClInclude Include="Engine\DX12\Desc\DescriptorAllocator.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\Shader\ShaderCompiler.h">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\Shader\ShaderModule.h">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\Shader\ShaderProgram.h">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -704,6 +728,12 @@
     </Filter>
     <Filter Include="Engine\DX12\Desc">
       <UniqueIdentifier>{646edf6c-a59e-48f3-bae0-d493572ab8c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics">
+      <UniqueIdentifier>{74ec4142-1d36-42a1-9a55-58ab8cccdb33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\Shader">
+      <UniqueIdentifier>{0f9a0124-cd65-421a-a381-f1f56a410e7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
