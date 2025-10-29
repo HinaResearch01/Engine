@@ -1,0 +1,57 @@
+#pragma once
+
+#include <d3d12.h>
+#include <wrl.h>
+#include <unordered_map>
+#include <string>
+
+// 前方宣言
+namespace Tsumi::DX12 {
+class DX12Manager;
+}
+
+namespace Tsumi::Graphic {
+
+/* ルートシグネチャ管理 */
+class RootSignatureLibrary {
+
+public:
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	RootSignatureLibrary() = default;
+	RootSignatureLibrary(DX12::DX12Manager* ptr);
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~RootSignatureLibrary() = default;
+
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	void Init();
+
+	/// <summary>
+	/// ルートシグネチャの登録
+	/// </summary>
+	void Register(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc);
+
+#pragma region Accessor
+	ID3D12RootSignature* Get(const std::string& name)
+	{ return rootSigs_[name].Get();	}
+#pragma endregion
+
+private:
+	/// <summary>
+	/// ルートシグネチャの生成
+	/// </summary>
+	void CreateObject3D();
+
+private:
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12RootSignature>> rootSigs_;
+
+	DX12::DX12Manager* dx12Mgr_ = nullptr;
+};
+
+}

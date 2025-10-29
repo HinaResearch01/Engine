@@ -128,6 +128,9 @@
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\PSO\rootSigs\RootSignatureLibrary.cpp">
+      <Filter>Engine\Graphics\PSO\rootSigs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -505,6 +508,9 @@
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\PSO\rootSigs\RootSignatureLibrary.h">
+      <Filter>Engine\Graphics\PSO\rootSigs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -734,6 +740,12 @@
     </Filter>
     <Filter Include="Engine\Graphics\Shader">
       <UniqueIdentifier>{0f9a0124-cd65-421a-a381-f1f56a410e7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\PSO">
+      <UniqueIdentifier>{43fa3a30-8e48-4c06-b9ca-274382ffc8d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\PSO\rootSigs">
+      <UniqueIdentifier>{5b40ad29-0d62-46c9-b122-a32d5b88af97}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
