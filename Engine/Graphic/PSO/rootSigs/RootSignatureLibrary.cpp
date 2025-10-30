@@ -93,25 +93,27 @@ bool RootSignatureLibrary::Has(const std::string& name) const
 void RootSignatureLibrary::CreateObject3D()
 {
     // -------------------------
-    // CBV / SRV / サンプラーの定義
+    // CBV / SRV の定義（ディスクリプタ範囲）
     // -------------------------
-    CD3DX12_DESCRIPTOR_RANGE cbvRangeVS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0); // VS:b0
-    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 7, 0); // PS:b0～b6
-    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);   // t0～t3
-    CD3DX12_DESCRIPTOR_RANGE samplerRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0); // s0
+    // VS: 定数バッファ1個 (b0)
+    CD3DX12_DESCRIPTOR_RANGE cbvRangeVS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+    // PS: 定数バッファ7個 (b0～b6)
+    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 7, 0);
+    // PS: テクスチャ (SRV) 4個 (t0～t3)
+    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);
 
-    CD3DX12_ROOT_PARAMETER params[4]{};
+    // ルートパラメータを定義（VS用CBVテーブル、PS用CBVテーブル、PS用SRVテーブル）
+    CD3DX12_ROOT_PARAMETER params[3]{};
     params[0].InitAsDescriptorTable(1, &cbvRangeVS, D3D12_SHADER_VISIBILITY_VERTEX);
     params[1].InitAsDescriptorTable(1, &cbvRangePS, D3D12_SHADER_VISIBILITY_PIXEL);
     params[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
-    params[3].InitAsDescriptorTable(1, &samplerRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
     // -------------------------
-    // 静的サンプラー（共通プリセット）
+    // スタティックサンプラー定義（共通設定）
     // -------------------------
     std::vector<D3D12_STATIC_SAMPLER_DESC> staticSamplers;
 
-    // s0 : 線形補間＋リピート（バイリニア）サンプラー
+    // s0 : 線形補間＋ラップモード（一般的なテクスチャサンプリング）
     D3D12_STATIC_SAMPLER_DESC linearWrap{};
     linearWrap.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
     linearWrap.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -119,7 +121,7 @@ void RootSignatureLibrary::CreateObject3D()
     linearWrap.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     linearWrap.MipLODBias = 0;
     linearWrap.MaxAnisotropy = 0;
-    linearWrap.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+    linearWrap.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     linearWrap.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
     linearWrap.MinLOD = 0.0f;
     linearWrap.MaxLOD = D3D12_FLOAT32_MAX;
@@ -128,9 +130,9 @@ void RootSignatureLibrary::CreateObject3D()
     linearWrap.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
     staticSamplers.push_back(linearWrap);
 
-    // s1 : 最近点補間＋クランプ（ポイントクランプ）サンプラー
+    // s1 : 最近傍＋クランプモード（UIやピクセルくっきり表現などに使用）
     D3D12_STATIC_SAMPLER_DESC pointClamp = CD3DX12_STATIC_SAMPLER_DESC(
-        1, // シェーダーレジスタ番号 s1
+        1, // s1 レジスタ
         D3D12_FILTER_MIN_MAG_MIP_POINT,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
@@ -139,7 +141,7 @@ void RootSignatureLibrary::CreateObject3D()
     staticSamplers.push_back(pointClamp);
 
     // -------------------------
-    // ルートシグネチャを作成して登録
+    // ルートシグネチャの作成
     // -------------------------
     D3D12_ROOT_SIGNATURE_DESC desc = {};
     desc.NumParameters = _countof(params);
@@ -148,5 +150,6 @@ void RootSignatureLibrary::CreateObject3D()
     desc.pStaticSamplers = staticSamplers.empty() ? nullptr : staticSamplers.data();
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
+    // "Object3D" という名前で登録
     Register("Object3D", desc, staticSamplers);
 }

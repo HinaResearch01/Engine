@@ -62,7 +62,7 @@ private:
 	/// ルートシグネチャの生成
 	/// </summary>
 	void CreateObject3D();
-
+	
 private:
 	mutable std::mutex mutex_;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12RootSignature>> rootSigs_;
