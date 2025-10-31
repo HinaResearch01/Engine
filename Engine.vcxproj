@@ -196,6 +196,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
+    <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
@@ -328,6 +329,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
+    <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />

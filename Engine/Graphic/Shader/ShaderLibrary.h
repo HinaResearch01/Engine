@@ -1,29 +1,28 @@
 #pragma once
 #include <d3d12.h>
-#include <wrl.h>
-#include <d3dcompiler.h>
+#include <dxgi1_6.h>
+#include <dxgidebug.h>
+#include <dxcapi.h>
 #include <string>
+#include <wrl.h>
+#include <format>
+#include <iostream>
+#include <map>
+#include <memory>
 #include <unordered_map>
 #include <mutex>
-#include <memory>
 #include "Utils/Logger/UtilsLog.h"
-
-#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxcompiler.lib")
 
 namespace Tsumi::Graphic {
 
 enum class ShaderType { VS, PS, GS, HS, DS, CS };
 
-struct ShaderData {
-    Microsoft::WRL::ComPtr<ID3DBlob> blob;
-    std::wstring entryPoint;
-    ShaderType type;
-};
 struct ShaderLoadModule {
     std::unordered_map<ShaderType, std::wstring> sources;
 };
 struct ShaderBlob {
-    std::unordered_map<ShaderType, Microsoft::WRL::ComPtr<ID3DBlob>> blob;
+    std::unordered_map<ShaderType, Microsoft::WRL::ComPtr<IDxcBlob>> blob;
 };
 
 /* シェーダー管理 */
@@ -57,7 +56,7 @@ public:
     /// <summary>
     /// 取得
     /// </summary>
-    ID3DBlob* Get(const std::wstring& name, ShaderType stage) const;
+    IDxcBlob* Get(const std::wstring& name, ShaderType stage) const;
 
     /// <summary>
     /// 読みこみ済み確認
@@ -71,9 +70,18 @@ private:
     /// </summary>
     HRESULT Compile(const std::wstring& name, const ShaderLoadModule& desc);
 
+    /// <summary>
+    /// DXCの初期化処理
+    /// </summary>
+    HRESULT InitDXC();
+
 private:
     std::unordered_map<std::wstring, ShaderBlob> shaders_;
     mutable std::mutex mutex_;
+
+    Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
+    Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
+    Microsoft::WRL::ComPtr<IDxcIncludeHandler> dxcIncludeHandler_;
 };
 
 

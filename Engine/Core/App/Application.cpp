@@ -6,6 +6,7 @@
 #include "DX12/DX12Manager.h"
 #include "Graphic/Shader/ShaderLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
+#include "Graphic/PSO/PSOLibrary.h"
 
 using namespace Tsumi;
 
@@ -15,6 +16,7 @@ Application::Application()
     dx12_ = DX12::DX12Manager::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
+    psos_ = Graphic::PSOLibrary::GetInstance();
 }
 
 Application::~Application()
@@ -28,8 +30,10 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
+    shaders_->Init();
     shaders_->CompileAllShader();
     rootsigs_->Init();
+    psos_->Init();
 }
 
 void Application::Run()
@@ -48,7 +52,7 @@ void Application::Run()
         // フレーム開始処理
         HRESULT hr = dx12_->StartFrame();
         if (FAILED(hr)) {
-            Utils::Log(std::format(L"Application::Run - StartFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+            Utils::Info(std::format(L"Application::Run - StartFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
             break;
         }
 
@@ -60,7 +64,7 @@ void Application::Run()
         // フレーム終了処理
         hr = dx12_->EndFrame();
         if (FAILED(hr)) {
-            Utils::Log(std::format(L"Application::Run - EndFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+            Utils::Info(std::format(L"Application::Run - EndFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
             break;
         }
 

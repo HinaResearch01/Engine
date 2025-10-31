@@ -1,10 +1,12 @@
 #include "PSOLibrary.h"
+#include "PSOUtil.h"
 #include "DX12/DX12Manager.h"
 #include "../Shader/ShaderLibrary.h"
 #include "../Rootsigs/RootSignatureLibrary.h"
 #include <stdexcept>
 #include <locale>
 #include <codecvt>
+#include <d3dx12.h>
 
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
@@ -18,8 +20,8 @@ PSOLibrary::PSOLibrary()
 
 void PSOLibrary::Init() 
 {
-    // RootSignatureの生成
-    rootsigs_->Init();
+    // PSOの生成
+    CreateObject3D();
 }
 
 void PSOLibrary::Register(const std::wstring& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc)
@@ -75,23 +77,23 @@ void PSOLibrary::CreateObject3D()
     // 例: Position, Normal, Texcoord, Tangent
     static const D3D12_INPUT_ELEMENT_DESC inputLayout[] =
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,      0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        PSOUtil::SetUpInputElementDescs("POSITION"),
+        PSOUtil::SetUpInputElementDescs("TEXCOORD"),
+        PSOUtil::SetUpInputElementDescs("NORMAL"),
+        PSOUtil::SetUpInputElementDescs("WORLDPOSITION"),
     };
 
     // ========================================================
     // シェーダの読み込み
     // ========================================================
-    //auto vs = shaders_->Get(Shader::Type::Vertex, L"Assets/Shaders/Object3D.hlsl", "VSMain");
-    //auto ps = shaders_->Get(Shader::Type::Pixel, L"Assets/Shaders/Object3D.hlsl", "PSMain");
+    auto vs = shaders_->Get(L"Object3D", ShaderType::VS);
+    auto ps = shaders_->Get(L"Object3D", ShaderType::PS);
 
-    //if (!vs || !ps)
-    //{
-    //    Tsumi::Utils::Error(L"[PSO] Object3D シェーダのロードに失敗しました。");
-    //    return;
-    //}
+    if (!vs || !ps)
+    {
+        Tsumi::Utils::Error(L"[PSO] Object3D シェーダのロードに失敗しました。");
+        return;
+    }
 
     // ========================================================
     // Blend State
@@ -99,14 +101,8 @@ void PSOLibrary::CreateObject3D()
     D3D12_BLEND_DESC blendDesc = {};
     blendDesc.AlphaToCoverageEnable = FALSE;
     blendDesc.IndependentBlendEnable = FALSE;
-    const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
-    {
-        TRUE, FALSE,
-        D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
-        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-        D3D12_LOGIC_OP_NOOP,
-        D3D12_COLOR_WRITE_ENABLE_ALL
-    };
+    const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc = 
+        PSOUtil::SetUpBlendState(BlendMode::None);
     blendDesc.RenderTarget[0] = defaultRenderTargetBlendDesc;
 
     // ========================================================
@@ -133,8 +129,8 @@ void PSOLibrary::CreateObject3D()
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.pRootSignature = rootSig;
     psoDesc.InputLayout = { inputLayout, _countof(inputLayout) };
-    //psoDesc.VS = CD3DX12_SHADER_BYTECODE(vs->GetBufferPointer(), vs->GetBufferSize());
-    //psoDesc.PS = CD3DX12_SHADER_BYTECODE(ps->GetBufferPointer(), ps->GetBufferSize());
+    psoDesc.VS = CD3DX12_SHADER_BYTECODE(vs->GetBufferPointer(), vs->GetBufferSize());
+    psoDesc.PS = CD3DX12_SHADER_BYTECODE(ps->GetBufferPointer(), ps->GetBufferSize());
     psoDesc.BlendState = blendDesc;
     psoDesc.RasterizerState = rasterDesc;
     psoDesc.DepthStencilState = depthDesc;

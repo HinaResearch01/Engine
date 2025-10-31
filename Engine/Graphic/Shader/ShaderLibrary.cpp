@@ -10,12 +10,12 @@ using namespace Microsoft::WRL;
 
 static const char* ShaderTypeToTarget(ShaderType t) {
     switch (t) {
-        case ShaderType::VS: return "vs_5_0";
-        case ShaderType::PS: return "ps_5_0";
-        case ShaderType::GS: return "gs_5_0";
-        case ShaderType::HS: return "hs_5_0";
-        case ShaderType::DS: return "ds_5_0";
-        case ShaderType::CS: return "cs_5_0";
+        case ShaderType::VS: return "vs_6_0";
+        case ShaderType::PS: return "ps_6_0";
+        case ShaderType::GS: return "gs_6_0";
+        case ShaderType::HS: return "hs_6_0";
+        case ShaderType::DS: return "ds_6_0";
+        case ShaderType::CS: return "cs_6_0";
         default: return "ps_5_0";
     }
 }
@@ -24,6 +24,10 @@ void ShaderLibrary::Init()
 {
     shaders_.clear();
     Tsumi::Utils::Info(L"[ShaderLibrary] Initialized");
+
+    // DXCの初期化
+    InitDXC();
+
     // シェーダーの一括読み込み
     CompileAllShader();
 }
@@ -110,7 +114,7 @@ void ShaderLibrary::CompileAllShader()
     Tsumi::Utils::Info(L"[ShaderLibrary] LoadAllShaders - completed (errors were logged per-shader if any)");
 }
 
-ID3DBlob* ShaderLibrary::Get(const std::wstring& name, ShaderType stage) const
+IDxcBlob* ShaderLibrary::Get(const std::wstring& name, ShaderType stage) const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = shaders_.find(name);
@@ -126,108 +130,126 @@ bool ShaderLibrary::Has(const std::wstring& name) const
     return shaders_.find(name) != shaders_.end();
 }
 
-HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule& desc)
+HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule& module)
 {
     // シェーダソースが指定されていない場合は例外を投げる
-    if (desc.sources.empty()) {
+    if (module.sources.empty()) {
         throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + Tsumi::Utils::WstringToUtf8(name));
     }
-
     ShaderBlob compiled;
+    HRESULT hr = S_OK;
 
-    // 各ステージ（VS, PS, CSなど）ごとにコンパイル処理を行う
-    for (auto& kv : desc.sources) {
-        ShaderType st = kv.first;
-        const std::wstring& pathW = kv.second;
-        if (pathW.empty()) continue;
+    for (auto& kv : module.sources) {
 
-        // ターゲットとエントリーポイントを決定（エントリーポイントは固定で "main"）
-        const char* target = ShaderTypeToTarget(st);
-        std::string entry = "main";
+        ShaderType stage = kv.first;
+        const std::wstring& filePath = kv.second;
 
-        // キャッシュキーを生成して、キャッシュ済みCSOを読み込みを試みる
-        std::string key = ShaderUtil::ComputeShaderCacheKey(pathW, target, entry);
-        auto cached = ShaderUtil::LoadCSOFromDisk(key);
-        if (cached) {
-            // キャッシュが存在する場合はそれを使用して次へ
-            compiled.blob[st] = cached;
-            Tsumi::Utils::Info(std::wstring(L"[ShaderLibrary] キャッシュ利用: ") + name + L" (" + std::wstring(pathW.begin(), pathW.end()) + L")");
-            continue;
+        // -------------------------------
+        // hlslファイルを読む
+        // -------------------------------
+        Tsumi::Utils::Info(std::format(L"[ShaderLibrary] Begin CompileShader, path:{}, stage:{}\n", filePath, static_cast<int>(stage)));
+
+        Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
+        hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+        if (FAILED(hr) || !shaderSource) {
+            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] Failed to load shader file: {}\n", filePath));
+            return hr;
         }
 
-        // キャッシュがない場合はシェーダをコンパイルする
-        LPCWSTR filename = pathW.c_str();
-        LPCSTR entryPoint = entry.c_str();
-        UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+        DxcBuffer shaderSourceBuffer{};
+        shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
+        shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+        shaderSourceBuffer.Encoding = DXC_CP_UTF8; // UTF8文字コード
 
-#ifdef _DEBUG
-        // デバッグビルドではデバッグ情報を付与し最適化を無効化
-        compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-        // リリースビルドでは最適化を有効化
-        compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
-#endif
-
-        ComPtr<ID3DBlob> shaderBlob;
-        ComPtr<ID3DBlob> errorBlob;
-
-        // シェーダファイルをコンパイル
-        HRESULT hr = D3DCompileFromFile(
-            filename,
-            nullptr,
-            D3D_COMPILE_STANDARD_FILE_INCLUDE,
-            entryPoint,
-            target,
-            compileFlags,
-            0,
-            &shaderBlob,
-            &errorBlob);
-
-        // コンパイル失敗時の処理
-        if (FAILED(hr)) {
-            std::string msg;
-            if (errorBlob) {
-                // エラーメッセージをUTF-8からUTF-16に変換
-                msg.assign(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()),
-                    errorBlob->GetBufferSize());
-                int len = MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), (int)msg.size(), nullptr, 0);
-                std::wstring wmsg;
-                if (len > 0) {
-                    wmsg.resize(len);
-                    MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), (int)msg.size(), &wmsg[0], len);
-                }
-                Tsumi::Utils::Error(std::wstring(L"[ShaderLibrary] コンパイルエラー: ") + wmsg);
-            }
-            else {
-                msg = "D3DCompileFromFile failed with hr=" + std::to_string(static_cast<unsigned>(hr));
-                Tsumi::Utils::Error(std::wstring(L"[ShaderLibrary] コンパイル失敗: ") + std::wstring(msg.begin(), msg.end()));
-            }
-            throw std::runtime_error(msg);
+        // -------------------------------
+        // Compilerする
+        // -------------------------------
+        std::wstring profile;
+        switch (stage)
+        {
+            case ShaderType::VS: profile = L"vs_6_0"; break;
+            case ShaderType::PS: profile = L"ps_6_0"; break;
+            case ShaderType::GS: profile = L"gs_6_0"; break;
+            case ShaderType::HS: profile = L"hs_6_0"; break;
+            case ShaderType::DS: profile = L"ds_6_0"; break;
+            case ShaderType::CS: profile = L"cs_6_0"; break;
+            default: profile = L"ps_6_0"; break;
         }
 
-        // コンパイル結果を一時バッファに保存
-        compiled.blob[st] = shaderBlob;
+        LPCWSTR arguments[] = {
+            filePath.c_str(),
+            L"-E", L"main",          // エントリーポイント
+            L"-T", profile.c_str(),  // ターゲットプロファイル
+            L"-Zi", L"-Qembed_debug", // デバッグ情報埋め込み
+            L"-Od",                  // 最適化無効（開発時）
+            L"-Zpr"                  // パッキングルール: 16byte境界
+        };
 
-        // キャッシュに保存（失敗しても無視）
-        try {
-            bool saved = ShaderUtil::SaveCSOToDisk(key, shaderBlob.Get());
-            if (saved) {
+        Microsoft::WRL::ComPtr<IDxcResult> shaderResult;
+        hr = dxcCompiler_->Compile(
+            &shaderSourceBuffer,
+            arguments,
+            _countof(arguments),
+            dxcIncludeHandler_.Get(),
+            IID_PPV_ARGS(&shaderResult)
+        );
+        if (FAILED(hr) || !shaderResult) {
+            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] DXC Compile failed: {} stage:{}\n", filePath, static_cast<int>(stage)));
+            return hr;
+        }
 
-                Tsumi::Utils::Info(std::wstring(L"[ShaderLibrary] キャッシュに保存: ") + std::wstring(key.begin(), key.end()));
-            }
+        // -------------------------------
+        // 警告・エラーが出てないか確認する
+        // -------------------------------
+        Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError;
+        shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+
+        if (shaderError && shaderError->GetStringLength() != 0) {
+            Tsumi::Utils::Error(std::format(
+                L"[ShaderLibrary] DXC error/warning ({}):\n{}",
+                filePath,
+                Tsumi::Utils::Utf8ToWstring(shaderError->GetStringPointer())
+            ));
+            return E_FAIL; // エラー扱いで中断
         }
-        catch (...) {
-            // キャッシュ保存時の例外は無視
+
+        // -------------------------------
+        // Compiler結果を受け取って返す
+        // -------------------------------
+        Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob;
+        hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+        if (FAILED(hr) || !shaderBlob) {
+            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] DXC: failed to get compiled object for {}\n", filePath));
+            return hr;
         }
+
+        Tsumi::Utils::Info(std::format(L"[ShaderLibrary] Compile Succeeded, path:{}, profile:{}\n", filePath, profile));
+
+        compiled.blob[stage] = shaderBlob; // ステージごとに格納
     }
 
-    // コンパイル結果をスレッドセーフにマップへ登録
+    // スレッドセーフに登録
     {
         std::lock_guard<std::mutex> lock(mutex_);
         shaders_[name] = std::move(compiled);
     }
 
-    Tsumi::Utils::Info(std::wstring(L"[ShaderLibrary] シェーダ登録完了: ") + name);
     return S_OK;
 }
 
+HRESULT Tsumi::Graphic::ShaderLibrary::InitDXC()
+{
+    HRESULT hr{};
+
+    // ComPtrで持つことを推奨
+    hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
+    if (FAILED(hr)) return hr;
+
+    hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
+    if (FAILED(hr)) return hr;
+
+    hr = dxcUtils_->CreateDefaultIncludeHandler(&dxcIncludeHandler_);
+    if (FAILED(hr)) return hr;
+
+    return hr;
+}

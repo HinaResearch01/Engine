@@ -131,6 +131,9 @@
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp">
       <Filter>Engine\Utils\Func</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp">
+      <Filter>Engine\Graphics\PSO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -510,6 +513,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h">
       <Filter>Engine\Utils\Func</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h">
+      <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

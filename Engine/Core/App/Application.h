@@ -18,6 +18,7 @@ class DX12Manager;
 namespace Graphic {
 class ShaderLibrary;
 class RootSignatureLibrary;
+class PSOLibrary;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -62,5 +63,6 @@ private:
     DX12::DX12Manager* dx12_ = nullptr;
     Graphic::ShaderLibrary* shaders_ = nullptr;
     Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
+    Graphic::PSOLibrary* psos_ = nullptr;
 };
 }

@@ -25,7 +25,7 @@ std::string Tsumi::Graphic::ShaderUtil::ComputeShaderCacheKey(const std::wstring
     return ss.str();
 }
 
-bool Tsumi::Graphic::ShaderUtil::SaveCSOToDisk(const std::string& key, ID3DBlob* blob)
+bool Tsumi::Graphic::ShaderUtil::SaveCSOToDisk(const std::string& key, IDxcBlob* blob)
 {
     if (!blob) return false;
     std::filesystem::path cacheDir = std::filesystem::temp_directory_path() / "tsumi_shader_cache";
@@ -33,29 +33,32 @@ bool Tsumi::Graphic::ShaderUtil::SaveCSOToDisk(const std::string& key, ID3DBlob*
     std::filesystem::path out = cacheDir / (key + ".cso");
     std::ofstream ofs(out, std::ios::binary);
     if (!ofs) return false;
+
     uint64_t size = blob->GetBufferSize();
     ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
     ofs.write(reinterpret_cast<const char*>(blob->GetBufferPointer()), size);
     return ofs.good();
 }
 
-Microsoft::WRL::ComPtr<ID3DBlob> Tsumi::Graphic::ShaderUtil::LoadCSOFromDisk(const std::string& key)
+Microsoft::WRL::ComPtr<IDxcBlob> Tsumi::Graphic::ShaderUtil::LoadCSOFromDisk(const std::string& key)
 {
     std::filesystem::path cacheDir = std::filesystem::temp_directory_path() / "tsumi_shader_cache";
     std::filesystem::path in = cacheDir / (key + ".cso");
     if (!std::filesystem::exists(in)) return nullptr;
+
     std::ifstream ifs(in, std::ios::binary);
     if (!ifs) return nullptr;
     uint64_t size = 0;
     ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+
     std::vector<char> buf(size);
     ifs.read(buf.data(), size);
-    // Create blob via D3DCreateBlob
-    Microsoft::WRL::ComPtr<ID3DBlob> blob;
-    if (SUCCEEDED(D3DCreateBlob(size, &blob))) {
-        memcpy(blob->GetBufferPointer(), buf.data(), size);
-        return blob;
-    }
-    return nullptr;
+
+    // DXC Blob に変換
+    Microsoft::WRL::ComPtr<IDxcLibrary> library;
+    Microsoft::WRL::ComPtr<IDxcBlobEncoding> encoding;
+    DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+    library->CreateBlobWithEncodingOnHeapCopy(buf.data(), (UINT32)size, CP_UTF8, &encoding);
+    return encoding;
 }
 
