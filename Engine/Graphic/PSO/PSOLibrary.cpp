@@ -1,0 +1,154 @@
+#include "PSOLibrary.h"
+#include "DX12/DX12Manager.h"
+#include "../Shader/ShaderLibrary.h"
+#include "../Rootsigs/RootSignatureLibrary.h"
+#include <stdexcept>
+#include <locale>
+#include <codecvt>
+
+using namespace Tsumi::Graphic;
+using namespace Microsoft::WRL;
+
+PSOLibrary::PSOLibrary()
+{
+	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
+    shaders_ = Tsumi::Graphic::ShaderLibrary::GetInstance();
+    rootsigs_ = Tsumi::Graphic::RootSignatureLibrary::GetInstance();
+}
+
+void PSOLibrary::Init() 
+{
+    // RootSignatureの生成
+    rootsigs_->Init();
+}
+
+void PSOLibrary::Register(const std::wstring& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc)
+{
+    if (pipelines.contains(name))
+        return;
+
+    ComPtr<ID3D12PipelineState> pso;
+    HRESULT hr = dx12Mgr_->GetDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso));
+    if (FAILED(hr))
+    {
+        Tsumi::Utils::Error(L"[PSO] " + name + L" の作成に失敗");
+        return;
+    }
+
+    pipelines[name] = pso;
+    Tsumi::Utils::Info(L"[PSO] " + name + L" 登録完了");
+}
+
+ID3D12PipelineState* PSOLibrary::Get(const std::wstring& name)
+{
+    std::lock_guard<std::mutex> lk(mutex_);
+    auto it = pipelines.find(name);
+    if (it == pipelines.end()) return nullptr;
+    return it->second.Get();
+}
+
+
+bool PSOLibrary::Has(const std::wstring& name) const
+{
+    std::lock_guard<std::mutex> lk(mutex_);
+    return pipelines.find(name) != pipelines.end();
+}
+
+void PSOLibrary::CreateObject3D()
+{
+    if (Has(L"Object3D"))
+        return;
+
+    auto device = dx12Mgr_->GetDevice();
+
+    // ========================================================
+    // ルートシグネチャの取得
+    // ========================================================
+    auto rootSig = rootsigs_->Get("Object3D");
+    if (!rootSig)
+    {
+        Tsumi::Utils::Error(L"[PSO] Object3D 用 RootSignature が見つかりません。");
+        return;
+    }
+
+    // ========================================================
+    // Input Layout
+    // ========================================================
+    // 例: Position, Normal, Texcoord, Tangent
+    static const D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,      0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT,   0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
+
+    // ========================================================
+    // シェーダの読み込み
+    // ========================================================
+    //auto vs = shaders_->Get(Shader::Type::Vertex, L"Assets/Shaders/Object3D.hlsl", "VSMain");
+    //auto ps = shaders_->Get(Shader::Type::Pixel, L"Assets/Shaders/Object3D.hlsl", "PSMain");
+
+    //if (!vs || !ps)
+    //{
+    //    Tsumi::Utils::Error(L"[PSO] Object3D シェーダのロードに失敗しました。");
+    //    return;
+    //}
+
+    // ========================================================
+    // Blend State
+    // ========================================================
+    D3D12_BLEND_DESC blendDesc = {};
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.IndependentBlendEnable = FALSE;
+    const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+    {
+        TRUE, FALSE,
+        D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
+        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+        D3D12_LOGIC_OP_NOOP,
+        D3D12_COLOR_WRITE_ENABLE_ALL
+    };
+    blendDesc.RenderTarget[0] = defaultRenderTargetBlendDesc;
+
+    // ========================================================
+    // Rasterizer State
+    // ========================================================
+    D3D12_RASTERIZER_DESC rasterDesc = {};
+    rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
+    rasterDesc.FrontCounterClockwise = FALSE;
+    rasterDesc.DepthClipEnable = TRUE;
+
+    // ========================================================
+    // DepthStencil State
+    // ========================================================
+    D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+    depthDesc.DepthEnable = TRUE;
+    depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    depthDesc.StencilEnable = FALSE;
+
+    // ========================================================
+    // PSO 設定
+    // ========================================================
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.pRootSignature = rootSig;
+    psoDesc.InputLayout = { inputLayout, _countof(inputLayout) };
+    //psoDesc.VS = CD3DX12_SHADER_BYTECODE(vs->GetBufferPointer(), vs->GetBufferSize());
+    //psoDesc.PS = CD3DX12_SHADER_BYTECODE(ps->GetBufferPointer(), ps->GetBufferSize());
+    psoDesc.BlendState = blendDesc;
+    psoDesc.RasterizerState = rasterDesc;
+    psoDesc.DepthStencilState = depthDesc;
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+    psoDesc.SampleDesc.Count = 1;
+
+    // ========================================================
+    // 登録
+    // ========================================================
+    Register(L"Object3D", psoDesc);
+}

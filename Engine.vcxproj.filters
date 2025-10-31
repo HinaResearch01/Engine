@@ -116,20 +116,14 @@
     <ClCompile Include="Engine\DX12\Desc\DescriptorAllocator.cpp">
       <Filter>Engine\DX12\Desc</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\Shader\ShaderCompiler.cpp">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Graphic\Shader\ShaderModule.cpp">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Graphic\Shader\ShaderProgram.cpp">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\rootSigs\RootSignatureLibrary.cpp">
-      <Filter>Engine\Graphics\PSO\rootSigs</Filter>
+    <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp">
+      <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp">
+      <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -496,20 +490,14 @@
     <ClInclude Include="Engine\DX12\Desc\DescriptorAllocator.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\Shader\ShaderCompiler.h">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Graphic\Shader\ShaderModule.h">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Graphic\Shader\ShaderProgram.h">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\rootSigs\RootSignatureLibrary.h">
-      <Filter>Engine\Graphics\PSO\rootSigs</Filter>
+    <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h">
+      <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h">
+      <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -744,8 +732,8 @@
     <Filter Include="Engine\Graphics\PSO">
       <UniqueIdentifier>{43fa3a30-8e48-4c06-b9ca-274382ffc8d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Graphics\PSO\rootSigs">
-      <UniqueIdentifier>{5b40ad29-0d62-46c9-b122-a32d5b88af97}</UniqueIdentifier>
+    <Filter Include="Engine\Graphics\RootSigs">
+      <UniqueIdentifier>{fcb3809a-aecb-403d-94f4-abd93560bbd7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

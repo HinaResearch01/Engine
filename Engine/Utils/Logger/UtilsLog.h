@@ -37,4 +37,14 @@ inline void LogHandle(const wchar_t* name, SIZE_T value) {
     OutputDebugStringW(ss.str().c_str());
 }
 
+inline void Info(const std::wstring& message) {
+    std::wstring tagged = L"[Tsumi][Info] " + message + L"\n";
+    OutputDebugStringW(tagged.c_str());
+}
+
+inline void Error(const std::wstring& message) {
+    std::wstring tagged = L"[Tsumi][Error] " + message + L"\n";
+    OutputDebugStringW(tagged.c_str());
+}
+
 }

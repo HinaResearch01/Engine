@@ -8,9 +8,9 @@
 using namespace Tsumi::Graphic;
 using Microsoft::WRL::ComPtr;
 
-RootSignatureLibrary::RootSignatureLibrary(DX12::DX12Manager* ptr)
-    : dx12Mgr_(ptr)
+RootSignatureLibrary::RootSignatureLibrary() 
 {
+    dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
 }
 
 void RootSignatureLibrary::Init()

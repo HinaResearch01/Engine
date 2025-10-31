@@ -18,7 +18,6 @@ struct Win32Desc {
 class Win32Window {
 
 private: // シングルトン
-    // コンストラクタ、デストラクタ
     Win32Window() = default;
     ~Win32Window() = default;
     Win32Window(const Win32Window&) = delete;

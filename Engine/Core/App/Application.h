@@ -17,6 +17,7 @@ class DX12Manager;
 }
 namespace Graphic {
 class ShaderLibrary;
+class RootSignatureLibrary;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -59,6 +60,7 @@ private:
 
     Win32::Win32Window* window_ = nullptr;
     DX12::DX12Manager* dx12_ = nullptr;
-    std::unique_ptr<Graphic::ShaderLibrary> shaderLibrary_;
+    Graphic::ShaderLibrary* shaders_ = nullptr;
+    Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
 };
 }

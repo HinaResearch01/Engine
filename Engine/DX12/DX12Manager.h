@@ -19,7 +19,6 @@ namespace Tsumi::DX12 {
 class DX12Manager {
 
 private: // シングルトン
-	// コンストラクタ、デストラクタ
 	DX12Manager();
 	~DX12Manager() = default;
 	DX12Manager(const DX12Manager&) = delete;

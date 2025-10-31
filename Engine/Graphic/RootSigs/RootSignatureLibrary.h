@@ -19,17 +19,20 @@ namespace Tsumi::Graphic {
 /* ルートシグネチャ管理 */
 class RootSignatureLibrary {
 
+private: // シングルトン
+	RootSignatureLibrary();
+	~RootSignatureLibrary() = default;
+	RootSignatureLibrary(const RootSignatureLibrary&) = delete;
+	const RootSignatureLibrary& operator=(const RootSignatureLibrary&) = delete;
+
 public:
 	/// <summary>
-	/// コンストラクタ
+	/// インスタンスの取得
 	/// </summary>
-	RootSignatureLibrary() = default;
-	RootSignatureLibrary(DX12::DX12Manager* ptr);
-
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~RootSignatureLibrary() = default;
+	static RootSignatureLibrary* GetInstance() {
+		static RootSignatureLibrary instance;
+		return &instance;
+	}
 
 	/// <summary>
 	/// 初期化処理
@@ -53,8 +56,7 @@ public:
 	bool Has(const std::string& name) const;
 
 #pragma region Accessor
-	ID3D12RootSignature* Get(const std::string& name)
-	{ return rootSigs_[name].Get();	}
+
 #pragma endregion
 
 private:

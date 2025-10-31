@@ -5,6 +5,7 @@
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "Graphic/Shader/ShaderLibrary.h"
+#include "Graphic/RootSigs/RootSignatureLibrary.h"
 
 using namespace Tsumi;
 
@@ -12,7 +13,8 @@ Application::Application()
 {
     window_ = Win32::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
-    shaderLibrary_ = std::make_unique<Graphic::ShaderLibrary>();
+    shaders_ = Graphic::ShaderLibrary::GetInstance();
+    rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
 }
 
 Application::~Application()
@@ -26,7 +28,8 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
-    shaderLibrary_->LoadAllShaders();
+    shaders_->LoadAllShaders();
+    rootsigs_->Init();
 }
 
 void Application::Run()
