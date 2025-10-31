@@ -1,9 +1,9 @@
 #include "RootSignatureLibrary.h"
 #include "DX12/DX12Manager.h"
+#include "Utils/Func/UtilFunc.h"
 #include <d3dx12.h>
 #include <stdexcept>
 #include <locale>
-#include <codecvt>
 
 using namespace Tsumi::Graphic;
 using Microsoft::WRL::ComPtr;
@@ -22,10 +22,8 @@ void RootSignatureLibrary::Init()
 void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc,
     const std::vector<D3D12_STATIC_SAMPLER_DESC>& staticSamplers)
 {
-    // descをコピーして、静的サンプラーを付与できるようにする
+    // descをコピーして静的サンプラーを付与可能にする
     D3D12_ROOT_SIGNATURE_DESC descCopy = desc;
-
-    // 静的サンプラーが指定されている場合は設定する
     if (!staticSamplers.empty()) {
         descCopy.NumStaticSamplers = static_cast<UINT>(staticSamplers.size());
         descCopy.pStaticSamplers = staticSamplers.data();
@@ -38,42 +36,59 @@ void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SI
     ComPtr<ID3DBlob> serializedRootSig;
     ComPtr<ID3DBlob> errorBlob;
 
-    // ルートシグネチャをシリアライズしてバイナリ化する
-    HRESULT hr = D3D12SerializeRootSignature(&descCopy, D3D_ROOT_SIGNATURE_VERSION_1,
-        &serializedRootSig, &errorBlob);
+    // ルートシグネチャをシリアライズ
+    HRESULT hr = D3D12SerializeRootSignature(
+        &descCopy,
+        D3D_ROOT_SIGNATURE_VERSION_1,
+        &serializedRootSig,
+        &errorBlob
+    );
+
+    // 名前を安全に wstring に変換
+    std::wstring wname = Utils::Utf8ToWstring(name);
+
     if (FAILED(hr)) {
         if (errorBlob) {
-            // エラーメッセージをwstringに変換してログ出力
+            // エラーメッセージも UTF-16 に変換
             std::string err((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize());
-            std::wstring werr = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(err);
-            Utils::Log(std::format(L"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n", std::wstring(name.begin(), name.end()), werr));
+            std::wstring werr = Utils::Utf8ToWstring(err);
+            Utils::Log(std::format(
+                L"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n",
+                wname, werr));
         }
         else {
-            Utils::Log(std::format(L"RootSignatureLibrary::Register - シリアライズに失敗 '{}', hr=0x{:08X}\n",
-                std::wstring(name.begin(), name.end()), static_cast<unsigned>(hr)));
+            Utils::Log(std::format(
+                L"RootSignatureLibrary::Register - シリアライズに失敗 '{}', hr=0x{:08X}\n",
+                wname, static_cast<unsigned>(hr)));
         }
         throw std::runtime_error("RootSignature serialize failed: " + name);
     }
 
-    // GPU上にルートシグネチャを生成
+    // GPU上にルートシグネチャを作成
     ComPtr<ID3D12RootSignature> rootSig;
     hr = dx12Mgr_->GetDevice()->CreateRootSignature(
         0,
         serializedRootSig->GetBufferPointer(),
         serializedRootSig->GetBufferSize(),
-        IID_PPV_ARGS(&rootSig));
+        IID_PPV_ARGS(&rootSig)
+    );
+
     if (FAILED(hr) || !rootSig) {
-        Utils::Log(std::format(L"RootSignatureLibrary::Register - CreateRootSignature に失敗 '{}', hr=0x{:08X}\n",
-            std::wstring(name.begin(), name.end()), static_cast<unsigned>(hr)));
+        Utils::Log(std::format(
+            L"RootSignatureLibrary::Register - CreateRootSignature に失敗 '{}', hr=0x{:08X}\n",
+            wname, static_cast<unsigned>(hr)));
         throw std::runtime_error("RootSignature create failed: " + name);
     }
 
+    // 登録処理（スレッドセーフ）
     {
         std::lock_guard<std::mutex> lk(mutex_);
         rootSigs_[name] = rootSig;
     }
 
-    Utils::Log(std::format(L"RootSignatureLibrary::Register - 登録完了 '{}'\n", std::wstring(name.begin(), name.end())));
+    Utils::Log(std::format(
+        L"RootSignatureLibrary::Register - 登録完了 '{}'\n",
+        wname));
 }
 
 ID3D12RootSignature* RootSignatureLibrary::Get(const std::string& name) const

@@ -125,6 +125,12 @@
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp">
+      <Filter>Engine\Utils\Func</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -499,6 +505,12 @@
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h">
+      <Filter>Engine\Graphics\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utils\Func\UtilFunc.h">
+      <Filter>Engine\Utils\Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -734,6 +746,9 @@
     </Filter>
     <Filter Include="Engine\Graphics\RootSigs">
       <UniqueIdentifier>{fcb3809a-aecb-403d-94f4-abd93560bbd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\Func">
+      <UniqueIdentifier>{2ffe03c2-deae-456d-8407-f20c853479b5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

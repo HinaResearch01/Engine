@@ -28,7 +28,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
-    shaders_->LoadAllShaders();
+    shaders_->CompileAllShader();
     rootsigs_->Init();
 }
 

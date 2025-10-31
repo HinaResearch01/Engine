@@ -57,7 +57,7 @@ public:
     /// <summary>
     /// 取得
     /// </summary>
-    ShaderBlob Get(const std::wstring& name) const;
+    ID3DBlob* Get(const std::wstring& name, ShaderType stage) const;
 
     /// <summary>
     /// 読みこみ済み確認
