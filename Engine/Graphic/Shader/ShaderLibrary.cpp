@@ -6,6 +6,18 @@ using namespace Tsumi::DX12;
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
 
+static const char* ShaderTypeToTarget(ShaderType t) {
+    switch (t) {
+        case ShaderType::VS: return "vs_5_0";
+        case ShaderType::PS: return "ps_5_0";
+        case ShaderType::GS: return "gs_5_0";
+        case ShaderType::HS: return "hs_5_0";
+        case ShaderType::DS: return "ds_5_0";
+        case ShaderType::CS: return "cs_5_0";
+        default: return "ps_5_0";
+    }
+}
+
 void ShaderLibrary::Init()
 {
     shaders_.clear();
@@ -96,9 +108,12 @@ void ShaderLibrary::CompileAllShader()
     Tsumi::Utils::Info(L"[ShaderLibrary] LoadAllShaders - completed (errors were logged per-shader if any)");
 }
 
-ID3DBlob* ShaderLibrary::Get(const std::wstring& name)
+ShaderBlob ShaderLibrary::Get(const std::wstring& name) const
 {
-    
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = shaders_.find(name);
+    if (it == shaders_.end()) return ShaderBlob{};
+    return it->second; // copy (ComPtr inside is copyable)
 }
 
 bool ShaderLibrary::Has(const std::wstring& name) const
@@ -109,6 +124,64 @@ bool ShaderLibrary::Has(const std::wstring& name) const
 
 HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule& desc)
 {
+    if (desc.sources.empty()) {
+        throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + std::string(name.begin(), name.end()));
+    }
 
+    ShaderBlob compiled;
+    for (auto& kv : desc.sources) {
+        ShaderType st = kv.first;
+        const std::wstring& pathW = kv.second;
+        if (pathW.empty()) continue;
+
+        const char* target = ShaderTypeToTarget(st);
+        LPCWSTR filename = pathW.c_str();
+        LPCSTR entryPoint = "main";
+        UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+        compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+        ComPtr<ID3DBlob> shaderBlob;
+        ComPtr<ID3DBlob> errorBlob;
+        HRESULT hr = D3DCompileFromFile(
+            filename,
+            nullptr,
+            D3D_COMPILE_STANDARD_FILE_INCLUDE,
+            entryPoint,
+            target,
+            compileFlags,
+            0,
+            &shaderBlob,
+            &errorBlob);
+
+        if (FAILED(hr)) {
+            std::string msg;
+            if (errorBlob) {
+                msg.assign(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()),
+                    errorBlob->GetBufferSize());
+            }
+            else {
+                msg = "D3DCompileFromFile failed with hr=" + std::to_string(static_cast<unsigned>(hr));
+            }
+            // Log and throw so the caller's try/catch can handle it
+            std::wcerr << L"ShaderLibrary::Compile - Failed to compile " << pathW << L": " << std::wstring(msg.begin(), msg.end()) << std::endl;
+            throw std::runtime_error(msg);
+        }
+
+        // store compiled blob
+        compiled.blob[st] = shaderBlob;
+    }
+
+    // commit into map (thread-safe)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        shaders_[name] = std::move(compiled);
+    }
+
+    Tsumi::Utils::Info(std::wstring(L"[ShaderLibrary] Compiled shader: ") + name);
+    return S_OK;
 }
 

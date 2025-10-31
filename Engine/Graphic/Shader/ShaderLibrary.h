@@ -57,7 +57,7 @@ public:
     /// <summary>
     /// 取得
     /// </summary>
-    ID3DBlob* Get(const std::wstring& name);
+    ShaderBlob Get(const std::wstring& name) const;
 
     /// <summary>
     /// 読みこみ済み確認
