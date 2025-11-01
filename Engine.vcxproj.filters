@@ -134,6 +134,15 @@
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\IActor.cpp">
+      <Filter>Engine\Framework\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\IComponent.cpp">
+      <Filter>Engine\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp">
+      <Filter>Engine\Math\MathUtil</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -517,6 +526,30 @@
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\IActor.h">
+      <Filter>Engine\Framework\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\IComponent.h">
+      <Filter>Engine\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Matrix\Matrix.h">
+      <Filter>Engine\Math\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\MathUtil\MathUtil.h">
+      <Filter>Engine\Math\MathUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\MathUtil\EaseUtil.h">
+      <Filter>Engine\Math\MathUtil</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Constants\Constants.h">
+      <Filter>Engine\Math\Constants</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\TMath.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Vecor\Vector.h">
+      <Filter>Engine\Math\Vector</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -755,6 +788,30 @@
     </Filter>
     <Filter Include="Engine\Utils\Func">
       <UniqueIdentifier>{2ffe03c2-deae-456d-8407-f20c853479b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework">
+      <UniqueIdentifier>{89e7c6c6-b81e-47dc-a619-1bf589867727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Actor">
+      <UniqueIdentifier>{c6fbf96f-b40f-4aac-a0d6-2a7b32cb4c0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Component">
+      <UniqueIdentifier>{d8d148ac-53f8-444b-ad87-d10a16bc7961}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math">
+      <UniqueIdentifier>{ffe791f2-93ab-4cc1-8a0b-84ce4c892393}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math\Vector">
+      <UniqueIdentifier>{a9b23e46-826d-46f2-a395-3fc03a59a994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math\Matrix">
+      <UniqueIdentifier>{730b292a-311f-4b45-9745-eaf90637523a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math\MathUtil">
+      <UniqueIdentifier>{baf33091-1229-43d2-bb9f-8c8e6d6dffe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math\Constants">
+      <UniqueIdentifier>{04c2fffd-fda1-4f47-bb4b-6919f337659b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
