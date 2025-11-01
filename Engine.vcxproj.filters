@@ -134,14 +134,14 @@
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Component\IComponent.cpp">
-      <Filter>Engine\Framework\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp">
       <Filter>Engine\Math\MathUtil</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp">
       <Filter>Engine\Framework\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\TrasnformComponent.cpp">
+      <Filter>Engine\Framework\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -549,6 +549,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\Actor\IActor.h">
       <Filter>Engine\Framework\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\TrasnformComponent.h">
+      <Filter>Engine\Framework\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

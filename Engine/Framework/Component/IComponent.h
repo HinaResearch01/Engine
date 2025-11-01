@@ -1,4 +1,58 @@
 #pragma once
-class IComponent {
-};
 
+#include <iostream>
+#include <vector>
+#include <memory>
+
+namespace Tsumi::Framework {
+
+// 前方宣言
+class IActor;
+
+/* Actorが持つComppnentの基底クラス */
+class IComponent {
+
+public:
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	IComponent() = default;
+	IComponent(const std::string& name)
+		: name_(name)
+	{};
+
+	/// <summary>
+	/// 仮想デストラクタ
+	/// </summary>
+	virtual ~IComponent() = default;
+
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	virtual void Init() = 0;
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	virtual void Update() {};
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	virtual void Render() {};
+
+#pragma region Accessor
+	// 親
+	IActor* GetOwner() const { return owner_; }
+	void SetOwner(IActor* ptr) { owner_ = ptr; } 
+	// 名前
+	std::string GetName() const { return name_; }
+#pragma endregion
+
+private:
+	// 親
+	IActor* owner_ = nullptr;
+	// 名前
+	std::string name_ = "default";
+};
+}
