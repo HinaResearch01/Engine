@@ -6,27 +6,27 @@
 using namespace Tsumi::Math;
 using namespace Func;
 
-float FLOAT::Lerp(const float& start, const float& end, float t)
+float NUM::Lerp(const float& start, const float& end, float t)
 {
 	return start + (end - start) * t;
 }
 
-float FLOAT::Clamp(const float& value, const float& minValue, const float& maxValue)
+float NUM::Clamp(const float& value, const float& minValue, const float& maxValue)
 {
 	return max(minValue, min(value, maxValue));
 }
 
-float FLOAT::APOneAsZeroCloser(float value)
+float NUM::APOneAsZeroCloser(float value)
 {
 	return exp(-pow(value, 2.0f));
 }
 
-float FLOAT::ToRadians(float degrees)
+float NUM::ToRadians(float degrees)
 {
 	return degrees * (float(M_PI) / 180.0f);
 }
 
-float FLOAT::ConvertToRange(Vec2f input, Vec2f output, float value)
+float NUM::ConvertToRange(Vec2f input, Vec2f output, float value)
 {
 	// 入力値を入力範囲に正規化
 	float normalize = (value - input.x) / (input.y - input.x);
@@ -64,7 +64,7 @@ Vec2f VEC2::Absolute(const Vec2f& v)
 
 Vec2f VEC2::Project(const Vec2f& v1, const Vec2f& v2)
 {
-	return Vec2f::Dot(v1, v2.Normalize()) * v2.Normalize();
+	return Dot(v1, v2.Normalize()) * v2.Normalize();
 }
 
 float VEC3::Dot(const Vec3f& v1, const Vec3f& v2)
@@ -262,6 +262,16 @@ float VEC3::ShortestAngle(float currentAngle, float targetAngle)
 	while (angleDifference < -Math::Const::PI) angleDifference += 2.0f * Math::Const::PI;
 
 	return angleDifference; // 最短回転角度を返す
+}
+
+float VEC4::Dot(const Vec4f& a, const Vec4f& b)
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
+
+float VEC4::Distance(const Vec4f& a, const Vec4f& b)
+{
+	return (a - b).Length();
 }
 
 Mat4x4 MAT4x4::AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f& translate)

@@ -17,7 +17,7 @@
 
 namespace Tsumi::Math::Func {
 
-namespace FLOAT {
+namespace NUM {
 // ラープ
 float Lerp(const float& start, const float& end, float t);
 // クランプ
@@ -83,6 +83,12 @@ Vec3f TransformWithPerspective(const Vec3f& v, const Mat4x4& m);
 float NormalizeAngle(float angle);
 // 最短回転角度を求める
 float ShortestAngle(float currentAngle, float targetAngle);
+}
+
+
+namespace VEC4 {
+float Dot(const Vec4f& a, const Vec4f& b);
+float Distance(const Vec4f& a, const Vec4f& b);
 }
 
 

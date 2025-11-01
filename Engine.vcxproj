@@ -195,8 +195,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\Component\IComponent.cpp" />
-    <ClCompile Include="Engine\Framework\IActor.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -331,8 +331,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
+    <ClInclude Include="Engine\Framework\Actor\IActor.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
-    <ClInclude Include="Engine\Framework\IActor.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />

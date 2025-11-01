@@ -1,5 +1,8 @@
 #pragma once
+
 #include <type_traits>
+#include <cmath>
+#include <algorithm>
 
 namespace Tsumi::Math {
 
@@ -85,21 +88,9 @@ struct Vec2 {
             return *this;
         }
     }
-    static T Dot(const Vec2& v1, const Vec2& v2) noexcept {
-        return (v1.x * v2.x) + (v1.y * v2.y);
-    }
-    static T Cross(const Vec2& v1, const Vec2& v2) noexcept {
-        // 2Dベクトルの外積はスカラー（z成分相当）を返す
-        return (v1.x * v2.y) - (v1.y * v2.x);
-    }
-    static Vec2 Lerp(const Vec2& a, const Vec2& b, T t) noexcept {
-        return a + (b - a) * t;
-    }
-    T Distance(const Vec2& v) const noexcept {
-        return (*this - v).Length();
-    }
-    static Vec2 Clamp(const Vec2& v, T min, T max) noexcept {
-        return { std::clamp(v.x, min, max), std::clamp(v.y, min, max) };
+    void Clamp(T min, T max) noexcept {
+        std::clamp(x, min, max);
+        std::clamp(y, min, max);
     }
 };
 
@@ -180,7 +171,7 @@ struct Vec3 {
             return *this; // int型ではそのまま
         }
     }
-    static Vec3 Clamp(T min, T max) noexcept {
+    void Clamp(T min, T max) noexcept {
         std::clamp(x, min, max);
         std::clamp(y, min, max);
         std::clamp(z, min, max);
@@ -263,19 +254,11 @@ struct Vec4 {
             return *this;
         }
     }
-    static T Dot(const Vec4& a, const Vec4& b) noexcept {
-        return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-    }
-    static T Distance(const Vec4& a, const Vec4& b) noexcept {
-        return (a - b).Length();
-    }
-    static Vec4 Clamp(const Vec4& v, T min, T max) noexcept {
-        return {
-            std::clamp(v.x, min, max),
-            std::clamp(v.y, min, max),
-            std::clamp(v.z, min, max),
-            std::clamp(v.w, min, max)
-        };
+    void Clamp(T min, T max) noexcept {
+        std::clamp(x, min, max);
+        std::clamp(y, min, max);
+        std::clamp(z, min, max);
+        std::clamp(w, min, max);
     }
 };
 
