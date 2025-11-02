@@ -13,17 +13,17 @@ float NUM::Lerp(const float& start, const float& end, float t)
 
 float NUM::Clamp(const float& value, const float& minValue, const float& maxValue)
 {
-	return max(minValue, min(value, maxValue));
+	return std::clamp(value, minValue, maxValue);
 }
 
 float NUM::APOneAsZeroCloser(float value)
 {
-	return exp(-pow(value, 2.0f));
+	return expf(-powf(value, 2.0f));
 }
 
 float NUM::ToRadians(float degrees)
 {
-	return degrees * (float(M_PI) / 180.0f);
+	return degrees * (Const::PI / 180.0f);
 }
 
 float NUM::ConvertToRange(Vec2f input, Vec2f output, float value)
@@ -52,7 +52,7 @@ Vec2f VEC2::Lerp(const Vec2f& a, const Vec2f& b, float t)
 	return a + (b - a) * t;
 }
 
-float VEC2::Distance(const Vec3f& v1, const Vec3f& v2)
+float VEC2::Distance(const Vec2f& v1, const Vec2f& v2)
 {
 	return (v1 - v2).Length();
 }
@@ -103,16 +103,16 @@ Vec3f VEC3::Lerp(const Vec3f& start, const Vec3f& end, const float t)
 
 Vec3f VEC3::SLerp(const Vec3f& start, const Vec3f& end, const float t)
 {
-	float dot = Dot(start, end);
+	Vec3f v0 = start.Normalize();
+	Vec3f v1 = end.Normalize();
+
+	float dot = VEC3::Dot(v0, v1);
+	dot = std::clamp(dot, -1.0f, 1.0f);
+
 	float theta = std::acos(dot) * t;
-	Vec3f relative = { end.x - start.x * dot, end.y - start.y * dot, end.z - start.z * dot };
-	relative = relative.Normalize();
-	Vec3f result = {
-		start.x * std::cosf(theta) + relative.x * std::sinf(theta),
-		start.y * std::cosf(theta) + relative.y * std::sinf(theta),
-		start.z * std::cosf(theta) + relative.z * std::sinf(theta),
-	};
-	return result;
+	Vec3f relative = (v1 - v0 * dot).Normalize();
+
+	return v0 * std::cos(theta) + relative * std::sin(theta);
 }
 
 Vec3f VEC3::Perpendicular(const Vec3f& v)

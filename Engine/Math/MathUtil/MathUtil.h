@@ -39,7 +39,7 @@ float Cross(const Vec2f& v1, const Vec2f& v2);
 // 線形補間
 Vec2f Lerp(const Vec2f& a, const Vec2f& b, float t);
 // 距離
-float Distance(const Vec3f& v1, const Vec3f& v2);
+float Distance(const Vec2f& v1, const Vec2f& v2);
 // 絶対値
 Vec2f Absolute(const Vec2f& v);
 // 正射影ベクトル
