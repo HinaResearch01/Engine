@@ -143,6 +143,12 @@
     <ClCompile Include="Engine\Framework\Component\TrasnformComponent.cpp">
       <Filter>Engine\Framework\Component</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp">
+      <Filter>Engine\Graphics\Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\Buffer\ConstantBufferAllocator.cpp">
+      <Filter>Engine\Graphics\Buffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -553,6 +559,12 @@
     <ClInclude Include="Engine\Framework\Component\TrasnformComponent.h">
       <Filter>Engine\Framework\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\Frame\FrameResource.h">
+      <Filter>Engine\Graphics\Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\Buffer\ConstantBufferAllocator.h">
+      <Filter>Engine\Graphics\Buffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -815,6 +827,12 @@
     </Filter>
     <Filter Include="Engine\Math\Constants">
       <UniqueIdentifier>{04c2fffd-fda1-4f47-bb4b-6919f337659b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\Frame">
+      <UniqueIdentifier>{8464be83-78ea-4fab-91ef-e990a3decd2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\Buffer">
+      <UniqueIdentifier>{8e682f04-cd45-4b2e-aeb6-0cb8114d26eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
