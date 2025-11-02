@@ -9,6 +9,7 @@
 #include <mutex>
 #include "Math/TMath.h"
 #include "../Component/IComponent.h"
+#include "../Component/TrasnformComponent.h"
 
 namespace Tsumi::Framework {
 
@@ -78,6 +79,7 @@ public:
 		static_assert(std::is_base_of<IComponent, T>::value, "T must derive from Component");
 		auto comp = std::make_shared<T>(std::forward<Args>(args)...);
 		comp->SetOwner(this);
+		comp->Init();
 		std::lock_guard<std::mutex> lock(mutex_);
 		// 型情報でIComponentを保存 (同じコンポーネントは1つまで)
 		comps_[typeid(T)] = comp;
@@ -89,6 +91,7 @@ public:
 		static_assert(std::is_base_of<IComponent, T>::value, "T must derive from Component");
 		std::shared_ptr comp = std::make_shared<T>(std::forward<Args>(args)...);
 		comp->SetOwner(this);
+		comp->Init();
 		std::lock_guard<std::mutex> lock(mutex_);
 		// 型情報でIComponentを保存 (同じコンポーネントは1つまで)
 		rendComp_= comp;
@@ -111,6 +114,8 @@ public:
 		if (it == comps_.end()) return nullptr;
 		return dynamic_cast<T*>(it->second.get());
 	}
+	// トランスフォームコンポーネント
+	std::weak_ptr<TransformComponent> GetTransComp() { return transComp_; }
 
 #pragma endregion 
 
@@ -120,6 +125,9 @@ private:
 
 	// 状態
 	State state_ = IActor::State::None;
+
+	// トランスフォームコンポーネント (Actorが必ず1つもつ)
+	std::shared_ptr<TransformComponent> transComp_;
 
 	// 通常コンポーネント
 	std::unordered_map<std::type_index, std::shared_ptr<IComponent>> comps_;

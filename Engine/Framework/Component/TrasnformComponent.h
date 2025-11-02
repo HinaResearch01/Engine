@@ -57,6 +57,7 @@ public:
 	// ワールド座標
 	const Math::Mat4x4& GetWorldMatrix();
 	// SRT
+	SRT GetSRT() const { return srt_; }
 	void SetSRT(const SRT& srt) { srt_ = srt; }
 	void SetScale(const Math::Vec3f& s) { srt_.scale = s; MarkDirty(); }
 	void SetRotate(const Math::Vec3f& r) { srt_.rotate = r; MarkDirty(); }
