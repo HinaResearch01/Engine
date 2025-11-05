@@ -1,0 +1,1 @@
+#include "StaticResourceManager.h"

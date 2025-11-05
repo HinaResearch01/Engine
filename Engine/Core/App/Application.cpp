@@ -4,9 +4,11 @@
 #include <Utils/Logger/UtilsLog.h>
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
+#include "DX12/Desc/DescriptorAllocator.h"
 #include "Graphic/Shader/ShaderLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
+#include "Graphic/Frame/FrameResource.h"
 
 using namespace Tsumi;
 
@@ -14,9 +16,11 @@ Application::Application()
 {
     window_ = Win32::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
+    descAlloc_ = DX12::DescriptorAllocator::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
+    frameResource_ = Graphic::FrameResource::GetInstance();
 }
 
 Application::~Application()
@@ -30,10 +34,12 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
+    descAlloc_->Init();
     shaders_->Init();
     shaders_->CompileAllShader();
     rootsigs_->Init();
     psos_->Init();
+    frameResource_->Init();
 }
 
 void Application::Run()

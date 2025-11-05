@@ -110,7 +110,6 @@ public:
 	/// </summary>
 	void SetScissor(const Scissor& sc);
 
-
 	/// <summary>
 	/// SwapChainサイズやレンダーターゲットに合わせて、
 	/// 自動的にフルスクリーン範囲を設定する際に使用。

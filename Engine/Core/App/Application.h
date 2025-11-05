@@ -14,11 +14,13 @@ struct Win32Desc;
 }
 namespace DX12 {
 class DX12Manager;
+class DescriptorAllocator;
 }
 namespace Graphic {
 class ShaderLibrary;
 class RootSignatureLibrary;
 class PSOLibrary;
+class FrameResource;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -61,8 +63,10 @@ private:
 
     Win32::Win32Window* window_ = nullptr;
     DX12::DX12Manager* dx12_ = nullptr;
+    DX12::DescriptorAllocator* descAlloc_ = nullptr;
     Graphic::ShaderLibrary* shaders_ = nullptr;
     Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
     Graphic::PSOLibrary* psos_ = nullptr;
+    Graphic::FrameResource* frameResource_ = nullptr;
 };
 }

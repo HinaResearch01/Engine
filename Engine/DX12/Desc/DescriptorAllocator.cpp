@@ -4,13 +4,18 @@
 
 using namespace Tsumi::DX12;
 
-DescriptorAllocator::DescriptorAllocator(DX12Manager* ptr)
-	: dx12Mgr_(ptr)
+DescriptorAllocator::DescriptorAllocator()
 {
+    dx12Mgr_ = DX12Manager::GetInstance();
 }
 
-HRESULT DescriptorAllocator::Init(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool shaderVisible)
+HRESULT DescriptorAllocator::Init()
 {
+    D3D12_DESCRIPTOR_HEAP_TYPE type =
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    UINT numDescriptors = 1024;
+    bool shaderVisible = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
     if (!dx12Mgr_->GetDevice()) return E_POINTER;
     if (numDescriptors == 0) return E_INVALIDARG;
 
@@ -36,9 +41,9 @@ HRESULT DescriptorAllocator::Init(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescr
     return S_OK;
 }
 
-DescriptorAllocation DescriptorAllocator::Allocate(UINT count)
+DescAlloc DescriptorAllocator::Allocate(UINT count)
 {
-    DescriptorAllocation alloc{};
+    DescAlloc alloc{};
     if (!heap_) return alloc;
     if (count == 0 || count > capacity_) return alloc;
 

@@ -834,6 +834,9 @@
     <Filter Include="Engine\Graphics\Buffer">
       <UniqueIdentifier>{8e682f04-cd45-4b2e-aeb6-0cb8114d26eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Resource">
+      <UniqueIdentifier>{c48fc819-fa23-4dc9-998b-ec25f650d7ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\CPUParticle\CPUParticle.hlsli">

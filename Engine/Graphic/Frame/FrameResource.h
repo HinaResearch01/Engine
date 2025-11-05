@@ -5,20 +5,31 @@
 #include <cstdint>
 #include "DX12/Desc/DescriptorAllocator.h"
 
+// 前方宣言
+namespace Tsumi::DX12{
+class DX12Manager;
+class DescriptorAllocator;
+}
+
 namespace Tsumi::Graphic {
 
+/* フレームごとのリソース管理クラス */
 class FrameResource {
+
+private: // シングルトン
+	FrameResource();
+	~FrameResource() = default;
+	FrameResource(const FrameResource&) = delete;
+	FrameResource& operator=(const FrameResource&) = delete;
 
 public:
 	/// <summary>
-	/// コンストラクタ
+	/// インスタンスの取得
 	/// </summary>
-	FrameResource() = default;
-	
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~FrameResource() = default;
+	static FrameResource* GetInstance() {
+		static FrameResource instance;
+		return &instance;
+	}
 
 	/// <summary>
 	/// 初期化処理
@@ -26,9 +37,9 @@ public:
 	bool Init();
 
 	/// <summary>
-	/// 
+	/// フレーム切り替え時に呼ぶ
 	/// </summary>
-	void ResetForRecord();
+	bool ResetForRecord();
 
 #pragma region Accessor
 	ID3D12CommandAllocator* GetCommandAllocator() const { return cmdAllocator_.Get(); }
@@ -42,13 +53,15 @@ public:
 	size_t GetUploadBufferSize() const { return uploadBufferSize_; }
 #pragma endregion
 
-
 private:
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
 	std::unique_ptr<DX12::DescriptorAllocator> descAllocaor_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer_;
 	uint8_t* mappedUploadPtr_ = nullptr;
 	size_t uploadBufferSize_ = 0;
-	 uint64_t fenceValue_ = 0;
+	uint64_t fenceValue_ = 0;
+
+	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	DX12::DescriptorAllocator* descAlloc_ = nullptr;
 };
 }

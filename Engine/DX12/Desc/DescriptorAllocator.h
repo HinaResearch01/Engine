@@ -11,7 +11,7 @@ namespace Tsumi::DX12 {
 // 前方宣言
 class DX12Manager;
 
-struct DescriptorAllocation {
+struct DescAlloc {
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 	UINT startIndex = UINT_MAX;
@@ -22,28 +22,30 @@ struct DescriptorAllocation {
 /* ディスクリプタアロケータ */
 class DescriptorAllocator {
 
-public:
-
-	/// <summary>
-	/// コンストラクタ　
-	/// </summary>
-	DescriptorAllocator() = default;
-	DescriptorAllocator(DX12Manager* ptr);
-
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
+private: // シングルトン
+	DescriptorAllocator();
 	~DescriptorAllocator() = default;
+	DescriptorAllocator(const DescriptorAllocator&) = delete;
+	DescriptorAllocator& operator=(const DescriptorAllocator&) = delete;
+
+public:
+	/// <summary>
+	/// インスタンスの取得
+	/// </summary>
+	static DescriptorAllocator* GetInstance() {
+		static DescriptorAllocator instance;
+		return &instance;
+	}
 
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	HRESULT Init(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool shaderVisible);
+	HRESULT Init();
 
 	/// <summary>
 	/// count個分の割り当て
 	/// </summary>
-	DescriptorAllocation Allocate(UINT count = 1);
+	DescAlloc Allocate(UINT count = 1);
 
 	/// <summary>
 	/// 全割り当てをクリアして再利用可能にする
