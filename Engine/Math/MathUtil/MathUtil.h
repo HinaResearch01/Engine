@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Vecor/Vector.h"
+#include "../Vector/Vector.h"
 #include "../Matrix/Matrix.h"
 #include <iostream>
 #include <cstdint>

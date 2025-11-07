@@ -1,4 +1,4 @@
-#include "TrasnformComponent.h"
+#include "TransformComponent.h"
 
 using namespace Tsumi::Framework;
 using namespace Tsumi::Math;

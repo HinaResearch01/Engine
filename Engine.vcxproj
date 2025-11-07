@@ -196,8 +196,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
-    <ClCompile Include="Engine\Framework\Component\TrasnformComponent.cpp" />
-    <ClCompile Include="Engine\Graphic\Buffer\ConstantBufferAllocator.cpp" />
+    <ClCompile Include="Engine\Framework\Component\TransformComponent.cpp" />
     <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
@@ -205,6 +204,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp" />
+    <ClCompile Include="Engine\Resource\Constant\ConstantBufferAllocator.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
@@ -335,8 +335,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
-    <ClInclude Include="Engine\Framework\Component\TrasnformComponent.h" />
-    <ClInclude Include="Engine\Graphic\Buffer\ConstantBufferAllocator.h" />
+    <ClInclude Include="Engine\Framework\Component\TransformComponent.h" />
     <ClInclude Include="Engine\Graphic\Frame\FrameResource.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
@@ -348,7 +347,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\MathUtil\MathUtil.h" />
     <ClInclude Include="Engine\Math\Matrix\Matrix.h" />
     <ClInclude Include="Engine\Math\TMath.h" />
-    <ClInclude Include="Engine\Math\Vecor\Vector.h" />
+    <ClInclude Include="Engine\Math\Vector\Vector.h" />
+    <ClInclude Include="Engine\Resource\Constant\ConstantBufferAllocator.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />

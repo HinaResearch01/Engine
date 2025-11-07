@@ -1,9 +1,10 @@
 #pragma once
+
 #include <cmath>
 #include <cstring> 
 #include <algorithm>
-#include "../Vecor/Vector.h"
 #include <cassert>
+#include "../Vector/Vector.h"
 
 namespace Tsumi::Math {
 

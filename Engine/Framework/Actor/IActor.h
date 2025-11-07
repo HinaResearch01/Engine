@@ -10,7 +10,7 @@
 #include <optional>
 #include "Math/TMath.h"
 #include "../Component/IComponent.h"
-#include "../Component/TrasnformComponent.h"
+#include "../Component/TransformComponent.h"
 
 namespace Tsumi::Framework {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Matrix/Matrix.h"
+#include "Constants/Constants.h"
 #include "MathUtil/EaseUtil.h"
 #include "MathUtil/MathUtil.h"
-#include "Constants/Constants.h"
-#include "Vecor/Vector.h"
+#include "Matrix/Matrix.h"
+#include "Vector/Vector.h"

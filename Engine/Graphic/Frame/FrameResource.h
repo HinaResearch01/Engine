@@ -43,7 +43,6 @@ public:
 
 #pragma region Accessor
 	ID3D12CommandAllocator* GetCommandAllocator() const { return cmdAllocator_.Get(); }
-	DX12::DescriptorAllocator* GetDescriptorAllocator() { return descAllocaor_.get(); }
 	ID3D12Resource* GetUploadBuffer() const { return uploadBuffer_.Get(); }
 	D3D12_GPU_VIRTUAL_ADDRESS GetUploadBufferGPUAddr() const {
 		return uploadBuffer_ ? uploadBuffer_->GetGPUVirtualAddress() : 0;
@@ -55,7 +54,6 @@ public:
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
-	std::unique_ptr<DX12::DescriptorAllocator> descAllocaor_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer_;
 	uint8_t* mappedUploadPtr_ = nullptr;
 	size_t uploadBufferSize_ = 0;

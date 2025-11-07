@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../Vecor/Vector.h"
-
+#include "../Vector/Vector.h"
 
 namespace Tsumi::Math::Const {
 // 円周率関連

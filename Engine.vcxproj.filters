@@ -140,14 +140,14 @@
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp">
       <Filter>Engine\Framework\Actor</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Component\TrasnformComponent.cpp">
-      <Filter>Engine\Framework\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp">
       <Filter>Engine\Graphics\Frame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\Buffer\ConstantBufferAllocator.cpp">
-      <Filter>Engine\Graphics\Buffer</Filter>
+    <ClCompile Include="Engine\Framework\Component\TransformComponent.cpp">
+      <Filter>Engine\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Resource\Constant\ConstantBufferAllocator.cpp">
+      <Filter>Engine\Resource\Constant</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -550,20 +550,20 @@
     <ClInclude Include="Engine\Math\TMath.h">
       <Filter>Engine\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Math\Vecor\Vector.h">
-      <Filter>Engine\Math\Vector</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Actor\IActor.h">
       <Filter>Engine\Framework\Actor</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Component\TrasnformComponent.h">
-      <Filter>Engine\Framework\Component</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphic\Frame\FrameResource.h">
       <Filter>Engine\Graphics\Frame</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\Buffer\ConstantBufferAllocator.h">
-      <Filter>Engine\Graphics\Buffer</Filter>
+    <ClInclude Include="Engine\Math\Vector\Vector.h">
+      <Filter>Engine\Math\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\TransformComponent.h">
+      <Filter>Engine\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\Constant\ConstantBufferAllocator.h">
+      <Filter>Engine\Resource\Constant</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -833,6 +833,12 @@
     </Filter>
     <Filter Include="Engine\Graphics\Buffer">
       <UniqueIdentifier>{8e682f04-cd45-4b2e-aeb6-0cb8114d26eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource">
+      <UniqueIdentifier>{abe9facf-8313-4999-aabd-a3696a5f456e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\Constant">
+      <UniqueIdentifier>{9f2334ab-d142-47ba-a0ee-d990f7233e51}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

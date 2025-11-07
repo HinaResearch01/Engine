@@ -1,6 +1,4 @@
 #include "MathUtil.h"
-#include "../Vecor/Vector.h"
-#include "../Matrix/Matrix.h"
 #include "../Constants/Constants.h"
 
 using namespace Tsumi::Math;
