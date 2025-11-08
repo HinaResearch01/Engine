@@ -38,8 +38,6 @@ public:
 
     HRESULT ErrorCode() const noexcept { return hr_; }
 
-
-private:
     static std::string WideToUTF8(const std::wstring& wstr)
     {
         if (wstr.empty()) return {};
@@ -97,16 +95,18 @@ inline void ThrowIfFailed(HRESULT hr, const std::string& msg = "")
         _com_error err(hr);
         std::wstring ws(err.ErrorMessage());
 
+        // ← wchar_t を UTF-8 に変換（WideToUTF8 を再利用）
+        std::string utf8Msg = DxException::WideToUTF8(ws);
+
         std::string errMsg = std::format(
             "[DxError] {}\nHRESULT = 0x{:08X}\nMessage = {}",
             msg.empty() ? "DirectX call failed" : msg,
             static_cast<unsigned int>(hr),
-            std::string(ws.begin(), ws.end())
+            utf8Msg // ← ここで安全なUTF-8文字列を使う
         );
 
         throw std::runtime_error(errMsg);
     }
 }
-
 
 }

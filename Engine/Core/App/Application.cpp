@@ -9,6 +9,7 @@
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/Frame/FrameResource.h"
+#include "Resource/Constant/ConstantBufferAllocator.h"
 
 using namespace Tsumi;
 
@@ -21,6 +22,7 @@ Application::Application()
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
     frameResource_ = Graphic::FrameResource::GetInstance();
+    constBuffAlloc_ = Resource::ConstantBufferAllocator::GetInstance();
 }
 
 Application::~Application()
@@ -40,6 +42,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     rootsigs_->Init();
     psos_->Init();
     frameResource_->Init();
+    constBuffAlloc_->Init();
 }
 
 void Application::Run()
@@ -48,38 +51,49 @@ void Application::Run()
         throw std::runtime_error("GameApp is not set. Call SetGameApp() before Run().");
     }
 
-    gameApp_->OnInit(); // 初期化処理
+    // ------------------ 初期化フェーズ ------------------
+    gameApp_->OnInit();
 
     // メインループ
     while (!window_->ShouldClose()) {
-        // メッセージ処理
-        window_->ProcessMessages();
 
-        // フレーム開始処理
-        HRESULT hr = dx12_->StartFrame();
+        // ------------------ ループ開始フェーズ ------------------
+        window_->ProcessMessages(); // OSメッセージ処理
+        HRESULT hr = dx12_->StartFrame(); // コマンドリストやヒープのリセット
         if (FAILED(hr)) {
-            Utils::Info(std::format(L"Application::Run - StartFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+            Utils::Error(std::format(L"[Application] StartFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
             break;
         }
+        constBuffAlloc_->Reset();
 
-        gameApp_->OnUpdate(); // 更新処理
-        gameApp_->OnBKSpriteRender(); // 背景画像
-        gameApp_->OnEntityRender(); // 3Dオブジェクト
-        gameApp_->OnFTSpriteRender(); // 前景画像
+        // ------------------ 更新フェーズ（CPU側ロジック） ------------------
+        gameApp_->OnUpdate(); // シーン・アクター・カメラなどの更新
 
-        // フレーム終了処理
-        hr = dx12_->EndFrame();
-        if (FAILED(hr)) {
-            Utils::Info(std::format(L"Application::Run - EndFrame failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-            break;
+        // ------------------ 描画フェーズ（GPUコマンド記録） ------------------
+        {
+            // 背景スプライト（2D）
+            gameApp_->OnBKSpriteRender();
+
+            // 3Dオブジェクト
+            gameApp_->OnEntityRender();
+
+            // 前景スプライト（UIなど）
+            gameApp_->OnFTSpriteRender();
         }
 
-        Sleep(0);
+        // ------------------ ループ終了フェーズ ------------------
+        hr = dx12_->EndFrame(); // コマンドリストを閉じてExecuteCommandLists() + Present()
+        if (FAILED(hr)) {
+            Utils::Error(std::format(L"[Application] EndFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
+            break;
+        }
+        // CPU側で少しスリープ（100%使用防止）
+        ::Sleep(0);
     }
 
-    dx12_->GetCommandContext()->WaitForGpu();
-
-    gameApp_->OnFinalize(); // 解放処理
+    // ------------------ 終了処理フェーズ ------------------
+    dx12_->GetCommandContext()->WaitForGpu(); // GPU完了待ち
+    gameApp_->OnFinalize();                   // ゲーム固有のリソース破棄
 }
 
 void Application::SetGameApp(std::unique_ptr<GameApp> game)
