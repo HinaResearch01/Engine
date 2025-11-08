@@ -565,6 +565,9 @@
     <ClInclude Include="Engine\Resource\Constant\ConstantBufferAllocator.h">
       <Filter>Engine\Resource\Constant</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h">
+      <Filter>Engine\Utils\DXAlign</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -839,6 +842,9 @@
     </Filter>
     <Filter Include="Engine\Resource\Constant">
       <UniqueIdentifier>{9f2334ab-d142-47ba-a0ee-d990f7233e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\DXAlign">
+      <UniqueIdentifier>{682953a4-c199-44fb-9458-3ce0e319945c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

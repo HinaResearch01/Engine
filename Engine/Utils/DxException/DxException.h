@@ -7,7 +7,7 @@
 #include <codecvt> 
 #include <locale> 
 
-namespace Tsumi::DX12 {
+namespace Tsumi::Utils {
 
 // =============================================================
 //  DxException : DirectX用の例外クラス
@@ -87,5 +87,26 @@ inline void ThrowIfFailed(HRESULT hr, const std::string& funcName, const std::st
 //  マクロ：自動で関数名とファイル・行番号を渡す
 // =============================================================
 #define DX_CALL(x) ThrowIfFailed((x), #x, __FILE__, __LINE__)
+
+/// <summary>
+/// HRESULT チェック用ヘルパー
+/// </summary>
+inline void ThrowIfFailed(HRESULT hr, const std::string& msg = "")
+{
+    if (FAILED(hr)) {
+        _com_error err(hr);
+        std::wstring ws(err.ErrorMessage());
+
+        std::string errMsg = std::format(
+            "[DxError] {}\nHRESULT = 0x{:08X}\nMessage = {}",
+            msg.empty() ? "DirectX call failed" : msg,
+            static_cast<unsigned int>(hr),
+            std::string(ws.begin(), ws.end())
+        );
+
+        throw std::runtime_error(errMsg);
+    }
+}
+
 
 }

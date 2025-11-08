@@ -16,13 +16,13 @@ DX12Manager::DX12Manager()
 void DX12Manager::Init()
 {
 	try {
-		DX_CALL(dx12Device_->Create());
+		Utils::DX_CALL(dx12Device_->Create());
 		if(cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
-		DX_CALL(cmdContext_->Create());
-		DX_CALL(swapChain_->Create());
-		DX_CALL(framebuf_->Init());
+		Utils::DX_CALL(cmdContext_->Create());
+		Utils::DX_CALL(swapChain_->Create());
+		Utils::DX_CALL(framebuf_->Init());
 	}
-	catch (const DxException& e) {
+	catch (const Utils::DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す
 		OutputDebugStringA(e.what());
 

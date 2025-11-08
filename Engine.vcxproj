@@ -352,6 +352,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
+    <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h" />
     <ClInclude Include="Engine\Utils\Logger\UtilsLog.h" />

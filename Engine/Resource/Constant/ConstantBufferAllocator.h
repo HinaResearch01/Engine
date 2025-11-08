@@ -4,6 +4,12 @@
 #include <unordered_map>
 #include <wrl.h>
 #include <d3d12.h>
+#include "Utils/DXAlign/DXAlign.h"
+#include "Utils/DxException/DxException.h"
+
+namespace Tsumi::DX12 {
+class DX12Manager;
+}
 
 namespace Tsumi::Resource {
 
@@ -17,11 +23,10 @@ struct CBAllocation {
 class ConstantBufferAllocator {
 
 private: // シングルトン
-	ConstantBufferAllocator() = default;
+	ConstantBufferAllocator();
 	~ConstantBufferAllocator() = default;
 	ConstantBufferAllocator(const ConstantBufferAllocator&) = delete;
 	const ConstantBufferAllocator& operator=(const ConstantBufferAllocator&) = delete;
-
 
 public:
 	/// <summary>
@@ -48,8 +53,17 @@ public:
 	CBAllocation Allocate(size_t size);
 
 private:
+	static constexpr size_t DefaultSize = 2 * 1024 * 1024; // 2MB（必要なら調整）
 
-private:
+	Microsoft::WRL::ComPtr<ID3D12Resource> uploadHeap_;
+	uint8_t* cpuPtr_ = nullptr;
+	D3D12_GPU_VIRTUAL_ADDRESS gpuBase_ = 0;
+
+	size_t currentOffset_ = 0;
+	size_t totalSize_ = 0;
+
+	DX12::DX12Manager* dx12Mgr_;
+
 };
 
 }
