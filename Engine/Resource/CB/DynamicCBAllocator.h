@@ -15,25 +15,21 @@ namespace Tsumi::Resource {
 /*  フレームごとに再利用可能な動的定数バッファアロケータ */
 class DynamicCBAllocator {
 
-private: // シングルトン
-	DynamicCBAllocator();
-	~DynamicCBAllocator() = default;
-	DynamicCBAllocator(const DynamicCBAllocator&) = delete;
-	const DynamicCBAllocator& operator=(const DynamicCBAllocator&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static DynamicCBAllocator* GetInstance() {
-		static DynamicCBAllocator instance;
-		return &instance;
-	}
+	DynamicCBAllocator();
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~DynamicCBAllocator() = default;
 
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	void Init(uint32_t totalSizePerframe = 3);
+	void Init(uint32_t totalSizePerframe = 1024 * 1024);
 
 	/// <summary>
 	/// フレーム切り替え

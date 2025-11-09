@@ -149,6 +149,9 @@
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
       <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp">
+      <Filter>Engine\Resource\CB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -566,6 +569,9 @@
       <Filter>Engine\Utils\DXAlign</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h">
+      <Filter>Engine\Resource\CB</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\CB\FrameCBManager.h">
       <Filter>Engine\Resource\CB</Filter>
     </ClInclude>
   </ItemGroup>

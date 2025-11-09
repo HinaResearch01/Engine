@@ -9,6 +9,7 @@
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/Frame/FrameResource.h"
+#include "Resource/CB/FrameCBManager.h"
 
 using namespace Tsumi;
 
@@ -21,6 +22,7 @@ Application::Application()
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
     frameResource_ = Graphic::FrameResource::GetInstance();
+    frameCBMgr_ = Resource::FrameCBManager::GetInstance();
 }
 
 Application::~Application()

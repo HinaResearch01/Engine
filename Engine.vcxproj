@@ -205,6 +205,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp" />
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
+    <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
@@ -349,6 +350,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\TMath.h" />
     <ClInclude Include="Engine\Math\Vector\Vector.h" />
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
+    <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
