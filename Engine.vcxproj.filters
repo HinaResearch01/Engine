@@ -146,8 +146,8 @@
     <ClCompile Include="Engine\Framework\Component\TransformComponent.cpp">
       <Filter>Engine\Framework\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Resource\Constant\ConstantBufferAllocator.cpp">
-      <Filter>Engine\Resource\Constant</Filter>
+    <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
+      <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -562,11 +562,11 @@
     <ClInclude Include="Engine\Framework\Component\TransformComponent.h">
       <Filter>Engine\Framework\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Resource\Constant\ConstantBufferAllocator.h">
-      <Filter>Engine\Resource\Constant</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h">
       <Filter>Engine\Utils\DXAlign</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h">
+      <Filter>Engine\Resource\CB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -840,11 +840,11 @@
     <Filter Include="Engine\Resource">
       <UniqueIdentifier>{abe9facf-8313-4999-aabd-a3696a5f456e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Resource\Constant">
-      <UniqueIdentifier>{9f2334ab-d142-47ba-a0ee-d990f7233e51}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Utils\DXAlign">
       <UniqueIdentifier>{682953a4-c199-44fb-9458-3ce0e319945c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\CB">
+      <UniqueIdentifier>{25ba113c-347a-4357-9d40-41dda8ff08b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

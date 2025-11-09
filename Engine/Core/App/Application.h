@@ -24,7 +24,6 @@ class FrameResource;
 }
 
 namespace Resource {
-class ConstantBufferAllocator;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -72,6 +71,5 @@ private:
     Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
     Graphic::PSOLibrary* psos_ = nullptr;
     Graphic::FrameResource* frameResource_ = nullptr;
-    Resource::ConstantBufferAllocator* constBuffAlloc_ = nullptr;
 };
 }

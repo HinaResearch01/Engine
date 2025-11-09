@@ -9,7 +9,6 @@
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/Frame/FrameResource.h"
-#include "Resource/Constant/ConstantBufferAllocator.h"
 
 using namespace Tsumi;
 
@@ -22,7 +21,6 @@ Application::Application()
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
     frameResource_ = Graphic::FrameResource::GetInstance();
-    constBuffAlloc_ = Resource::ConstantBufferAllocator::GetInstance();
 }
 
 Application::~Application()
@@ -42,7 +40,6 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     rootsigs_->Init();
     psos_->Init();
     frameResource_->Init();
-    constBuffAlloc_->Init();
 }
 
 void Application::Run()
@@ -64,7 +61,6 @@ void Application::Run()
             Utils::Error(std::format(L"[Application] StartFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
             break;
         }
-        constBuffAlloc_->Reset();
 
         // ------------------ 更新フェーズ（CPU側ロジック） ------------------
         gameApp_->OnUpdate(); // シーン・アクター・カメラなどの更新
@@ -82,7 +78,7 @@ void Application::Run()
         }
 
         // ------------------ ループ終了フェーズ ------------------
-        hr = dx12_->EndFrame(); // コマンドリストを閉じてExecuteCommandLists() + Present()
+        hr = dx12_->EndFrame();
         if (FAILED(hr)) {
             Utils::Error(std::format(L"[Application] EndFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
             break;
