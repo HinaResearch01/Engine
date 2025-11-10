@@ -6,6 +6,7 @@
 #include <vector>
 #include <cassert>
 
+// 前方宣言
 namespace Tsumi::DX12 {
 class DX12Manager;
 }

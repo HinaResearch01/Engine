@@ -152,6 +152,9 @@
     <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp">
       <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
+      <Filter>Engine\DX12\FrameSync</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -574,6 +577,9 @@
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h">
       <Filter>Engine\Resource\CB</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h">
+      <Filter>Engine\DX12\FrameSync</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -851,6 +857,9 @@
     </Filter>
     <Filter Include="Engine\Resource\CB">
       <UniqueIdentifier>{25ba113c-347a-4357-9d40-41dda8ff08b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\FrameSync">
+      <UniqueIdentifier>{c61abb51-d0b4-4b68-b4d1-841c4bf773d1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

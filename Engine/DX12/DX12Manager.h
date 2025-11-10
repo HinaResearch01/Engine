@@ -13,6 +13,7 @@
 #include "Cmd/CommandContext.h"
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
+#include "FrameSync/FrameSync.h"
 
 namespace Tsumi::DX12 {
 
@@ -99,15 +100,23 @@ public:
 
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
 	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
+	FrameSync* GetFrameSync() const { return frameSync_.get(); }
 
 #pragma endregion
 
+private:
+
+	void PrepareBackBuffer(UINT currIndex, ID3D12Resource* backBuffer);
+	void BindRenderTargets(UINT currIndex);
+	void ClearRenderTargets(UINT currIndex);
+	void TransitionToPresent(UINT currIndex, ID3D12Resource* backBuffer);
 
 private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> cmdContext_;
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuf_;
+	std::unique_ptr<FrameSync> frameSync_;
 
 	// デフォルトはトリプルバッファ
 	UINT bufferCount_ = 3;

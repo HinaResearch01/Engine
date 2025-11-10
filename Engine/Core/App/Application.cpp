@@ -63,20 +63,28 @@ void Application::Run()
             Utils::Error(std::format(L"[Application] StartFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
             break;
         }
+        frameCBMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
 
         // ------------------ 更新フェーズ（CPU側ロジック） ------------------
         gameApp_->OnUpdate(); // シーン・アクター・カメラなどの更新
 
         // ------------------ 描画フェーズ（GPUコマンド記録） ------------------
         {
+            dx12_->PreDraw4PE();
+
             // 背景スプライト（2D）
             gameApp_->OnBKSpriteRender();
 
             // 3Dオブジェクト
             gameApp_->OnEntityRender();
 
+            dx12_->PostDraw4PE();
+            dx12_->PreDraw4SC();
+
             // 前景スプライト（UIなど）
             gameApp_->OnFTSpriteRender();
+
+            dx12_->PostDraw4SC();
         }
 
         // ------------------ ループ終了フェーズ ------------------
