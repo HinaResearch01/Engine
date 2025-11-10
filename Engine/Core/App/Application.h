@@ -66,13 +66,14 @@ private:
     std::unique_ptr<GameApp> gameApp_;
 
     Win32::Win32Window* window_ = nullptr;
+
     DX12::DX12Manager* dx12_ = nullptr;
-    DX12::DescriptorAllocator* descAlloc_ = nullptr;
 
     Graphic::ShaderLibrary* shaders_ = nullptr;
     Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
     Graphic::PSOLibrary* psos_ = nullptr;
     Graphic::FrameResource* frameResource_ = nullptr;
+
     Resource::FrameCBManager* frameCBMgr_ = nullptr;
 };
 }

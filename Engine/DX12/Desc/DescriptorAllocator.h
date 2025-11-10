@@ -22,20 +22,17 @@ struct DescAlloc {
 /* ディスクリプタアロケータ */
 class DescriptorAllocator {
 
-private: // シングルトン
-	DescriptorAllocator();
-	~DescriptorAllocator() = default;
-	DescriptorAllocator(const DescriptorAllocator&) = delete;
-	DescriptorAllocator& operator=(const DescriptorAllocator&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static DescriptorAllocator* GetInstance() {
-		static DescriptorAllocator instance;
-		return &instance;
-	}
+	DescriptorAllocator() = default;
+	DescriptorAllocator(DX12Manager* ptr);
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~DescriptorAllocator() = default;
 
 	/// <summary>
 	/// 初期化処理

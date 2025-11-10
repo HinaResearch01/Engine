@@ -17,7 +17,6 @@ Application::Application()
 {
     window_ = Win32::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
-    descAlloc_ = DX12::DescriptorAllocator::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
@@ -36,7 +35,6 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
-    descAlloc_->Init();
     shaders_->Init();
     shaders_->CompileAllShader();
     rootsigs_->Init();

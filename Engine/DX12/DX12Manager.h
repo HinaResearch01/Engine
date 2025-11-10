@@ -8,12 +8,13 @@
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#include "Utils/DxException/DxException.h"
-#include "Device/DX12Device.h"
 #include "Cmd/CommandContext.h"
+#include "Desc/DescriptorAllocator.h"
+#include "Device/DX12Device.h"
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
 #include "FrameSync/FrameSync.h"
+#include "Utils/DxException/DxException.h"
 
 namespace Tsumi::DX12 {
 
@@ -99,6 +100,7 @@ public:
 	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
 
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
+	DescriptorAllocator* GetDescriptorAllocator() const { return descAlloc_.get(); }
 	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
 	FrameSync* GetFrameSync() const { return frameSync_.get(); }
 
@@ -112,8 +114,9 @@ private:
 	void TransitionToPresent(UINT currIndex, ID3D12Resource* backBuffer);
 
 private:
-	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> cmdContext_;
+	std::unique_ptr<DescriptorAllocator> descAlloc_;
+	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuf_;
 	std::unique_ptr<FrameSync> frameSync_;
