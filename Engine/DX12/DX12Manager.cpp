@@ -9,6 +9,7 @@ DX12Manager::DX12Manager()
 {
 	cmdContext_ = std::make_unique<CommandContext>(this);
 	transientDescAlloc_ = std::make_unique<DescriptorAllocator>(this);
+	persistentDescAlloc_ = std::make_unique<DescriptorAllocator>(this);
 	dx12Device_ = std::make_unique<DX12Device>();
 	swapChain_ = std::make_unique<SwapChain>(this);
 	framebuf_ = std::make_unique<Framebuffer>(this);
@@ -25,6 +26,7 @@ void DX12Manager::Init()
 		Utils::DX_CALL(framebuf_->Init());
 		Utils::DX_CALL(frameSync_->Init());
 		Utils::DX_CALL(transientDescAlloc_->Init());
+		Utils::DX_CALL(persistentDescAlloc_->Init());
 	}
 	catch (const Utils::DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す
@@ -39,7 +41,8 @@ void DX12Manager::Init()
 void DX12Manager::OnFinalize()
 {
 	if (cmdContext_) cmdContext_->WaitForGpu();
-	if(transientDescAlloc_) transientDescAlloc_.reset();
+	if (transientDescAlloc_) transientDescAlloc_.reset();
+	if(persistentDescAlloc_) persistentDescAlloc_.reset();
 }
 
 HRESULT DX12Manager::StartFrame()
