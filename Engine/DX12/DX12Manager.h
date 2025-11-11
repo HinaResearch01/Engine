@@ -100,7 +100,8 @@ public:
 	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
 
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
-	DescriptorAllocator* GetDescriptorAllocator() const { return descAlloc_.get(); }
+	DescriptorAllocator* GetTransientDescAlloc() const { return transientDescAlloc_.get(); }
+	DescriptorAllocator* GetPersistentDescAlloc() const { return persistentDescAlloc_.get(); }
 	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
 	FrameSync* GetFrameSync() const { return frameSync_.get(); }
 
@@ -115,7 +116,8 @@ private:
 
 private:
 	std::unique_ptr<CommandContext> cmdContext_;
-	std::unique_ptr<DescriptorAllocator> descAlloc_;
+	std::unique_ptr<DescriptorAllocator> transientDescAlloc_;
+	std::unique_ptr<DescriptorAllocator> persistentDescAlloc_;
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuf_;

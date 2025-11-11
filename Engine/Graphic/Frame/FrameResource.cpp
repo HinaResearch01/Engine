@@ -10,7 +10,6 @@ using Microsoft::WRL::ComPtr;
 FrameResource::FrameResource() 
 {
     dx12Mgr_ = DX12::DX12Manager::GetInstance();
-    descAlloc_ = DX12::DescriptorAllocator::GetInstance();
 }
 
 bool FrameResource::Init() 
@@ -18,13 +17,11 @@ bool FrameResource::Init()
     size_t uploadBufferSize = static_cast<size_t>(16) * 1024;
 
     if (!dx12Mgr_->GetDevice()) return false;
-    if (!descAlloc_)
-        return false;  // DescriptorAllocator は外部で初期化済みを期待
 
     // コマンドアロケータ生成
     HRESULT hr = dx12Mgr_->GetDevice()->CreateCommandAllocator(
         D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                                IID_PPV_ARGS(&cmdAllocator_));
+        IID_PPV_ARGS(&cmdAllocator_));
     if (FAILED(hr) || !cmdAllocator_) {
         return false;
     }
@@ -81,12 +78,6 @@ bool Tsumi::Graphic::FrameResource::ResetForRecord()
 
     HRESULT hr = dx12Mgr_->GetCmdList()->Reset(cmdAllocator_.Get(), nullptr);
     if (FAILED(hr)) return false;
-
-    // DescriptorAllocator のリセット
-    if (descAlloc_) {
-        
-        descAlloc_->Reset();
-    }
 
     return true;
 }

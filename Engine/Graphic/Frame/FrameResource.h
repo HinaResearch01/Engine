@@ -60,6 +60,5 @@ private:
 	uint64_t fenceValue_ = 0;
 
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
-	DX12::DescriptorAllocator* descAlloc_ = nullptr;
 };
 }

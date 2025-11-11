@@ -8,7 +8,7 @@ using namespace Tsumi::DX12;
 DX12Manager::DX12Manager()
 {
 	cmdContext_ = std::make_unique<CommandContext>(this);
-	descAlloc_ = std::make_unique<DescriptorAllocator>(this);
+	transientDescAlloc_ = std::make_unique<DescriptorAllocator>(this);
 	dx12Device_ = std::make_unique<DX12Device>();
 	swapChain_ = std::make_unique<SwapChain>(this);
 	framebuf_ = std::make_unique<Framebuffer>(this);
@@ -24,7 +24,7 @@ void DX12Manager::Init()
 		Utils::DX_CALL(swapChain_->Create());
 		Utils::DX_CALL(framebuf_->Init());
 		Utils::DX_CALL(frameSync_->Init());
-		Utils::DX_CALL(descAlloc_->Init());
+		Utils::DX_CALL(transientDescAlloc_->Init());
 	}
 	catch (const Utils::DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す
@@ -39,7 +39,7 @@ void DX12Manager::Init()
 void DX12Manager::OnFinalize()
 {
 	if (cmdContext_) cmdContext_->WaitForGpu();
-	if(descAlloc_) descAlloc_.reset();
+	if(transientDescAlloc_) transientDescAlloc_.reset();
 }
 
 HRESULT DX12Manager::StartFrame()
@@ -53,8 +53,8 @@ HRESULT DX12Manager::StartFrame()
 	frameSync_->BeginFrame(); // GPUがこのフレームの使用を終えるまで待機
 	//const uint32_t frameIndex = frameSync_->GetFrameIndex();
 
-	if (descAlloc_) {
-		descAlloc_->Reset();
+	if (transientDescAlloc_) {
+		transientDescAlloc_->Reset();
 	}
 
 	// === コマンドリストの準備 ===
