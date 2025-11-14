@@ -161,6 +161,9 @@
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp">
       <Filter>Engine\Resource\Tex</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Resource\Tex\stb_image.cpp">
+      <Filter>Engine\Resource\Tex</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -592,6 +595,9 @@
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h">
       <Filter>Engine\Resource\Tex</Filter>
     </ClInclude>
+    <ClInclude Include="externals\stb_image\stb_image.h">
+      <Filter>externals\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -875,6 +881,9 @@
     </Filter>
     <Filter Include="Engine\Resource\Tex">
       <UniqueIdentifier>{61bff403-5ac0-4203-b85a-9793ac1a64be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\stb_image">
+      <UniqueIdentifier>{731ad4a0-5cfc-4a33-8cbd-e76d4dc2eeca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
