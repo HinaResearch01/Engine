@@ -208,7 +208,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
     <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp" />
     <ClCompile Include="Engine\Resource\ResourceAPI.cpp" />
-    <ClCompile Include="Engine\Resource\Tex\Texture.cpp" />
+    <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
@@ -356,7 +356,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
     <ClInclude Include="Engine\Resource\ResourceAPI.h" />
-    <ClInclude Include="Engine\Resource\Tex\Texture.h" />
+    <ClInclude Include="Engine\Resource\Tex\TextureManager.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
