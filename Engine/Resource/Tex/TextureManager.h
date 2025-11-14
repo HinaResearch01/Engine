@@ -53,7 +53,7 @@ public:
 	/// <summary>
 	/// 読み込み処理
 	/// </summary>
-	bool Load(const std::string& root, const std::string& name, bool srgb = false);
+	HRESULT Load(const std::string& root, const std::string& name, bool srgb = false);
 
 	/// <summary>
 	/// 既にロード済みか

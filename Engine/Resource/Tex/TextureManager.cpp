@@ -19,11 +19,12 @@ TextureManager::TextureManager()
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
 
-bool TextureManager::Load(const std::string& root, const std::string& name, bool srgb)
+HRESULT TextureManager::Load(const std::string& root, const std::string& name, bool srgb)
 {
-    if (Has(name)) return true;
+    if (Has(name))
+        return S_OK; // 既にロード済み
 
-    // build path
+    // パス構築
     std::string filepath = root;
     if (!filepath.empty() && filepath.back() != '/' && filepath.back() != '\\')
         filepath += '/';
@@ -46,89 +47,98 @@ bool TextureManager::Load(const std::string& root, const std::string& name, bool
                 srgb ? TEX_FILTER_SRGB : TEX_FILTER_DEFAULT,
                 0, mipImg);
 
-            if (SUCCEEDED(hr)) {
-                const TexMetadata& meta = mipImg.GetMetadata();
-                auto* dx = DX12Manager::GetInstance();
-                ID3D12Device* device = dx->GetDevice();
-                CommandContext* cmdCtx = dx->GetCommandContext();
-                DescriptorAllocator* allocator = dx->GetPersistentDescAlloc();
-
-                //--- create texture resource ---
-                D3D12_RESOURCE_DESC desc{};
-                desc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(meta.dimension);
-                desc.Width = static_cast<UINT>(meta.width);
-                desc.Height = static_cast<UINT>(meta.height);
-                desc.DepthOrArraySize = static_cast<UINT16>(meta.arraySize);
-                desc.MipLevels = static_cast<UINT16>(meta.mipLevels);
-                desc.Format = srgb ? MakeSRGB(meta.format) : meta.format;
-                desc.SampleDesc.Count = 1;
-                desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-
-                ComPtr<ID3D12Resource> texture;
-                CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
-                hr = device->CreateCommittedResource(
-                    &heap, D3D12_HEAP_FLAG_NONE, &desc,
-                    D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
-                    IID_PPV_ARGS(&texture));
-                if (FAILED(hr)) {
-                    Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-                    return false;
-                }
-
-                //--- upload mip data ---
-                std::vector<D3D12_SUBRESOURCE_DATA> subres;
-                PrepareUpload(device, mipImg.GetImages(), mipImg.GetImageCount(), meta, subres);
-
-                UINT64 uploadBytes = GetRequiredIntermediateSize(texture.Get(), 0, (UINT)subres.size());
-                ComPtr<ID3D12Resource> upload;
-                CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
-                auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
-                hr = device->CreateCommittedResource(
-                    &upHeap, D3D12_HEAP_FLAG_NONE, &upDesc,
-                    D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-                    IID_PPV_ARGS(&upload));
-                if (FAILED(hr)) {
-                    Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
-                    return false;
-                }
-
-
-                ID3D12GraphicsCommandList* list = cmdCtx->GetList();
-                UpdateSubresources(list, texture.Get(), upload.Get(), 0, 0, (UINT)subres.size(), subres.data());
-                auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-                    texture.Get(),
-                    D3D12_RESOURCE_STATE_COPY_DEST,
-                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-                list->ResourceBarrier(1, &barrier);
-                cmdCtx->ExecuteAndWait();
-
-                //--- create SRV ---
-                auto descAlloc = allocator->Allocate(1);
-                if (!descAlloc.valid()) {
-                    Utils::Log(std::format(L"[TextureManager] Descriptor allocation failed for '{}'\n", ToWString(name)));
-                    return false;
-                }
-                D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
-                srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-                srv.Format = desc.Format;
-                srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                srv.Texture2D.MostDetailedMip = 0;
-                srv.Texture2D.MipLevels = (UINT)meta.mipLevels;
-
-                device->CreateShaderResourceView(texture.Get(), &srv, descAlloc.cpuHandle);
-
-                //--- store ---
-                auto tex = std::make_unique<Texture>();
-                tex->resource = texture;
-                tex->srvDesc = descAlloc;
-                tex->width = (UINT)meta.width;
-                tex->height = (UINT)meta.height;
-                tex->mipLevels = (UINT)meta.mipLevels;
-                tex->format = desc.Format;
-
-                textures_.emplace(name, std::move(tex));
-                return true;
+            if (FAILED(hr)) {
+                Utils::Log(std::format(L"[TextureManager] GenerateMipMaps failed (hr=0x{:08X}) '{}'\n", static_cast<unsigned>(hr), ToWString(name)));
+                return hr;
             }
+
+            const TexMetadata& meta = mipImg.GetMetadata();
+            auto* dx = DX12Manager::GetInstance();
+            ID3D12Device* device = dx->GetDevice();
+            CommandContext* cmdCtx = dx->GetCommandContext();
+            DescriptorAllocator* allocator = dx->GetPersistentDescAlloc();
+
+            //--- create texture resource ---
+            D3D12_RESOURCE_DESC desc{};
+            desc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(meta.dimension);
+            desc.Width = static_cast<UINT>(meta.width);
+            desc.Height = static_cast<UINT>(meta.height);
+            desc.DepthOrArraySize = static_cast<UINT16>(meta.arraySize);
+            desc.MipLevels = static_cast<UINT16>(meta.mipLevels);
+            desc.Format = srgb ? MakeSRGB(meta.format) : meta.format;
+            desc.SampleDesc.Count = 1;
+            desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+
+            ComPtr<ID3D12Resource> texture;
+            CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
+            hr = device->CreateCommittedResource(
+                &heap, D3D12_HEAP_FLAG_NONE, &desc,
+                D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
+                IID_PPV_ARGS(&texture));
+            if (FAILED(hr)) {
+                Utils::Log(std::format(L"[TextureManager] CreateCommittedResource(default) failed (hr=0x{:08X}) '{}'\n", static_cast<unsigned>(hr), ToWString(name)));
+                return hr;
+            }
+
+            //--- upload mip data ---
+            std::vector<D3D12_SUBRESOURCE_DATA> subres;
+            PrepareUpload(device, mipImg.GetImages(), mipImg.GetImageCount(), meta, subres);
+
+            UINT64 uploadBytes = GetRequiredIntermediateSize(texture.Get(), 0, (UINT)subres.size());
+            ComPtr<ID3D12Resource> upload;
+            CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
+            auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
+            hr = device->CreateCommittedResource(
+                &upHeap, D3D12_HEAP_FLAG_NONE, &upDesc,
+                D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+                IID_PPV_ARGS(&upload));
+            if (FAILED(hr)) {
+                Utils::Log(std::format(L"[TextureManager] CreateCommittedResource(upload) failed (hr=0x{:08X}) '{}'\n", static_cast<unsigned>(hr), ToWString(name)));
+                return hr;
+            }
+
+            ID3D12GraphicsCommandList* list = cmdCtx->GetList();
+            UpdateSubresources(list, texture.Get(), upload.Get(), 0, 0, (UINT)subres.size(), subres.data());
+
+            auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+                texture.Get(),
+                D3D12_RESOURCE_STATE_COPY_DEST,
+                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            list->ResourceBarrier(1, &barrier);
+
+            hr = cmdCtx->ExecuteAndWait();
+            if (FAILED(hr)) {
+                Utils::Log(std::format(L"[TextureManager] ExecuteAndWait failed (hr=0x{:08X}) '{}'\n", static_cast<unsigned>(hr), ToWString(name)));
+                return hr;
+            }
+
+            //--- create SRV ---
+            auto descAlloc = allocator->Allocate(1);
+            if (!descAlloc.valid()) {
+                Utils::Log(std::format(L"[TextureManager] Descriptor allocation failed for '{}'\n", ToWString(name)));
+                return E_FAIL;
+            }
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
+            srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            srv.Format = desc.Format;
+            srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            srv.Texture2D.MostDetailedMip = 0;
+            srv.Texture2D.MipLevels = (UINT)meta.mipLevels;
+
+            device->CreateShaderResourceView(texture.Get(), &srv, descAlloc.cpuHandle);
+
+            //--- store ---
+            auto tex = std::make_unique<Texture>();
+            tex->resource = texture;
+            tex->srvDesc = descAlloc;
+            tex->width = (UINT)meta.width;
+            tex->height = (UINT)meta.height;
+            tex->mipLevels = (UINT)meta.mipLevels;
+            tex->format = desc.Format;
+
+            textures_.emplace(name, std::move(tex));
+            return S_OK;
         }
     }
 
@@ -138,14 +148,18 @@ bool TextureManager::Load(const std::string& root, const std::string& name, bool
     int w = 0, h = 0, ch = 0;
     stbi_uc* pixels = stbi_load(filepath.c_str(), &w, &h, &ch, 4);
     if (!pixels) {
-        Utils::Log(std::format(L"[TextureManager] Failed to load '{}'\n", ToWString(filepath)));
-        return false;
+        Utils::Log(std::format(L"[TextureManager] Failed to load (stb_image) '{}'\n", ToWString(filepath)));
+        return E_FAIL;
     }
 
     DXGI_FORMAT fmt = srgb ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
     Texture* t = CreateTextureFromMemory(name, pixels, w, h, fmt, 4);
     stbi_image_free(pixels);
-    return (t != nullptr);
+
+    if (!t)
+        return E_FAIL;
+
+    return S_OK;
 }
 
 Texture* TextureManager::CreateTextureFromMemory(
