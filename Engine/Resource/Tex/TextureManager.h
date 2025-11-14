@@ -12,11 +12,7 @@
 namespace Tsumi::Resource {
 
 struct TexDesc {
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	UINT width = 0;
-	UINT height = 0;
-	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	UINT mipLevels = 1;
+	
 };
 
 /* テクスチャ管理 */
