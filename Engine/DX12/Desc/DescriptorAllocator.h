@@ -37,7 +37,7 @@ public:
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	HRESULT Init();
+	HRESULT Init(UINT numDescriptor = 1024);
 
 	/// <summary>
 	/// count個分の割り当て

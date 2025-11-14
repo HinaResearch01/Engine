@@ -155,6 +155,10 @@
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Resource\Tex\Texture.cpp">
+      <Filter>Engine\Resource\Tex</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Resource\ResourceAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -580,6 +584,12 @@
     <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Resource\Tex\Texture.h">
+      <Filter>Engine\Resource\Tex</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\ResourceAPI.h">
+      <Filter>Engine\Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -860,6 +870,9 @@
     </Filter>
     <Filter Include="Engine\DX12\FrameSync">
       <UniqueIdentifier>{c61abb51-d0b4-4b68-b4d1-841c4bf773d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\Tex">
+      <UniqueIdentifier>{61bff403-5ac0-4203-b85a-9793ac1a64be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

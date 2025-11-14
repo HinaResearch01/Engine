@@ -9,11 +9,11 @@ DescriptorAllocator::DescriptorAllocator(DX12Manager* ptr)
     dx12Mgr_ = ptr;
 }
 
-HRESULT DescriptorAllocator::Init()
+HRESULT DescriptorAllocator::Init(UINT numDescriptor)
 {
     D3D12_DESCRIPTOR_HEAP_TYPE type =
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    UINT numDescriptors = 1024;
+    UINT numDescriptors = numDescriptor;
     bool shaderVisible = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
     if (!dx12Mgr_->GetDevice()) return E_POINTER;
