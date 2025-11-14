@@ -87,6 +87,18 @@ DescAlloc DescriptorAllocator::Allocate(UINT count)
     return alloc;
 }
 
+void DescriptorAllocator::Free(const DescAlloc& handle)
+{
+    if (!handle.valid()) return;
+    std::scoped_lock lock(mutex_);
+
+    // 範囲チェック
+    assert(handle.startIndex + handle.descriptorCount <= used_.size());
+
+    for (UINT i = 0; i < handle.descriptorCount; ++i)
+        used_[handle.startIndex + i] = 0;
+}
+
 void DescriptorAllocator::Reset()
 {
     std::lock_guard lock(mutex_);

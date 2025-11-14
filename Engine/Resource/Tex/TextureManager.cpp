@@ -66,10 +66,14 @@ bool TextureManager::Load(const std::string& root, const std::string& name, bool
 
                 ComPtr<ID3D12Resource> texture;
                 CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
-                device->CreateCommittedResource(
+                hr = device->CreateCommittedResource(
                     &heap, D3D12_HEAP_FLAG_NONE, &desc,
                     D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
                     IID_PPV_ARGS(&texture));
+                if (FAILED(hr)) {
+                    Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+                    return false;
+                }
 
                 //--- upload mip data ---
                 std::vector<D3D12_SUBRESOURCE_DATA> subres;
@@ -79,10 +83,15 @@ bool TextureManager::Load(const std::string& root, const std::string& name, bool
                 ComPtr<ID3D12Resource> upload;
                 CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
                 auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
-                device->CreateCommittedResource(
+                hr = device->CreateCommittedResource(
                     &upHeap, D3D12_HEAP_FLAG_NONE, &upDesc,
                     D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
                     IID_PPV_ARGS(&upload));
+                if (FAILED(hr)) {
+                    Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+                    return false;
+                }
+
 
                 ID3D12GraphicsCommandList* list = cmdCtx->GetList();
                 UpdateSubresources(list, texture.Get(), upload.Get(), 0, 0, (UINT)subres.size(), subres.data());
@@ -95,6 +104,10 @@ bool TextureManager::Load(const std::string& root, const std::string& name, bool
 
                 //--- create SRV ---
                 auto descAlloc = allocator->Allocate(1);
+                if (!descAlloc.valid()) {
+                    Utils::Log(std::format(L"[TextureManager] Descriptor allocation failed for '{}'\n", ToWString(name)));
+                    return false;
+                }
                 D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
                 srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                 srv.Format = desc.Format;
@@ -168,10 +181,14 @@ Texture* TextureManager::CreateTextureFromMemory(
 
 	ComPtr<ID3D12Resource> texture;
 	CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
-	device->CreateCommittedResource(
+    HRESULT hr = device->CreateCommittedResource(
 		&heap, D3D12_HEAP_FLAG_NONE, &desc,
 		D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 		IID_PPV_ARGS(&texture));
+    if (FAILED(hr)) {
+        Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        return nullptr;
+    }
 
 	//--- upload data ---
 	std::vector<D3D12_SUBRESOURCE_DATA> subres;
@@ -181,10 +198,15 @@ Texture* TextureManager::CreateTextureFromMemory(
 	ComPtr<ID3D12Resource> upload;
 	CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
 	auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
-	device->CreateCommittedResource(
+    hr = device->CreateCommittedResource(
 		&upHeap, D3D12_HEAP_FLAG_NONE, &upDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(&upload));
+    if (FAILED(hr)) {
+        Utils::Log(std::format(L"[TextureManager] CreateCommittedResource failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        return nullptr;
+    }
+
 
 	ID3D12GraphicsCommandList* list = cmdCtx->GetList();
 	UpdateSubresources(list, texture.Get(), upload.Get(), 0, 0, (UINT)subres.size(), subres.data());
@@ -220,5 +242,14 @@ Texture* TextureManager::CreateTextureFromMemory(
 
 void TextureManager::UnloadAll()
 {
-	textures_.clear();
+    auto* allocator = dx12Mgr_->GetPersistentDescAlloc();
+    if (allocator) {
+        for (auto& [name, tex] : textures_) {
+            if (tex && tex->srvDesc.valid()) {
+                allocator->Free(tex->srvDesc);
+            }
+        }
+    }
+
+    textures_.clear();
 }

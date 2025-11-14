@@ -45,6 +45,11 @@ public:
 	DescAlloc Allocate(UINT count = 1);
 
 	/// <summary>
+	/// 1つの割り当てを解放
+	/// </summary>
+	void Free(const DescAlloc& handle);
+
+	/// <summary>
 	/// 全割り当てをクリアして再利用可能にする
 	/// </summary>
 	void Reset();
