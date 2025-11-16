@@ -51,9 +51,9 @@ public:
 	}
 
 	/// <summary>
-	/// 読み込み処理
+	/// Mapに追加
 	/// </summary>
-	HRESULT Load(const std::string& root, const std::string& name, bool srgb = false);
+	void Emplace(const std::string& name, Texture* tex);
 
 	/// <summary>
 	/// 既にロード済みか
@@ -74,18 +74,6 @@ public:
 		return (it != textures_.end()) ? it->second.get() : nullptr;
 	}
 #pragma endregion 
-
-private:
-	/// <summary>
-	/// メモリからテクスチャを生成
-	/// </summary>
-	Texture* CreateTextureFromMemory(
-		const std::string& name,
-		const uint8_t* pixels,
-		UINT width, UINT height,
-		DXGI_FORMAT format,
-		UINT bytesPerPixel
-	);
 
 private:
 	std::map<std::string, std::unique_ptr<Texture>> textures_;

@@ -112,5 +112,4 @@ inline HRESULT ResourceAPI::SceneReset()
 	return S_OK;
 }
 
-
 }
