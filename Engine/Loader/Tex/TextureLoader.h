@@ -6,7 +6,6 @@
 // 前方宣言
 struct aiScene;
 struct aiMaterial;
-struct Tsumi::Resource::Texture;
 
 namespace Tsumi::Loader {
 
@@ -29,17 +28,6 @@ public:
 	/// </summary>
 	static HRESULT LoadFromMaterial(const aiMaterial* mat, const std::string& root, bool srgb = false);
 
-private:
-	/// <summary>
-	/// メモリからテクスチャを生成
-	/// </summary>
-	static Tsumi::Resource::Texture* CreateTextureFromMemory(
-		const std::string& name,
-		const uint8_t* pixels,
-		UINT width, UINT height,
-		DXGI_FORMAT format,
-		UINT bytesPerPixel
-	);
 };
 
 }

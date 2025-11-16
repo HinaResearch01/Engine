@@ -53,7 +53,13 @@ public:
 	/// <summary>
 	/// Mapに追加
 	/// </summary>
-	void Emplace(const std::string& name, Texture* tex);
+	void Emplace(const std::string& name, std::unique_ptr<Texture> tex);
+
+	/// <summary>
+	/// GPUにアップロードしてSRVを作る
+	/// </summary>
+	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
+
 
 	/// <summary>
 	/// 既にロード済みか
