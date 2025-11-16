@@ -8,7 +8,9 @@
 #include <cassert>
 #include <map>
 #include <vector>
+#include <mutex>
 #include <stb_image.h>
+#include <DirectXTex.h>
 #include "DX12/Desc/DescriptorAllocator.h"
 
 namespace Tsumi::DX12 {
@@ -60,7 +62,6 @@ public:
 	/// </summary>
 	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
 
-
 	/// <summary>
 	/// 既にロード済みか
 	/// </summary>
@@ -83,6 +84,7 @@ public:
 
 private:
 	std::map<std::string, std::unique_ptr<Texture>> textures_;
+	mutable std::mutex mutex_;
 
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
