@@ -8,6 +8,7 @@
 
 #include "Utils/Logger/UtilsLog.h"
 #include "Utils/Func/UtilFunc.h"
+#include "Loader/Tex/TextureLoader.h"
 #include "Resource/Tex/TextureManager.h"
 
 struct Mdl { std::string name; };
@@ -20,22 +21,12 @@ namespace Tsumi {
 class ResourceAPI {
 
 private: // シングルトン
-	ResourceAPI() {
-		texMgr_ = Resource::TextureManager::GetInstance();
-	}
+	ResourceAPI() = default;
 	~ResourceAPI() = default;
 	ResourceAPI(const ResourceAPI&) = delete;
 	const ResourceAPI& operator=(const ResourceAPI&) = delete;
 
 public:
-	/// <summary>
-	/// インスタンスの取得
-	/// </summary>
-	static ResourceAPI* GetInstance() {
-		static ResourceAPI instance;
-		return &instance;
-	}
-
 	/// <summary>
 	/// 読み込み処理
 	/// </summary>
@@ -52,10 +43,6 @@ public:
 	/// シーンリセット処理
 	/// </summary>
 	HRESULT SceneReset();
-
-private:
-	Resource::TextureManager* texMgr_ = nullptr;
-
 };
 
 
@@ -69,7 +56,7 @@ inline HRESULT ResourceAPI::Load<Mdl>(const std::string& root, const std::string
 template <>
 inline HRESULT ResourceAPI::Load<Tex>(const std::string& root, const std::string& name)
 {
-	HRESULT hr = texMgr_->Load(root, name);
+	HRESULT hr = Loader::TextureLoader::LoadFromFile(root, name);
 
 	if (FAILED(hr)) {
 		Utils::Error(std::format(
@@ -94,7 +81,7 @@ inline bool ResourceAPI::Has<Mdl>(const std::string& name)
 template<>
 inline bool ResourceAPI::Has<Tex>(const std::string& name)
 {
-	bool exists = texMgr_->Has(name);
+	bool exists = Resource::TextureManager::GetInstance()->Has(name);
 
 	if (!exists) {
 		Utils::Error(std::format(
