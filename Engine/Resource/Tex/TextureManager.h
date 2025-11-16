@@ -66,6 +66,7 @@ public:
 	/// 既にロード済みか
 	/// </summary>
 	bool Has(const std::string& name) const {
+		std::lock_guard lock(mutex_);
 		return textures_.find(name) != textures_.end();
 	}
 
