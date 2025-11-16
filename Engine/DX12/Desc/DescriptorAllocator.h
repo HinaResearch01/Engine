@@ -37,7 +37,7 @@ public:
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	HRESULT Init(UINT numDescriptor = 1024);
+	HRESULT Init(UINT numDescriptor = 1024, UINT frameBuckets = 3);
 
 	/// <summary>
 	/// count個分の割り当て
@@ -54,6 +54,17 @@ public:
 	/// </summary>
 	void Reset();
 
+	/// <summary>
+	/// 指定の割り当てを「フレームが完了するまで保留」しておく（GPU 側での使用が終わるまで安全に解放しない）
+	/// frameIndex: フレームインデックス（例: FrameSync::GetFrameIndex()）
+	/// </summary>
+	void DeferFree(const DescAlloc& alloc, UINT frameIndex);
+
+	/// <summary>
+	/// StartFrame のタイミングで呼ぶ。frameIndex のバケットに登録された割当を実際に解放する。
+	/// </summary>
+	void CollectDeferred(UINT frameIndex);
+
 #pragma region Accessor
 	ID3D12DescriptorHeap* GetHeap() const { return heap_.Get(); }
 	UINT GetDescriptorSize() const { return descriptorSize_; }
@@ -69,6 +80,9 @@ private:
 
 	// シンプルな空き管理：bool 配列で確保状態を保持
 	std::vector<uint8_t> used_; // 0: free, 1: used
+
+	// deferred free buckets (frame-based)
+	std::vector<std::vector<DescAlloc>> pendingFrees_;
 
 	// 排他
 	mutable std::mutex mutex_;

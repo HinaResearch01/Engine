@@ -9,15 +9,16 @@ DescriptorAllocator::DescriptorAllocator(DX12Manager* ptr)
     dx12Mgr_ = ptr;
 }
 
-HRESULT DescriptorAllocator::Init(UINT numDescriptor)
+HRESULT DescriptorAllocator::Init(UINT numDescriptor, UINT frameBuckets)
 {
     D3D12_DESCRIPTOR_HEAP_TYPE type =
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     UINT numDescriptors = numDescriptor;
     bool shaderVisible = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-    if (!dx12Mgr_->GetDevice()) return E_POINTER;
+    if (!dx12Mgr_ || !dx12Mgr_->GetDevice()) return E_POINTER;
     if (numDescriptors == 0) return E_INVALIDARG;
+    if (frameBuckets == 0) frameBuckets = 1;
 
     heapType_ = type;
     shaderVisible_ = shaderVisible;
@@ -37,6 +38,10 @@ HRESULT DescriptorAllocator::Init(UINT numDescriptor)
 
     descriptorSize_ = dx12Mgr_->GetDevice()->GetDescriptorHandleIncrementSize(type);
     used_.assign(numDescriptors, 0);
+
+    // initialize pending free buckets (frame-based)
+    pendingFrees_.clear();
+    pendingFrees_.resize(frameBuckets);
 
     return S_OK;
 }
@@ -90,17 +95,49 @@ DescAlloc DescriptorAllocator::Allocate(UINT count)
 void DescriptorAllocator::Free(const DescAlloc& handle)
 {
     if (!handle.valid()) return;
-    std::scoped_lock lock(mutex_);
-
-    // 範囲チェック
-    assert(handle.startIndex + handle.descriptorCount <= used_.size());
-
-    for (UINT i = 0; i < handle.descriptorCount; ++i)
-        used_[handle.startIndex + i] = 0;
+    std::lock_guard lock(mutex_);
+    if (handle.startIndex == UINT_MAX || handle.descriptorCount == 0) return;
+    UINT end = handle.startIndex + handle.descriptorCount;
+    if (end > capacity_) end = capacity_;
+    for (UINT i = handle.startIndex; i < end; ++i) {
+        used_[i] = 0;
+    }
 }
 
 void DescriptorAllocator::Reset()
 {
     std::lock_guard lock(mutex_);
     std::fill(used_.begin(), used_.end(), static_cast<uint8_t>(0));
+    // Also clear pending frees since Reset implies frame-based allocator reuse
+    for (auto& vec : pendingFrees_) vec.clear();
+}
+
+void DescriptorAllocator::DeferFree(const DescAlloc& alloc, UINT frameIndex)
+{
+    if (!alloc.valid()) return;
+    std::lock_guard lock(mutex_);
+    if (pendingFrees_.empty()) {
+        // if no buckets, fallback to immediate free
+        UINT end = alloc.startIndex + alloc.descriptorCount;
+        if (alloc.startIndex != UINT_MAX && end <= capacity_) {
+            for (UINT i = alloc.startIndex; i < end; ++i) used_[i] = 0;
+        }
+        return;
+    }
+    // push to bucket for frameIndex
+    pendingFrees_[frameIndex % pendingFrees_.size()].push_back(alloc);
+}
+
+void DescriptorAllocator::CollectDeferred(UINT frameIndex)
+{
+    std::lock_guard lock(mutex_);
+    if (pendingFrees_.empty()) return;
+    auto& bucket = pendingFrees_[frameIndex % pendingFrees_.size()];
+    for (const DescAlloc& a : bucket) {
+        if (!a.valid() || a.startIndex == UINT_MAX) continue;
+        UINT end = a.startIndex + a.descriptorCount;
+        if (end > capacity_) end = capacity_;
+        for (UINT i = a.startIndex; i < end; ++i) used_[i] = 0;
+    }
+    bucket.clear();
 }

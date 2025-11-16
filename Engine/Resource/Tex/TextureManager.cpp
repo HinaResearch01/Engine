@@ -2,7 +2,6 @@
 #include "DX12/DX12Manager.h"
 #include "DX12/Desc/DescriptorAllocator.h"
 #include "Utils/Logger/UtilsLog.h"
-#include "stb_image.h"
 #include <DirectXTex.h>
 
 using namespace Tsumi::Resource;
@@ -258,9 +257,10 @@ void TextureManager::UnloadAll()
 {
     auto* allocator = dx12Mgr_->GetPersistentDescAlloc();
     if (allocator) {
+        uint32_t frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
         for (auto& [name, tex] : textures_) {
             if (tex && tex->srvDesc.valid()) {
-                allocator->Free(tex->srvDesc);
+                allocator->DeferFree(tex->srvDesc, frameIndex);
             }
         }
     }

@@ -54,8 +54,13 @@ HRESULT DX12Manager::StartFrame()
 
 	// === GPUフレーム同期 ===
 	frameSync_->BeginFrame(); // GPUがこのフレームの使用を終えるまで待機
-	//const uint32_t frameIndex = frameSync_->GetFrameIndex();
 
+	// Collect deferred frees for this frame (safe to reclaim now)
+	uint32_t frameIndex = frameSync_->GetFrameIndex();
+	if (transientDescAlloc_) transientDescAlloc_->CollectDeferred(frameIndex);
+	if (persistentDescAlloc_) persistentDescAlloc_->CollectDeferred(frameIndex);
+
+	// Reset transient allocator only (persistent kept)
 	if (transientDescAlloc_) {
 		transientDescAlloc_->Reset();
 	}

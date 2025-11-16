@@ -207,6 +207,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp" />
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
     <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp" />
+    <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp" />
     <ClCompile Include="Engine\Resource\ResourceAPI.cpp" />
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp" />
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
@@ -356,6 +357,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Vector\Vector.h" />
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
+    <ClInclude Include="Engine\Resource\Mesh\MeshManager.h" />
     <ClInclude Include="Engine\Resource\ResourceAPI.h" />
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />

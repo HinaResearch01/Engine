@@ -164,6 +164,9 @@
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp">
       <Filter>Engine\Resource\Tex</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp">
+      <Filter>Engine\Resource\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -598,6 +601,9 @@
     <ClInclude Include="externals\stb_image\stb_image.h">
       <Filter>externals\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Resource\Mesh\MeshManager.h">
+      <Filter>Engine\Resource\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -864,9 +870,6 @@
     <Filter Include="Engine\Graphics\Frame">
       <UniqueIdentifier>{8464be83-78ea-4fab-91ef-e990a3decd2f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Graphics\Buffer">
-      <UniqueIdentifier>{8e682f04-cd45-4b2e-aeb6-0cb8114d26eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Resource">
       <UniqueIdentifier>{abe9facf-8313-4999-aabd-a3696a5f456e}</UniqueIdentifier>
     </Filter>
@@ -884,6 +887,9 @@
     </Filter>
     <Filter Include="externals\stb_image">
       <UniqueIdentifier>{731ad4a0-5cfc-4a33-8cbd-e76d4dc2eeca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\Mesh">
+      <UniqueIdentifier>{acfe883d-0463-4533-8bcf-26f019bcc21f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
