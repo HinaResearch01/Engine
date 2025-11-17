@@ -3,12 +3,14 @@
 #include "DX12/Desc/DescriptorAllocator.h"
 #include "Utils/Logger/UtilsLog.h"
 #include "Utils/Func/UtilFunc.h"
+#include <filesystem>
 #include <DirectXTex.h>
 
 using namespace Tsumi::Resource;
 using namespace Tsumi::DX12;
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
+namespace fs = std::filesystem;
 
 static DXGI_FORMAT MakeTypelessIfNeeded(DXGI_FORMAT fmt)
 {
@@ -33,21 +35,22 @@ TextureManager::TextureManager()
 
 void TextureManager::Emplace(const std::string& name, std::unique_ptr<Texture> tex)
 {
-    if (!tex) return;
-    std::lock_guard lock(mutex_);
+	if (!tex) return;
+	std::lock_guard lock(mutex_);
 
-    auto it = textures_.find(name);
-    if (it != textures_.end()) {
-        if (dx12Mgr_) {
-            DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
-            if (allocator && it->second && it->second->srvDesc.valid()) {
-                uint32_t frameIndex = 0;
-                if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
-                allocator->DeferFree(it->second->srvDesc, frameIndex);
-            }
-        }
-    }
-    textures_[name] = std::move(tex);
+	// If existing entry present, defer-free its descriptor before replace
+	auto it = textures_.find(name);
+	if (it != textures_.end()) {
+		if (dx12Mgr_) {
+			DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
+			if (allocator && it->second && it->second->srvDesc.valid()) {
+				uint32_t frameIndex = 0;
+				if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
+				allocator->DeferFree(it->second->srvDesc, frameIndex);
+			}
+		}
+	}
+	textures_[name] = std::move(tex);
 }
 
 HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat)
@@ -83,14 +86,14 @@ HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const Di
 		resourceFormat = MakeTypelessIfNeeded(meta.format);
 	}
 
-	// Build resource desc (handle array/cube if needed)
+	// Build resource desc (handle array/cube if needed); ensure MipLevels uses mipCount
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Alignment = 0;
 	desc.Width = meta.width;
 	desc.Height = static_cast<UINT>(meta.height);
 	desc.DepthOrArraySize = static_cast<UINT16>(meta.arraySize);
-	desc.MipLevels = static_cast<UINT16>(meta.mipLevels);
+	desc.MipLevels = static_cast<UINT16>(mipCount); // use safe mipCount
 	desc.Format = resourceFormat;
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;

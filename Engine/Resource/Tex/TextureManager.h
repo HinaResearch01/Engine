@@ -75,7 +75,6 @@ public:
 	/// </summary>
 	void UnloadAll();
 
-
 #pragma region Accessor
 	Texture* GetTexture(const std::string& name) {
 		auto it = textures_.find(name);

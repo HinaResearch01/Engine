@@ -88,21 +88,21 @@ HRESULT MeshManager::Load(const std::string& root, const std::string& name)
 
 		vertexOffset = static_cast<uint32_t>(vertices.size());
 
-		//------------------------------------------------------------
-		// テクスチャ読み込み（最初のメッシュのみ）
-		//------------------------------------------------------------
-		if (mi == 0 && scene->HasMaterials()) {
-			const aiMaterial* material = scene->mMaterials[aimesh->mMaterialIndex];
-			std::string texPath = GetDiffuseTexturePath(material);
+		////------------------------------------------------------------
+		//// テクスチャ読み込み（最初のメッシュのみ）
+		////------------------------------------------------------------
+		//if (mi == 0 && scene->HasMaterials()) {
+		//	const aiMaterial* material = scene->mMaterials[aimesh->mMaterialIndex];
+		//	std::string texPath = GetDiffuseTexturePath(material);
 
-			if (!texPath.empty()) {
-				HRESULT hr = TextureManager::GetInstance()->Load(root, texPath, false);
-				if (FAILED(hr)) {
-					Utils::Log(std::format(L"[MeshManager] テクスチャ読み込み失敗: {}\n",
-						Utils::Utf8ToWstring(texPath)));
-				}
-			}
-		}
+		//	if (!texPath.empty()) {
+		//		HRESULT hr = TextureManager::GetInstance()->Load(root, texPath, false);
+		//		if (FAILED(hr)) {
+		//			Utils::Log(std::format(L"[MeshManager] テクスチャ読み込み失敗: {}\n",
+		//				Utils::Utf8ToWstring(texPath)));
+		//		}
+		//	}
+		//}
 	}
 
 	if (vertices.empty() || indices.empty()) {

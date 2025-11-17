@@ -21,41 +21,50 @@ static std::wstring ToWString(const std::string& s) {
     return std::wstring(s.begin(), s.end());
 }
 
+static std::string MakeKeyFromRoot(const std::string& root, const std::string& name)
+{
+	fs::path p(name);
+	fs::path full;
+	if (p.is_absolute()) {
+		// If absolute, try to make it relative to root if possible; else use absolute as key
+		if (!root.empty()) {
+			try {
+				fs::path rootp = fs::path(root);
+				fs::path rel = fs::relative(p, rootp);
+				if (!rel.empty()) {
+					return (rootp / rel).lexically_normal().string();
+				}
+			}
+			catch (...) {
+				// fallback to absolute
+			}
+		}
+		return p.lexically_normal().string();
+	}
+	else {
+		if (!root.empty()) full = fs::path(root) / p;
+		else full = p;
+		return full.lexically_normal().string();
+	}
+}
+
 HRESULT TextureLoader::LoadFromFile(const std::string& root, const std::string& name, bool srgb)
 {
 	if (name.empty()) return E_INVALIDARG;
 
-	// Normalize path and decide resource key.
-	// Policy: use filename() as the resource key (keeps compatibility with prior code).
-	// If you want full-path keys to avoid collisions, change key derivation here to canonical/absolute.
+	// Build full path and key using root+relative policy
 	fs::path p(name);
 	fs::path fullPath;
-	std::string key;
-
 	if (p.is_absolute()) {
 		fullPath = p;
-		key = p.filename().string();
-	}
-	else if (p.has_parent_path()) {
-		if (!root.empty()) {
-			fullPath = fs::path(root) / p;
-		}
-		else {
-			fullPath = p;
-		}
-		key = p.filename().string();
 	}
 	else {
-		if (!root.empty()) {
-			fullPath = fs::path(root) / p;
-		}
-		else {
-			fullPath = p;
-		}
-		key = p.filename().string();
+		if (!root.empty()) fullPath = fs::path(root) / p;
+		else fullPath = p;
 	}
+	std::string key = MakeKeyFromRoot(root, name);
 
-	// Short-circuit if already present
+	// Short-circuit if already present (check by key)
 	if (TextureManager::GetInstance()->Has(key)) return S_OK;
 
 	// Ensure file exists
