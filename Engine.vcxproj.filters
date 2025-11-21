@@ -167,6 +167,15 @@
     <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp">
       <Filter>Engine\Resource\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Loader\Mesh\MeshLoader.cpp">
+      <Filter>Engine\Loader\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp">
+      <Filter>Engine\Loader\Tex</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Loader\Renderable\RenderableLoader.cpp">
+      <Filter>Engine\Loader\Renderable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -604,6 +613,15 @@
     <ClInclude Include="Engine\Resource\Mesh\MeshManager.h">
       <Filter>Engine\Resource\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Loader\Mesh\MeshLoader.h">
+      <Filter>Engine\Loader\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Loader\Tex\TextureLoader.h">
+      <Filter>Engine\Loader\Tex</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Loader\Renderable\RenderableLoader.h">
+      <Filter>Engine\Loader\Renderable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -890,6 +908,18 @@
     </Filter>
     <Filter Include="Engine\Resource\Mesh">
       <UniqueIdentifier>{acfe883d-0463-4533-8bcf-26f019bcc21f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Loader">
+      <UniqueIdentifier>{10f30ea4-b8c1-4f9e-a844-f7b9fa42a185}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Loader\Mesh">
+      <UniqueIdentifier>{201bddc9-aa5e-4791-b0e9-a2c6a18ada09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Loader\Renderable">
+      <UniqueIdentifier>{353d5c06-e590-4b2b-988b-d5093c5bdee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Loader\Tex">
+      <UniqueIdentifier>{b53744e1-ea03-4509-be81-9a98b3fbe0a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

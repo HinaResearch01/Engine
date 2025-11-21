@@ -58,11 +58,6 @@ public:
 	void Emplace(const std::string& name, std::unique_ptr<Texture> tex);
 
 	/// <summary>
-	/// GPUにアップロードしてSRVを作る
-	/// </summary>
-	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
-
-	/// <summary>
 	/// 既にロード済みか
 	/// </summary>
 	bool Has(const std::string& name) const {
@@ -74,6 +69,11 @@ public:
 	/// 全アンロード（シーンリセット等）
 	/// </summary>
 	void UnloadAll();
+
+	/// <summary>
+	/// GPUリソースとSRVを作成する
+	/// </summary>
+	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
 
 #pragma region Accessor
 	Texture* GetTexture(const std::string& name) {
