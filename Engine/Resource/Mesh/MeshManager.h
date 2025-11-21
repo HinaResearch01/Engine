@@ -55,41 +55,43 @@ public:
 	}
 
 	/// <summary>
-	/// 読み込み処理
+	/// Mapに追加
 	/// </summary>
-	HRESULT Load(const std::string& root, const std::string& name);
+	HRESULT Emplace(const std::string& name, std::unique_ptr<Mesh> mesh, bool overwrite = true);
 
 	/// <summary>
 	/// 既にロード済みか
 	/// </summary>
-	bool Has(const std::string& name) {
+	bool Has(const std::string& name) const {
+		std::lock_guard lock(mutex_);
 		return meshes_.find(name) != meshes_.end();
 	}
 
 	/// <summary>
-	/// 全アンロード（シーンリセット等）
+	/// 全アンロード
 	/// </summary>
 	void UnloadAll();
 
+	/// <summary>
+	/// CPU 側の頂点/インデックス配列から GPU バッファを作成して管理する API
+	/// </summary>
+	HRESULT CreateFromCpuData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+
 #pragma region Accessor
 	Mesh* GetMesh(const std::string& name) {
+		std::lock_guard lock(mutex_);
 		auto it = meshes_.find(name);
 		return (it != meshes_.end()) ? it->second.get() : nullptr;
 	}
 #pragma endregion
 
 private:
-	// helper to create GPU buffers (unchanged behavior)
+	// helper to create GPU buffers
 	HRESULT CreateBufferFromData(const void* data, size_t dataSize, ID3D12Resource** outDefault, ID3D12Resource** outUpload);
-
-	// parse a single aiMesh into outVertices/outIndices (per-mesh)
-	bool ParseAiMesh(const aiMesh* aimesh, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
-
-	// extracts diffuse texture path (if any) from material
-	std::string GetDiffuseTexturePath(const aiMaterial* material);
 
 private:
 	std::map<std::string, std::unique_ptr<Mesh>> meshes_;
+	mutable std::mutex mutex_;
 
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };

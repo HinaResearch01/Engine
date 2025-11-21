@@ -9,6 +9,7 @@
 #include "Utils/Logger/UtilsLog.h"
 #include "Utils/Func/UtilFunc.h"
 #include "Resource/Tex/TextureManager.h"
+#include  "Loader/Tex/TextureLoader.h"
 
 struct Mdl { std::string name; };
 struct Tex { std::string name; };
@@ -55,9 +56,9 @@ inline HRESULT ResourceAPI::Load<Mdl>(const std::string& root, const std::string
 template <>
 inline HRESULT ResourceAPI::Load<Tex>(const std::string& root, const std::string& name)
 {
-	//HRESULT hr = Loader::TextureLoader::LoadFromFile(root, name);
+	HRESULT hr = Loader::TextureLoader::LoadFromFile(root, name);
 
-	/*if (FAILED(hr)) {
+	if (FAILED(hr)) {
 		Utils::Error(std::format(
 			L"[ResourceAPI::Load<Tex>] Failed to load texture '{}{}' (HRESULT = 0x{:08X})",
 			Utils::Utf8ToWstring(root),
@@ -65,7 +66,7 @@ inline HRESULT ResourceAPI::Load<Tex>(const std::string& root, const std::string
 			static_cast<unsigned>(hr)
 		));
 		return hr;
-	}*/
+	}
 
 	return S_OK;
 }
@@ -80,15 +81,15 @@ inline bool ResourceAPI::Has<Mdl>(const std::string& name)
 template<>
 inline bool ResourceAPI::Has<Tex>(const std::string& name)
 {
-	//bool exists = Resource::TextureManager::GetInstance()->Has(name);
+	bool exists = Resource::TextureManager::GetInstance()->Has(name);
 
-	/*if (!exists) {
+	if (!exists) {
 		Utils::Error(std::format(
 			L"[ResourceAPI::Has<Tex>] Texture '{}' not found or not loaded.",
 			Utils::Utf8ToWstring(name)
 		));
 		return false;
-	}*/
+	}
 
 	return true;
 }

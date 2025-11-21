@@ -66,7 +66,7 @@ public:
 	}
 
 	/// <summary>
-	/// 全アンロード（シーンリセット等）
+	/// 全アンロード
 	/// </summary>
 	void UnloadAll();
 
@@ -77,6 +77,7 @@ public:
 
 #pragma region Accessor
 	Texture* GetTexture(const std::string& name) {
+		std::lock_guard lock(mutex_);
 		auto it = textures_.find(name);
 		return (it != textures_.end()) ? it->second.get() : nullptr;
 	}

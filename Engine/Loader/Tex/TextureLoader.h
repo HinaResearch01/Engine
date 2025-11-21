@@ -14,7 +14,7 @@ class TextureLoader {
 
 public:
 	/// <summary>
-	/// テクスチャファイルを読み込む
+	/// テクスチャファイルの読み込み処理
 	/// </summary>
 	static HRESULT LoadFromFile(const std::string& root, const std::string& name, bool srgb = false);
 

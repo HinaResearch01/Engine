@@ -35,37 +35,39 @@ TextureManager::TextureManager()
 
 void TextureManager::Emplace(const std::string& name, std::unique_ptr<Texture> tex)
 {
-    if (!tex) return;
-    std::lock_guard lock(mutex_);
-
-    // If existing entry present, defer-free its descriptor before replace
-    auto it = textures_.find(name);
-    if (it != textures_.end()) {
-        if (dx12Mgr_) {
-            DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
-            if (allocator && it->second && it->second->srvDesc.valid()) {
-                uint32_t frameIndex = 0;
-                if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
-                allocator->DeferFree(it->second->srvDesc, frameIndex);
-            }
-        }
-    }
-    textures_[name] = std::move(tex);
+	if (!tex) return;
+	std::lock_guard lock(mutex_);
+	auto it = textures_.find(name);
+	if (it != textures_.end()) {
+		if (dx12Mgr_) {
+			DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
+			if (allocator && it->second && it->second->srvDesc.valid()) {
+				uint32_t frameIndex = 0;
+				if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
+				allocator->DeferFree(it->second->srvDesc, frameIndex);
+			}
+		}
+	}
+	textures_[name] = std::move(tex);
 }
 
 void TextureManager::UnloadAll()
 {
-    auto* allocator = dx12Mgr_->GetPersistentDescAlloc();
-    if (allocator) {
-        uint32_t frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
-        for (auto& [name, tex] : textures_) {
-            if (tex && tex->srvDesc.valid()) {
-                allocator->DeferFree(tex->srvDesc, frameIndex);
-            }
-        }
-    }
+	auto* allocator = dx12Mgr_->GetPersistentDescAlloc();
+	uint32_t frameIndex = 0;
+	if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
 
-    textures_.clear();
+	{
+		std::lock_guard lock(mutex_);
+		if (allocator) {
+			for (auto& [name, tex] : textures_) {
+				if (tex && tex->srvDesc.valid()) {
+					allocator->DeferFree(tex->srvDesc, frameIndex);
+				}
+			}
+		}
+		textures_.clear();
+	}
 }
 
 HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat)
@@ -108,7 +110,7 @@ HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const Di
 	desc.Width = meta.width;
 	desc.Height = static_cast<UINT>(meta.height);
 	desc.DepthOrArraySize = static_cast<UINT16>(meta.arraySize);
-	desc.MipLevels = static_cast<UINT16>(meta.mipLevels);
+	desc.MipLevels = static_cast<UINT16>(mipCount); // <- use safe mipCount
 	desc.Format = resourceFormat;
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
