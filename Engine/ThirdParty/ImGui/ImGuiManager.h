@@ -57,7 +57,7 @@ private:
 private:
 	Win32::Win32Window* win_ = nullptr;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
-
+	Tsumi::DX12::DescAlloc guiDescAlloc_{};
 };
 
 }
