@@ -11,6 +11,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <mutex>
 #include "Math/TMath.h"
 
 namespace Tsumi::DX12 {

@@ -58,9 +58,11 @@ HRESULT MeshLoader::LoadFromFile(const std::string& root, const std::string& nam
 
 HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& root, const std::string& nameKeyBase)
 {
+	root;
 	if (!scene || !scene->HasMeshes()) return S_OK;
 
 	HRESULT overall = S_OK;
+	overall;
 
 	// We'll consolidate all meshes into a single mesh as previous behavior did.
 	std::vector<Vertex> vertices;
@@ -91,9 +93,9 @@ HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& root,
 	return MeshManager::GetInstance()->CreateFromCpuData(nameKeyBase, vertices, indices);
 }
 
-MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
+bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
 {
-	if (!src || !src->HasboolPositions())
+	if (!src || !src->HasPositions())
 		return false;
 
 	outVertices.resize(src->mNumVertices);
