@@ -5,6 +5,7 @@
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/SwapChain/SwapChain.h"
+#include "Utils/Logger/UtilsLog.h"
 #include <d3d12.h>
 
 using namespace Tsumi::GUI;
@@ -24,6 +25,10 @@ void ImGuiManager::Init()
     StyleSetup();
 
     guiDescAlloc_ = dx12Mgr_->GetPersistentDescAlloc()->Allocate(16);
+    if (!guiDescAlloc_.valid()) {
+        Utils::Info(L"[ImGuiManager] Failed to allocate descriptors for ImGui\n");
+        return;
+    }
 
     // Win32 + DX12 backend 初期化
     ImGui_ImplWin32_Init(win_->GetHWND());
@@ -40,6 +45,17 @@ void ImGuiManager::Init()
 
 void ImGuiManager::Finalize()
 {
+    // Ensure GPU is idle before freeing persistent descriptors
+    if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
+        dx12Mgr_->GetCommandContext()->WaitForGpu();
+    }
+
+    // Free gui descriptors if allocated
+    if (guiDescAlloc_.valid() && dx12Mgr_ && dx12Mgr_->GetPersistentDescAlloc()) {
+        dx12Mgr_->GetPersistentDescAlloc()->Free(guiDescAlloc_);
+        guiDescAlloc_ = Tsumi::DX12::DescAlloc{}; // reset
+    }
+
     ImGui_ImplDX12_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -70,22 +86,16 @@ void ImGuiManager::StyleSetup()
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // enable later if platform support added
 
-    // 日本語フォント読み込み
+    // 日本語フォント読み込み (フォントデータは CreateDeviceObjects でアップロードされます)
     std::string fontPath = "Resources/font/CascadiaCodeNFItalic.ttf";
     io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 17.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 
-    // フォントのテクスチャを強制的に作成
-    unsigned char* pixels = nullptr;
-    int width, height;
-    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-    // Viewport有効化時のスタイル調整
+    // Style tweaks (compact)
     ImGuiStyle& style = ImGui::GetStyle();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         style.WindowRounding = 0.0f;
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
-    // 形状設定 (VS Code風に角を落とす)
     style.WindowRounding = 4.0f;
     style.FrameRounding = 3.0f;
     style.GrabRounding = 3.0f;
