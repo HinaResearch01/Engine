@@ -21,19 +21,21 @@ void ImGuiManager::Init()
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
+    StyleSetup();
+
     guiDescAlloc_ = dx12Mgr_->GetPersistentDescAlloc()->Allocate(16);
 
     // Win32 + DX12 backend 初期化
     ImGui_ImplWin32_Init(win_->GetHWND());
     ImGui_ImplDX12_Init(
         dx12Mgr_->GetDevice(),
-        dx12Mgr_->GetBufferCount(),
+        static_cast<int>(dx12Mgr_->GetBufferCount()),
         dx12Mgr_->GetSwapChain()->GetDesc().Format,
         dx12Mgr_->GetPersistentDescAlloc()->GetHeap(),
         guiDescAlloc_.cpuHandle,
         guiDescAlloc_.gpuHandle);
 
-    StyleSetup();
+    ImGui_ImplDX12_CreateDeviceObjects();
 }
 
 void ImGuiManager::Finalize()
@@ -66,12 +68,11 @@ void ImGuiManager::StyleSetup()
 
     // ★ Docking 有効化
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // マルチウィンドウも使いたければ
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // enable later if platform support added
 
     // 日本語フォント読み込み
     std::string fontPath = "Resources/font/CascadiaCodeNFItalic.ttf";
     io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 17.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-
 
     // フォントのテクスチャを強制的に作成
     unsigned char* pixels = nullptr;
