@@ -22,9 +22,11 @@ class RootSignatureLibrary;
 class PSOLibrary;
 class FrameResource;
 }
-
 namespace Resource {
 class FrameCBManager;
+}
+namespace GUI {
+class ImGuiManager;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -75,5 +77,7 @@ private:
     Graphic::FrameResource* frameResource_ = nullptr;
 
     Resource::FrameCBManager* frameCBMgr_ = nullptr;
+
+    GUI::ImGuiManager* imgui_ = nullptr;
 };
 }
