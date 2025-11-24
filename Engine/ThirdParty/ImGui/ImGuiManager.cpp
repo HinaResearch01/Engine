@@ -7,6 +7,7 @@
 #include "DX12/SwapChain/SwapChain.h"
 #include "Utils/Logger/UtilsLog.h"
 #include <d3d12.h>
+#include <cstdint>
 
 using namespace Tsumi::GUI;
 
@@ -22,25 +23,35 @@ void ImGuiManager::Init()
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
-    StyleSetup();
-
-    guiDescAlloc_ = dx12Mgr_->GetPersistentDescAlloc()->Allocate(16);
-    if (!guiDescAlloc_.valid()) {
-        Utils::Info(L"[ImGuiManager] Failed to allocate descriptors for ImGui\n");
-        ImGui::DestroyContext();
-        return;
+    auto persistentAlloc = dx12Mgr_->GetPersistentDescAlloc();
+    if (!persistentAlloc) {
+        Utils::Info(L"[ImGui] persistent descriptor allocator missing\n");
     }
 
-    // Win32 + DX12 backend 初期化
+    guiDescAlloc_ = persistentAlloc->Allocate(16);
+    if (!guiDescAlloc_.valid()) {
+        Utils::Info(L"[ImGui] Failed to allocate descriptors\n");
+    }
+
+    ID3D12DescriptorHeap* heap = persistentAlloc->GetHeap();
+    if (!heap) {
+        Utils::Info(L"[ImGui] descriptor heap is null\n");
+    }
+
+    DXGI_FORMAT rtvFormat = dx12Mgr_->GetSwapChain()->GetDesc().Format;
+
+    // Backend init
     ImGui_ImplWin32_Init(win_->GetHWND());
     ImGui_ImplDX12_Init(
         dx12Mgr_->GetDevice(),
         static_cast<int>(dx12Mgr_->GetBufferCount()),
-        dx12Mgr_->GetSwapChain()->GetDesc().Format,
-        dx12Mgr_->GetPersistentDescAlloc()->GetHeap(),
+        rtvFormat,
+        heap,
         guiDescAlloc_.cpuHandle,
-        guiDescAlloc_.gpuHandle);
+        guiDescAlloc_.gpuHandle
+    );
 
+    // Create font texture, PSO, etc.
     ImGui_ImplDX12_CreateDeviceObjects();
 }
 
@@ -50,13 +61,12 @@ void ImGuiManager::Finalize()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
+    if (dx12Mgr_ && dx12Mgr_->GetCommandContext())
         dx12Mgr_->GetCommandContext()->WaitForGpu();
-    }
 
     if (guiDescAlloc_.valid() && dx12Mgr_ && dx12Mgr_->GetPersistentDescAlloc()) {
         dx12Mgr_->GetPersistentDescAlloc()->Free(guiDescAlloc_);
-        guiDescAlloc_ = Tsumi::DX12::DescAlloc{};
+        guiDescAlloc_ = {};
     }
 }
 
@@ -70,7 +80,10 @@ void ImGuiManager::BeginFrame()
 void ImGuiManager::Render()
 {
     ImGui::Render();
-    // 描画先のでDescriptorの設定
+
+    // 保険：必要ならデバイスオブジェクトを再作成
+    ImGui_ImplDX12_CreateDeviceObjects();
+
     auto persistentAlloc = dx12Mgr_->GetPersistentDescAlloc();
     ID3D12DescriptorHeap* heap = persistentAlloc ? persistentAlloc->GetHeap() : nullptr;
     ID3D12GraphicsCommandList* cmdList = dx12Mgr_->GetCmdList();
@@ -78,11 +91,10 @@ void ImGuiManager::Render()
     if (heap && cmdList) {
         ID3D12DescriptorHeap* heaps[] = { heap };
         cmdList->SetDescriptorHeaps(1, heaps);
-        // 実際のCommandListのImGuiの描画コマンドを進める
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
     }
     else {
-        Utils::Info(L"[ImGuiManager] Skipping ImGui Render: heap or cmdList is null\n");
+        Utils::Info(L"[ImGui] Render skip : heap or cmdList null\n");
     }
 }
 
