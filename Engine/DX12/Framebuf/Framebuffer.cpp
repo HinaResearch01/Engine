@@ -20,7 +20,7 @@ HRESULT Framebuffer::Init()
 {
     if (!dx12Mgr_) return E_POINTER;
     ID3D12Device* device = dx12Mgr_->GetDevice();
-    IDXGISwapChain4* swapChain = dx12Mgr_->GetSwapChain();
+    IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
     if (!device || !swapChain) {
         Utils::Log(L"Framebuffer::Initialize - device or swapChain is null\n");
         return E_POINTER;
@@ -42,7 +42,7 @@ HRESULT Framebuffer::Resize(UINT width, UINT height)
 {
     // スワップチェーンのリサイズ処理
     if (!dx12Mgr_) return E_POINTER;
-    IDXGISwapChain4* swapChain = dx12Mgr_->GetSwapChain();
+    IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
     if (!swapChain) return E_POINTER;
 
     // 既存リソースを破棄
@@ -138,7 +138,7 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 {
     if (!dx12Mgr_) return E_POINTER;
     ID3D12Device* device = dx12Mgr_->GetDevice();
-    IDXGISwapChain4* swapChain = dx12Mgr_->GetSwapChain();
+    IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
     if (!device || !swapChain) return E_POINTER;
 
     // バッファ枚数を取得（最低2）

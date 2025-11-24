@@ -176,6 +176,9 @@
     <ClCompile Include="Engine\Loader\Renderable\RenderableLoader.cpp">
       <Filter>Engine\Loader\Renderable</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp">
+      <Filter>Engine\ThirdParty\ImGui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -622,6 +625,9 @@
     <ClInclude Include="Engine\Loader\Renderable\RenderableLoader.h">
       <Filter>Engine\Loader\Renderable</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h">
+      <Filter>Engine\ThirdParty\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -920,6 +926,12 @@
     </Filter>
     <Filter Include="Engine\Loader\Tex">
       <UniqueIdentifier>{b53744e1-ea03-4509-be81-9a98b3fbe0a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\ThirdParty">
+      <UniqueIdentifier>{f522ff87-833e-43c6-b7d3-b7436bfb7933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\ThirdParty\ImGui">
+      <UniqueIdentifier>{667f00a3-531b-4ccd-9f21-fdf692634c95}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

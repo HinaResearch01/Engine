@@ -212,6 +212,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp" />
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
     <ClCompile Include="Engine\Test\TestScene.cpp" />
+    <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp">
@@ -366,6 +367,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Test\TestScene.h" />
+    <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h" />

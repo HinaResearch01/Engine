@@ -93,12 +93,13 @@ public:
 	ID3D12GraphicsCommandList* GetCmdList() const { 
 		return cmdContext_ ? cmdContext_->GetList() : nullptr;
 	}
-	IDXGISwapChain4* GetSwapChain() const {
+	IDXGISwapChain4* GetIDXGISwapChain4() const {
 		return swapChain_ ? swapChain_->GetSwapChain() : nullptr;
 	}
 	UINT GetBufferCount() const { return bufferCount_; }
 	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
 
+	SwapChain* GetSwapChain() const { return swapChain_.get(); }
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
 	DescriptorAllocator* GetTransientDescAlloc() const { return transientDescAlloc_.get(); }
 	DescriptorAllocator* GetPersistentDescAlloc() const { return persistentDescAlloc_.get(); }

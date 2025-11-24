@@ -15,6 +15,7 @@ struct Win32Desc {
     HINSTANCE hInstance = nullptr;
 };
 
+/* ウィンドウ管理クラス */
 class Win32Window {
 
 private: // シングルトン
