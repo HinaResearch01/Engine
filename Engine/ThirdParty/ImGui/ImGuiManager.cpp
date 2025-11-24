@@ -27,6 +27,7 @@ void ImGuiManager::Init()
     guiDescAlloc_ = dx12Mgr_->GetPersistentDescAlloc()->Allocate(16);
     if (!guiDescAlloc_.valid()) {
         Utils::Info(L"[ImGuiManager] Failed to allocate descriptors for ImGui\n");
+        ImGui::DestroyContext();
         return;
     }
 
@@ -45,20 +46,18 @@ void ImGuiManager::Init()
 
 void ImGuiManager::Finalize()
 {
-    // Ensure GPU is idle before freeing persistent descriptors
+    ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
     if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
         dx12Mgr_->GetCommandContext()->WaitForGpu();
     }
 
-    // Free gui descriptors if allocated
     if (guiDescAlloc_.valid() && dx12Mgr_ && dx12Mgr_->GetPersistentDescAlloc()) {
         dx12Mgr_->GetPersistentDescAlloc()->Free(guiDescAlloc_);
-        guiDescAlloc_ = Tsumi::DX12::DescAlloc{}; // reset
+        guiDescAlloc_ = Tsumi::DX12::DescAlloc{};
     }
-
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
 }
 
 void ImGuiManager::BeginFrame()
@@ -72,10 +71,19 @@ void ImGuiManager::Render()
 {
     ImGui::Render();
     // 描画先のでDescriptorの設定
-    ID3D12DescriptorHeap* heaps[] = { dx12Mgr_->GetPersistentDescAlloc()->GetHeap() };
-    dx12Mgr_->GetCmdList()->SetDescriptorHeaps(1, heaps);
-    //実際のCommandListのImGuiの描画コマンドを進む
-    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dx12Mgr_->GetCmdList());
+    auto persistentAlloc = dx12Mgr_->GetPersistentDescAlloc();
+    ID3D12DescriptorHeap* heap = persistentAlloc ? persistentAlloc->GetHeap() : nullptr;
+    ID3D12GraphicsCommandList* cmdList = dx12Mgr_->GetCmdList();
+
+    if (heap && cmdList) {
+        ID3D12DescriptorHeap* heaps[] = { heap };
+        cmdList->SetDescriptorHeaps(1, heaps);
+        // 実際のCommandListのImGuiの描画コマンドを進める
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
+    }
+    else {
+        Utils::Info(L"[ImGuiManager] Skipping ImGui Render: heap or cmdList is null\n");
+    }
 }
 
 void ImGuiManager::StyleSetup()
