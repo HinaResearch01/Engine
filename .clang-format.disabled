@@ -1,0 +1,43 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+
+BreakBeforeBraces: Attach  # same_line と一致
+
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: true
+  BeforeElse: true
+
+IndentCaseLabels: true
+IndentCaseBlocks: false
+IndentGotoLabels: false
+IndentPPDirectives: None
+IndentExternBlock: AfterExternBlock
+
+SpaceBeforeParens: ControlStatements
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false
+  AfterFunctionDeclarationName: false
+  AfterIfMacros: false
+  AfterOverloadedOperator: false
+
+SpaceAfterCStyleCast: false
+SpacesInContainerLiterals: true
+SpaceInEmptyBlock: false
+SpacesBeforeTrailingComments: 1
+SpacesInParentheses: false
+SpaceAfterLogicalNot: false
+
+SpaceAroundPointerQualifiers: Default
+PointerAlignment: Left
+
+SortIncludes: false
+IncludeBlocks: Preserve

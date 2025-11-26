@@ -179,6 +179,7 @@
     <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Test\TestActor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -628,6 +629,7 @@
     <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Test\TestActor.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

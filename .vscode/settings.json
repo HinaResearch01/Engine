@@ -1,13 +1,22 @@
 {
-  "terminal.integrated.defaultProfile.windows": "Developer Command Prompt",
-  "terminal.integrated.profiles.windows": {
-    "Developer Command Prompt": {
-      "path": "C:\\Windows\\System32\\cmd.exe",
-      "args": [
-        "/k",
-        "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
-      ],
-      "icon": "terminal-cmd"
-    }
-  },
+   "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-vscode.cpptools",
+
+  // clang-format は使わない
+  "C_Cpp.formatting": "Disabled",
+
+  // ===== Visual Studio と同じインデント挙動にする設定 =====
+  "C_Cpp.vcFormat.indentation": "Block",
+
+  // ブレース位置の VS 互換設定（editorconfig と矛盾しない）
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.namespace": "ignore",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "sameLine",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "ignore",
+  "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "ignore",
+
+  // public:, private:, protected: の次行をインデント
+  "C_Cpp.vcFormat.indent.accessSpecifiers": true,
+
+  // case ラベル行のインデントも VS と同じにする
+  "C_Cpp.vcFormat.indent.caseLabels": true
 }
