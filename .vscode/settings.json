@@ -18,5 +18,15 @@
   "C_Cpp.vcFormat.indent.accessSpecifiers": true,
 
   // case ラベル行のインデントも VS と同じにする
-  "C_Cpp.vcFormat.indent.caseLabels": true
+  "C_Cpp.vcFormat.indent.caseLabels": true,
+
+  "workbench.view.experimental.allowMovingViews": true,
+  "workbench.layoutControl.enabled": true,
+
+  // ===== ChatGPT（Codex）作業が快適になる設定 =====
+  // ChatGPT の回答が折り返しで読めるようにする
+  "editor.wordWrap": "on",
+
+  // VSCode 内で ChatGPT がコードを書き換える時に必要
+  "security.workspace.trust.untrustedFiles": "open"
 }
