@@ -5,6 +5,11 @@
 #include <memory>
 #include <stdexcept>
 #include <cmath>
+#include "imgui.h"
+#include "imgui_impl_dx12.h"
+#include "imgui_impl_win32.h"
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Tsumi::Win32 {
 

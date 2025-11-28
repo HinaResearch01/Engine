@@ -6,7 +6,6 @@
 #include "DX12/DX12Manager.h"
 #include "DX12/SwapChain/SwapChain.h"
 #include "Utils/Logger/UtilsLog.h"
-#include <d3d12.h>
 
 using namespace Tsumi::GUI;
 
@@ -18,85 +17,85 @@ ImGuiManager::ImGuiManager()
 
 void ImGuiManager::Init()
 {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
 
-    StyleSetup();
+	// Docking 有効化
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // マルチウィンドウも使いたければ
 
-    guiDescAlloc_ = dx12Mgr_->GetPersistentDescAlloc()->Allocate(16);
-    if (!guiDescAlloc_.valid()) {
-        Utils::Info(L"[ImGuiManager] Failed to allocate descriptors for ImGui\n");
-        ImGui::DestroyContext();
-        return;
-    }
+	// フォント読み込み
+	std::string fontPath = "Resources/font/komorebi.ttf";
+	io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 17.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 
-    // Win32 + DX12 backend 初期化
-    ImGui_ImplWin32_Init(win_->GetHWND());
-    ImGui_ImplDX12_Init(
-        dx12Mgr_->GetDevice(),
-        static_cast<int>(dx12Mgr_->GetBufferCount()),
-        dx12Mgr_->GetSwapChain()->GetDesc().Format,
-        dx12Mgr_->GetPersistentDescAlloc()->GetHeap(),
-        guiDescAlloc_.cpuHandle,
-        guiDescAlloc_.gpuHandle);
+	// ImGui 用 SRV ヒープの用意
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	desc.NumDescriptors = 1;
+	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	HRESULT hr = dx12Mgr_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&imguiHeap_));
 
-    ImGui_ImplDX12_CreateDeviceObjects();
+	if (FAILED(hr)) {
+		Utils::Log(L"[ImGui] DescriptorHeap 作成失敗\n");
+		return;
+	}
+
+	// Win32 + DX12 backend 初期化
+	ImGui_ImplWin32_Init(win_->GetHWND());
+
+	ImGui_ImplDX12_Init(
+		dx12Mgr_->GetDevice(),
+		static_cast<int>(dx12Mgr_->GetBufferCount()),
+		dx12Mgr_->GetSwapChain()->GetDesc().Format,
+		imguiHeap_.Get(),
+		imguiHeap_->GetCPUDescriptorHandleForHeapStart(),
+		imguiHeap_->GetGPUDescriptorHandleForHeapStart()
+	);
+
+	// フォントのテクスチャを強制的に作成
+	unsigned char* pixels = nullptr;
+	int width, height;
+	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+	// スタイル適用
+	StyleSetup();
 }
 
 void ImGuiManager::Finalize()
 {
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+	if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
+		dx12Mgr_->GetCommandContext()->WaitForGpu();
+	}
 
-    if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
-        dx12Mgr_->GetCommandContext()->WaitForGpu();
-    }
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
-    if (guiDescAlloc_.valid() && dx12Mgr_ && dx12Mgr_->GetPersistentDescAlloc()) {
-        dx12Mgr_->GetPersistentDescAlloc()->Free(guiDescAlloc_);
-        guiDescAlloc_ = Tsumi::DX12::DescAlloc{};
-    }
+	imguiHeap_.Reset();
 }
 
 void ImGuiManager::BeginFrame()
 {
-    ImGui_ImplWin32_NewFrame();
-    ImGui_ImplDX12_NewFrame();
-    ImGui::NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui_ImplDX12_NewFrame();
+	ImGui::NewFrame();
 }
 
 void ImGuiManager::Render()
 {
-    ImGui::Render();
-    // 描画先のでDescriptorの設定
-    auto persistentAlloc = dx12Mgr_->GetPersistentDescAlloc();
-    ID3D12DescriptorHeap* heap = persistentAlloc ? persistentAlloc->GetHeap() : nullptr;
-    ID3D12GraphicsCommandList* cmdList = dx12Mgr_->GetCmdList();
+	ImGui::Render();
+	ID3D12GraphicsCommandList* cmdList = dx12Mgr_->GetCmdList();
 
-    if (heap && cmdList) {
-        ID3D12DescriptorHeap* heaps[] = { heap };
-        cmdList->SetDescriptorHeaps(1, heaps);
-        // 実際のCommandListのImGuiの描画コマンドを進める
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
-    }
-    else {
-        Utils::Info(L"[ImGuiManager] Skipping ImGui Render: heap or cmdList is null\n");
-    }
+	ID3D12DescriptorHeap* heaps[] = { imguiHeap_.Get() };
+	cmdList->SetDescriptorHeaps(1, heaps);
+
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
 }
 
 void ImGuiManager::StyleSetup()
 {
     ImGuiIO& io = ImGui::GetIO();
-
-    // ★ Docking 有効化
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // enable later if platform support added
-
-    // 日本語フォント読み込み (フォントデータは CreateDeviceObjects でアップロードされます)
-    std::string fontPath = "Resources/font/CascadiaCodeNFItalic.ttf";
-    io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 17.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 
     // Style tweaks (compact)
     ImGuiStyle& style = ImGui::GetStyle();

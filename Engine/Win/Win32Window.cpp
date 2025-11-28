@@ -69,12 +69,14 @@ void Win32Window::ProcessMessages()
 LRESULT Win32Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// WM_NCCREATE の時に CreateWindowEx の lpParam (this) をウィンドウのユーザーデータに保存する
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return true;
+
 	if (msg == WM_NCCREATE) {
 		CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
 		void* instancePtr = cs->lpCreateParams;
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instancePtr));
 
-		// インスタンスの hwnd_ を設定しておく（便利）
 		if (instancePtr) {
 			Win32Window* win = reinterpret_cast<Win32Window*>(instancePtr);
 			win->hwnd_ = hwnd;
@@ -86,7 +88,6 @@ LRESULT Win32Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return window->HandleMessage(msg, wParam, lParam);
 	}
 
-	// インスタンスがまだない場合はデフォルト処理
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 

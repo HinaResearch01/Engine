@@ -58,6 +58,9 @@ private:
 	void StyleSetup();
 
 private:
+	// imgui用のヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap_;
+
 	Win32::Win32Window* win_ = nullptr;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Tsumi::DX12::DescAlloc guiDescAlloc_{};

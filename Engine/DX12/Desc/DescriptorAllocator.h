@@ -16,7 +16,7 @@ struct DescAlloc {
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
 	UINT startIndex = UINT_MAX;
 	UINT descriptorCount = 0;
-	bool valid() const { return cpuHandle.ptr != 0 || gpuHandle.ptr != 0; }
+	bool valid() const { return startIndex != UINT_MAX; }
 };
 
 /* ディスクリプタアロケータ */
