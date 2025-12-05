@@ -11,50 +11,44 @@
 #include "Resource/Tex/TextureManager.h"
 #include  "Loader/Tex/TextureLoader.h"
 
-struct Mdl { std::string name; };
-struct Tex { std::string name; };
-struct Snd { std::string name; };
+struct mdl { std::string name; };
+struct tex { std::string name; };
+struct snd { std::string name; };
 
 namespace Tsumi {
 
 /* 各種リソースの共通インターフェース */
 class ResourceAPI {
 
-private: // シングルトン
-	ResourceAPI() = default;
-	~ResourceAPI() = default;
-	ResourceAPI(const ResourceAPI&) = delete;
-	const ResourceAPI& operator=(const ResourceAPI&) = delete;
-
 public:
 	/// <summary>
 	/// 読み込み処理
 	/// </summary>
 	template <typename T>
-	HRESULT Load(const std::string& root, const std::string& name);
+	static HRESULT Load(const std::string& root, const std::string& name);
 
 	/// <summary>
 	/// 所持確認
 	/// </summary>
 	template <typename T>
-	bool Has(const std::string& name);
+	static bool Has(const std::string& name);
 
 	/// <summary>
 	/// シーンリセット処理
 	/// </summary>
-	HRESULT SceneReset();
+	static HRESULT SceneReset();
 };
 
 
 template <>
-inline HRESULT ResourceAPI::Load<Mdl>(const std::string& root, const std::string& name)
+inline HRESULT ResourceAPI::Load<mdl>(const std::string& root, const std::string& name)
 {
 	root,name;
 	return S_OK;
 }
 
 template <>
-inline HRESULT ResourceAPI::Load<Tex>(const std::string& root, const std::string& name)
+inline HRESULT ResourceAPI::Load<tex>(const std::string& root, const std::string& name)
 {
 	HRESULT hr = Loader::TextureLoader::LoadFromFile(root, name);
 
@@ -72,14 +66,14 @@ inline HRESULT ResourceAPI::Load<Tex>(const std::string& root, const std::string
 }
 
 template<>
-inline bool ResourceAPI::Has<Mdl>(const std::string& name)
+inline bool ResourceAPI::Has<mdl>(const std::string& name)
 {
 	name;
 	return false;
 }
 
 template<>
-inline bool ResourceAPI::Has<Tex>(const std::string& name)
+inline bool ResourceAPI::Has<tex>(const std::string& name)
 {
 	bool exists = Resource::TextureManager::GetInstance()->Has(name);
 

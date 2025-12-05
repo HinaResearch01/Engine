@@ -28,6 +28,27 @@ static DXGI_FORMAT MakeTypelessIfNeeded(DXGI_FORMAT fmt)
     }
 }
 
+static DXGI_FORMAT ChooseViewFormat(DXGI_FORMAT resourceFmt, bool srgb)
+{
+	switch (resourceFmt)
+	{
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return srgb ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+				: DXGI_FORMAT_R8G8B8A8_UNORM;
+
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return srgb ? DXGI_FORMAT_B8G8R8A8_UNORM_SRGB
+				: DXGI_FORMAT_B8G8R8A8_UNORM;
+
+		default:
+			return resourceFmt; // その他のフォーマットはそのまま
+	}
+}
+
 TextureManager::TextureManager()
 {
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
@@ -73,14 +94,7 @@ void TextureManager::UnloadAll()
 HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat)
 {
 	// Validate
-	if (mipChain.GetImageCount() == 0) {
-		Utils::Log(std::format(L"[TextureManager] CreateFromScratchImage - empty image '{}'\n", Utils::Utf8ToWstring(name)));
-		return E_INVALIDARG;
-	}
-	if (!dx12Mgr_) {
-		Utils::Log(L"[TextureManager] DX12Manager not available\n");
-		return E_FAIL;
-	}
+	if (mipChain.GetImageCount() == 0) return E_INVALIDARG;
 
 	ID3D12Device* device = dx12Mgr_->GetDevice();
 	CommandContext* cmdCtx = dx12Mgr_->GetCommandContext();
@@ -96,12 +110,16 @@ HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const Di
 	UINT mipCount = static_cast<UINT>(meta.mipLevels);
 	if (mipCount == 0) mipCount = 1;
 
-	// Decide resource format. If viewFormat is SRGB, prefer typeless resource format to allow SRGB SRV.
-	DXGI_FORMAT resourceFormat = meta.format;
-	bool viewIsSRGB = (viewFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) || (viewFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB);
-	if (viewIsSRGB) {
-		resourceFormat = MakeTypelessIfNeeded(meta.format);
-	}
+	// リソースフォーマット（GPUメモリ側）
+	// SRGB の場合 typeless にしておく必要がある
+	bool isSRGB = (viewFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
+		viewFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB);
+	DXGI_FORMAT resourceFormat = isSRGB
+		? MakeTypelessIfNeeded(meta.format)   // typeless にしておく
+		: meta.format;                        // UNORM のまま
+	// SRV に使うフォーマット（View 側）
+	DXGI_FORMAT srvFormat = ChooseViewFormat(meta.format, isSRGB);
+
 
 	// Build resource desc (handle array/cube if needed)
 	D3D12_RESOURCE_DESC desc{};
@@ -167,7 +185,7 @@ HRESULT TextureManager::CreateFromScratchImage(const std::string& name, const Di
 	// Determine view dimension based on metadata
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
 	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srv.Format = viewFormat;
+	srv.Format = srvFormat;
 	if (meta.arraySize > 1) {
 		// texture array
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;

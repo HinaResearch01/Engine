@@ -48,30 +48,22 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 
 void Application::Run()
 {
-    if (!gameApp_) {
-        throw std::runtime_error("GameApp is not set. Call SetGameApp() before Run().");
-    }
-
-    // ------------------ 初期化フェーズ ------------------
-    gameApp_->OnInit();
-
     // メインループ
     while (!window_->ShouldClose()) {
 
         // ------------------ ループ開始フェーズ ------------------
-        window_->ProcessMessages(); // OSメッセージ処理
-        HRESULT hr = dx12_->StartFrame(); // コマンドリストやヒープのリセット
-        if (FAILED(hr)) {
-            Utils::Error(std::format(L"[Application] StartFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
-            break;
-        }
+        window_->ProcessMessages();
+        dx12_->StartFrame();
         frameCBMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
         imgui_->BeginFrame();
 
-        // ------------------ 更新フェーズ（CPU側ロジック） ------------------
-        gameApp_->OnUpdate(); // シーン・アクター・カメラなどの更新
+		// ------------------ 初期化フェーズ ------------------
+		gameApp_->OnInit();
 
-        // ------------------ 描画フェーズ（GPUコマンド記録） ------------------
+        // ------------------ 更新フェーズ ------------------
+        gameApp_->OnUpdate(); 
+
+        // ------------------ 描画フェーズ ------------------
         {
             dx12_->PreDraw4PE();
 
@@ -92,18 +84,14 @@ void Application::Run()
         }
 
         // ------------------ ループ終了フェーズ ------------------
-        hr = dx12_->EndFrame();
-        if (FAILED(hr)) {
-            Utils::Error(std::format(L"[Application] EndFrame failed (hr=0x{:08X})", static_cast<unsigned>(hr)));
-            break;
-        }
+        dx12_->EndFrame();
         // CPU側で少しスリープ（100%使用防止）
         ::Sleep(0);
     }
 
     // ------------------ 終了処理フェーズ ------------------
     dx12_->GetCommandContext()->WaitForGpu(); // GPU完了待ち
-    gameApp_->OnFinalize();                   // ゲーム固有のリソース破棄
+    gameApp_->OnFinalize();
 }
 
 void Application::SetGameApp(std::unique_ptr<GameApp> game)

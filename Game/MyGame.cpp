@@ -4,16 +4,16 @@
 
 using namespace Tsumi;
 
-Tsumi::MyGame::MyGame()
+MyGame::MyGame()
 {
 	sceneMgr_ = std::make_unique<SceneManager>();
+	sceneMgr_->RegisterScene<TestScene>("Test");
+	sceneMgr_->ChangeScene("Test");
 }
 
 void MyGame::OnInit()
 {
-	sceneMgr_->RegisterScene<TestScene>("Test");
-
-	sceneMgr_->ChangeScene("Test");
+	sceneMgr_->Init();
 }
 
 void MyGame::OnUpdate()
@@ -21,17 +21,17 @@ void MyGame::OnUpdate()
 	sceneMgr_->Update();
 }
 
-void Tsumi::MyGame::OnBKSpriteRender()
+void MyGame::OnBKSpriteRender()
 {
 	sceneMgr_->RenderBackSprite();
 }
 
 void MyGame::OnEntityRender()
 {
-	sceneMgr_->RendRenderModeler();
+	sceneMgr_->RendModeler();
 }
 
-void Tsumi::MyGame::OnFTSpriteRender()
+void MyGame::OnFTSpriteRender()
 {
 	sceneMgr_->RenderFrontSprite();
 }
