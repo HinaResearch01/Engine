@@ -8,5 +8,6 @@ public:
     TestActor() = default;
     ~TestActor() = default;
 
+	void Init() override;
 private:
 };
