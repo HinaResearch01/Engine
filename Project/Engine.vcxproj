@@ -323,6 +323,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imguidocking\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imguidocking\imgui_tables.cpp" />
     <ClCompile Include="externals\imguidocking\imgui_widgets.cpp" />
+    <ClCompile Include="Game\GameContext.cpp" />
     <ClCompile Include="Game\MyGame.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -840,6 +841,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\LuaJIT\luajit.h" />
     <ClInclude Include="externals\LuaJIT\lualib.h" />
     <ClInclude Include="externals\stb_image\stb_image.h" />
+    <ClInclude Include="Game\GameContext.h" />
     <ClInclude Include="Game\MyGame.h" />
   </ItemGroup>
   <ItemGroup>

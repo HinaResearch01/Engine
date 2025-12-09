@@ -4,6 +4,7 @@ namespace Tsumi {
 
 // 前方宣言
 class SceneManager;
+class GameContext;
 
 /* シーンの基底クラス */
 class IScene {
@@ -47,11 +48,16 @@ public:
 	/// <summary>
 	/// 親マネージャーのポインタ
 	/// </summary>
-	/// <param name="setManager"></param>
 	void SetManager(SceneManager* setManager) { sceneMgr_ = setManager; }
+
+	/// <summary>
+	/// GameContextのポインタ設定
+	/// </summary>
+	void SetContext(GameContext* setPtr) { gameContext_ = setPtr; }
 
 protected:
 	SceneManager* sceneMgr_ = nullptr;
+	GameContext* gameContext_ = nullptr;
 };
 
 }

@@ -24,11 +24,12 @@ Application::Application()
     frameResource_ = Graphic::FrameResource::GetInstance();
     frameCBMgr_ = Resource::FrameCBManager::GetInstance();
     imgui_ = GUI::ImGuiManager::GetInstance();
+	gameCtx_ = std::make_unique<GameContext>();
 }
 
 Application::~Application()
 {
-	if (gameApp_) gameApp_->OnFinalize();
+	gameCtx_->Finalize();
     imgui_->Finalize();
     window_->OnFinalize();
     dx12_->OnFinalize();
@@ -58,26 +59,27 @@ void Application::Run()
         imgui_->BeginFrame();
 
 		// ------------------ 初期化フェーズ ------------------
-		gameApp_->OnInit();
+		if(gameCtx_->GetPedingInit())
+			gameCtx_->Init();
 
         // ------------------ 更新フェーズ ------------------
-        gameApp_->OnUpdate(); 
+        gameCtx_->Update();
 
         // ------------------ 描画フェーズ ------------------
         {
             dx12_->PreDraw4PE();
 
             // 背景スプライト（2D）
-            gameApp_->OnBKSpriteRender();
+			gameCtx_->BKSpriteRender();
 
             // 3Dオブジェクト
-            gameApp_->OnEntityRender();
+            gameCtx_->ModelRender();
 
             dx12_->PostDraw4PE();
             dx12_->PreDraw4SC();
 
-            // 前景スプライト（UIなど）
-            gameApp_->OnFTSpriteRender();
+            // 前景スプライト
+            gameCtx_->FTSpriteRender();
 
             imgui_->Render(); // GUI
             dx12_->PostDraw4SC();
@@ -91,10 +93,5 @@ void Application::Run()
 
     // ------------------ 終了処理フェーズ ------------------
     dx12_->GetCommandContext()->WaitForGpu(); // GPU完了待ち
-    gameApp_->OnFinalize();
-}
-
-void Application::SetGameApp(std::unique_ptr<GameApp> game)
-{
-	gameApp_ = std::move(game);
+    gameCtx_->Finalize();
 }

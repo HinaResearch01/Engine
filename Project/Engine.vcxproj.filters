@@ -182,6 +182,9 @@
     <ClCompile Include="Engine\Test\TestActor.cpp">
       <Filter>Engine\Test</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GameContext.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -633,6 +636,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Test\TestActor.h">
       <Filter>Engine\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameContext.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

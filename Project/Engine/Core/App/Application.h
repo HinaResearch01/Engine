@@ -3,7 +3,7 @@
 #include <string>
 #include <Windows.h>
 #include <memory>
-#include "../GameApp.h"
+#include "../Game/GameContext.h"
 
 namespace Tsumi {
 
@@ -58,14 +58,8 @@ public:
     /// </summary>
     void Run();
 
-    /// <summary>
-    /// ゲームの設定
-    /// </summary>
-    void SetGameApp(std::unique_ptr<GameApp> game);
-
 private:
     bool isRunning_ = true;
-    std::unique_ptr<GameApp> gameApp_;
 
     Win32::Win32Window* window_ = nullptr;
 
@@ -79,5 +73,7 @@ private:
     Resource::FrameCBManager* frameCBMgr_ = nullptr;
 
     GUI::ImGuiManager* imgui_ = nullptr;
+
+	std::unique_ptr<GameContext> gameCtx_;
 };
 }

@@ -3,46 +3,63 @@
 #include "../Engine/Core/GameApp.h"
 #include "../Engine/Scene/SceneManager.h"
 
+#include "Test/TestScene.h"
+
 namespace  Tsumi {
 
 /* ゲーム全体のルート制御 */
 class MyGame : public GameApp {
 
 public:
-    /// <summary>
-    /// コンストラクタ
-    /// </summary>
-    MyGame();
-
-    /// <summary>
-    /// デストラクタ
-    /// </summary>
+	MyGame();
     ~MyGame() = default;
 
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
     void OnInit() override;
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
     void OnUpdate() override;
-
-    /// <summary>
-    /// 描画処理
-    /// </summary>
     void OnBKSpriteRender() override;
     void OnEntityRender() override;
     void OnFTSpriteRender() override;
-    
-    /// <summary>
-    /// 解放処理
-    /// </summary>
     void OnFinalize() override;
 
 private:
     std::unique_ptr<SceneManager> sceneMgr_;
 };
+
+
+inline MyGame::MyGame()
+{
+	sceneMgr_ = std::make_unique<SceneManager>();
+	sceneMgr_->RegisterScene<TestScene>("Test");
+	sceneMgr_->ChangeScene("Test");
+}
+
+inline void MyGame::OnInit()
+{
+	sceneMgr_->Init();
+}
+
+inline void MyGame::OnUpdate()
+{
+	sceneMgr_->Update();
+}
+
+inline void MyGame::OnBKSpriteRender()
+{
+	sceneMgr_->RenderBackSprite();
+}
+
+inline void MyGame::OnEntityRender()
+{
+	sceneMgr_->RendModeler();
+}
+
+inline void MyGame::OnFTSpriteRender()
+{
+	sceneMgr_->RenderFrontSprite();
+}
+
+inline void MyGame::OnFinalize()
+{
+}
 
 }
