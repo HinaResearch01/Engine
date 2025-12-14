@@ -16,7 +16,7 @@ HRESULT MeshLoader::LoadFromFile(const std::string& root, const std::string& nam
 {
 	if (name.empty()) return E_INVALIDARG;
 
-	// Build path and key
+	// ファイルパスと管理用キーを構築
 	fs::path p(name);
 	fs::path fullPath;
 	if (p.is_absolute()) fullPath = p;
@@ -25,38 +25,49 @@ HRESULT MeshLoader::LoadFromFile(const std::string& root, const std::string& nam
 
 	std::string key = MakeKeyFromRoot(root, name);
 
-	// if already exists, skip
+	// すでにロード済みであれば何もしない
 	if (MeshManager::GetInstance()->Has(key)) return S_OK;
 
+	// ファイル存在チェック
 	if (!fs::exists(fullPath)) {
-		Utils::Log(std::format(L"[MeshLoader] File not found: {}\n", Utils::Utf8ToWstring(fullPath.string())));
+		Utils::Log(std::format(
+			L"[MeshLoader] ファイルが見つかりません: {}\n",
+			Utils::Utf8ToWstring(fullPath.string())));
 		return E_FAIL;
 	}
 
 	Assimp::Importer importer;
 	const unsigned int flags =
-		aiProcess_Triangulate |
-		aiProcess_FlipUVs |
-		aiProcess_FlipWindingOrder |
-		aiProcess_CalcTangentSpace;
+		aiProcess_Triangulate |          // 面を三角形化
+		aiProcess_FlipUVs |               // UV の上下反転
+		aiProcess_FlipWindingOrder |      // 面の向きを反転
+		aiProcess_CalcTangentSpace;       // 接線・従法線計算
 
+	// Assimp でモデル読み込み
 	const aiScene* scene = importer.ReadFile(fullPath.string().c_str(), flags);
 	if (!scene) {
-		Utils::Log(std::format(L"[MeshLoader] Assimp failed: {}\n", Utils::Utf8ToWstring(importer.GetErrorString())));
+		Utils::Log(std::format(
+			L"[MeshLoader] Assimp 読み込み失敗: {}\n",
+			Utils::Utf8ToWstring(importer.GetErrorString())));
 		return E_FAIL;
 	}
 
-	// Let LoadFromScene handle parsing and delegation
+	// シーンの解析とメッシュ生成は LoadFromScene に委譲
 	HRESULT hr = LoadFromScene(scene, root, key);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"[MeshLoader] Failed to create mesh from file '{}'\n", Utils::Utf8ToWstring(fullPath.string())));
+		Utils::Log(std::format(
+			L"[MeshLoader] メッシュ生成に失敗 '{}'\n",
+			Utils::Utf8ToWstring(fullPath.string())));
 		return hr;
 	}
 
 	return S_OK;
 }
 
-HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& root, const std::string& nameKeyBase)
+HRESULT MeshLoader::LoadFromScene(
+	const aiScene* scene,
+	const std::string& root,
+	const std::string& nameKeyBase)
 {
 	root;
 	if (!scene || !scene->HasMeshes()) return S_OK;
@@ -64,7 +75,7 @@ HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& root,
 	HRESULT overall = S_OK;
 	overall;
 
-	// We'll consolidate all meshes into a single mesh as previous behavior did.
+	// 従来挙動と同様、すべての aiMesh を 1 つのメッシュに統合する
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	vertices.reserve(10240);
@@ -76,24 +87,36 @@ HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& root,
 		std::vector<Vertex> localV;
 		std::vector<uint32_t> localI;
 
+		// Assimp メッシュを自前形式に変換
 		if (!ParseAiMesh(aimesh, localV, localI))
 			continue;
 
+		// 頂点追加
 		vertices.insert(vertices.end(), localV.begin(), localV.end());
-		for (uint32_t idx : localI) indices.push_back(vertexOffset + idx);
+
+		// インデックスは頂点オフセットを加算
+		for (uint32_t idx : localI)
+			indices.push_back(vertexOffset + idx);
+
 		vertexOffset = static_cast<uint32_t>(vertices.size());
 	}
 
 	if (vertices.empty() || indices.empty()) {
-		Utils::Log(std::format(L"[MeshLoader] No valid geometry in scene '{}'\n", Utils::Utf8ToWstring(nameKeyBase)));
+		Utils::Log(std::format(
+			L"[MeshLoader] 有効なジオメトリが存在しません '{}'\n",
+			Utils::Utf8ToWstring(nameKeyBase)));
 		return E_FAIL;
 	}
 
-	// Delegate GPU upload & storage to MeshManager
-	return MeshManager::GetInstance()->CreateFromCpuData(nameKeyBase, vertices, indices);
+	// GPU へのアップロードと管理は MeshManager に委譲
+	return MeshManager::GetInstance()->CreateFromCpuData(
+		nameKeyBase, vertices, indices);
 }
 
-bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
+bool MeshLoader::ParseAiMesh(
+	const aiMesh* src,
+	std::vector<Vertex>& outVertices,
+	std::vector<uint32_t>& outIndices)
 {
 	if (!src || !src->HasPositions())
 		return false;
@@ -101,16 +124,17 @@ bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices
 	outVertices.resize(src->mNumVertices);
 	outIndices.clear();
 
-	// --- vertex conversion (RH -> LH) ---
+	// --- 頂点変換（右手系 → 左手系） ---
 	for (unsigned int i = 0; i < src->mNumVertices; ++i) {
 		const aiVector3D& p = src->mVertices[i];
 		Vertex v{};
 
-		v.pos.x = -p.x;   // X flip RH->LH
+		// 位置（X 反転で RH → LH）
+		v.pos.x = -p.x;
 		v.pos.y = p.y;
 		v.pos.z = p.z;
 
-		// normal
+		// 法線
 		if (src->HasNormals()) {
 			const aiVector3D& n = src->mNormals[i];
 			v.normal.x = -n.x;
@@ -118,7 +142,7 @@ bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices
 			v.normal.z = n.z;
 		}
 
-		// uv
+		// UV
 		if (src->HasTextureCoords(0)) {
 			const aiVector3D& uv = src->mTextureCoords[0][i];
 			v.uv.x = uv.x;
@@ -128,7 +152,7 @@ bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices
 		outVertices[i] = v;
 	}
 
-	// indices (triangles)
+	// インデックス（必ず三角形）
 	for (unsigned int f = 0; f < src->mNumFaces; ++f) {
 		const aiFace& face = src->mFaces[f];
 		if (face.mNumIndices == 3) {
@@ -141,10 +165,14 @@ bool MeshLoader::ParseAiMesh(const aiMesh* src, std::vector<Vertex>& outVertices
 	return !(outVertices.empty() || outIndices.empty());
 }
 
-std::string MeshLoader::MakeKeyFromRoot(const std::string& root, const std::string& name)
+std::string MeshLoader::MakeKeyFromRoot(
+	const std::string& root,
+	const std::string& name)
 {
 	fs::path p(name);
 	fs::path full;
+
+	// 絶対パスの場合
 	if (p.is_absolute()) {
 		if (!root.empty()) {
 			try {
@@ -154,10 +182,13 @@ std::string MeshLoader::MakeKeyFromRoot(const std::string& root, const std::stri
 					return (rootp / rel).lexically_normal().string();
 				}
 			}
-			catch (...) { /* fallback to absolute */ }
+			catch (...) {
+				// 相対化失敗時は絶対パスをそのまま使用
+			}
 		}
 		return p.lexically_normal().string();
 	}
+	// 相対パスの場合
 	else {
 		if (!root.empty()) full = fs::path(root) / p;
 		else full = p;
