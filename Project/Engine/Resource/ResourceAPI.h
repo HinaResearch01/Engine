@@ -37,8 +37,8 @@ public:
 	/// <summary>
 	/// 所持確認
 	/// </summary>
-	template <typename T>
-	static bool Has(const std::string& name);
+//	template <typename T>
+//	static bool Has(const std::string& name);
 
 	/// <summary>
 	/// シーンリセット処理
@@ -68,20 +68,6 @@ inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::st
 	}
 
 	return S_OK;
-}
-
-template<>
-inline bool ResourceAPI::Has<mdl>(const std::string& name)
-{
-	name;
-	return false;
-}
-
-template<>
-inline bool ResourceAPI::Has<tex>(const std::string& name)
-{
-	name;
-	return false;
 }
 
 inline HRESULT ResourceAPI::SceneReset()
