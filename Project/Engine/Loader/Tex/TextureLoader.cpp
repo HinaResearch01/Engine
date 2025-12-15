@@ -48,173 +48,199 @@ static std::string MakeKeyFromRoot(const std::string& root, const std::string& n
 	}
 }
 
-HRESULT TextureLoader::LoadFromFile(const std::string& root, const std::string& name, bool srgb)
+HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb = false)
 {
-	if (name.empty()) return E_INVALIDARG;
+	auto* texMgr = TextureManager::GetInstance();
 
-	// root + 相対パスのルールでフルパスとキーを構築
-	fs::path p(name);
-	fs::path fullPath;
-	if (p.is_absolute()) {
-		fullPath = p;
-	}
-	else {
-		if (!root.empty()) fullPath = fs::path(root) / p;
-		else fullPath = p;
-	}
-	std::string key = MakeKeyFromRoot(root, name);
+	std::string key = MakeKeyFromRoot("", fullPath);
 
-	// すでに読み込まれていれば何もしない
-	if (TextureManager::GetInstance()->Has(key)) return S_OK;
+	if (texMgr->HasAlias(alias))
+		return S_OK;
 
-	// ファイル存在チェック
-	if (!fs::exists(fullPath)) {
-		Utils::Log(std::format(
-			L"[TextureLoader] テクスチャファイルが見つかりません: {}\n",
-			Utils::Utf8ToWstring(fullPath.string())));
-		return E_FAIL;
-	}
+	// 1. CPUデコード
+	ScratchImage mipChain;
+	HRESULT hr{};
+	//HRESULT hr = DecodeToScratchImage(fullPath, srgb, mipChain);
+	if (FAILED(hr)) return hr;
 
-	const std::string filepath = fullPath.string();
+	// 2. Manager に登録依頼
+	hr = texMgr->RegisterTexture(
+		key,
+		mipChain,
+		srgb ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+		: DXGI_FORMAT_R8G8B8A8_UNORM);
+	if (FAILED(hr)) return hr;
 
-	// まず DirectXTex（WIC）での読み込みを試みる
+	// 3. alias 登録
+	texMgr->RegisterAlias(alias, key);
+
+	return S_OK;
+}
+
+HRESULT Tsumi::Loader::TextureLoader::ExtractSceneTextures(const aiScene* scene, const std::string& fullPath, const std::string& alias, bool srgb)
+{
+	if (!scene || !scene->HasMaterials())
+		return S_OK;
+
+	// モデルファイルのあるディレクトリ
+	std::filesystem::path modelPath(fullPath);
+	std::filesystem::path baseDir = modelPath.parent_path();
+
+	HRESULT overall = S_OK;
+
+	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
 	{
-		ScratchImage srcImg, mipImg;
-		std::wstring wpath = fullPath.wstring();
-		auto flags = srgb ? WIC_FLAGS_FORCE_SRGB : WIC_FLAGS_NONE;
+		const aiMaterial* mat = scene->mMaterials[i];
+		if (!mat) continue;
 
-		HRESULT hr = LoadFromWICFile(wpath.c_str(), flags, nullptr, srcImg);
-		if (SUCCEEDED(hr)) {
+		// Diffuse テクスチャ（まずは1枚目だけ）
+		aiString texPath;
+		if (mat->GetTextureCount(aiTextureType_DIFFUSE) == 0)
+			continue;
+
+		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) != AI_SUCCESS)
+			continue;
+
+		// Assimp が返すのは「相対パス」であることが多い
+		std::filesystem::path rel(texPath.C_Str());
+		std::filesystem::path fullTexPath = baseDir / rel;
+
+		// alias を組み立てる（衝突回避）
+		std::string alias =
+			alias + "_diffuse_" + std::to_string(i);
+
+		// 普通の Load に委譲
+		HRESULT hr = Load(
+			fullTexPath.string(),
+			alias,
+			srgb);
+
+		if (FAILED(hr))
+			overall = hr;
+	}
+
+	return overall;
+}
+
+HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, DirectX::ScratchImage& outImage)
+{
+	using namespace DirectX;
+
+	outImage.Release();
+
+	std::filesystem::path p(path);
+	if (!std::filesystem::exists(p))
+		return E_FAIL;
+
+	const std::wstring wpath = p.wstring();
+	const auto ext = p.extension().wstring();
+
+	HRESULT hr = S_OK;
+
+	// =========================
+	// DDS（ミップ・圧縮そのまま）
+	// =========================
+	if (_wcsicmp(ext.c_str(), L".dds") == 0)
+	{
+		hr = LoadFromDDSFile(
+			wpath.c_str(),
+			DDS_FLAGS_NONE,
+			nullptr,
+			outImage);
+
+		return hr;
+	}
+
+	// =========================
+	// WIC（png / jpg / bmp 等）
+	// =========================
+	{
+		ScratchImage src;
+		WIC_FLAGS flags = srgb
+			? WIC_FLAGS_FORCE_SRGB
+			: WIC_FLAGS_NONE;
+
+		hr = LoadFromWICFile(
+			wpath.c_str(),
+			flags,
+			nullptr,
+			src);
+
+		if (SUCCEEDED(hr))
+		{
 			// ミップマップ生成
 			hr = GenerateMipMaps(
-				srcImg.GetImages(),
-				srcImg.GetImageCount(),
-				srcImg.GetMetadata(),
+				src.GetImages(),
+				src.GetImageCount(),
+				src.GetMetadata(),
 				srgb ? TEX_FILTER_SRGB : TEX_FILTER_DEFAULT,
 				0,
-				mipImg);
+				outImage);
 
-			if (FAILED(hr)) {
-				Utils::Log(std::format(
-					L"[TextureLoader] GenerateMipMaps 失敗 (hr=0x{:08X}) '{}'\n",
-					static_cast<unsigned>(hr),
-					Utils::Utf8ToWstring(key)));
-				// stb_image にフォールバック
+			// ミップ生成失敗時は元画像だけ使う
+			if (FAILED(hr))
+			{
+				outImage = std::move(src);
+				return S_OK;
 			}
-			else {
-				// sRGB / Linear に応じたビュー用フォーマット
-				auto viewFmt = srgb
-					? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
-					: DXGI_FORMAT_R8G8B8A8_UNORM;
 
-				return TextureManager::GetInstance()->CreateFromScratchImage(
-					key, mipImg, viewFmt);
-			}
+			return S_OK;
 		}
 	}
 
-	// stb_image を使ったフォールバック読み込み
+	// =========================
+	// stb_image フォールバック
+	// =========================
 	int w = 0, h = 0, ch = 0;
-	stbi_uc* pixels = stbi_load(filepath.c_str(), &w, &h, &ch, 4);
-	if (!pixels) {
-		Utils::Log(std::format(
-			L"[TextureLoader] 読み込み失敗 (stb_image) '{}'\n",
-			Utils::Utf8ToWstring(filepath)));
-		return E_FAIL;
-	}
+	stbi_uc* pixels = stbi_load(
+		path.c_str(),
+		&w,
+		&h,
+		&ch,
+		4);
 
-	// 生ピクセルから ScratchImage を作成し、ミップマップを生成
+	if (!pixels)
+		return E_FAIL;
+
 	ScratchImage src;
-	HRESULT hr = src.Initialize2D(
+	hr = src.Initialize2D(
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		static_cast<size_t>(w),
 		static_cast<size_t>(h),
 		1,
 		1);
 
-	if (FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		stbi_image_free(pixels);
-		Utils::Log(std::format(
-			L"[TextureLoader] ScratchImage Initialize2D 失敗 (hr=0x{:08X}) '{}'\n",
-			static_cast<unsigned>(hr),
-			Utils::Utf8ToWstring(key)));
-		return E_FAIL;
+		return hr;
 	}
 
-	// ピクセルデータを ScratchImage にコピー
 	const Image* img = src.GetImage(0, 0, 0);
-	for (UINT y = 0; y < static_cast<UINT>(h); ++y) {
+	for (int y = 0; y < h; ++y)
+	{
 		memcpy(
 			reinterpret_cast<uint8_t*>(img->pixels) + y * img->rowPitch,
 			pixels + y * (w * 4),
 			w * 4);
 	}
 
-	ScratchImage mipChain;
+	stbi_image_free(pixels);
+
+	// ミップ生成
 	hr = GenerateMipMaps(
 		src.GetImages(),
 		src.GetImageCount(),
 		src.GetMetadata(),
 		TEX_FILTER_DEFAULT,
 		0,
-		mipChain);
+		outImage);
 
-	stbi_image_free(pixels);
-
-	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"[TextureLoader] GenerateMipMaps (stb 経路) 失敗 (hr=0x{:08X}) '{}'\n",
-			static_cast<unsigned>(hr),
-			Utils::Utf8ToWstring(key)));
-
-		// フォールバック：ミップなしで単一レベルを使用
-		hr = mipChain.InitializeFromImage(*img);
-		if (FAILED(hr)) {
-			Utils::Log(std::format(
-				L"[TextureLoader] InitializeFromImage フォールバック失敗 (hr=0x{:08X}) '{}'\n",
-				static_cast<unsigned>(hr),
-				Utils::Utf8ToWstring(key)));
-			return E_FAIL;
-		}
+	if (FAILED(hr))
+	{
+		outImage = std::move(src);
+		return S_OK;
 	}
 
-	auto viewFmt = srgb
-		? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
-		: DXGI_FORMAT_R8G8B8A8_UNORM;
-
-	return TextureManager::GetInstance()->CreateFromScratchImage(
-		key, mipChain, viewFmt);
-}
-
-HRESULT TextureLoader::LoadFromScene(const aiScene* scene, const std::string& root, bool srgb)
-{
-	if (!scene || !scene->HasMaterials()) return S_OK;
-
-	HRESULT overall = S_OK;
-	for (unsigned int mi = 0; mi < scene->mNumMaterials; ++mi) {
-		const aiMaterial* mat = scene->mMaterials[mi];
-		if (!mat) continue;
-
-		// マテリアルからテクスチャをロード
-		HRESULT hr = LoadFromMaterial(mat, root, srgb);
-		if (FAILED(hr)) overall = hr;
-	}
-	return overall;
-}
-
-HRESULT TextureLoader::LoadFromMaterial(const aiMaterial* mat, const std::string& root, bool srgb)
-{
-	if (!mat) return E_FAIL;
-
-	aiString texPath;
-
-	// Diffuse テクスチャがなければ何もしない
-	if (mat->GetTextureCount(aiTextureType_DIFFUSE) == 0) return S_OK;
-
-	// 最初の Diffuse テクスチャパスを取得
-	if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) != AI_SUCCESS)
-		return E_FAIL;
-
-	std::string rel = texPath.C_Str();
-	return LoadFromFile(root, rel, srgb);
+	return S_OK;
 }

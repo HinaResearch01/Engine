@@ -33,6 +33,15 @@ struct Texture {
 	UINT mipLevels = 1;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 };
+struct TextureAsset {
+	std::string key;               // 実キー（正規化パス）
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;    // GPUリソース
+	Tsumi::DX12::DescAlloc srvDesc;
+	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	uint32_t width = 0;
+	uint32_t height = 0;
+	UINT mipLevels = 1;
+};
 
 /* テクスチャ管理 */
 class TextureManager {
@@ -53,16 +62,21 @@ public:
 	}
 
 	/// <summary>
-	/// Mapに追加
+	/// 登録
 	/// </summary>
-	void Emplace(const std::string& name, std::unique_ptr<Texture> tex);
+	HRESULT  RegisterTexture(const std::string& key, const ScratchImage& image, DXGI_FORMAT viewFormat);
+	void RegisterAlias(const std::string& alias, const std::string& key);
 
 	/// <summary>
 	/// 既にロード済みか
 	/// </summary>
-	bool Has(const std::string& name) const {
+	bool HasKey(const std::string& key) const {
 		std::lock_guard lock(mutex_);
-		return textures_.find(name) != textures_.end();
+		return textures_.find(key) != textures_.end();
+	}
+	bool HasAlias(const std::string& alias) const {
+		std::lock_guard lock(mutex_);
+		return aliasToKey_.find(alias) != aliasToKey_.end();
 	}
 
 	/// <summary>
@@ -70,23 +84,27 @@ public:
 	/// </summary>
 	void UnloadAll();
 
-	/// <summary>
-	/// GPUリソースとSRVを作成する
-	/// </summary>
-	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
-
 #pragma region Accessor
-	Texture* GetTexture(const std::string& name) {
+	TextureAsset* GetTexture(const std::string& key) {
 		std::lock_guard lock(mutex_);
-		auto it = textures_.find(name);
+		auto it = textures_.find(key);
 		return (it != textures_.end()) ? it->second.get() : nullptr;
 	}
 #pragma endregion 
 
 private:
-	std::map<std::string, std::unique_ptr<Texture>> textures_;
-	mutable std::mutex mutex_;
+	/// <summary>
+	/// GPUリソースとSRVを作成する
+	/// </summary>
+	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
 
+private:
+	// 実体：key（正規化パス） → Texture
+	std::unordered_map<std::string, std::unique_ptr<TextureAsset>> textures_;
+	// 論理名：alias → key
+	std::unordered_map<std::string, std::string> aliasToKey_;
+
+	mutable std::mutex mutex_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 

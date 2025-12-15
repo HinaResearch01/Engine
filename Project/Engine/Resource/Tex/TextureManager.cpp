@@ -54,22 +54,25 @@ TextureManager::TextureManager()
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
 
-void TextureManager::Emplace(const std::string& name, std::unique_ptr<Texture> tex)
+HRESULT TextureManager::RegisterTexture(const std::string& key, const ScratchImage& image, DXGI_FORMAT viewFormat)
 {
-	if (!tex) return;
-	std::lock_guard lock(mutex_);
-	auto it = textures_.find(name);
-	if (it != textures_.end()) {
-		if (dx12Mgr_) {
-			DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
-			if (allocator && it->second && it->second->srvDesc.valid()) {
-				uint32_t frameIndex = 0;
-				if (dx12Mgr_->GetFrameSync()) frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
-				allocator->DeferFree(it->second->srvDesc, frameIndex);
-			}
+	// すでに存在していれば何もしない（二重ロード防止）
+	if (textures_.contains(key))
+		return S_OK;
+}
+
+void TextureManager::RegisterAlias(const std::string& alias, const std::string& key)
+{
+	auto it = aliasToKey_.find(alias);
+	if (it != aliasToKey_.end()) {
+		// 同じ alias が別 key を指すのは禁止
+		if (it->second != key)
+		{
+			assert(false && "Texture alias collision");
 		}
+		return;
 	}
-	textures_[name] = std::move(tex);
+	aliasToKey_.emplace(alias, key);
 }
 
 void TextureManager::UnloadAll()

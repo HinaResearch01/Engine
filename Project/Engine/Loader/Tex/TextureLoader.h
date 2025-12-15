@@ -14,20 +14,20 @@ class TextureLoader {
 
 public:
 	/// <summary>
-	/// テクスチャファイルの読み込み処理
+	/// テクスチャの読み込み処理
 	/// </summary>
-	static HRESULT LoadFromFile(const std::string& root, const std::string& name, bool srgb = false);
-
+	static HRESULT Load(const std::string& fullPath, const std::string& alias, bool srgb = false);
+	
 	/// <summary>
-	/// aiSceneを走査しテクスチャファイルを読み込む
+	/// 
 	/// </summary>
-	static HRESULT LoadFromScene(const aiScene* scene, const std::string& root, bool srgb = false);
+	static HRESULT ExtractSceneTextures(const aiScene* scene, const std::string& fullPath, const std::string& alias, bool srgb = false);
 
+private:
 	/// <summary>
-	/// aiMaterialに含まれるテクスチャファイルを読み込む
+	/// 画像データの作成
 	/// </summary>
-	static HRESULT LoadFromMaterial(const aiMaterial* mat, const std::string& root, bool srgb = false);
-
+	static HRESULT DecodeToScratchImage(const std::string& path, bool srgb, DirectX::ScratchImage& outImage);
 };
 
 }
