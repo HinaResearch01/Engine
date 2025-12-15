@@ -60,7 +60,7 @@ HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alia
 	// 1. CPUデコード
 	ScratchImage mipChain;
 	HRESULT hr{};
-	//HRESULT hr = DecodeToScratchImage(fullPath, srgb, mipChain);
+	HRESULT hr = DecodeToScratchImage(fullPath, srgb, mipChain);
 	if (FAILED(hr)) return hr;
 
 	// 2. Manager に登録依頼
