@@ -203,7 +203,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
     <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp" />
     <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp" />
-    <ClCompile Include="Engine\Resource\ResourceAPI.cpp" />
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp" />
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
     <ClCompile Include="Engine\Test\TestActor.cpp" />

@@ -152,9 +152,6 @@
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Resource\ResourceAPI.cpp">
-      <Filter>Engine\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp">
       <Filter>Engine\Resource\Tex</Filter>
     </ClCompile>
