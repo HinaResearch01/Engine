@@ -22,7 +22,7 @@ struct mdl { std::string name; };
 struct tex { std::string name; };
 struct snd { std::string name; };
 
-namespace Tsumi {
+namespace tme {
 
 /* 各種リソースの共通インターフェース */
 class ResourceAPI {
@@ -56,12 +56,12 @@ inline HRESULT ResourceAPI::Load<mdl>(const std::string& fullPath, const std::st
 template <>
 inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::string& alias)
 {
-	HRESULT hr = Loader::TextureLoader::Load(fullPath, alias);
+	HRESULT hr = Tsumi::Loader::TextureLoader::Load(fullPath, alias);
 
 	if (FAILED(hr)) {
-		Utils::Error(std::format(
+		Tsumi::Utils::Error(std::format(
 			L"[ResourceAPI::Load<Tex>] Failed to load texture '{}{}' (HRESULT = 0x{:08X})",
-			Utils::Utf8ToWstring(fullPath),
+			Tsumi::Utils::Utf8ToWstring(fullPath),
 			static_cast<unsigned>(hr)
 		));
 		return hr;

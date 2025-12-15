@@ -4,8 +4,8 @@
 
 void TestScene::Init()
 {
-	Tsumi::ResourceAPI::Load<tex>("Resources/Texture", "uvChecker.png");
-	Tsumi::ResourceAPI::Load<tex>("Resources/Texture", "monsterBall.png");
+	tme::ResourceAPI::Load<tex>("Resources/Texture", "uvChecker.png");
+	tme::ResourceAPI::Load<tex>("Resources/Texture", "monsterBall.png");
 }
 
 void TestScene::Update()
