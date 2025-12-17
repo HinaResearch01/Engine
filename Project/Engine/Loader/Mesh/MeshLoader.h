@@ -3,15 +3,13 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include "Resource/Mesh/MeshManager.h"
 
 // 前方宣言
 namespace Assimp { class Importer; }
 struct aiScene;
 struct aiMesh;
 struct aiMaterial;
-namespace Tsumi::Resource {
-struct Vertex;
-}
 
 namespace Tsumi::Loader {
 
@@ -22,23 +20,22 @@ public:
 	/// <summary>
 	/// メッシュの読み込み処理
 	/// </summary>
-	static HRESULT LoadFromFile(const std::string& root, const std::string& name);
-	
-	/// <summary>
-	/// aiSceneを走査してメッシュを読み込む
-	/// </summary>
-	static HRESULT LoadFromScene(const aiScene* scene, const std::string& root, const std::string& nameKeyBase);
+	static HRESULT Load(const std::string& fullPath, const std::string& alias);
 
 private:
 	/// <summary>
-	/// 単一のaiMeshをパースして、頂点・インデックスを生成する
+	/// aiScene から Vertex / Index を生成
 	/// </summary>
-	static bool ParseAiMesh(const aiMesh* src, std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
-	
+	static HRESULT LoadFromScene(
+		const aiScene* scene,
+		std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+
 	/// <summary>
-	/// 正規化キーを生成する
+	/// aiMesh を Vertex / Index に変換
 	/// </summary>
-	static std::string MakeKeyFromRoot(const std::string& root, const std::string& name);
+	static bool ParseAiMesh(
+		const aiMesh* mesh,
+		std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 };
 
 }

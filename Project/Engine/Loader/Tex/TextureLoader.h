@@ -22,7 +22,8 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
-	static HRESULT ExtractSceneTextures(const aiScene* scene, const std::string& fullPath, const std::string& alias, bool srgb = false);
+	static HRESULT ExtractSceneTextures(
+		const aiScene* scene, const std::string& fullPath, const std::string& alias, bool srgb = false);
 
 private:
 	/// <summary>

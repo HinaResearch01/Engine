@@ -18,41 +18,11 @@ using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 namespace fs = std::filesystem;
 
-// root + name から管理用キーを生成する
-static std::string MakeKeyFromRoot(const std::string& root, const std::string& name)
-{
-	fs::path p(name);
-	fs::path full;
-	if (p.is_absolute()) {
-		// 絶対パスの場合、可能であれば root からの相対パスに変換
-		// 失敗した場合は絶対パスをそのままキーとして使用
-		if (!root.empty()) {
-			try {
-				fs::path rootp = fs::path(root);
-				fs::path rel = fs::relative(p, rootp);
-				if (!rel.empty()) {
-					return (rootp / rel).lexically_normal().string();
-				}
-			}
-			catch (...) {
-				// 相対化に失敗した場合は絶対パスを使用
-			}
-		}
-		return p.lexically_normal().string();
-	}
-	else {
-		// 相対パスの場合は root を基準にフルパス化
-		if (!root.empty()) full = fs::path(root) / p;
-		else full = p;
-		return full.lexically_normal().string();
-	}
-}
-
 HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb)
 {
 	auto* texMgr = TextureManager::GetInstance();
 
-	std::string key = MakeKeyFromRoot("", fullPath);
+	std::string key = Utils::MakeKeyFromRoot("", fullPath);
 
 	if (texMgr->HasAlias(alias))
 		return S_OK;
@@ -221,7 +191,7 @@ HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, 
 		memcpy(
 			reinterpret_cast<uint8_t*>(img->pixels) + y * img->rowPitch,
 			pixels + y * (w * 4),
-			w * 4);
+			static_cast<size_t>(w) * 4);
 	}
 
 	stbi_image_free(pixels);
