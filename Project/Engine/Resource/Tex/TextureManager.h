@@ -7,6 +7,7 @@
 #include <d3dx12.h>
 #include <cassert>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <mutex>
 #include <stb_image.h>
@@ -25,17 +26,10 @@ const std::pair<std::string, uint32_t> DSS = { ".dds", 2 };
 
 namespace Tsumi::Resource {
 
-struct Texture {
-	Microsoft::WRL::ComPtr<ID3D12Resource>	resource;
-	Tsumi::DX12::DescAlloc srvDesc;	// SRV descriptor (CPU/GPU handles)
-	UINT width = 0;
-	UINT height = 0;
-	UINT mipLevels = 1;
-	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-};
 struct TextureAsset {
-	std::string key;               // 実キー（正規化パス）
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;    // GPUリソース
+	std::string key; // 実キー（正規化パス）
+	// gpuリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	Tsumi::DX12::DescAlloc srvDesc;
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	uint32_t width = 0;
@@ -64,7 +58,10 @@ public:
 	/// <summary>
 	/// 登録
 	/// </summary>
-	HRESULT  RegisterTexture(const std::string& key, const ScratchImage& image, DXGI_FORMAT viewFormat);
+	HRESULT  RegisterTexture(
+		const std::string& key,
+		const DirectX::ScratchImage& image, 
+		DXGI_FORMAT viewFormat);
 	void RegisterAlias(const std::string& alias, const std::string& key);
 
 	/// <summary>
@@ -94,9 +91,15 @@ public:
 
 private:
 	/// <summary>
-	/// GPUリソースとSRVを作成する
+	/// GPU リソース作成とアップロード
 	/// </summary>
-	HRESULT CreateFromScratchImage(const std::string& name, const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat);
+	HRESULT CreateTextureResource(const DirectX::ScratchImage& mipChain, 
+								  DXGI_FORMAT viewFormat, TextureAsset& outAsset);
+
+	/// <summary>
+	/// SRVの作成
+	/// </summary>
+	HRESULT CreateTextureSRV(const DirectX::TexMetadata& meta, TextureAsset& asset);
 
 private:
 	// 実体：key（正規化パス） → Texture

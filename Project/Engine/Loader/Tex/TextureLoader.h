@@ -2,6 +2,7 @@
 
 #include <string>
 #include <Windows.h>
+#include <DirectXTex.h>
 
 // 前方宣言
 struct aiScene;

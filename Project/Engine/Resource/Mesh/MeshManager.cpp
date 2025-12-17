@@ -22,33 +22,75 @@ MeshManager::MeshManager()
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
 
-HRESULT MeshManager::Emplace(const std::string& name, std::unique_ptr<Mesh> mesh, bool overwrite)
+HRESULT MeshManager::RegisterMesh(const std::string& key, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
-	if (!mesh) return E_INVALIDARG;
+	// すでに同じ実キー（正規化パス）で登録済みの場合は何もしない
+	// → 二重ロード防止（同一メッシュの多重GPU生成を防ぐ）
+	if (HasKey(key))
+		return S_OK;
 
-	// meshes_ へのアクセスを排他制御
-	std::lock_guard lock(mutex_);
+	// 頂点・インデックスデータの空チェック
+	if (vertices.empty() || indices.empty())
+		return E_INVALIDARG;
 
-	auto it = meshes_.find(name);
-	if (it != meshes_.end()) {
-		if (!overwrite) return E_FAIL;
+	// ListとContextの取得と空チェック
+	CommandContext* ctx = dx12Mgr_->GetCommandContext();
+	if (!ctx)
+		return E_POINTER;
+	ID3D12GraphicsCommandList* list = ctx->GetList();
+	if (!list)
+		return E_FAIL;
 
-		// 既存リソースを置き換える前に GPU の処理完了を待つ
-		if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
-			dx12Mgr_->GetCommandContext()->WaitForGpu();
-		}
+	// 登録するメッシュ実体を構築
+	MeshAsset asset{};
+	asset.key = key;
+	asset.vertexCount = static_cast<uint32_t>(vertices.size());
+	asset.indexCount = static_cast<uint32_t>(indices.size());
+	asset.stride = sizeof(Vertex);
 
-		// 既存の GPU リソースを解放
-		// （unique_ptr の破棄時に ComPtr::Reset が呼ばれる）
-		it->second->vertexBuffer.Reset();
-		it->second->indexBuffer.Reset();
-		meshes_.erase(it);
+	// 頂点バッファ・インデックスバッファの作成
+	ComPtr<ID3D12Resource> vbUpload;
+	ComPtr<ID3D12Resource> ibUpload;
+
+	HRESULT hr = CreateVertexBuffer(list, vertices, asset, vbUpload);
+	if (FAILED(hr)) return hr;
+	hr = CreateIndexBuffer(list, indices, asset, ibUpload);
+	if (FAILED(hr)) return hr;
+
+	// ここで一回だけ実行＆待機
+	hr = ctx->ExecuteAndWait();
+	if (FAILED(hr)) return hr;
+	{
+		std::lock_guard lock(mutex_);
+		meshes_.emplace(
+			key,
+			std::make_unique<MeshAsset>(std::move(asset))
+		);
 	}
 
-	// 新しい Mesh を登録（所有権を移動）
-	meshes_.emplace(name, std::move(mesh));
 	return S_OK;
 }
+
+void MeshManager::RegisterAlias(const std::string& alias, const std::string& key)
+{
+	// alias → key の対応表は共有データのためロック
+	std::lock_guard lock(mutex_);
+
+	auto it = aliasToKey_.find(alias);
+	if (it != aliasToKey_.end()) {
+		// すでに登録済みの alias が存在する場合、
+		// 異なる key を指そうとするのは設計ミスとして扱う
+		if (it->second != key) {
+			assert(false && "Mesh alias collision");
+		}
+		// 同じ key であれば問題ないので何もしない
+		return;
+	}
+
+	// 新しい alias → key の対応を登録
+	aliasToKey_.emplace(alias, key);
+}
+
 
 void MeshManager::UnloadAll()
 {
@@ -58,75 +100,76 @@ void MeshManager::UnloadAll()
 
 	std::lock_guard lock(mutex_);
 	meshes_.clear();
+	aliasToKey_.clear();
 }
 
-HRESULT MeshManager::CreateFromCpuData(const std::string& name,
-	const std::vector<Vertex>& vertices,
-	const std::vector<uint32_t>& indices)
+HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const std::vector<Vertex>& vertices, 
+										MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadVB)
 {
-	if (vertices.empty() || indices.empty()) {
-		Utils::Log(std::format(
-			L"[MeshManager] CreateFromCpuData 無効なジオメトリ '{}'\n",
-			Utils::Utf8ToWstring(name)));
-		return E_INVALIDARG;
-	}
+	if (!list) return E_FAIL;
 
-	ComPtr<ID3D12Resource> vbDefault, vbUpload;
-	ComPtr<ID3D12Resource> ibDefault, ibUpload;
+	const size_t size = vertices.size() * sizeof(Vertex);
 
-	size_t vbSize = vertices.size() * sizeof(Vertex);
-	size_t ibSize = indices.size() * sizeof(uint32_t);
-
-	// 頂点バッファを CPU データから作成
-	HRESULT hr = CreateBufferFromData(vertices.data(), vbSize, &vbDefault, &vbUpload);
+	HRESULT hr = CreateBufferFromData(
+		list,
+		vertices.data(),
+		size,
+		out.vertexBuffer,
+		outUploadVB);
 	if (FAILED(hr)) return hr;
 
-	// インデックスバッファを CPU データから作成
-	hr = CreateBufferFromData(indices.data(), ibSize, &ibDefault, &ibUpload);
-	if (FAILED(hr)) return hr;
+	// COPY_DEST -> VB 用ステートに遷移（コマンドを積むだけ）
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		out.vertexBuffer.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	list->ResourceBarrier(1, &barrier);
 
-	// Mesh オブジェクト生成
-	auto mesh = std::make_unique<Mesh>();
-	mesh->vertexCount = static_cast<UINT>(vertices.size());
-	mesh->indexCount = static_cast<UINT>(indices.size());
-	mesh->vertexStride = sizeof(Vertex);
-
-	mesh->vertexBuffer = vbDefault;
-	mesh->indexBuffer = ibDefault;
-
-	// 頂点バッファビュー設定
-	mesh->vbView.BufferLocation = vbDefault->GetGPUVirtualAddress();
-	mesh->vbView.SizeInBytes = (UINT)vbSize;
-	mesh->vbView.StrideInBytes = mesh->vertexStride;
-
-	// インデックスバッファビュー設定
-	mesh->ibView.BufferLocation = ibDefault->GetGPUVirtualAddress();
-	mesh->ibView.Format = DXGI_FORMAT_R32_UINT;
-	mesh->ibView.SizeInBytes = (UINT)ibSize;
-
-	// 排他制御下で登録
-	{
-		std::lock_guard lock(mutex_);
-		meshes_.emplace(name, std::move(mesh));
-	}
+	out.vbView.BufferLocation = out.vertexBuffer->GetGPUVirtualAddress();
+	out.vbView.SizeInBytes = static_cast<UINT>(size);
+	out.vbView.StrideInBytes = out.stride;
 
 	return S_OK;
 }
 
-HRESULT MeshManager::CreateBufferFromData(
-	const void* data,
-	size_t dataSize,
-	ID3D12Resource** outDefault,
-	ID3D12Resource** outUpload)
+HRESULT MeshManager::CreateIndexBuffer(ID3D12GraphicsCommandList* list, const std::vector<uint32_t>& indices, 
+									   MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadIB)
+{
+	if (!list) return E_FAIL;
+
+	const size_t size = indices.size() * sizeof(uint32_t);
+
+	HRESULT hr = CreateBufferFromData(
+		list,
+		indices.data(),
+		size,
+		out.indexBuffer,
+		outUploadIB);
+	if (FAILED(hr)) return hr;
+
+	// COPY_DEST -> IB 用ステートに遷移（コマンドを積むだけ）
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		out.indexBuffer.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	list->ResourceBarrier(1, &barrier);
+
+	out.ibView.BufferLocation = out.indexBuffer->GetGPUVirtualAddress();
+	out.ibView.SizeInBytes = static_cast<UINT>(size);
+	out.ibView.Format = DXGI_FORMAT_R32_UINT;
+
+	return S_OK;
+}
+
+HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const void* data, size_t dataSize, 
+										  Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
 {
 	if (!dx12Mgr_) return E_POINTER;
 
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	CommandContext* ctx = dx12Mgr_->GetCommandContext();
-	if (!device || !ctx) return E_POINTER;
+	if (!device || !list) return E_POINTER;
 
-	// GPU 用の Default ヒープバッファ作成
-	ComPtr<ID3D12Resource> defaultBuf;
+	// Default heap（GPU側）
 	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
 	auto desc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
 
@@ -136,17 +179,10 @@ HRESULT MeshManager::CreateBufferFromData(
 		&desc,
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
-		IID_PPV_ARGS(&defaultBuf));
+		IID_PPV_ARGS(&outDefault));
+	if (FAILED(hr)) return hr;
 
-	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"[MeshManager] DefaultBuffer 作成失敗 (hr=0x{:08X})",
-			(unsigned)hr));
-		return hr;
-	}
-
-	// CPU から書き込むための Upload ヒープバッファ作成
-	ComPtr<ID3D12Resource> uploadBuf;
+	// Upload heap（CPU→GPU転送用）
 	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
 	auto uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
 
@@ -156,38 +192,16 @@ HRESULT MeshManager::CreateBufferFromData(
 		&uploadDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&uploadBuf));
+		IID_PPV_ARGS(&outUpload));
+	if (FAILED(hr)) return hr;
 
-	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"[MeshManager] UploadBuffer 作成失敗 (hr=0x{:08X})",
-			(unsigned)hr));
-		return hr;
-	}
-
-	// CPU データを GPU に転送するためのサブリソース情報設定
+	// CPU -> Upload -> Default のコピーコマンドを積む
 	D3D12_SUBRESOURCE_DATA sub{};
 	sub.pData = data;
 	sub.RowPitch = dataSize;
 	sub.SlicePitch = dataSize;
 
-	ID3D12GraphicsCommandList* list = ctx->GetList();
-	if (!list) return E_FAIL;
+	UpdateSubresources(list, outDefault.Get(), outUpload.Get(), 0, 0, 1, &sub);
 
-	// Upload → Default へコピー
-	UpdateSubresources(list, defaultBuf.Get(), uploadBuf.Get(), 0, 0, 1, &sub);
-
-	// コマンド実行＆完了待ち
-	hr = ctx->ExecuteAndWait();
-	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"[MeshManager] ExecuteAndWait 失敗 (hr=0x{:08X})",
-			(unsigned)hr));
-		return hr;
-	}
-
-	// 呼び出し元へ所有権を渡す
-	*outDefault = defaultBuf.Detach();
-	*outUpload = uploadBuf.Detach();
 	return S_OK;
 }

@@ -50,7 +50,8 @@ public:
 template <>
 inline HRESULT ResourceAPI::Load<mdl>(const std::string& fullPath, const std::string& alias)
 {
-
+	fullPath, alias;
+	return S_OK;
 }
 
 template <>
@@ -60,7 +61,7 @@ inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::st
 
 	if (FAILED(hr)) {
 		Tsumi::Utils::Error(std::format(
-			L"[ResourceAPI::Load<Tex>] Failed to load texture '{}{}' (HRESULT = 0x{:08X})",
+			L"[ResourceAPI::Load<Tex>] Failed to load texture '{}' (HRESULT = 0x{:08X})",
 			Tsumi::Utils::Utf8ToWstring(fullPath),
 			static_cast<unsigned>(hr)
 		));

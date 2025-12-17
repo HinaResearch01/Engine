@@ -4,8 +4,8 @@
 
 void TestScene::Init()
 {
-	tme::ResourceAPI::Load<tex>("Resources/Texture", "uvChecker.png");
-	tme::ResourceAPI::Load<tex>("Resources/Texture", "monsterBall.png");
+	tme::ResourceAPI::Load<tex>("Resources/Texture/uvChecker.png", "uvChecker");
+	tme::ResourceAPI::Load<tex>("Resources/Texture/monsterBall.png", "monsterBall");
 }
 
 void TestScene::Update()

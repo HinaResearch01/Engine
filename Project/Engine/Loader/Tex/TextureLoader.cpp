@@ -48,7 +48,7 @@ static std::string MakeKeyFromRoot(const std::string& root, const std::string& n
 	}
 }
 
-HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb = false)
+HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb)
 {
 	auto* texMgr = TextureManager::GetInstance();
 
@@ -59,7 +59,6 @@ HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alia
 
 	// 1. CPUデコード
 	ScratchImage mipChain;
-	HRESULT hr{};
 	HRESULT hr = DecodeToScratchImage(fullPath, srgb, mipChain);
 	if (FAILED(hr)) return hr;
 
@@ -106,13 +105,13 @@ HRESULT Tsumi::Loader::TextureLoader::ExtractSceneTextures(const aiScene* scene,
 		std::filesystem::path fullTexPath = baseDir / rel;
 
 		// alias を組み立てる（衝突回避）
-		std::string alias =
+		std::string buildAlias =
 			alias + "_diffuse_" + std::to_string(i);
 
 		// 普通の Load に委譲
 		HRESULT hr = Load(
 			fullTexPath.string(),
-			alias,
+			buildAlias,
 			srgb);
 
 		if (FAILED(hr))
