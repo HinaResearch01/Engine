@@ -28,14 +28,14 @@ private:
 	/// </summary>
 	static HRESULT LoadFromScene(
 		const aiScene* scene,
-		std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 
 	/// <summary>
 	/// aiMesh を Vertex / Index に変換
 	/// </summary>
 	static bool ParseAiMesh(
 		const aiMesh* mesh,
-		std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 };
 
 }
