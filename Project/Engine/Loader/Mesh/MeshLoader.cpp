@@ -18,13 +18,10 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 
 	// key = 正規化パス（TextureLoader と同一ルール）
 	std::string key = Utils::MakeKeyFromRoot("", fullPath);
-	auto* meshMgr = MeshManager::GetInstance();
-
-	// すでにロード済みなら alias だけ登録
-	if (meshMgr->HasKey(key)) {
-		meshMgr->RegisterAlias(alias, key);
+	
+	// 既読チェック
+	if (TryResolveAlias(key, alias))
 		return S_OK;
-	}
 
 	// ファイル存在チェック
 	if (!std::filesystem::exists(fullPath))
@@ -50,11 +47,33 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 	if (!scene || !scene->HasMeshes())
 		return E_FAIL;
 
+	// 登録処理
+	return RegisterFromScene(scene, key, alias);
+}
+
+HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
+{
+	// 読み込み失敗、またはメッシュが含まれていない場合は失敗
+	if (!scene || !scene->HasMeshes())
+		return E_FAIL;
+
+	// 既読チェック
+	if (TryResolveAlias(key, alias))
+		return S_OK;
+
+	// 登録処理
+	return RegisterFromScene(scene, key, alias);
+}
+
+HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
+{
+	auto* meshMgr = MeshManager::GetInstance();
+	
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
 	// aiScene から Vertex / Index を生成
-	HRESULT hr = LoadFromScene(scene, vertices, indices);
+	HRESULT hr = ParseScene(scene, vertices, indices);
 	if (FAILED(hr))
 		return hr;
 
@@ -62,12 +81,13 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 	hr = meshMgr->RegisterMesh(key, vertices, indices);
 	if (FAILED(hr))
 		return hr;
+
 	// alias → key の関連付けを登録
 	meshMgr->RegisterAlias(alias, key);
 	return S_OK;
 }
 
-HRESULT MeshLoader::LoadFromScene(const aiScene* scene, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
+HRESULT MeshLoader::ParseScene(const aiScene* scene, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
 {
 	// 不正チェック
 	if (!scene || !scene->HasMeshes())
@@ -150,4 +170,15 @@ bool MeshLoader::ParseAiMesh(const aiMesh* mesh, std::vector<Vertex>& outVertice
 	}
 
 	return true;
+}
+
+bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alias)
+{
+	auto* meshMgr = MeshManager::GetInstance();
+
+	if (meshMgr->HasKey(key)) {
+		meshMgr->RegisterAlias(alias, key);
+		return true; // すでに登録済み
+	}
+	return false;
 }

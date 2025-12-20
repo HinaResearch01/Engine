@@ -20,70 +20,72 @@ namespace fs = std::filesystem;
 
 HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb)
 {
-	auto* texMgr = TextureManager::GetInstance();
+	// パスが空の場合は無効
+	if (fullPath.empty())
+		return E_INVALIDARG;
 
-	std::string key = Utils::MakeKeyFromRoot("", fullPath);
+	// 実キー（正規化されたパス）を生成
+	const std::string key =
+		Utils::MakeKeyFromRoot("", fullPath);
 
-	if (texMgr->HasAlias(alias))
+	// すでに同じ実キーが登録済みの場合は
+	// alias の紐づけだけ行って早期リターン
+	if (TryResolveAlias(key, alias))
 		return S_OK;
 
-	// 1. CPUデコード
-	ScratchImage mipChain;
-	HRESULT hr = DecodeToScratchImage(fullPath, srgb, mipChain);
-	if (FAILED(hr)) return hr;
+	// ファイル存在チェック
+	if (!fs::exists(fullPath))
+		return E_FAIL;
 
-	// 2. Manager に登録依頼
-	hr = texMgr->RegisterTexture(
-		key,
-		mipChain,
-		srgb ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
-		: DXGI_FORMAT_R8G8B8A8_UNORM);
-	if (FAILED(hr)) return hr;
+	// CPU 側で画像をデコード（DDS / WIC / stb のいずれか）
+	ScratchImage image;
+	HRESULT hr = DecodeToScratchImage(fullPath, srgb, image);
+	if (FAILED(hr))
+		return hr;
 
-	// 3. alias 登録
-	texMgr->RegisterAlias(alias, key);
-
-	return S_OK;
+	// GPU リソースの生成と Manager への登録は共通処理に委譲
+	return RegisterFromImage(key, image, alias, srgb);
 }
 
-HRESULT Tsumi::Loader::TextureLoader::ExtractSceneTextures(const aiScene* scene, const std::string& fullPath, const std::string& alias, bool srgb)
+HRESULT TextureLoader::LoadFromScene(const aiScene* scene, const std::string& modelPath, const std::string& alias, bool srgb)
 {
+	// マテリアルが無い場合は正常終了（テクスチャなしモデル）
 	if (!scene || !scene->HasMaterials())
 		return S_OK;
 
-	// モデルファイルのあるディレクトリ
-	std::filesystem::path modelPath(fullPath);
-	std::filesystem::path baseDir = modelPath.parent_path();
+	// モデルファイルの存在するディレクトリ
+	fs::path baseDir = fs::path(modelPath).parent_path();
 
 	HRESULT overall = S_OK;
 
+	// シーン内の全マテリアルを走査
 	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
 	{
 		const aiMaterial* mat = scene->mMaterials[i];
 		if (!mat) continue;
 
-		// Diffuse テクスチャ（まずは1枚目だけ）
-		aiString texPath;
+		// Diffuse テクスチャが無いマテリアルはスキップ
 		if (mat->GetTextureCount(aiTextureType_DIFFUSE) == 0)
 			continue;
 
+		aiString texPath;
 		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) != AI_SUCCESS)
 			continue;
 
-		// Assimp が返すのは「相対パス」であることが多い
-		std::filesystem::path rel(texPath.C_Str());
-		std::filesystem::path fullTexPath = baseDir / rel;
+		// Assimp の返すパスは相対パスであることが多い
+		fs::path fullTexPath = baseDir / texPath.C_Str();
 
-		// alias を組み立てる（衝突回避）
+		// マテリアルごとに alias を組み立てる（衝突回避）
 		std::string buildAlias =
 			alias + "_diffuse_" + std::to_string(i);
 
-		// 普通の Load に委譲
+		// 通常の Load に処理を委譲
 		HRESULT hr = Load(
 			fullTexPath.string(),
 			buildAlias,
 			srgb);
 
+		// 失敗は記録するが、他のマテリアルは処理を続行
 		if (FAILED(hr))
 			overall = hr;
 	}
@@ -91,10 +93,31 @@ HRESULT Tsumi::Loader::TextureLoader::ExtractSceneTextures(const aiScene* scene,
 	return overall;
 }
 
+HRESULT TextureLoader::RegisterFromImage(const std::string& key, const DirectX::ScratchImage& image, const std::string& alias, bool srgb)
+{
+	auto* texMgr = TextureManager::GetInstance();
+
+	// GPU リソースの生成と登録
+	HRESULT hr = texMgr->RegisterTexture(
+		key,
+		image,
+		srgb
+		? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+		: DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	if (FAILED(hr))
+		return hr;
+
+	// alias → key の対応付け
+	texMgr->RegisterAlias(alias, key);
+	return S_OK;
+}
+
 HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, DirectX::ScratchImage& outImage)
 {
 	using namespace DirectX;
 
+	// 既存データを解放
 	outImage.Release();
 
 	std::filesystem::path p(path);
@@ -107,17 +130,15 @@ HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, 
 	HRESULT hr = S_OK;
 
 	// =========================
-	// DDS（ミップ・圧縮そのまま）
+	// DDS（圧縮・ミップを保持）
 	// =========================
 	if (_wcsicmp(ext.c_str(), L".dds") == 0)
 	{
-		hr = LoadFromDDSFile(
+		return LoadFromDDSFile(
 			wpath.c_str(),
 			DDS_FLAGS_NONE,
 			nullptr,
 			outImage);
-
-		return hr;
 	}
 
 	// =========================
@@ -146,7 +167,7 @@ HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, 
 				0,
 				outImage);
 
-			// ミップ生成失敗時は元画像だけ使う
+			// ミップ生成に失敗した場合は元画像のみ使用
 			if (FAILED(hr))
 			{
 				outImage = std::move(src);
@@ -207,9 +228,21 @@ HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, 
 
 	if (FAILED(hr))
 	{
+		// ミップ無しでフォールバック
 		outImage = std::move(src);
 		return S_OK;
 	}
 
 	return S_OK;
+}
+
+bool TextureLoader::TryResolveAlias(const std::string& key, const std::string& alias)
+{
+	auto* texMgr = TextureManager::GetInstance();
+
+	if (texMgr->HasKey(key)) {
+		texMgr->RegisterAlias(alias, key);
+		return true; // すでに登録済み
+	}
+	return false;
 }

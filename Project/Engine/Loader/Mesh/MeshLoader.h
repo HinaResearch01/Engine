@@ -21,12 +21,24 @@ public:
 	/// メッシュの読み込み処理
 	/// </summary>
 	static HRESULT Load(const std::string& fullPath, const std::string& alias);
+	static HRESULT LoadFromScene(
+		const aiScene* scene,
+		const std::string& key,
+		const std::string& alias);
 
 private:
 	/// <summary>
+	/// 走査してMgrに登録
+	/// </summary>
+	static HRESULT RegisterFromScene(
+		const aiScene* scene,
+		const std::string& key,
+		const std::string& alias);
+
+	/// <summary>
 	/// aiScene から Vertex / Index を生成
 	/// </summary>
-	static HRESULT LoadFromScene(
+	static HRESULT ParseScene(
 		const aiScene* scene,
 		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 
@@ -36,6 +48,14 @@ private:
 	static bool ParseAiMesh(
 		const aiMesh* mesh,
 		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+
+	/// <summary>
+	/// 既読チェック専用関数
+	/// </summary>
+	static bool TryResolveAlias(
+		const std::string& key,
+		const std::string& alias);
+
 };
 
 }

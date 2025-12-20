@@ -167,9 +167,6 @@
     <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp">
       <Filter>Engine\Loader\Tex</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Loader\Renderable\RenderableLoader.cpp">
-      <Filter>Engine\Loader\Renderable</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClCompile>
@@ -178,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="Game\GameContext.cpp">
       <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp">
+      <Filter>Engine\Loader\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -613,9 +613,6 @@
     <ClInclude Include="Engine\Loader\Tex\TextureLoader.h">
       <Filter>Engine\Loader\Tex</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Loader\Renderable\RenderableLoader.h">
-      <Filter>Engine\Loader\Renderable</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClInclude>
@@ -624,6 +621,9 @@
     </ClInclude>
     <ClInclude Include="Game\GameContext.h">
       <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Loader\Model\ModelLoader.h">
+      <Filter>Engine\Loader\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -918,9 +918,6 @@
     <Filter Include="Engine\Loader\Mesh">
       <UniqueIdentifier>{201bddc9-aa5e-4791-b0e9-a2c6a18ada09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Loader\Renderable">
-      <UniqueIdentifier>{353d5c06-e590-4b2b-988b-d5093c5bdee7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Loader\Tex">
       <UniqueIdentifier>{b53744e1-ea03-4509-be81-9a98b3fbe0a0}</UniqueIdentifier>
     </Filter>
@@ -929,6 +926,9 @@
     </Filter>
     <Filter Include="Engine\ThirdParty\ImGui">
       <UniqueIdentifier>{667f00a3-531b-4ccd-9f21-fdf692634c95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Loader\Model">
+      <UniqueIdentifier>{fa916980-5029-4dbe-9b2b-1e8ba713127d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

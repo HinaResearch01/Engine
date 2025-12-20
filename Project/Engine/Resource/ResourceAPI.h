@@ -9,14 +9,12 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <filesystem>
-#include <format>
 
 #include "Utils/Logger/UtilsLog.h"
 #include "Utils/Func/UtilFunc.h"
-#include "Resource/Tex/TextureManager.h"
 #include  "Loader/Tex/TextureLoader.h"
-#include "Resource/Mesh/MeshManager.h"
 #include "Loader/Mesh/MeshLoader.h"
+#include "Loader/Model/ModelLoader.h"
 
 struct mdl { std::string name; };
 struct tex { std::string name; };
@@ -50,7 +48,17 @@ public:
 template <>
 inline HRESULT ResourceAPI::Load<mdl>(const std::string& fullPath, const std::string& alias)
 {
-	fullPath, alias;
+	HRESULT hr = Tsumi::Loader::ModelLoader::Load(fullPath, alias);
+
+	if (FAILED(hr)) {
+		Tsumi::Utils::Error(std::format(
+			L"[ResourceAPI::Load<Model>] Failed to load model '{}' (HRESULT = 0x{:08X})",
+			Tsumi::Utils::Utf8ToWstring(fullPath),
+			static_cast<unsigned>(hr)
+		));
+		return hr;
+	}
+
 	return S_OK;
 }
 
