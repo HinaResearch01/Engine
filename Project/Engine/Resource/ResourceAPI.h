@@ -15,10 +15,12 @@
 #include  "Loader/Tex/TextureLoader.h"
 #include "Loader/Mesh/MeshLoader.h"
 #include "Loader/Model/ModelLoader.h"
+#include "Resource/Tex/TextureManager.h"
+#include "Resource/Mesh/MeshManager.h"
 
-struct mdl { std::string name; };
-struct tex { std::string name; };
-struct snd { std::string name; };
+struct mdl {};
+struct tex {};
+struct snd {};
 
 namespace tme {
 
@@ -81,6 +83,9 @@ inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::st
 
 inline HRESULT ResourceAPI::SceneReset()
 {
+	using namespace Tsumi::Resource;
+	TextureManager::GetInstance()->UnloadAll();
+	MeshManager::GetInstance()->UnloadAll();
 	return S_OK;
 }
 
