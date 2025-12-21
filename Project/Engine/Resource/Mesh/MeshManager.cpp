@@ -177,7 +177,7 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 		&defaultHeap,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
-		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&outDefault));
 	if (FAILED(hr)) return hr;
@@ -194,6 +194,15 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 		nullptr,
 		IID_PPV_ARGS(&outUpload));
 	if (FAILED(hr)) return hr;
+
+	// COMMON -> COPY_DEST
+	{
+		auto b = CD3DX12_RESOURCE_BARRIER::Transition(
+			outDefault.Get(),
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_COPY_DEST);
+		list->ResourceBarrier(1, &b);
+	}
 
 	// CPU -> Upload -> Default のコピーコマンドを積む
 	D3D12_SUBRESOURCE_DATA sub{};
