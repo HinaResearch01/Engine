@@ -74,13 +74,10 @@ void PSOLibrary::CreateObject3D()
     // ========================================================
     // Input Layout
     // ========================================================
-    // 例: Position, Normal, Texcoord, Tangent
     static const D3D12_INPUT_ELEMENT_DESC inputLayout[] =
     {
         PSOUtil::SetUpInputElementDescs("POSITION"),
         PSOUtil::SetUpInputElementDescs("TEXCOORD"),
-        PSOUtil::SetUpInputElementDescs("NORMAL"),
-        PSOUtil::SetUpInputElementDescs("WORLDPOSITION"),
     };
 
     // ========================================================

@@ -10,7 +10,7 @@
 #include <optional>
 #include "Math/TMath.h"
 #include "../Component/IComponent.h"
-#include "../Component/TransformComponent.h"
+#include "../Component/Transform/TransformComponent.h"
 
 namespace Tsumi::Framework {
 
@@ -170,11 +170,11 @@ private:
 	// 状態
 	State state_ = IActor::State::None;
 
-	// トランスフォームコンポーネント (Actorが必ず1つもつ)
-	std::shared_ptr<TransformComponent> transComp_;
-
 	// コンポーネント
 	std::unordered_map<std::type_index, std::shared_ptr<IComponent>> comps_;
+
+	// トランスフォームコンポーネント (Actorが必ず1つもつ)
+	std::shared_ptr<TransformComponent> transComp_;
 
 	// レンダーコンポーネントの型
 	std::optional<std::type_index> renderType_;

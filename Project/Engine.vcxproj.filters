@@ -140,9 +140,6 @@
     <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp">
       <Filter>Engine\Graphics\Frame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Component\TransformComponent.cpp">
-      <Filter>Engine\Framework\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
       <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
@@ -178,6 +175,15 @@
     </ClCompile>
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp">
       <Filter>Engine\Loader\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp">
+      <Filter>Engine\Framework\Component\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp">
+      <Filter>Engine\Framework\Component\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Render\RenderSystem.cpp">
+      <Filter>Engine\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -580,9 +586,6 @@
     <ClInclude Include="Engine\Math\Vector\Vector.h">
       <Filter>Engine\Math\Vector</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Component\TransformComponent.h">
-      <Filter>Engine\Framework\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h">
       <Filter>Engine\Utils\DXAlign</Filter>
     </ClInclude>
@@ -624,6 +627,15 @@
     </ClInclude>
     <ClInclude Include="Engine\Loader\Model\ModelLoader.h">
       <Filter>Engine\Loader\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h">
+      <Filter>Engine\Framework\Component\Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h">
+      <Filter>Engine\Framework\Component\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Render\RenderSystem.h">
+      <Filter>Engine\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -930,6 +942,15 @@
     <Filter Include="Engine\Loader\Model">
       <UniqueIdentifier>{fa916980-5029-4dbe-9b2b-1e8ba713127d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Framework\Component\Transform">
+      <UniqueIdentifier>{4fd8c22b-8cf4-4785-b8af-5e14abd73446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Component\Render">
+      <UniqueIdentifier>{42a6ecec-77b0-4238-8d82-d0e487b6b208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Render">
+      <UniqueIdentifier>{996a756d-ea08-4fdf-baf8-1fbd910ceb59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\CPUParticle\CPUParticle.hlsli">
@@ -949,9 +970,6 @@
     </None>
     <None Include="Resources\Shaders\Skinning\SkinningObject3d.hlsli">
       <Filter>Resources\Shaders\Skinning</Filter>
-    </None>
-    <None Include="Resources\Shaders\Object3d\Object3d.hlsli">
-      <Filter>Resources\Shaders\Object3d</Filter>
     </None>
     <None Include="Resources\Shaders\PostEffect\PostEffect.hlsli">
       <Filter>Resources\Shaders\PostEffect</Filter>
@@ -1088,6 +1106,9 @@
     <None Include="Resources\Shaders\Random\Random.hlsli">
       <Filter>Resources\Shaders\Random</Filter>
     </None>
+    <None Include="Resources\Shaders\Object3d\Object3D_Common.hlsli">
+      <Filter>Resources\Shaders\Object3d</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\CPUParticle\CPUParticle.PS.hlsl">
@@ -1122,12 +1143,6 @@
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Skinning\SkinningObject3d.VS.hlsl">
       <Filter>Resources\Shaders\Skinning</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Object3d\Object3d.PS.hlsl">
-      <Filter>Resources\Shaders\Object3d</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Object3d\Object3d.VS.hlsl">
-      <Filter>Resources\Shaders\Object3d</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\PostEffect\Absent\Absent.PS.hlsl">
       <Filter>Resources\Shaders\PostEffect\Absent</Filter>
@@ -1200,6 +1215,12 @@
     </FxCompile>
     <FxCompile Include="Resources\Shaders\GPUParticle\Update\GPUParticle_Update.CS.hlsl">
       <Filter>Resources\Shaders\GPUParticle\Update</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object3d\Object3D_Static.VS.hlsl">
+      <Filter>Resources\Shaders\Object3d</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Object3d\Object3D_Static.PS.hlsl">
+      <Filter>Resources\Shaders\Object3d</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

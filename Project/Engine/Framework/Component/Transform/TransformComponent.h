@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "IComponent.h"
+#include "../IComponent.h"
 
 namespace Tsumi::Framework {
 

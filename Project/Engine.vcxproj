@@ -189,7 +189,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
-    <ClCompile Include="Engine\Framework\Component\TransformComponent.cpp" />
+    <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
+    <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
     <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
@@ -200,6 +201,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp" />
     <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp" />
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp" />
+    <ClCompile Include="Engine\Render\RenderSystem.cpp" />
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
     <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp" />
     <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp" />
@@ -337,7 +339,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
-    <ClInclude Include="Engine\Framework\Component\TransformComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
     <ClInclude Include="Engine\Graphic\Frame\FrameResource.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
@@ -353,6 +356,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Matrix\Matrix.h" />
     <ClInclude Include="Engine\Math\TMath.h" />
     <ClInclude Include="Engine\Math\Vector\Vector.h" />
+    <ClInclude Include="Engine\Render\RenderSystem.h" />
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
     <ClInclude Include="Engine\Resource\Mesh\MeshManager.h" />
@@ -1046,9 +1050,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="Resources\Shaders\Field\Field.hlsli" />
     <None Include="Resources\Shaders\GPUParticle\GPUParticle.hlsli" />
     <None Include="Resources\Shaders\Math\Math.hlsli" />
+    <None Include="Resources\Shaders\Object3d\Object3D_Common.hlsli" />
     <None Include="Resources\Shaders\Random\Random.hlsli" />
     <None Include="Resources\Shaders\Object2d\Object2d.hlsli" />
-    <None Include="Resources\Shaders\Object3d\Object3d.hlsli" />
     <None Include="Resources\Shaders\PostEffect\PostEffect.hlsli" />
     <None Include="Resources\Shaders\Skinning\SkinningObject3d.hlsli" />
     <None Include="Resources\Shaders\Skybox\Skybox.hlsli" />
@@ -1155,15 +1159,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Object3d\Object3d.PS.hlsl">
+    <FxCompile Include="Resources\Shaders\Object3d\Object3D_Static.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Object3d\Object3d.VS.hlsl">
+    <FxCompile Include="Resources\Shaders\Object3d\Object3D_Static.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\PostEffect\Absent\Absent.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -112,10 +112,10 @@ void RootSignatureLibrary::CreateObject3D()
     // -------------------------
     // VS: 定数バッファ1個 (b0)
     CD3DX12_DESCRIPTOR_RANGE cbvRangeVS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-    // PS: 定数バッファ7個 (b0～b6)
-    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 7, 0);
-    // PS: テクスチャ (SRV) 4個 (t0～t3)
-    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);
+    // PS: 定数バッファ1個 (b0)
+    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+    // PS: テクスチャ (SRV) 1個 (t0)
+    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
     // ルートパラメータを定義（VS用CBVテーブル、PS用CBVテーブル、PS用SRVテーブル）
     CD3DX12_ROOT_PARAMETER params[3]{};

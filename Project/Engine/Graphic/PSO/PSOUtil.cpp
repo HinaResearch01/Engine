@@ -8,7 +8,7 @@ D3D12_INPUT_ELEMENT_DESC Tsumi::Graphic::PSOUtil::SetUpInputElementDescs(LPCSTR 
 	{
 		inputElementDescs.SemanticName = "POSITION";
 		inputElementDescs.SemanticIndex = 0;
-		inputElementDescs.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		inputElementDescs.Format = DXGI_FORMAT_R32G32B32_FLOAT;
 		inputElementDescs.InputSlot = 0;
 		inputElementDescs.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	}
