@@ -64,17 +64,10 @@ void ShaderLibrary::CompileAllShader()
     // 通常オブジェクト描画用シェーダー群（2D / 3D / スキニング / スカイボックス）
     // -------------------------------
     {
-        // 2Dオブジェクト描画
-        ShaderLoadModule m;
-        m.sources[ShaderType::VS] = L"Resources/Shaders/Object2d/Object2d.VS.hlsl";
-        m.sources[ShaderType::PS] = L"Resources/Shaders/Object2d/Object2d.PS.hlsl";
-        tryCompile(L"Object2D", m);
-    }
-    {
         // 3Dオブジェクト描画
         ShaderLoadModule m;
-        m.sources[ShaderType::VS] = L"Resources/Shaders/Object3d/Object3d.VS.hlsl";
-        m.sources[ShaderType::PS] = L"Resources/Shaders/Object3d/Object3d.PS.hlsl";
+        m.sources[ShaderType::VS] = L"Resources/Shaders/VS/Object3D_Static.VS.hlsl";
+        m.sources[ShaderType::PS] = L"Resources/Shaders/PS/Object3D_Static.PS.hlsl";
         tryCompile(L"Object3D", m);
     }
 

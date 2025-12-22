@@ -112,8 +112,8 @@ void RootSignatureLibrary::CreateObject3D()
     // -------------------------
     // VS: 定数バッファ1個 (b0)
     CD3DX12_DESCRIPTOR_RANGE cbvRangeVS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-    // PS: 定数バッファ1個 (b0)
-    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+    // PS: 定数バッファ1個 (b1)
+    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
     // PS: テクスチャ (SRV) 1個 (t0)
     CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
