@@ -23,7 +23,7 @@ class PSOLibrary;
 class FrameResource;
 }
 namespace Resource {
-class FrameCBManager;
+class ResourceSystem;
 }
 namespace GUI {
 class ImGuiManager;
@@ -70,7 +70,7 @@ private:
     Graphic::PSOLibrary* psos_ = nullptr;
     Graphic::FrameResource* frameResource_ = nullptr;
 
-    Resource::FrameCBManager* frameCBMgr_ = nullptr;
+    Resource::ResourceSystem* resourceMgr_ = nullptr;
 
     GUI::ImGuiManager* imgui_ = nullptr;
 

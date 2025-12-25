@@ -9,7 +9,7 @@
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/Frame/FrameResource.h"
-#include "Resource/CB/FrameCBManager.h"
+#include "Resource/ResourceSystem.h"
 #include "ThirdParty/ImGui/ImGuiManager.h"
 
 using namespace Tsumi;
@@ -22,7 +22,7 @@ Application::Application()
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
     frameResource_ = Graphic::FrameResource::GetInstance();
-    frameCBMgr_ = Resource::FrameCBManager::GetInstance();
+    resourceMgr_ = Resource::ResourceSystem::GetInstance();
     imgui_ = GUI::ImGuiManager::GetInstance();
 	gameCtx_ = std::make_unique<GameContext>();
 }
@@ -44,6 +44,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     rootsigs_->Init();
     psos_->Init();
     frameResource_->Init();
+	resourceMgr_->Init();
     imgui_->Init();
 }
 
@@ -55,7 +56,7 @@ void Application::Run()
         // ------------------ ループ開始フェーズ ------------------
         window_->ProcessMessages();
         dx12_->StartFrame();
-        frameCBMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
+		resourceMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
         imgui_->BeginFrame();
 
 		// ------------------ 初期化フェーズ ------------------

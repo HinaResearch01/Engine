@@ -88,9 +88,6 @@
     <ClCompile Include="Engine\Core\App\Application.cpp">
       <Filter>Engine\Core\App</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Test\TestScene.cpp">
-      <Filter>Engine\Test</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp">
       <Filter>Engine\DX12\SwapChain</Filter>
@@ -143,9 +140,6 @@
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
       <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Resource\CB\FrameCBManager.cpp">
-      <Filter>Engine\Resource\CB</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClCompile>
@@ -167,9 +161,6 @@
     <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Test\TestActor.cpp">
-      <Filter>Engine\Test</Filter>
-    </ClCompile>
     <ClCompile Include="Game\GameContext.cpp">
       <Filter>Game</Filter>
     </ClCompile>
@@ -184,6 +175,15 @@
     </ClCompile>
     <ClCompile Include="Engine\Render\RenderSystem.cpp">
       <Filter>Engine\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\TestActor.cpp">
+      <Filter>Game\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\TestScene.cpp">
+      <Filter>Game\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Resource\ResourceSystem.cpp">
+      <Filter>Engine\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -511,9 +511,6 @@
     <ClInclude Include="Engine\Scene\IScene.h">
       <Filter>Engine\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Test\TestScene.h">
-      <Filter>Engine\Test</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
@@ -616,9 +613,6 @@
     <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h">
       <Filter>Engine\ThirdParty\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Test\TestActor.h">
-      <Filter>Engine\Test</Filter>
-    </ClInclude>
     <ClInclude Include="Game\GameContext.h">
       <Filter>Game</Filter>
     </ClInclude>
@@ -636,6 +630,15 @@
     </ClInclude>
     <ClInclude Include="Engine\Loader\LoaderAPI.h">
       <Filter>Engine\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\TestActor.h">
+      <Filter>Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\TestScene.h">
+      <Filter>Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\ResourceSystem.h">
+      <Filter>Engine\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -707,9 +710,6 @@
     </Filter>
     <Filter Include="Engine\Scene">
       <UniqueIdentifier>{0937fdad-9e5c-4c74-919d-e1071356bf22}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Test">
-      <UniqueIdentifier>{43d4c384-6a08-426d-ae97-63137e25ad18}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Utils">
       <UniqueIdentifier>{9c7fbf6d-bb18-4efe-a7f1-37b3a4e17071}</UniqueIdentifier>
@@ -857,6 +857,15 @@
     </Filter>
     <Filter Include="Resources\Shaders\PS">
       <UniqueIdentifier>{605f145a-04f5-4610-89e7-9d0c5c381bdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\GameObject">
+      <UniqueIdentifier>{5fe58151-51d1-435c-9bf7-09b5e9921115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Scene">
+      <UniqueIdentifier>{6708bf80-8e61-41b5-9a4e-f07f5ba409ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test">
+      <UniqueIdentifier>{0a97b779-5bcf-4efc-b8d4-9ef624ba2a6c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

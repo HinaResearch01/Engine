@@ -67,7 +67,7 @@ HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& key, 
 
 HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
 {
-	auto* meshMgr = MeshManager::GetInstance();
+	auto* meshMgr = ResourceSystem::GetInstance()->GetMeshManager();
 	
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
@@ -174,7 +174,7 @@ bool MeshLoader::ParseAiMesh(const aiMesh* mesh, std::vector<Vertex>& outVertice
 
 bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alias)
 {
-	auto* meshMgr = MeshManager::GetInstance();
+	auto* meshMgr = ResourceSystem::GetInstance()->GetMeshManager();
 
 	if (meshMgr->HasKey(key)) {
 		meshMgr->RegisterAlias(alias, key);

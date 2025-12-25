@@ -3,6 +3,7 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include "Resource/ResourceSystem.h"
 #include "Resource/Mesh/MeshManager.h"
 
 // 前方宣言

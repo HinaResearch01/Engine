@@ -44,20 +44,16 @@ struct MeshAsset {
 /* メッシュ管理 */
 class MeshManager {
 
-private: // シングルトン
-	MeshManager();
-	~MeshManager() = default;
-	MeshManager(const MeshManager&) = delete;
-	const MeshManager& operator=(const MeshManager&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static MeshManager* GetInstance() {
-		static MeshManager instance;
-		return &instance;
-	}
+	MeshManager();
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~MeshManager() = default;
 
 	/// <summary>
 	/// 登録

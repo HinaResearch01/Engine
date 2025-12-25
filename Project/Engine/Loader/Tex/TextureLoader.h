@@ -4,6 +4,9 @@
 #include <Windows.h>
 #include <DirectXTex.h>
 
+#include "Resource/ResourceSystem.h"
+#include "Resource/Tex/TextureManager.h"
+
 // 前方宣言
 struct aiScene;
 struct aiMaterial;

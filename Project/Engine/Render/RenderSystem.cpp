@@ -6,8 +6,7 @@ using namespace Tsumi::Render;
 RenderSystem::RenderSystem()
 {
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
-	meshMgr_ = Resource::MeshManager::GetInstance();
-	texMgr_ = Resource::TextureManager::GetInstance();
+	resourceSys_ = Resource::ResourceSystem::GetInstance();
 	psoLib_ = Graphic::PSOLibrary::GetInstance();
 	rootSigLib_ = Graphic::RootSignatureLibrary::GetInstance();
 }

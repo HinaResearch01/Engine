@@ -40,20 +40,16 @@ struct TextureAsset {
 /* テクスチャ管理 */
 class TextureManager {
 
-private: // シングルトン
-	TextureManager();
-	~TextureManager() = default;
-	TextureManager(const TextureManager&) = delete;
-	const TextureManager& operator=(const TextureManager&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static TextureManager* GetInstance() {
-		static TextureManager instance;
-		return &instance;
-	}
+	TextureManager();
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~TextureManager() = default;
 
 	/// <summary>
 	/// 登録

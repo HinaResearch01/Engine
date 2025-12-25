@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Scene/IScene.h"
+#include "Scene/IScene.h"
 
 /* テスト用のsceneクラス */
 class TestScene : public Tsumi::IScene {

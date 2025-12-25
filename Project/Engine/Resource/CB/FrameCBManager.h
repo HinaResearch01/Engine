@@ -10,23 +10,18 @@ namespace Tsumi::Resource {
 
 class FrameCBManager {
 
-private: // シングルトン
-	FrameCBManager()
-	{
-		cbAllocator_ = std::make_unique<DynamicCBAllocator>();
-	}
-	~FrameCBManager() = default;
-	FrameCBManager(const FrameCBManager&) = delete;
-	const FrameCBManager& operator=(const FrameCBManager&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static FrameCBManager* GetInstance() {
-		static FrameCBManager instance;
-		return &instance;
+	FrameCBManager() {
+		cbAllocator_ = std::make_unique<DynamicCBAllocator>();
 	}
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~FrameCBManager() = default;
 
 	/// <summary>
 	/// 初期化処理　

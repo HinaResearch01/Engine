@@ -1,5 +1,4 @@
 #include "TextureLoader.h"
-#include "Resource/Tex/TextureManager.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Desc/DescriptorAllocator.h"
 #include "Utils/Logger/UtilsLog.h"
@@ -95,7 +94,7 @@ HRESULT TextureLoader::LoadFromScene(const aiScene* scene, const std::string& mo
 
 HRESULT TextureLoader::RegisterFromImage(const std::string& key, const DirectX::ScratchImage& image, const std::string& alias, bool srgb)
 {
-	auto* texMgr = TextureManager::GetInstance();
+	auto* texMgr = ResourceSystem::GetInstance()->GetTextureManager();
 
 	// GPU リソースの生成と登録
 	HRESULT hr = texMgr->RegisterTexture(
@@ -238,7 +237,7 @@ HRESULT TextureLoader::DecodeToScratchImage(const std::string& path, bool srgb, 
 
 bool TextureLoader::TryResolveAlias(const std::string& key, const std::string& alias)
 {
-	auto* texMgr = TextureManager::GetInstance();
+	auto* texMgr = ResourceSystem::GetInstance()->GetTextureManager();
 
 	if (texMgr->HasKey(key)) {
 		texMgr->RegisterAlias(alias, key);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DX12/DX12Manager.h"
+#include "Resource/ResourceSystem.h"
 #include "Resource/Tex/TextureManager.h"
 #include "Resource/Mesh/MeshManager.h"
 #include "Graphic/PSO/PSOLibrary.h"
@@ -93,8 +94,7 @@ private:
 	std::vector<RenderItem> items_;
 	
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
-	Resource::MeshManager* meshMgr_ = nullptr;
-	Resource::TextureManager* texMgr_ = nullptr;
+	Resource::ResourceSystem* resourceSys_ = nullptr;
 	Graphic::PSOLibrary* psoLib_ = nullptr;
 	Graphic::RootSignatureLibrary* rootSigLib_ = nullptr;
 };
