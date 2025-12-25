@@ -347,6 +347,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Engine\Loader\LoaderAPI.h" />
     <ClInclude Include="Engine\Loader\Mesh\MeshLoader.h" />
     <ClInclude Include="Engine\Loader\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Loader\Tex\TextureLoader.h" />
@@ -360,7 +361,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
     <ClInclude Include="Engine\Resource\Mesh\MeshManager.h" />
-    <ClInclude Include="Engine\Resource\ResourceAPI.h" />
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h" />
     <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\Test\TestActor.h" />

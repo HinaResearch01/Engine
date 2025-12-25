@@ -598,9 +598,6 @@
     <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Resource\ResourceAPI.h">
-      <Filter>Engine\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h">
       <Filter>Engine\Resource\Tex</Filter>
     </ClInclude>
@@ -636,6 +633,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Render\RenderSystem.h">
       <Filter>Engine\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Loader\LoaderAPI.h">
+      <Filter>Engine\Loader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

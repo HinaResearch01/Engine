@@ -70,7 +70,12 @@ public:
 		}
 
 		// 2) Allocate a descriptor from DescriptorAllocator
-		auto descAlloc = Tsumi::DX12::DescriptorAllocator::GetInstance()->Allocate(1);
+		auto* transientAlloc = Tsumi::DX12::DX12Manager::GetInstance()->GetTransientDescAlloc();
+		if (!transientAlloc) {
+			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - transient descriptor allocator is null");
+		}
+
+		auto descAlloc = transientAlloc->Allocate(1);
 		if (!descAlloc.valid()) {
 			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - Descriptor allocation failed");
 		}
@@ -93,7 +98,6 @@ public:
 		// Return the DescAlloc (contains cpu/gpu handles)
 		return descAlloc;
 	}
-
 
 	/// <summary>
 	/// 解放処理

@@ -43,7 +43,7 @@ public:
 	/// <summary>
 	/// 解放処理
 	/// </summary>
-	void OnFinalize();
+	void Finalize();
 
 	/// <summary>
 	/// フレーム開始処理

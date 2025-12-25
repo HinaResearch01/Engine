@@ -1,15 +1,5 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-#include <format>
-#include <wrl.h>
-#include <d3d12.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <filesystem>
-
 #include "Utils/Logger/UtilsLog.h"
 #include "Utils/Func/UtilFunc.h"
 #include  "Loader/Tex/TextureLoader.h"
@@ -22,10 +12,10 @@ struct mdl {};
 struct tex {};
 struct snd {};
 
-namespace tme {
+namespace tme::API {
 
-/* 各種リソースの共通インターフェース */
-class ResourceAPI {
+/* 各種アセットの共通インターフェース */
+class AssetLoader {
 
 public:
 	/// <summary>
@@ -35,12 +25,6 @@ public:
 	static HRESULT Load(const std::string& fullPath, const std::string& alias);
 
 	/// <summary>
-	/// 所持確認
-	/// </summary>
-//	template <typename T>
-//	static bool Has(const std::string& name);
-
-	/// <summary>
 	/// シーンリセット処理
 	/// </summary>
 	static HRESULT SceneReset();
@@ -48,13 +32,13 @@ public:
 
 
 template <>
-inline HRESULT ResourceAPI::Load<mdl>(const std::string& fullPath, const std::string& alias)
+inline HRESULT AssetLoader::Load<mdl>(const std::string& fullPath, const std::string& alias)
 {
 	HRESULT hr = Tsumi::Loader::ModelLoader::Load(fullPath, alias);
 
 	if (FAILED(hr)) {
 		Tsumi::Utils::Error(std::format(
-			L"[ResourceAPI::Load<Model>] Failed to load model '{}' (HRESULT = 0x{:08X})",
+			L"[AssetLoader::Load<Model>] Failed to load model '{}' (HRESULT = 0x{:08X})",
 			Tsumi::Utils::Utf8ToWstring(fullPath),
 			static_cast<unsigned>(hr)
 		));
@@ -65,13 +49,13 @@ inline HRESULT ResourceAPI::Load<mdl>(const std::string& fullPath, const std::st
 }
 
 template <>
-inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::string& alias)
+inline HRESULT AssetLoader::Load<tex>(const std::string& fullPath, const std::string& alias)
 {
 	HRESULT hr = Tsumi::Loader::TextureLoader::Load(fullPath, alias);
 
 	if (FAILED(hr)) {
 		Tsumi::Utils::Error(std::format(
-			L"[ResourceAPI::Load<Tex>] Failed to load texture '{}' (HRESULT = 0x{:08X})",
+			L"[AssetLoader::Load<Tex>] Failed to load texture '{}' (HRESULT = 0x{:08X})",
 			Tsumi::Utils::Utf8ToWstring(fullPath),
 			static_cast<unsigned>(hr)
 		));
@@ -81,12 +65,13 @@ inline HRESULT ResourceAPI::Load<tex>(const std::string& fullPath, const std::st
 	return S_OK;
 }
 
-inline HRESULT ResourceAPI::SceneReset()
+inline HRESULT AssetLoader::SceneReset()
 {
 	using namespace Tsumi::Resource;
 	TextureManager::GetInstance()->UnloadAll();
 	MeshManager::GetInstance()->UnloadAll();
 	return S_OK;
 }
+
 
 }

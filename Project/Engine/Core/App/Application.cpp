@@ -32,7 +32,7 @@ Application::~Application()
 	gameCtx_->Finalize();
     imgui_->Finalize();
     window_->OnFinalize();
-    dx12_->OnFinalize();
+    dx12_->Finalize();
 }
 
 void Application::Init(const Win32::Win32Desc& windowDesc)

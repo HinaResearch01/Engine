@@ -3,6 +3,8 @@
 #include "DX12/DX12Manager.h"
 #include "Resource/Tex/TextureManager.h"
 #include "Resource/Mesh/MeshManager.h"
+#include "Graphic/PSO/PSOLibrary.h"
+#include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Math/TMath.h"
 
 #include <cstdint>
@@ -70,15 +72,21 @@ public:
 #pragma	endregion
 
 private:
+
+	/// <summary>
+	/// Itemの描画
+	/// </summary>
+	void DrawItem(ID3D12GraphicsCommandList* list, const RenderItem& item);
+
 	/// <summary>
 	/// Itemのソート
 	/// </summary>
 	void SortItems();
 
 	/// <summary>
-	/// Itemの描画
+	/// PsoとRootSigの設定
 	/// </summary>
-	void DrawItem(ID3D12GraphicsCommandList* list, const RenderItem& item);
+	void SetPSOAndRootSig(ID3D12GraphicsCommandList* list);
 
 private:
 
@@ -87,6 +95,8 @@ private:
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Resource::MeshManager* meshMgr_ = nullptr;
 	Resource::TextureManager* texMgr_ = nullptr;
+	Graphic::PSOLibrary* psoLib_ = nullptr;
+	Graphic::RootSignatureLibrary* rootSigLib_ = nullptr;
 };
 
 }

@@ -8,6 +8,8 @@ RenderSystem::RenderSystem()
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 	meshMgr_ = Resource::MeshManager::GetInstance();
 	texMgr_ = Resource::TextureManager::GetInstance();
+	psoLib_ = Graphic::PSOLibrary::GetInstance();
+	rootSigLib_ = Graphic::RootSignatureLibrary::GetInstance();
 }
 
 void RenderSystem::BeginFrame()
@@ -36,11 +38,19 @@ void RenderSystem::Render()
 	auto* cmdList = dx12Mgr_->GetCmdList();
 	if (!cmdList) return;
 
+	// PSO と RootSig 設定
+	SetPSOAndRootSig(cmdList);
+
 	// アイテム描画
 	for (auto& item : items_)
 	{
 		DrawItem(cmdList, item);
 	}
+}
+
+void RenderSystem::DrawItem(ID3D12GraphicsCommandList* list, const RenderItem& item)
+{
+	list, item;
 }
 
 void RenderSystem::SortItems()
@@ -55,7 +65,11 @@ void RenderSystem::SortItems()
 	});
 }
 
-void RenderSystem::DrawItem(ID3D12GraphicsCommandList* list, const RenderItem& item)
+void RenderSystem::SetPSOAndRootSig(ID3D12GraphicsCommandList* list)
 {
-	list, item;
+	/* 要修正 */
+	list->SetGraphicsRootSignature(rootSigLib_->Get("Object3D"));
+	list->SetPipelineState(psoLib_->Get(L"Object3D"));
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+

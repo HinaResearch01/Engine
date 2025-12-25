@@ -38,7 +38,7 @@ void DX12Manager::Init()
 	}
 }
 
-void DX12Manager::OnFinalize()
+void DX12Manager::Finalize()
 {
 	if (cmdContext_) cmdContext_->WaitForGpu();
 	if (transientDescAlloc_) transientDescAlloc_.reset();

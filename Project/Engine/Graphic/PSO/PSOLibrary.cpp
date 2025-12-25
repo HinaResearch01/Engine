@@ -49,7 +49,6 @@ ID3D12PipelineState* PSOLibrary::Get(const std::wstring& name)
     return it->second.Get();
 }
 
-
 bool PSOLibrary::Has(const std::wstring& name) const
 {
     std::lock_guard<std::mutex> lk(mutex_);
