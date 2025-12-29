@@ -8,7 +8,6 @@
 #include "Graphic/Shader/ShaderLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
-#include "Graphic/Frame/FrameResource.h"
 #include "Resource/ResourceSystem.h"
 #include "ThirdParty/ImGui/ImGuiManager.h"
 
@@ -21,7 +20,6 @@ Application::Application()
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
-    frameResource_ = Graphic::FrameResource::GetInstance();
     resourceMgr_ = Resource::ResourceSystem::GetInstance();
     imgui_ = GUI::ImGuiManager::GetInstance();
 	gameCtx_ = std::make_unique<GameContext>();
@@ -31,6 +29,7 @@ Application::~Application()
 {
 	gameCtx_->Finalize();
     imgui_->Finalize();
+	resourceMgr_->Finalize();
     window_->OnFinalize();
     dx12_->Finalize();
 }
@@ -43,7 +42,6 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     shaders_->CompileAllShader();
     rootsigs_->Init();
     psos_->Init();
-    frameResource_->Init();
 	resourceMgr_->Init();
     imgui_->Init();
 }

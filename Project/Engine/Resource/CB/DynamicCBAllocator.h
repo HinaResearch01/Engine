@@ -1,13 +1,12 @@
 #pragma once
 
-#include <d3d12.h>
-#include <wrl.h>
 #include <cstdint>
-#include <vector>
-#include <cassert>
+#include <cstddef>
+#include <d3d12.h>
+#include "DX12/PerFrame/PerFrameResource.h"
 
 // 前方宣言
-namespace Tsumi::DX12 {
+namespace Tsumi::DX12 { 
 class DX12Manager;
 }
 
@@ -20,7 +19,7 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	DynamicCBAllocator();
+	DynamicCBAllocator() = default;
 
 	/// <summary>
 	/// デストラクタ
@@ -28,45 +27,40 @@ public:
 	~DynamicCBAllocator() = default;
 
 	/// <summary>
-	/// 初期化処理
+	/// 
 	/// </summary>
-	void Init(uint32_t totalSizePerframe = 1024 * 1024);
+	void Attach(Tsumi::DX12::PerFrameResource* fr);
 
 	/// <summary>
-	/// フレーム切り替え
+	/// 
 	/// </summary>
-	void BeginFrame(uint32_t frameIndex);
-
-	/// <summary>
-	/// 指定サイズの定数バッファ領域を書確保、CPU->GPUへコピー
-	/// </summary>
-	D3D12_GPU_VIRTUAL_ADDRESS Allocate(const void* srcData, uint32_t size);
-
-#pragma region Accessor
-	ID3D12Resource* GetCurrentHeap() const { return uploadHeaps_[currentFrame_].Get(); }
-#pragma endregion
-
-private:
-	/// <summary>
-	/// 256バイトアライメントを保証
-	/// </summary>
-	uint32_t Align256(uint32_t size)
+	template<typename T>
+	D3D12_GPU_VIRTUAL_ADDRESS UploadCB(const T& data)
 	{
-		return (size + 255) & ~255u;
+		if (!fr_) return 0;
+
+		constexpr size_t kAlign = 256;
+		const size_t bytes = AlignUp(sizeof(T), kAlign);
+
+		size_t offset = 0;
+		if (!fr_->Allocate(bytes, kAlign, offset)) {
+			return 0; // ここはログ or assert 推奨
+		}
+
+		std::memcpy(mapped_ + offset, &data, sizeof(T));
+		return baseGpu_ + offset;
 	}
 
-public:
-	static constexpr uint32_t kFrameCount = 3; // triple buffering
+private:
+	/// <summary>
+	/// バイトアライメント
+	/// </summary>
+	size_t AlignUp(size_t v, size_t a) { return (v + (a - 1)) & ~(a - 1); }
 
 private:
-	uint32_t totalSizePerFrame_ = 0;
-	uint32_t currentOffset_ = 0;
-	uint32_t currentFrame_ = 0;
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> uploadHeaps_[kFrameCount];
-	uint8_t* mappedPtrs_[kFrameCount] = { nullptr };
-
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	Tsumi::DX12::PerFrameResource* fr_ = nullptr;
+	uint8_t* mapped_ = nullptr;
+	D3D12_GPU_VIRTUAL_ADDRESS baseGpu_ = 0;
 };
 
 }

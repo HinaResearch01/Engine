@@ -134,9 +134,6 @@
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp">
       <Filter>Engine\Framework\Actor</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp">
-      <Filter>Engine\Graphics\Frame</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
       <Filter>Engine\Resource\CB</Filter>
     </ClCompile>
@@ -184,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Resource\ResourceSystem.cpp">
       <Filter>Engine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
+      <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -577,9 +577,6 @@
     <ClInclude Include="Engine\Framework\Actor\IActor.h">
       <Filter>Engine\Framework\Actor</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\Frame\FrameResource.h">
-      <Filter>Engine\Graphics\Frame</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Math\Vector\Vector.h">
       <Filter>Engine\Math\Vector</Filter>
     </ClInclude>
@@ -639,6 +636,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Resource\ResourceSystem.h">
       <Filter>Engine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h">
+      <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -798,9 +798,6 @@
     <Filter Include="Engine\Math\Constants">
       <UniqueIdentifier>{04c2fffd-fda1-4f47-bb4b-6919f337659b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Graphics\Frame">
-      <UniqueIdentifier>{8464be83-78ea-4fab-91ef-e990a3decd2f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Resource">
       <UniqueIdentifier>{abe9facf-8313-4999-aabd-a3696a5f456e}</UniqueIdentifier>
     </Filter>
@@ -866,6 +863,9 @@
     </Filter>
     <Filter Include="Game\Test">
       <UniqueIdentifier>{0a97b779-5bcf-4efc-b8d4-9ef624ba2a6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\DX12\PerFrame">
+      <UniqueIdentifier>{a8834c4a-1fc1-4c12-88a5-842e95f5d3fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

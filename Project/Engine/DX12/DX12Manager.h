@@ -14,6 +14,7 @@
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
 #include "FrameSync/FrameSync.h"
+#include "PerFrame/PerFrameResource.h"
 #include "Utils/DxException/DxException.h"
 
 namespace Tsumi::DX12 {
@@ -105,6 +106,10 @@ public:
 	DescriptorAllocator* GetPersistentDescAlloc() const { return persistentDescAlloc_.get(); }
 	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
 	FrameSync* GetFrameSync() const { return frameSync_.get(); }
+	PerFrameResource* GetCurrentFrameResource() const {
+		uint32_t idx = frameSync_ ? frameSync_->GetFrameIndex() : 0;
+		return (idx < frameResources_.size()) ? frameResources_[idx].get() : nullptr;
+	}
 
 #pragma endregion
 
@@ -123,6 +128,7 @@ private:
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuf_;
 	std::unique_ptr<FrameSync> frameSync_;
+	std::vector<std::unique_ptr<PerFrameResource>> frameResources_;
 
 	// デフォルトはトリプルバッファ
 	UINT bufferCount_ = 3;

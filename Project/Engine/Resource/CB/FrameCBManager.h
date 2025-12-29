@@ -14,9 +14,9 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	FrameCBManager() {
-		cbAllocator_ = std::make_unique<DynamicCBAllocator>();
-	}
+	FrameCBManager()
+		: cbAllocator_(std::make_unique<DynamicCBAllocator>())
+	{}
 
 	/// <summary>
 	/// デストラクタ
@@ -26,18 +26,17 @@ public:
 	/// <summary>
 	/// 初期化処理　
 	/// </summary>
-	void Init()
-	{
-		cbAllocator_->Init();
-	}
+	void Init() {}
 
 	/// <summary>
 	/// フレーム切り替え
 	/// </summary>
 	void BeginFrame(uint32_t frameIndex)
 	{
-		assert(cbAllocator_);
-		cbAllocator_->BeginFrame(frameIndex);
+		frameIndex; // 未使用
+		auto* fr = DX12::DX12Manager::GetInstance()->GetCurrentFrameResource();
+		assert(fr && "PerFrameResource is null");
+		cbAllocator_->Attach(fr);
 	}
 
 	/// <summary>
@@ -46,8 +45,10 @@ public:
 	template<typename T>
 	D3D12_GPU_VIRTUAL_ADDRESS UploadCB(const T& data)
 	{
+		static_assert(std::is_trivially_copyable_v<T>,
+					  "UploadCB requires trivially copyable type");
 		assert(cbAllocator_);
-		return cbAllocator_->Allocate(&data, sizeof(T));
+		return cbAllocator_->UploadCB(data);
 	}
 
 	/// <summary>
@@ -56,41 +57,38 @@ public:
 	template<typename T>
 	Tsumi::DX12::DescAlloc UploadCBAndCreateView(const T& data)
 	{
-		static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable for GPU upload");
+		static_assert(std::is_trivially_copyable_v<T>,
+					  "T must be trivially copyable for GPU upload");
 
 		// 1) Upload data and get GPU address
 		D3D12_GPU_VIRTUAL_ADDRESS gpuAddr = UploadCB(data);
-		if (gpuAddr == 0) {
-			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - UploadCB returned 0 GPU address");
-		}
+		assert(gpuAddr != 0 && "UploadCB failed");
 
 		// 2) Allocate a descriptor from DescriptorAllocator
-		auto* transientAlloc = Tsumi::DX12::DX12Manager::GetInstance()->GetTransientDescAlloc();
-		if (!transientAlloc) {
-			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - transient descriptor allocator is null");
-		}
+		auto* transientAlloc =
+			DX12::DX12Manager::GetInstance()->GetTransientDescAlloc();
+		assert(transientAlloc && "Transient DescriptorAllocator is null");
 
 		auto descAlloc = transientAlloc->Allocate(1);
-		if (!descAlloc.valid()) {
-			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - Descriptor allocation failed");
-		}
+		assert(descAlloc.valid() && "Descriptor allocation failed");
 
 		// 3) Create CBV
-		ID3D12Device* device = Tsumi::DX12::DX12Manager::GetInstance()->GetDevice();
-		if (!device) {
-			throw std::runtime_error("FrameCBManager::UploadCBAndCreateView - device is null");
-		}
+		ID3D12Device* device =
+			DX12::DX12Manager::GetInstance()->GetDevice();
+		assert(device && "D3D12 device is null");
 
-		// Size must be 256-aligned
-		UINT sizeInBytes = static_cast<UINT>((sizeof(T) + 255) & ~255u);
+		const UINT sizeInBytes =
+			static_cast<UINT>((sizeof(T) + 255) & ~255u);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
 		cbvDesc.BufferLocation = gpuAddr;
 		cbvDesc.SizeInBytes = sizeInBytes;
 
-		device->CreateConstantBufferView(&cbvDesc, descAlloc.cpuHandle);
+		device->CreateConstantBufferView(
+			&cbvDesc,
+			descAlloc.cpuHandle
+		);
 
-		// Return the DescAlloc (contains cpu/gpu handles)
 		return descAlloc;
 	}
 

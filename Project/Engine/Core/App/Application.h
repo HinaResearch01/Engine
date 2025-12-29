@@ -20,7 +20,6 @@ namespace Graphic {
 class ShaderLibrary;
 class RootSignatureLibrary;
 class PSOLibrary;
-class FrameResource;
 }
 namespace Resource {
 class ResourceSystem;
@@ -68,7 +67,6 @@ private:
     Graphic::ShaderLibrary* shaders_ = nullptr;
     Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
     Graphic::PSOLibrary* psos_ = nullptr;
-    Graphic::FrameResource* frameResource_ = nullptr;
 
     Resource::ResourceSystem* resourceMgr_ = nullptr;
 

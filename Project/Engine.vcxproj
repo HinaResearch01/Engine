@@ -187,11 +187,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp" />
+    <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
-    <ClCompile Include="Engine\Graphic\Frame\FrameResource.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -336,12 +336,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h" />
+    <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
-    <ClInclude Include="Engine\Graphic\Frame\FrameResource.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />

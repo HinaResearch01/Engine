@@ -21,12 +21,21 @@ void DX12Manager::Init()
 	try {
 		Utils::DX_CALL(dx12Device_->Create());
 		if(cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
+
 		Utils::DX_CALL(cmdContext_->Create());
 		Utils::DX_CALL(swapChain_->Create());
 		Utils::DX_CALL(framebuf_->Init());
 		Utils::DX_CALL(frameSync_->Init());
+
 		Utils::DX_CALL(transientDescAlloc_->Init());
 		Utils::DX_CALL(persistentDescAlloc_->Init());
+
+		frameResources_.clear();
+		frameResources_.resize(bufferCount_);
+		for (UINT i = 0; i < bufferCount_; ++i) {
+			frameResources_[i] = std::make_unique<PerFrameResource>();
+			Utils::DX_CALL(frameResources_[i]->Init(GetDevice(), /*uploadSize*/ 16 * 1024));
+		}
 	}
 	catch (const Utils::DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す
@@ -43,6 +52,11 @@ void DX12Manager::Finalize()
 	if (cmdContext_) cmdContext_->WaitForGpu();
 	if (transientDescAlloc_) transientDescAlloc_.reset();
 	if(persistentDescAlloc_) persistentDescAlloc_.reset();
+
+	for (auto& fr : frameResources_) {
+		if (fr) fr->~PerFrameResource();
+	}
+	frameResources_.clear();
 }
 
 HRESULT DX12Manager::StartFrame()
@@ -63,6 +77,11 @@ HRESULT DX12Manager::StartFrame()
 	// Reset transient allocator only (persistent kept)
 	if (transientDescAlloc_) {
 		transientDescAlloc_->Reset();
+	}
+
+	// Notify per-frame resource about frame start (hook for bookkeeping)
+	if (frameIndex < frameResources_.size() && frameResources_[frameIndex]) {
+		frameResources_[frameIndex]->BeginFrame(frameIndex);
 	}
 
 	// === コマンドリストの準備 ===
