@@ -107,64 +107,87 @@ bool RootSignatureLibrary::Has(const std::string& name) const
 
 void RootSignatureLibrary::CreateObject3D()
 {
-    // -------------------------
-    // CBV / SRV の定義（ディスクリプタ範囲）
-    // -------------------------
-    // VS: 定数バッファ1個 (b0)
-    CD3DX12_DESCRIPTOR_RANGE cbvRangeVS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-    // PS: 定数バッファ1個 (b1)
-    CD3DX12_DESCRIPTOR_RANGE cbvRangePS(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 1);
-    // PS: テクスチャ (SRV) 1個 (t0)
-    CD3DX12_DESCRIPTOR_RANGE srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	// -------------------------
+	// SRV の定義（ディスクリプタ範囲）
+	// -------------------------
+	// PS: テクスチャ (SRV) 1個 (t0)
+	CD3DX12_DESCRIPTOR_RANGE srvRange(
+		D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-    // ルートパラメータを定義（VS用CBVテーブル、PS用CBVテーブル、PS用SRVテーブル）
-    CD3DX12_ROOT_PARAMETER params[3]{};
-    params[0].InitAsDescriptorTable(1, &cbvRangeVS, D3D12_SHADER_VISIBILITY_VERTEX);
-    params[1].InitAsDescriptorTable(1, &cbvRangePS, D3D12_SHADER_VISIBILITY_PIXEL);
-    params[2].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
+	// -------------------------
+	// ルートパラメータ定義
+	// 0 : VS b0 (root CBV)
+	// 1 : PS b1 (root CBV)
+	// 2 : PS t0 (SRV table)
+	// -------------------------
+	CD3DX12_ROOT_PARAMETER params[3]{};
 
-    // -------------------------
-    // スタティックサンプラー定義（共通設定）
-    // -------------------------
-    std::vector<D3D12_STATIC_SAMPLER_DESC> staticSamplers;
+	// VS: 定数バッファ b0（root CBV）
+	params[0].InitAsConstantBufferView(
+		0, // b0
+		0,
+		D3D12_SHADER_VISIBILITY_VERTEX
+	);
 
-    // s0 : 線形補間＋ラップモード（一般的なテクスチャサンプリング）
-    D3D12_STATIC_SAMPLER_DESC linearWrap{};
-    linearWrap.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-    linearWrap.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    linearWrap.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    linearWrap.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    linearWrap.MipLODBias = 0;
-    linearWrap.MaxAnisotropy = 0;
-    linearWrap.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-    linearWrap.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-    linearWrap.MinLOD = 0.0f;
-    linearWrap.MaxLOD = D3D12_FLOAT32_MAX;
-    linearWrap.ShaderRegister = 0; // s0
-    linearWrap.RegisterSpace = 0;
-    linearWrap.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-    staticSamplers.push_back(linearWrap);
+	// PS: 定数バッファ b1（root CBV）
+	params[1].InitAsConstantBufferView(
+		1, // b1
+		0,
+		D3D12_SHADER_VISIBILITY_PIXEL
+	);
 
-    // s1 : 最近傍＋クランプモード（UIやピクセルくっきり表現などに使用）
-    D3D12_STATIC_SAMPLER_DESC pointClamp = CD3DX12_STATIC_SAMPLER_DESC(
-        1, // s1 レジスタ
-        D3D12_FILTER_MIN_MAG_MIP_POINT,
-        D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-        D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-        D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-    pointClamp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-    staticSamplers.push_back(pointClamp);
+	// PS: テクスチャ SRV (t0)
+	params[2].InitAsDescriptorTable(
+		1,
+		&srvRange,
+		D3D12_SHADER_VISIBILITY_PIXEL
+	);
 
-    // -------------------------
-    // ルートシグネチャの作成
-    // -------------------------
-    D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = _countof(params);
-    desc.pParameters = params;
-    desc.NumStaticSamplers = static_cast<UINT>(staticSamplers.size());
-    desc.pStaticSamplers = staticSamplers.empty() ? nullptr : staticSamplers.data();
-    desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	// -------------------------
+	// スタティックサンプラー
+	// -------------------------
+	std::vector<D3D12_STATIC_SAMPLER_DESC> staticSamplers;
 
-    // "Object3D" という名前で登録
-    Register("Object3D", desc, staticSamplers);
+	// s0 : Linear Wrap
+	D3D12_STATIC_SAMPLER_DESC linearWrap{};
+	linearWrap.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	linearWrap.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	linearWrap.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	linearWrap.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	linearWrap.MipLODBias = 0;
+	linearWrap.MaxAnisotropy = 0;
+	linearWrap.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	linearWrap.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	linearWrap.MinLOD = 0.0f;
+	linearWrap.MaxLOD = D3D12_FLOAT32_MAX;
+	linearWrap.ShaderRegister = 0; // s0
+	linearWrap.RegisterSpace = 0;
+	linearWrap.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	staticSamplers.push_back(linearWrap);
+
+	// s1 : Point Clamp
+	D3D12_STATIC_SAMPLER_DESC pointClamp =
+		CD3DX12_STATIC_SAMPLER_DESC(
+		1,
+		D3D12_FILTER_MIN_MAG_MIP_POINT,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+	pointClamp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	staticSamplers.push_back(pointClamp);
+
+	// -------------------------
+	// ルートシグネチャ作成
+	// -------------------------
+	D3D12_ROOT_SIGNATURE_DESC desc{};
+	desc.NumParameters = _countof(params);
+	desc.pParameters = params;
+	desc.NumStaticSamplers =
+		static_cast<UINT>(staticSamplers.size());
+	desc.pStaticSamplers =
+		staticSamplers.empty() ? nullptr : staticSamplers.data();
+	desc.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	Register("Object3D", desc, staticSamplers);
 }

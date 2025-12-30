@@ -5,11 +5,6 @@
 
 namespace Tsumi::Framework {
 
-struct ObjMat {
-	Math::Mat4x4 World{};
-	Math::Mat4x4 WVP{};
-	Math::Mat4x4 WorldInverseTranspose{};
-};
 struct SRT {
 	Math::Vec3f scale{};
 	Math::Vec3f rotate{};
@@ -53,9 +48,12 @@ public:
 
 #pragma region Accessor
 	// ワールド座標
-	Math::Vec3f GetWorldPos();
+	Math::Vec3f GetWorldPos() { 
+		return { worldMat_.m[3][0], worldMat_.m[3][1], worldMat_.m[3][2] }; }
 	// ワールド座標
-	const Math::Mat4x4& GetWorldMatrix();
+	const Math::Mat4x4& GetWorldMatrix() {
+		UpdateMat();
+		return worldMat_; }
 	// SRT
 	SRT GetSRT() const { return srt_; }
 	void SetSRT(const SRT& srt) { srt_ = srt; }
@@ -84,10 +82,11 @@ private:
 	// SRT
 	SRT srt_{};
 	// 行列
-	ObjMat mat_{};
+	Math::Mat4x4 worldMat_{};
 	// 親子
 	std::weak_ptr<TransformComponent> parent_;
 	std::vector<std::weak_ptr<TransformComponent>> children_;
 	bool isDirty_ = true; // SRT が変化したときに true にする
 };
+
 }

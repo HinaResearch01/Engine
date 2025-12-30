@@ -6,9 +6,7 @@ using namespace Tsumi::Math;
 void TransformComponent::Init()
 {
 	// 行列はIdentityで初期化
-	mat_.World.Identity();
-	mat_.WVP.Identity();
-	mat_.WorldInverseTranspose.Identity();
+	worldMat_.Identity();
 }
 
 void TransformComponent::Update()
@@ -34,36 +32,19 @@ void TransformComponent::DetachFromParent()
 	MarkDirty();
 }
 
- Vec3f TransformComponent::GetWorldPos()
+void TransformComponent::UpdateMat()
 {
-	 return { mat_.World.m[3][0], mat_.World.m[3][1], mat_.World.m[3][2] };
+	// ローカル行列
+	worldMat_ =
+		Func::MAT4x4::AffineMatrix(srt_.scale, srt_.rotate, srt_.translate);
+
+	// 親のワールド行列を掛ける
+	if (auto parent = parent_.lock()) {
+		worldMat_ *= parent->worldMat_;
+	}
 }
 
- const Mat4x4& TransformComponent::GetWorldMatrix()
- {
-	UpdateMat();
-	return mat_.World;
- }
-
- void TransformComponent::UpdateMat()
- {
-	 // ローカル行列
-	 mat_.World = 
-		 Func::MAT4x4::AffineMatrix(srt_.scale, srt_.rotate, srt_.translate);
-
-	 // 親のワールド行列を掛ける
-	 if (auto parent = parent_.lock()) {
-		 mat_.World *= parent->mat_.World;
-	 }
-
-	 // ワールド逆転置行列
-	 mat_.WorldInverseTranspose = mat_.World.Inverse().Transpose();
-
-	 // WVP 行列は描画時に cameraManager などから計算するのが良い
-
- }
-
- void TransformComponent::DrawImGui(std::string label)
+void TransformComponent::DrawImGui(std::string label)
 {
-	 label;
+	label;
 }
