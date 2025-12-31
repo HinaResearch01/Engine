@@ -13,7 +13,12 @@
 
 #include <cstdint>
 
-namespace Tsumi::Render {
+// 前方宣言
+namespace Tsumi {
+class IScene;
+}
+
+namespace Tsumi::Framework {
 
 using MeshHandle = std::string;
 using TextureHandle = std::string;
@@ -55,22 +60,7 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
-	void BeginFrame();
-
-	/// <summary>
-	/// 
-	/// </summary>
-	void EndFrame();
-
-	/// <summary>
-	/// 
-	/// </summary>
-	void Submit(const RenderItem& item);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	void Render();
+	void Render(IScene* scene);
 
 #pragma region Accessor
 

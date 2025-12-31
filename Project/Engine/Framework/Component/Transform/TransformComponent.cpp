@@ -7,14 +7,15 @@ void TransformComponent::Init()
 {
 	// 行列はIdentityで初期化
 	worldMat_.Identity();
+	prevSRT_ = srt_; // 初期状態を記録
 }
 
 void TransformComponent::Update()
 {
-	// Dirty フラグが立っている場合のみ行列を再計算
-	if (isDirty_ || (parent_.lock() && parent_.lock()->isDirty_)) {
+	// 親がいる場合は毎回更新
+	if (HasParent() || NeedsUpdate()) {
 		UpdateMat();
-		isDirty_ = false;
+		prevSRT_ = srt_;
 	}
 }
 
@@ -22,26 +23,37 @@ void TransformComponent::AttachToParent(std::weak_ptr<TransformComponent> parent
 {
 	// TODO : 機能として不十分
 	parent_ = parent;
-	MarkDirty();
 }
 
 void TransformComponent::DetachFromParent()
 {
 	// TODO : 機能として不十分
 	parent_.reset();
-	MarkDirty();
 }
 
 void TransformComponent::UpdateMat()
 {
 	// ローカル行列
-	worldMat_ =
-		Func::MAT4x4::AffineMatrix(srt_.scale, srt_.rotate, srt_.translate);
+	Math::Mat4x4 local =
+		Func::MAT4x4::AffineMatrix(
+		srt_.scale, srt_.rotate, srt_.translate);
 
-	// 親のワールド行列を掛ける
+	// 親がいる場合は親のワールド行列を掛ける
 	if (auto parent = parent_.lock()) {
-		worldMat_ *= parent->worldMat_;
+		worldMat_ = local * parent->worldMat_;
 	}
+	else {
+		worldMat_ = local;
+	}
+}
+
+bool TransformComponent::NeedsUpdate()
+{
+	if (srt_.scale != prevSRT_.scale)     return true;
+	if (srt_.rotate != prevSRT_.rotate)    return true;
+	if (srt_.translate != prevSRT_.translate) return true;
+	if (parent_.expired() == false)           return true; // 親ありは毎回
+	return false;
 }
 
 void TransformComponent::DrawImGui(std::string label)

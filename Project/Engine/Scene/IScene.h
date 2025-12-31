@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "Framework/Actor/IActor.h"
+#include "Framework/Render/RenderSystem.h"
 
 namespace Tsumi {
 
@@ -84,10 +85,12 @@ public:
 #pragma endregion
 
 protected:
-	GameContext* gameContext_ = nullptr;
-
 	// シーン内のアクター群
 	std::vector<std::unique_ptr<Framework::IActor>> actors_;
+	// 描画システム
+	Framework::RenderSystem renderSystem_;
+
+	GameContext* gameContext_ = nullptr;
 };
 
 }

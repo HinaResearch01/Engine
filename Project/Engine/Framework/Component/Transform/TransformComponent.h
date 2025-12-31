@@ -46,19 +46,18 @@ public:
 	void AttachToParent(std::weak_ptr<TransformComponent> parent);
 	void DetachFromParent();
 
+	/// <summary>
+	/// 親がいるか
+	/// </summary>
+	bool HasParent() const {
+		return !parent_.expired();
+	}
+
 #pragma region Accessor
-	// ワールド座標
 	Math::Vec3f GetWorldPos() const { 
 		return { worldMat_.m[3][0], worldMat_.m[3][1], worldMat_.m[3][2] }; }
-	// ワールド座標
 	const Math::Mat4x4& GetWorldMatrix() const {
 		return worldMat_; }
-	// SRT
-	SRT GetSRT() const { return srt_; }
-	void SetSRT(const SRT& srt) { srt_ = srt; }
-	void SetScale(const Math::Vec3f& s) { srt_.scale = s; MarkDirty(); }
-	void SetRotate(const Math::Vec3f& r) { srt_.rotate = r; MarkDirty(); }
-	void SetTranslate(const Math::Vec3f& t) { srt_.translate = t; MarkDirty(); }
 #pragma endregion 
 
 private:
@@ -68,24 +67,26 @@ private:
 	void UpdateMat();
 
 	/// <summary>
-	/// 非静止
+	/// 更新が必要か
 	/// </summary>
-	void MarkDirty() { isDirty_ = true; }
+	bool NeedsUpdate();
 
 	/// <summary>
 	/// ImGuiの描画
 	/// </summary>
 	void DrawImGui(std::string label = "");
 
-private:
+public:
 	// SRT
 	SRT srt_{};
+
+private:
+	SRT prevSRT_{};
 	// 行列
 	Math::Mat4x4 worldMat_{};
 	// 親子
 	std::weak_ptr<TransformComponent> parent_;
-	std::vector<std::weak_ptr<TransformComponent>> children_;
-	bool isDirty_ = true; // SRT が変化したときに true にする
+	//std::vector<std::weak_ptr<TransformComponent>> children_;
 };
 
 }

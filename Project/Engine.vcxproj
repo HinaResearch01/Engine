@@ -192,6 +192,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\Camera\CameraSystem.cpp" />
     <ClCompile Include="Engine\Framework\Component\Camera\CameraComponent.cpp" />
+    <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
     <ClCompile Include="Engine\Framework\Render\RenderSystem.cpp" />
@@ -345,6 +346,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Camera\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
     <ClInclude Include="Engine\Framework\Render\RenderSystem.h" />

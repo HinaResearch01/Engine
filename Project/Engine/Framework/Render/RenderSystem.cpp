@@ -1,7 +1,7 @@
 #include "RenderSystem.h"
 #include "Utils/Logger/UtilsLog.h"
 
-using namespace Tsumi::Render;
+using namespace Tsumi::Framework;
 
 RenderSystem::RenderSystem()
 {
@@ -11,25 +11,7 @@ RenderSystem::RenderSystem()
 	rootSigLib_ = Graphic::RootSignatureLibrary::GetInstance();
 }
 
-void RenderSystem::BeginFrame()
-{
-	items_.clear();
-}
-
-void RenderSystem::EndFrame()
-{
-}
-
-void RenderSystem::Submit(const RenderItem& item)
-{
-	if (item.mesh.empty()) {
-		Utils::Error(L"[RenderSystem] Add() mesh key is empty.");
-		return;
-	}
-	items_.push_back(item);
-}
-
-void RenderSystem::Render()
+void RenderSystem::Render(IScene* scene)
 {
 	// コマンドリスト取得
 	auto* cmdList = dx12Mgr_->GetCmdList();

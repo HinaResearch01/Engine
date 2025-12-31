@@ -2,7 +2,7 @@
 
 #include "Math/TMath.h"
 
-namespace Tsumi::Render {
+namespace Tsumi::Framework {
 
 struct GPUTransformCB {
 	Math::Mat4x4 worldMat;
