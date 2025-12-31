@@ -8,7 +8,10 @@
 #include <type_traits>
 #include <mutex>
 #include <optional>
+#include <bitset>
+
 #include "Math/TMath.h"
+#include "ActorTag.h"
 #include "../Component/IComponent.h"
 #include "../Component/Transform/TransformComponent.h"
 
@@ -29,18 +32,16 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	IActor() = default;
+	IActor();
 	IActor(const std::string& name);
 
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
 	virtual ~IActor() {
-		// safety: lock while clearing
 		std::lock_guard<std::mutex> lock(mutex_);
 		comps_.clear();
 		transComp_.reset();
-		renderType_.reset();
 	}
 
 	/// <summary>
@@ -53,63 +54,37 @@ public:
 	/// </summary>
 	virtual void Update([[maybe_unused]] float deltaTime) {};
 	void UpdateActor([[maybe_unused]] float deltaTime) {
-		// ステートアクティブ時、更新
-		if (state_ == State::Active) {
-			Update(deltaTime);
-			UpdateComponents(deltaTime);
-		}
-	}
-	void UpdateComponents([[maybe_unused]] float deltaTime) {
-		std::lock_guard<std::mutex> lock(mutex_);
-		for (auto& component : comps_) {
-			if (component.second) component.second->Update();
-		}
+		if (state_ != State::Active) return;
+		Update(deltaTime);
+		UpdateComponents(deltaTime);
 	}
 
 	/// <summary>
-	/// 描画処理
+	/// コンポーネントの追加（型で1つまで）
 	/// </summary>
-	void Render() {
-		std::shared_ptr<IComponent> rend = nullptr;
-		{
+	template<typename T, typename... Args>
+	T* AddComp(Args&&... args) {
+		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+
+		// Transform は必須＆特別扱い（必ず保持したい）
+		if constexpr (std::is_same_v<T, TransformComponent>) {
 			std::lock_guard<std::mutex> lock(mutex_);
-			if (renderType_) {
-				auto it = comps_.find(*renderType_);
-				if (it != comps_.end()) rend = it->second;
+			if (!transComp_) {
+				transComp_ = std::make_shared<TransformComponent>(std::forward<Args>(args)...);
+				transComp_->SetOwner(this);
+				transComp_->Init();
+				comps_[typeid(TransformComponent)] = transComp_;
 			}
+			return transComp_.get();
 		}
-		if (rend) rend->Render();
-	}
 
-	/// <summary>
-	/// コンポーネントの追加
-	/// </summary>
-	template<typename T, typename... Args>
-	void AddComp(Args&&... args) {
-		// TがIComponentクラスを継承していなければエラー
-		static_assert(std::is_base_of<IComponent, T>::value, "T must derive from Component");
 		auto comp = std::make_shared<T>(std::forward<Args>(args)...);
 		comp->SetOwner(this);
 		comp->Init();
-		std::lock_guard<std::mutex> lock(mutex_);
-		// 型情報でIComponentを保存 (同じコンポーネントは1つまで)
-		comps_[typeid(T)] = comp;
-	}
 
-	/// <summary>
-	/// 描画用コンポーネントを追加
-	/// - Actor が持てる RenderComp は 1 つまで
-	/// </summary>
-	template<typename T, typename... Args>
-	void AddRendComp(Args&&... args) {
 		std::lock_guard<std::mutex> lock(mutex_);
-		if (renderType_) return; // 既に render comp が設定されていれば早期return
-		static_assert(std::is_base_of<IComponent, T>::value, "T must derive from Component");
-		auto comp = std::make_shared<T>(std::forward<Args>(args)...);
-		comp->SetOwner(this);
-		comp->Init();
 		comps_[typeid(T)] = comp;
-		renderType_ = typeid(T);
+		return comp.get();
 	}
 
 	/// <summary>
@@ -117,11 +92,15 @@ public:
 	/// </summary>
 	template<typename T>
 	bool RemoveComp() {
+		// Transformは必須なので削除不可
+		if constexpr (std::is_same_v<T, TransformComponent>) {
+			return false;
+		}
+
 		std::lock_guard<std::mutex> lock(mutex_);
 		auto it = comps_.find(typeid(T));
 		if (it == comps_.end()) return false;
-		// if this was the render component, clear renderType_
-		if (renderType_ && *renderType_ == typeid(T)) renderType_.reset();
+
 		comps_.erase(it);
 		return true;
 	}
@@ -136,14 +115,8 @@ public:
 	}
 
 	/// <summary>
-	/// 衝突時コールバック関数
+	/// 指定型のコンポーネント取得（生ポインタ）
 	/// </summary>
-	virtual void OnCollision() {};
-
-#pragma region Accessor
-	// 状態
-	State GetState() const { return state_; }
-	// コンポーネント
 	template<typename T>
 	T* GetComponent() {
 		std::lock_guard<std::mutex> lock(mutex_);
@@ -151,7 +124,10 @@ public:
 		if (it == comps_.end()) return nullptr;
 		return dynamic_cast<T*>(it->second.get());
 	}
-	// コンポーネント
+
+	/// <summary>
+	/// 指定型のコンポーネント取得（shared_ptr）
+	/// </summary>
 	template<typename T>
 	std::shared_ptr<T> GetComponentShared() {
 		std::lock_guard<std::mutex> lock(mutex_);
@@ -159,25 +135,67 @@ public:
 		if (it == comps_.end()) return nullptr;
 		return std::dynamic_pointer_cast<T>(it->second);
 	}
+
 	// トランスフォームコンポーネント
-	std::weak_ptr<TransformComponent> GetTransComp() { return transComp_; }
+	TransformComponent* GetTransform() {
+		std::lock_guard<std::mutex> lock(mutex_);
+		return transComp_.get();
+	}
+
+	/// <summary>
+	/// 衝突時コールバック関数
+	/// </summary>
+	virtual void OnCollision() {};
+
+#pragma region Accessor
+	// 名前
+	std::string GetName() const { return name_; }
+	// 状態
+	State GetState() const { return state_; }
+	void SetState(State state) { state_ = state; }
 #pragma endregion 
+
+protected:
+	/// <summary>
+	/// コンポーネント更新
+	/// </summary>
+	void UpdateComponents([[maybe_unused]] float deltaTime) {
+		std::lock_guard<std::mutex> lock(mutex_);
+		for (auto& kv : comps_) {
+			if (kv.second) kv.second->Update();
+		}
+	}
+
+private:
+	/// <summary>
+	/// TransformComponent の確保
+	/// </summary>
+	void EnsureTransform() {
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (transComp_) return;
+
+		transComp_ = std::make_shared<TransformComponent>();
+		transComp_->SetOwner(this);
+		transComp_->Init();
+
+		comps_[typeid(TransformComponent)] = transComp_;
+	}
 
 private:
 	// 名前
 	std::string name_ = "default";
 
 	// 状態
-	State state_ = IActor::State::None;
+	State state_ = State::None;
 
-	// コンポーネント
+	// タグ（弾・地形など分類用）
+	std::bitset<32> tags_{};
+
+	// コンポーネント（型で1つまで）
 	std::unordered_map<std::type_index, std::shared_ptr<IComponent>> comps_;
 
-	// トランスフォームコンポーネント (Actorが必ず1つもつ)
+	// Transform（必須）
 	std::shared_ptr<TransformComponent> transComp_;
-
-	// レンダーコンポーネントの型
-	std::optional<std::type_index> renderType_;
 
 	// mutex for thread-safety
 	mutable std::mutex mutex_;

@@ -11,16 +11,12 @@ void TestScene::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Axis/Axis.obj", "Axis");
 }
 
-void TestScene::Update()
+void TestScene::Update(float deltaTime)
 {
-
+	deltaTime;
 #ifdef _DEBUG
 	
 #endif // _DEBUG
-}
-
-void TestScene::RenderModel()
-{
 }
 
 void TestScene::Finalize()

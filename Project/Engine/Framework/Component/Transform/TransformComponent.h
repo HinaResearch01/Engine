@@ -48,7 +48,7 @@ public:
 
 #pragma region Accessor
 	// ワールド座標
-	Math::Vec3f GetWorldPos() { 
+	Math::Vec3f GetWorldPos() const { 
 		return { worldMat_.m[3][0], worldMat_.m[3][1], worldMat_.m[3][2] }; }
 	// ワールド座標
 	const Math::Mat4x4& GetWorldMatrix() const {

@@ -170,9 +170,6 @@
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp">
       <Filter>Engine\Framework\Component\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Render\RenderSystem.cpp">
-      <Filter>Engine\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Game\Test\TestActor.cpp">
       <Filter>Game\Test</Filter>
     </ClCompile>
@@ -184,6 +181,15 @@
     </ClCompile>
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Render\RenderSystem.cpp">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\Camera\CameraComponent.cpp">
+      <Filter>Engine\Framework\Component\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Camera\CameraSystem.cpp">
+      <Filter>Engine\Framework\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -622,9 +628,6 @@
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h">
       <Filter>Engine\Framework\Component\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\RenderSystem.h">
-      <Filter>Engine\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Loader\LoaderAPI.h">
       <Filter>Engine\Loader</Filter>
     </ClInclude>
@@ -640,8 +643,20 @@
     <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Render\str\RenderStructure.h">
-      <Filter>Engine\Render\str</Filter>
+    <ClInclude Include="Engine\Framework\Render\RenderSystem.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\str\RenderStructure.h">
+      <Filter>Engine\Framework\Render\str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h">
+      <Filter>Engine\Framework\Component\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Camera\CameraSystem.h">
+      <Filter>Engine\Framework\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Actor\ActorTag.h">
+      <Filter>Engine\Framework\Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -846,9 +861,6 @@
     <Filter Include="Engine\Framework\Component\Render">
       <UniqueIdentifier>{42a6ecec-77b0-4238-8d82-d0e487b6b208}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Render">
-      <UniqueIdentifier>{996a756d-ea08-4fdf-baf8-1fbd910ceb59}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Shaders\Common">
       <UniqueIdentifier>{74aadfb9-35e8-41cb-ab43-9de04631221b}</UniqueIdentifier>
     </Filter>
@@ -870,8 +882,17 @@
     <Filter Include="Engine\DX12\PerFrame">
       <UniqueIdentifier>{a8834c4a-1fc1-4c12-88a5-842e95f5d3fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Render\str">
-      <UniqueIdentifier>{08e0ca44-a634-44a6-a9fe-2f51248313bb}</UniqueIdentifier>
+    <Filter Include="Engine\Framework\Render">
+      <UniqueIdentifier>{b56da0d0-e148-41b3-ab81-5095be1ed761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Render\str">
+      <UniqueIdentifier>{5de7566e-5a19-44b5-8575-71d29ae20882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Component\Camera">
+      <UniqueIdentifier>{fea9b50f-851b-4a56-8e38-3cad77093a91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Camera">
+      <UniqueIdentifier>{4f4e0768-9e06-4250-ad5a-35a6e8cadfc3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

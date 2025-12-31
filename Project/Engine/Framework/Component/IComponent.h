@@ -36,11 +36,6 @@ public:
 	/// </summary>
 	virtual void Update() {};
 
-	/// <summary>
-	/// 描画処理
-	/// </summary>
-	virtual void Render() {};
-
 #pragma region Accessor
 	// 親
 	IActor* GetOwner() const { return owner_; }

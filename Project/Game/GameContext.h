@@ -69,10 +69,10 @@ inline void GameContext::Init() {
 	if (!pendingInit_ || !currentScene_) return;
 	currentScene_->Init(), pendingInit_ = false;
 }
-inline void GameContext::Update() {	if(currentScene_) currentScene_->Update(); }
-inline void GameContext::BKSpriteRender() { if (currentScene_) currentScene_->RenderBackSprite(); }
-inline void GameContext::ModelRender() { if (currentScene_) currentScene_->RenderModel(); }
-inline void GameContext::FTSpriteRender() { if (currentScene_) currentScene_->RenderFrontSprite(); }
+inline void GameContext::Update() {	if(currentScene_) currentScene_->Update(0); }
+inline void GameContext::BKSpriteRender() { }
+inline void GameContext::ModelRender() { }
+inline void GameContext::FTSpriteRender() { }
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }
 
 template<typename T, typename ...Args>

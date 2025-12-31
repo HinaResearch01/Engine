@@ -10,8 +10,7 @@ public:
 	~TestScene() = default;
 
 	void Init() override;
-	void Update() override;
-	void RenderModel() override;
+	void Update(float deltaTime) override;
 	void Finalize() override;
 
 private:

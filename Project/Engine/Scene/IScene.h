@@ -1,9 +1,14 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+#include <type_traits>
+
+#include "Framework/Actor/IActor.h"
+
 namespace Tsumi {
 
 // 前方宣言
-class SceneManager;
 class GameContext;
 
 /* シーンの基底クラス */
@@ -15,49 +20,74 @@ public:
 	/// </summary>
 	virtual ~IScene() = default;
 
-	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	virtual void Init() {};
+
+	// ===============================================
+	// Scene LifeCycle
+	// ===============================================
+	virtual void Init() {}
+	virtual void Update(float deltaTime) {
+		UpdateActors(deltaTime);
+		CleanupDeadActors();
+	}
+	virtual void Finalize() {
+		actors_.clear();
+	}
+
+	// ===============================================
+	// Actor Management
+	// ===============================================
 
 	/// <summary>
-	/// 更新処理
+	/// Actor生成
 	/// </summary>
-	virtual void Update() {};
+	template<class T, class... Args>
+	T* SpawnActor(Args&&... args) {
+		static_assert(std::is_base_of_v<Framework::IActor, T>, "T must derive from IActor");
+
+		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
+		actor->Init();
+
+		T* ptr = actor.get();
+		actors_.push_back(std::move(actor));
+		return ptr;
+	}
 
 	/// <summary>
-	/// 背景スプライトの描画処理
+	/// 全Actor更新
 	/// </summary>
-	virtual void RenderBackSprite() {};
+	void UpdateActors(float deltaTime) {
+		for (auto& actor : actors_) {
+			actor->UpdateActor(deltaTime);
+		}
+	}
 
 	/// <summary>
-	/// ３Dオブジェクトの描画処理
+	/// Dead状態のActorを削除
 	/// </summary>
-	virtual void RenderModel() {};
+	void CleanupDeadActors() {
+		std::erase_if(actors_,
+					  [](const std::unique_ptr<Framework::IActor>& actor) {
+			return actor->GetState() == Framework::IActor::State::Dead;
+		});
+	}
 
 	/// <summary>
-	/// 前景スプライトの描画処理
+	/// Actor一覧取得（System用）
 	/// </summary>
-	virtual void RenderFrontSprite() {};
+	const std::vector<std::unique_ptr<Framework::IActor>>& GetActors() const {
+		return actors_;
+	}
 
-	/// <summary>
-	/// 解放処理
-	/// </summary>
-	virtual void Finalize() {};
-
-	/// <summary>
-	/// 親マネージャーのポインタ
-	/// </summary>
-	void SetManager(SceneManager* setManager) { sceneMgr_ = setManager; }
-
-	/// <summary>
-	/// GameContextのポインタ設定
-	/// </summary>
-	void SetContext(GameContext* setPtr) { gameContext_ = setPtr; }
+#pragma region Accessor
+	void SetContext(GameContext* context) { gameContext_ = context; }
+	GameContext* GetContext() const { return gameContext_; }
+#pragma endregion
 
 protected:
-	SceneManager* sceneMgr_ = nullptr;
 	GameContext* gameContext_ = nullptr;
+
+	// シーン内のアクター群
+	std::vector<std::unique_ptr<Framework::IActor>> actors_;
 };
 
 }
