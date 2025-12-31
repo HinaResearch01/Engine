@@ -99,7 +99,6 @@ private:
 	GPUTransformCB SetupTransformCB(const RenderItem& item);
 
 private:
-
 	std::vector<RenderItem> items_;
 	
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
