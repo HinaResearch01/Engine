@@ -640,6 +640,9 @@
     <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Render\str\RenderStructure.h">
+      <Filter>Engine\Render\str</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -867,6 +870,9 @@
     <Filter Include="Engine\DX12\PerFrame">
       <UniqueIdentifier>{a8834c4a-1fc1-4c12-88a5-842e95f5d3fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Render\str">
+      <UniqueIdentifier>{08e0ca44-a634-44a6-a9fe-2f51248313bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc">
@@ -993,6 +999,9 @@
       <Filter>Resources\Shaders\Common</Filter>
     </None>
     <None Include="Resources\Shaders\Common\Material.hlsli">
+      <Filter>Resources\Shaders\Common</Filter>
+    </None>
+    <None Include="Resources\Shaders\Common\Camera.hlsli">
       <Filter>Resources\Shaders\Common</Filter>
     </None>
   </ItemGroup>

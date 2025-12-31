@@ -51,8 +51,7 @@ public:
 	Math::Vec3f GetWorldPos() { 
 		return { worldMat_.m[3][0], worldMat_.m[3][1], worldMat_.m[3][2] }; }
 	// ワールド座標
-	const Math::Mat4x4& GetWorldMatrix() {
-		UpdateMat();
+	const Math::Mat4x4& GetWorldMatrix() const {
 		return worldMat_; }
 	// SRT
 	SRT GetSRT() const { return srt_; }

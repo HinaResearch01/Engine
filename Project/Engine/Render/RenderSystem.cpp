@@ -89,3 +89,13 @@ void RenderSystem::SetPSOAndRootSig(ID3D12GraphicsCommandList* list)
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+GPUTransformCB RenderSystem::SetupTransformCB(const RenderItem& item)
+{
+	GPUTransformCB result = {
+		.worldMat = item.transform->GetWorldMatrix(),
+		.worldInverseTranspose = item.transform->GetWorldMatrix().Inverse().Transpose()
+	};
+
+	return result;
+}
+

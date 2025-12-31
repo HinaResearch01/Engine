@@ -6,7 +6,10 @@
 #include "Resource/Mesh/MeshManager.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
+#include "Framework/Component/Transform/TransformComponent.h"
 #include "Math/TMath.h"
+
+#include "str/RenderStructure.h"
 
 #include <cstdint>
 
@@ -28,6 +31,7 @@ struct RenderItem
 	TextureHandle albedo;
 	RenderLayer layer;
 	Math::Mat4x4 world;
+	const Framework::TransformComponent* transform;
 };
 
 /* 描画管理クラス */
@@ -88,6 +92,11 @@ private:
 	/// PsoとRootSigの設定
 	/// </summary>
 	void SetPSOAndRootSig(ID3D12GraphicsCommandList* list);
+
+	/// <summary>
+	/// GPU用Transformバッファのセットアップ
+	/// </summary>
+	GPUTransformCB SetupTransformCB(const RenderItem& item);
 
 private:
 

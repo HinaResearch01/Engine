@@ -116,32 +116,26 @@ void RootSignatureLibrary::CreateObject3D()
 
 	// -------------------------
 	// ルートパラメータ定義
-	// 0 : VS b0 (root CBV)
-	// 1 : PS b1 (root CBV)
-	// 2 : PS t0 (SRV table)
 	// -------------------------
-	CD3DX12_ROOT_PARAMETER params[3]{};
+	CD3DX12_ROOT_PARAMETER params[4]{};
 
-	// VS: 定数バッファ b0（root CBV）
+	// VS: 定数バッファ
 	params[0].InitAsConstantBufferView(
-		0, // b0
-		0,
-		D3D12_SHADER_VISIBILITY_VERTEX
-	);
-
-	// PS: 定数バッファ b1（root CBV）
+		0, // b0 
+		0, D3D12_SHADER_VISIBILITY_VERTEX);
 	params[1].InitAsConstantBufferView(
 		1, // b1
-		0,
-		D3D12_SHADER_VISIBILITY_PIXEL
-	);
+		0, D3D12_SHADER_VISIBILITY_VERTEX);
 
-	// PS: テクスチャ SRV (t0)
-	params[2].InitAsDescriptorTable(
+	// PS: 定数バッファ
+	params[2].InitAsConstantBufferView(
+		2, // b2
+		0, D3D12_SHADER_VISIBILITY_PIXEL);
+
+	// PS: テクスチャ SRV t0
+	params[3].InitAsDescriptorTable(
 		1,
-		&srvRange,
-		D3D12_SHADER_VISIBILITY_PIXEL
-	);
+		&srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// -------------------------
 	// スタティックサンプラー

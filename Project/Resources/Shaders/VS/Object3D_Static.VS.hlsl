@@ -1,4 +1,5 @@
 #include "../Common/Transform.hlsli"
+#include "../Common/Camera.hlsli"
 
 struct VS_INPUT
 {
@@ -12,13 +13,14 @@ struct VS_OUTPUT
 };
 
 ConstantBuffer<TransformCB> gTransform : register(b0);
+ConstantBuffer<CameraMatricesCB> gCameraMat : register(b1);
 
 VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
 
     float4 worldPos = mul(gTransform.world, float4(input.position, 1.0f));
-    output.position = mul(gTransform.viewProj, worldPos);
+    output.position = mul(gCameraMat.viewProj, worldPos);
     output.texCoord = input.texCoord;
 
     return output;

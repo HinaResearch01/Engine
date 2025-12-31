@@ -4,7 +4,7 @@
 struct TransformCB
 {
     float4x4 world;
-    float4x4 viewProj;
+    float4x4 worldInverseTranspose;
 };
 
 #endif

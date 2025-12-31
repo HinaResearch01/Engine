@@ -6,7 +6,7 @@ struct PS_INPUT
     float2 texCoord : TEXCOORD0;
 };
 
-ConstantBuffer<MaterialCB> gMaterial : register(b1);
+ConstantBuffer<MaterialCB> gMaterial : register(b2);
 
 Texture2D gAlbedoTexture : register(t0);
 SamplerState gLinearSampler : register(s0);
