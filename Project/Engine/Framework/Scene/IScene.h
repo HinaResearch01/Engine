@@ -30,9 +30,10 @@ public:
 	virtual void Init() {}
 	virtual void Update(float deltaTime) {
 		UpdateActors(deltaTime);
-		CleanupDeadActors();
+		CleanupDeadActorsInternal();
 	}
 	virtual void Finalize() {
+		ClearViews();
 		actors_.clear();
 	}
 
@@ -40,9 +41,7 @@ public:
 	// Actor Management
 	// ===============================================
 
-	/// <summary>
 	/// Actor生成
-	/// </summary>
 	template<class T, class... Args>
 	T* SpawnActor(Args&&... args) {
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
@@ -52,39 +51,67 @@ public:
 
 		T* ptr = actor.get();
 		actors_.push_back(std::move(actor));
+
+		// ★ View 登録
+		RegisterActor(ptr);
 		return ptr;
 	}
 
-	/// <summary>
-	/// 全Actor更新
-	/// </summary>
-	void UpdateActors(float deltaTime) {
-		for (auto& actor : actors_) {
-			actor->UpdateActor(deltaTime);
-		}
-	}
-
-	/// <summary>
-	/// Dead状態のActorを削除
-	/// </summary>
-	void CleanupDeadActors() {
-		std::erase_if(actors_,
-					  [](const std::unique_ptr<IActor>& actor) {
-			return actor->GetState() == IActor::State::Dead;
-		});
-	}
-
-	/// <summary>
 	/// Actor一覧取得（System用）
-	/// </summary>
 	const std::vector<std::unique_ptr<IActor>>& GetActors() const {
 		return actors_;
 	}
 
+
 #pragma region Accessor
 	void SetContext(GameContext* context) { gameContext_ = context; }
 	GameContext* GetContext() const { return gameContext_; }
+	ComponentView<RenderComponent>& GetRenderables() { return renderables_; }
+	ComponentView<CameraComponent>& GetCameras() { return cameras_; }
 #pragma endregion
+
+protected:
+	// ===============================================
+	// Internal Update
+	// ===============================================
+
+	void UpdateActors(float dt) {
+		for (auto& a : actors_) {
+			a->UpdateActor(dt);
+		}
+	}
+
+	void CleanupDeadActorsInternal() {
+		// View から先に除外
+		for (auto& a : actors_) {
+			if (a->GetState() == IActor::State::Dead) {
+				UnregisterActor(a.get());
+			}
+		}
+
+		std::erase_if(actors_, [](const std::unique_ptr<IActor>& a) {
+			return a->GetState() == IActor::State::Dead;
+		});
+	}
+
+	// ===============================================
+	// View Management
+	// ===============================================
+
+	void RegisterActor(IActor* actor) {
+		renderables_.Refresh(actor);
+		cameras_.Refresh(actor);
+	}
+
+	void UnregisterActor(IActor* actor) {
+		renderables_.Remove(actor);
+		cameras_.Remove(actor);
+	}
+
+	void ClearViews() {
+		renderables_.Clear();
+		cameras_.Clear();
+	}
 
 protected:
 	// シーン内のアクター群
