@@ -196,6 +196,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
     <ClCompile Include="Engine\Framework\Render\RenderSystem.cpp" />
+    <ClCompile Include="Engine\Framework\Scene\IScene.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -351,6 +352,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
     <ClInclude Include="Engine\Framework\Render\RenderSystem.h" />
     <ClInclude Include="Engine\Framework\Render\str\RenderStructure.h" />
+    <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
+    <ClInclude Include="Engine\Framework\Scene\IScene.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
@@ -371,7 +374,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Resource\Mesh\MeshManager.h" />
     <ClInclude Include="Engine\Resource\ResourceSystem.h" />
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h" />
-    <ClInclude Include="Engine\Scene\IScene.h" />
     <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />

@@ -13,12 +13,10 @@
 
 #include <cstdint>
 
-// 前方宣言
-namespace Tsumi {
-class IScene;
-}
-
 namespace Tsumi::Framework {
+
+// 前方宣言
+class IScene;
 
 using MeshHandle = std::string;
 using TextureHandle = std::string;
@@ -42,23 +40,19 @@ struct RenderItem
 /* 描画管理クラス */
 class RenderSystem {
 
-private: // シングルトン
-	RenderSystem();
-	~RenderSystem() = default;
-	RenderSystem(const RenderSystem&) = delete;
-	const RenderSystem& operator=(const RenderSystem&) = delete;
-
 public:
 	/// <summary>
-	/// インスタンスの取得
+	/// コンストラクタ
 	/// </summary>
-	static RenderSystem* GetInstance() {
-		static RenderSystem instance;
-		return &instance;
-	}
+	RenderSystem();
 
 	/// <summary>
-	/// 
+	/// デストラクタ
+	/// </summary>
+	~RenderSystem() = default;
+
+	/// <summary>
+	/// 描画処理
 	/// </summary>
 	void Render(IScene* scene);
 

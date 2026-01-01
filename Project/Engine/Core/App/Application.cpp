@@ -22,7 +22,7 @@ Application::Application()
     psos_ = Graphic::PSOLibrary::GetInstance();
     resourceMgr_ = Resource::ResourceSystem::GetInstance();
     imgui_ = GUI::ImGuiManager::GetInstance();
-	gameCtx_ = std::make_unique<GameContext>();
+	gameCtx_ = std::make_unique<Framework::GameContext>();
 }
 
 Application::~Application()

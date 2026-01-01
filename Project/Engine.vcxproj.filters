@@ -191,7 +191,12 @@
     <ClCompile Include="Engine\Framework\Camera\CameraSystem.cpp">
       <Filter>Engine\Framework\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp" />
+    <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp">
+      <Filter>Engine\Framework\Component\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\Scene\IScene.cpp">
+      <Filter>Engine\Framework\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -515,9 +520,6 @@
     <ClInclude Include="Engine\Core\EntryPoint.h">
       <Filter>Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Scene\IScene.h">
-      <Filter>Engine\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
@@ -659,7 +661,15 @@
     <ClInclude Include="Engine\Framework\Actor\ActorTag.h">
       <Filter>Engine\Framework\Actor</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h">
+      <Filter>Engine\Framework\Component\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Scene\IScene.h">
+      <Filter>Engine\Framework\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h">
+      <Filter>Engine\Framework\Scene\CompView</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -727,9 +737,6 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{bf7bbfe8-2f89-4ecf-873e-d28399ff1a9e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Scene">
-      <UniqueIdentifier>{0937fdad-9e5c-4c74-919d-e1071356bf22}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Utils">
       <UniqueIdentifier>{9c7fbf6d-bb18-4efe-a7f1-37b3a4e17071}</UniqueIdentifier>
@@ -898,6 +905,12 @@
     </Filter>
     <Filter Include="Engine\Framework\Component\Material">
       <UniqueIdentifier>{3fd83676-4d4b-464f-9d79-745a02e427e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Scene">
+      <UniqueIdentifier>{5c5e490f-376a-48ac-9de6-35f9c52a5d5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Scene\CompView">
+      <UniqueIdentifier>{116c8838-2337-4b3f-bd63-577519e0b41b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

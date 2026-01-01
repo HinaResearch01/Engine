@@ -4,10 +4,13 @@
 #include <vector>
 #include <type_traits>
 
-#include "Framework/Actor/IActor.h"
+#include "CompView/ComponentView.h"
 #include "Framework/Render/RenderSystem.h"
+#include "Framework/Actor/IActor.h"
+#include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Component/Camera/CameraComponent.h"
 
-namespace Tsumi {
+namespace Tsumi::Framework {
 
 // 前方宣言
 class GameContext;
@@ -19,8 +22,7 @@ public:
 	/// <summary>
 	/// 仮想デストラクタ
 	/// </summary>
-	virtual ~IScene() = default;
-
+	virtual ~IScene();
 
 	// ===============================================
 	// Scene LifeCycle
@@ -43,7 +45,7 @@ public:
 	/// </summary>
 	template<class T, class... Args>
 	T* SpawnActor(Args&&... args) {
-		static_assert(std::is_base_of_v<Framework::IActor, T>, "T must derive from IActor");
+		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
 
 		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
 		actor->Init();
@@ -67,15 +69,15 @@ public:
 	/// </summary>
 	void CleanupDeadActors() {
 		std::erase_if(actors_,
-					  [](const std::unique_ptr<Framework::IActor>& actor) {
-			return actor->GetState() == Framework::IActor::State::Dead;
+					  [](const std::unique_ptr<IActor>& actor) {
+			return actor->GetState() == IActor::State::Dead;
 		});
 	}
 
 	/// <summary>
 	/// Actor一覧取得（System用）
 	/// </summary>
-	const std::vector<std::unique_ptr<Framework::IActor>>& GetActors() const {
+	const std::vector<std::unique_ptr<IActor>>& GetActors() const {
 		return actors_;
 	}
 
@@ -86,10 +88,13 @@ public:
 
 protected:
 	// シーン内のアクター群
-	std::vector<std::unique_ptr<Framework::IActor>> actors_;
+	std::vector<std::unique_ptr<IActor>> actors_;
 	// 描画システム
-	Framework::RenderSystem renderSystem_;
-
+	//RenderSystem renderSystem_;
+	// コンポーネントビュー
+	ComponentView<RenderComponent> renderables_;
+	ComponentView<CameraComponent> cameras_;
+	// ゲームコンテキスト
 	GameContext* gameContext_ = nullptr;
 };
 

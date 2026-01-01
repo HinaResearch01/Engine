@@ -3,9 +3,9 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include "Scene/IScene.h"
+#include "Framework/Scene/IScene.h"
 
-namespace Tsumi {
+namespace Tsumi::Framework {
 
 class GameContext {
 
@@ -59,8 +59,8 @@ public:
 #pragma endregion
 
 private:
-	std::unordered_map<std::string, std::unique_ptr<IScene>> scenes_;
-	IScene* currentScene_ = nullptr;
+	std::unordered_map<std::string, std::unique_ptr<Framework::IScene>> scenes_;
+	Framework::IScene* currentScene_ = nullptr;
 	bool pendingInit_ = false;
 };
 
@@ -79,11 +79,11 @@ template<typename T, typename ...Args>
 inline void GameContext::RegisterScene(const std::string& name, Args && ...args)
 {
 	// TはISceneを継承していなければいけない
-	static_assert(std::is_base_of<IScene, T>::value,
+	static_assert(std::is_base_of<Framework::IScene, T>::value,
 		"RegisterScene: T must derive from IScene");
 
 	using SceneType = T;
-	using BaseType = IScene;
+	using BaseType = Framework::IScene;
 
 	// mapに追加
 	std::unique_ptr<BaseType> ptr(

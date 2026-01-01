@@ -7,7 +7,7 @@ void TransformComponent::Init()
 {
 	// 行列はIdentityで初期化
 	worldMat_.Identity();
-	prevSRT_ = srt_; // 初期状態を記録
+	prevSRT_ = srt; // 初期状態を記録
 }
 
 void TransformComponent::Update()
@@ -15,7 +15,7 @@ void TransformComponent::Update()
 	// 親がいる場合は毎回更新
 	if (HasParent() || NeedsUpdate()) {
 		UpdateMat();
-		prevSRT_ = srt_;
+		prevSRT_ = srt;
 	}
 }
 
@@ -36,7 +36,7 @@ void TransformComponent::UpdateMat()
 	// ローカル行列
 	Math::Mat4x4 local =
 		Func::MAT4x4::AffineMatrix(
-		srt_.scale, srt_.rotate, srt_.translate);
+		srt.scale, srt.rotate, srt.translate);
 
 	// 親がいる場合は親のワールド行列を掛ける
 	if (auto parent = parent_.lock()) {
@@ -49,9 +49,9 @@ void TransformComponent::UpdateMat()
 
 bool TransformComponent::NeedsUpdate()
 {
-	if (srt_.scale != prevSRT_.scale)     return true;
-	if (srt_.rotate != prevSRT_.rotate)    return true;
-	if (srt_.translate != prevSRT_.translate) return true;
+	if (srt.scale != prevSRT_.scale)     return true;
+	if (srt.rotate != prevSRT_.rotate)    return true;
+	if (srt.translate != prevSRT_.translate) return true;
 	if (parent_.expired() == false)           return true; // 親ありは毎回
 	return false;
 }

@@ -72,6 +72,6 @@ private:
 
     GUI::ImGuiManager* imgui_ = nullptr;
 
-	std::unique_ptr<GameContext> gameCtx_;
+	std::unique_ptr<Framework::GameContext> gameCtx_;
 };
 }

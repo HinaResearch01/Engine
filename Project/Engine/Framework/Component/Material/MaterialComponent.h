@@ -27,9 +27,9 @@ public:
 
 public:
 	// ベースカラー
-	Math::Vec4f baseColor_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Math::Vec4f baseColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	// アルベドテクスチャハンドル
-	TextureHandle texKey_ = "uvChecker.png";
+	TextureHandle texKey = "uvChecker.png";
 };
 
 }

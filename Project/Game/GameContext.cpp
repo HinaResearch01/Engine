@@ -1,7 +1,7 @@
 #include "GameContext.h"
 #include "Test/TestScene.h"
 
-using namespace Tsumi;
+using namespace Tsumi::Framework;
 
 GameContext::GameContext()
 {

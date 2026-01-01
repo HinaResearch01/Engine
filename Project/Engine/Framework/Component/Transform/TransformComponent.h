@@ -78,7 +78,7 @@ private:
 
 public:
 	// SRT
-	SRT srt_{};
+	SRT srt{};
 
 private:
 	SRT prevSRT_{};

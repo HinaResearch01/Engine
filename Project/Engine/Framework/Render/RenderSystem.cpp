@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include "Framework/Scene/IScene.h"
 #include "Utils/Logger/UtilsLog.h"
 
 using namespace Tsumi::Framework;
@@ -13,6 +14,8 @@ RenderSystem::RenderSystem()
 
 void RenderSystem::Render(IScene* scene)
 {
+	scene;
+
 	// コマンドリスト取得
 	auto* cmdList = dx12Mgr_->GetCmdList();
 	if (!cmdList) return;
