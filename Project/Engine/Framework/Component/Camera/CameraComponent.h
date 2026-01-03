@@ -29,7 +29,17 @@ public:
 	float nearZ = 0.1f;
 	float farZ = 1000.0f;
 	
-	bool  isActive = true;
+	bool  enabled = true;
+
+	enum class Role {
+		Main,
+		Debug,
+		CutScene,
+		Shadow,
+		UI,
+	} role = Role::Main;
+
+	int priority = 0;
 };
 
 }

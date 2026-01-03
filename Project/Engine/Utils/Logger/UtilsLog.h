@@ -42,6 +42,11 @@ inline void Info(const std::wstring& message) {
     OutputDebugStringW(tagged.c_str());
 }
 
+inline void Rarn	(const std::wstring& message) {
+	std::wstring tagged = L"[Tsumi][Error] " + message + L"\n";
+	OutputDebugStringW(tagged.c_str());
+}
+
 inline void Error(const std::wstring& message) {
     std::wstring tagged = L"[Tsumi][Error] " + message + L"\n";
     OutputDebugStringW(tagged.c_str());

@@ -9,13 +9,13 @@ struct GPUTransformCB {
 	Math::Mat4x4 worldInverseTranspose;
 };
 
-struct CameraMatricesCB {
+struct GPUCameraMatricesCB {
 	Math::Mat4x4 view;
 	Math::Mat4x4 proj;
 	Math::Mat4x4 viewProj;
 };
 
-struct CameraParamsCB {
+struct GPUCameraParamsCB {
 	Math::Vec3f cameraPos;
 	float nearZ;
 	Math::Vec3f cameraDir;

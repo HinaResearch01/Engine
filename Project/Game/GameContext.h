@@ -89,7 +89,7 @@ inline void GameContext::RegisterScene(const std::string& name, Args && ...args)
 	std::unique_ptr<BaseType> ptr(
 		new SceneType(std::forward<Args>(args)...)
 	);
-	ptr->SetContext(this); // このクラスのptrを渡す
+	ptr->SetGameContext(this); // このクラスのptrを渡す
 	scenes_[name] = std::move(ptr);
 }
 

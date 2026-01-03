@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "CompView/ComponentView.h"
+#include "Framework/Camera/CameraSystem.h"
 #include "Framework/Render/RenderSystem.h"
 #include "Framework/Actor/IActor.h"
 #include "Framework/Component/Render/RenderComponent.h"
@@ -47,12 +48,13 @@ public:
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
 
 		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
+		actor->SetID(GenerateActorID());
 		actor->Init();
 
 		T* ptr = actor.get();
 		actors_.push_back(std::move(actor));
 
-		// ★ View 登録
+		// View 登録
 		RegisterActor(ptr);
 		return ptr;
 	}
@@ -62,10 +64,17 @@ public:
 		return actors_;
 	}
 
+	/// ActorID発行
+	IActor::ActorID GenerateActorID() { return nextActorId_++; }
 
 #pragma region Accessor
-	void SetContext(GameContext* context) { gameContext_ = context; }
-	GameContext* GetContext() const { return gameContext_; }
+	// GameContext
+	GameContext* GetGameContext() const { return gameContext_; }
+	void SetGameContext(GameContext* context) { gameContext_ = context; }
+	// CameraContext
+	CameraContext& GetCameraContext() { return cameraContext_; }
+	void SetCameraContext(const CameraContext& context) { cameraContext_ = context; }
+	// ViewComp
 	ComponentView<RenderComponent>& GetRenderables() { return renderables_; }
 	ComponentView<CameraComponent>& GetCameras() { return cameras_; }
 #pragma endregion
@@ -116,6 +125,8 @@ protected:
 protected:
 	// シーン内のアクター群
 	std::vector<std::unique_ptr<IActor>> actors_;
+	// 次のアクターID
+	IActor::ActorID nextActorId_ = 1;
 	// 描画システム
 	//RenderSystem renderSystem_;
 	// コンポーネントビュー
@@ -123,6 +134,8 @@ protected:
 	ComponentView<CameraComponent> cameras_;
 	// ゲームコンテキスト
 	GameContext* gameContext_ = nullptr;
+	// カメラコンテキスト
+	CameraContext cameraContext_;
 };
 
 }

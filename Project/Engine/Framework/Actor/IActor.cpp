@@ -11,5 +11,4 @@ Tsumi::Framework::IActor::IActor(const std::string& name)
 {
 	state_ = State::Active;
 	EnsureTransform();
-
 }

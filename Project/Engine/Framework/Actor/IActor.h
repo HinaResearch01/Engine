@@ -21,6 +21,8 @@ namespace Tsumi::Framework {
 class IActor {
 
 public:
+	// ID
+	using ActorID = uint64_t;
 	// 状態
 	enum class State {
 		None = -1,
@@ -150,6 +152,9 @@ public:
 #pragma region Accessor
 	// 名前
 	std::string GetName() const { return name_; }
+	// ID
+	ActorID GetID() const { return id_; }
+	void SetID(ActorID id) { id_ = id; }
 	// 状態
 	State GetState() const { return state_; }
 	void SetState(State state) { state_ = state; }
@@ -187,6 +192,9 @@ private:
 
 	// 状態
 	State state_ = State::None;
+
+	// ID
+	ActorID id_ = 0;
 
 	// タグ（弾・地形など分類用）
 	std::bitset<32> tags_{};
