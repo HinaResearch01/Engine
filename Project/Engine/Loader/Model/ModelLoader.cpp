@@ -1,7 +1,7 @@
 #include "ModelLoader.h"
 #include "Loader/Mesh/MeshLoader.h"
 #include "Loader/Tex/TextureLoader.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

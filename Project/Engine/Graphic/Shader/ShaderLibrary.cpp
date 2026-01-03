@@ -23,7 +23,7 @@ static const char* ShaderTypeToTarget(ShaderType t) {
 void ShaderLibrary::Init()
 {
     shaders_.clear();
-    Tsumi::Utils::Info(L"[ShaderLibrary] Initialized");
+    Tsumi::Utils::Logger::Info("[ShaderLibrary] Initialized");
 
     // DXCの初期化
     InitDXC();
@@ -104,7 +104,7 @@ void ShaderLibrary::CompileAllShader()
     //    tryCompile(pe.first, d);
     //}
 
-    Tsumi::Utils::Info(L"[ShaderLibrary] LoadAllShaders - completed (errors were logged per-shader if any)");
+    Tsumi::Utils::Logger::Info("[ShaderLibrary] LoadAllShaders - completed (errors were logged per-shader if any)");
 }
 
 IDxcBlob* ShaderLibrary::Get(const std::wstring& name, ShaderType stage) const
@@ -140,12 +140,15 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
         // -------------------------------
         // hlslファイルを読む
         // -------------------------------
-        Tsumi::Utils::Info(std::format(L"[ShaderLibrary] Begin CompileShader, path:{}, stage:{}\n", filePath, static_cast<int>(stage)));
+        Tsumi::Utils::Logger::Info(
+			"[ShaderLibrary] Begin CompileShader, path:{}, stage:{}\n", 
+			filePath, static_cast<int>(stage));
 
         Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
         hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
         if (FAILED(hr) || !shaderSource) {
-            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] Failed to load shader file: {}\n", filePath));
+            Tsumi::Utils::Logger::Error(
+				"[ShaderLibrary] Failed to load shader file: {}\n", filePath);
             return hr;
         }
 
@@ -187,7 +190,9 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
             IID_PPV_ARGS(&shaderResult)
         );
         if (FAILED(hr) || !shaderResult) {
-            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] DXC Compile failed: {} stage:{}\n", filePath, static_cast<int>(stage)));
+            Tsumi::Utils::Logger::Error(
+				"[ShaderLibrary] DXC Compile failed: {} stage:{}\n", 
+				filePath, static_cast<int>(stage));
             return hr;
         }
 
@@ -198,11 +203,9 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
         shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 
         if (shaderError && shaderError->GetStringLength() != 0) {
-            Tsumi::Utils::Error(std::format(
-                L"[ShaderLibrary] DXC error/warning ({}):\n{}",
-                filePath,
-                Tsumi::Utils::Utf8ToWstring(shaderError->GetStringPointer())
-            ));
+            Tsumi::Utils::Logger::Error(
+				"[ShaderLibrary] DXC error/warning ({}):\n{}",
+                filePath, Tsumi::Utils::Utf8ToWstring(shaderError->GetStringPointer()));
             return E_FAIL; // エラー扱いで中断
         }
 
@@ -212,11 +215,14 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
         Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob;
         hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
         if (FAILED(hr) || !shaderBlob) {
-            Tsumi::Utils::Error(std::format(L"[ShaderLibrary] DXC: failed to get compiled object for {}\n", filePath));
+            Tsumi::Utils::Logger::Error(
+				"[ShaderLibrary] DXC: failed to get compiled object for {}\n", filePath);
             return hr;
         }
 
-        Tsumi::Utils::Info(std::format(L"[ShaderLibrary] Compile Succeeded, path:{}, profile:{}\n", filePath, profile));
+        Tsumi::Utils::Logger::Info(
+			"[ShaderLibrary] Compile Succeeded, path:{}, profile:{}\n", 
+			filePath, profile);
 
         compiled.blob[stage] = shaderBlob; // ステージごとに格納
     }

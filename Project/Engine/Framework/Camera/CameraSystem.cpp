@@ -1,7 +1,7 @@
 #include "CameraSystem.h"
 #include "Framework/Actor/IActor.h"
 #include "Framework/Scene/IScene.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::Framework;
 

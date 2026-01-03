@@ -5,7 +5,7 @@
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/SwapChain/SwapChain.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::GUI;
 
@@ -37,7 +37,7 @@ void ImGuiManager::Init()
 	HRESULT hr = dx12Mgr_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&imguiHeap_));
 
 	if (FAILED(hr)) {
-		Utils::Log(L"[ImGui] DescriptorHeap 作成失敗\n");
+		Utils::Logger::Error("[ImGui] DescriptorHeap 作成失敗\n");
 		return;
 	}
 

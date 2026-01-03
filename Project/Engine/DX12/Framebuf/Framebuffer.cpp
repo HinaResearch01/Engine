@@ -1,6 +1,6 @@
 #include "Framebuffer.h"
 #include "DX12/DX12Manager.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
 
 using namespace Tsumi::DX12;
@@ -22,7 +22,7 @@ HRESULT Framebuffer::Init()
     ID3D12Device* device = dx12Mgr_->GetDevice();
     IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
     if (!device || !swapChain) {
-        Utils::Log(L"Framebuffer::Initialize - device or swapChain is null\n");
+        Utils::Logger::Error("Framebuffer::Initialize - device or swapChain is null\n");
         return E_POINTER;
     }
 
@@ -55,7 +55,9 @@ HRESULT Framebuffer::Resize(UINT width, UINT height)
     // スワップチェーンのバッファを再作成
     HRESULT hr = swapChain->ResizeBuffers(bufCount, width, height, backBufferFormat_, 0);
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Framebuffer::Resize - ResizeBuffers failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Framebuffer::Resize - ResizeBuffers failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 
@@ -155,7 +157,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
     rtvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     HRESULT hr = device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&rtvHeap_));
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Framebuffer::CreateHeapsAndViews - CreateDescriptorHeap(RTV) failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Framebuffer::CreateHeapsAndViews - CreateDescriptorHeap(RTV) failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
     rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -167,7 +171,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
     dsvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     hr = device->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&dsvHeap_));
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Framebuffer::CreateHeapsAndViews - CreateDescriptorHeap(DSV) failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Framebuffer::CreateHeapsAndViews - CreateDescriptorHeap(DSV) failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
     dsvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -180,7 +186,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
         // スワップチェーンから各バッファを取得
         hr = swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
         if (FAILED(hr)) {
-            Utils::Log(std::format(L"Framebuffer::CreateHeapsAndViews - GetBuffer({}) failed (hr=0x{:08X})\n", i, static_cast<unsigned>(hr)));
+            Utils::Logger::Error(
+				"Framebuffer::CreateHeapsAndViews - GetBuffer({}) failed (hr=0x{:08X})\n", 
+				i, static_cast<unsigned>(hr));
             return hr;
         }
         backBuffers_[i] = backBuffer;
@@ -229,7 +237,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
     );
 
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Framebuffer::CreateHeapsAndViews - CreateCommittedResource(depth) failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Framebuffer::CreateHeapsAndViews - CreateCommittedResource(depth) failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 
@@ -239,7 +249,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 
     backBufferStates_.resize(bufferCount, D3D12_RESOURCE_STATE_PRESENT);
 
-    Utils::Log(std::format(L"Framebuffer initialized: {}x{}, buffers={}\n", width, height, bufferCount));
+    Utils::Logger::Info(
+		"Framebuffer initialized: {}x{}, buffers={}\n", 
+		width, height, bufferCount);
     return S_OK;
 }
 

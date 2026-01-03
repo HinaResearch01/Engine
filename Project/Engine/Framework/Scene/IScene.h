@@ -34,7 +34,7 @@ public:
 		CleanupDeadActorsInternal();
 	}
 	virtual void Finalize() {
-		ClearViews();
+		ClearComponentView();
 		actors_.clear();
 	}
 
@@ -55,7 +55,7 @@ public:
 		actors_.push_back(std::move(actor));
 
 		// View 登録
-		RegisterActor(ptr);
+		RegisterComponentView(ptr);
 		return ptr;
 	}
 
@@ -94,7 +94,7 @@ protected:
 		// View から先に除外
 		for (auto& a : actors_) {
 			if (a->GetState() == IActor::State::Dead) {
-				UnregisterActor(a.get());
+				UnregisterComponentViewActor(a.get());
 			}
 		}
 
@@ -104,20 +104,20 @@ protected:
 	}
 
 	// ===============================================
-	// View Management
+	// ComponentView Management
 	// ===============================================
 
-	void RegisterActor(IActor* actor) {
+	void RegisterComponentView(IActor* actor) {
 		renderables_.Refresh(actor);
 		cameras_.Refresh(actor);
 	}
 
-	void UnregisterActor(IActor* actor) {
+	void UnregisterComponentViewActor(IActor* actor) {
 		renderables_.Remove(actor);
 		cameras_.Remove(actor);
 	}
 
-	void ClearViews() {
+	void ClearComponentView() {
 		renderables_.Clear();
 		cameras_.Clear();
 	}

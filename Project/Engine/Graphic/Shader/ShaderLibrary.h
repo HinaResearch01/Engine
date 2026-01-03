@@ -11,8 +11,9 @@
 #include <memory>
 #include <unordered_map>
 #include <mutex>
-#include "Utils/Logger/UtilsLog.h"
 #pragma comment(lib, "dxcompiler.lib")
+
+#include "Utils/Logger/Logger.h"
 
 namespace Tsumi::Graphic {
 

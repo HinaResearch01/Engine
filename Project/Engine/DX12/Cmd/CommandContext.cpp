@@ -1,5 +1,5 @@
 #include "CommandContext.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include "DX12/DX12Manager.h"
 #include "../Framebuf/Framebuffer.h"
 #include <format>
@@ -47,25 +47,37 @@ HRESULT CommandContext::Create()
 
 	hr = CreateQueue();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: CreateQueue failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"CreateQueue failed (hr=0x{:08X})",
+			static_cast<unsigned>(hr)
+		);
 		return hr;
 	}
 
 	hr = CreateAllocators(frameCount_);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: CreateAllocators failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"CreateAllocators failed (hr=0x{:08X})",
+			static_cast<unsigned>(hr)
+		);
 		return hr;
 	}
 
 	hr = CreateList();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: CreateList failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"CreateList failed (hr=0x{:08X})",
+			static_cast<unsigned>(hr)
+		);
 		return hr;
 	}
 
 	hr = CreateFence();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: CreateFence failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"CreateFence failed (hr=0x{:08X})",
+			static_cast<unsigned>(hr)
+		);
 		return hr;
 	}
 
@@ -83,7 +95,9 @@ HRESULT CommandContext::ExecuteAndWait()
 	// Close してから実行
 	hr = list_->Close();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: Close command list failed before execute (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 	}
 
 	ID3D12CommandList* lists[] = { list_.Get() };
@@ -92,7 +106,9 @@ HRESULT CommandContext::ExecuteAndWait()
 	const UINT64 signalValue = ++globalFenceValue_;
 	hr = queue_->Signal(fence_.Get(), signalValue);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: queue->Signal failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Error(
+			"Error: queue->Signal failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 		return hr;
 	}
 
@@ -103,10 +119,14 @@ HRESULT CommandContext::ExecuteAndWait()
 
 	// Reset allocator/list for current frame after GPU done
 	hr = allocators_[currentFrameIndex_]->Reset();
-	if (FAILED(hr)) Utils::Log(std::format(L"Warning: allocator->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+	if (FAILED(hr)) Utils::Logger::Warn(
+		"Warning: allocator->Reset failed (hr=0x{:08X})\n", 
+		static_cast<unsigned>(hr));
 	else {
 		hr = list_->Reset(allocators_[currentFrameIndex_].Get(), nullptr);
-		if (FAILED(hr)) Utils::Log(std::format(L"Warning: list_->Reset failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		if (FAILED(hr)) Utils::Logger::Warn(
+			"Warning: list_->Reset failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 	}
 
 	return S_OK;
@@ -123,7 +143,9 @@ HRESULT CommandContext::ExecuteAndSignal()
 	// Close (無視可能)
 	hr = list_->Close();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: Close command list failed before execute (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Warn(
+			"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 	}
 
 	ID3D12CommandList* lists[] = { list_.Get() };
@@ -133,7 +155,9 @@ HRESULT CommandContext::ExecuteAndSignal()
 	const UINT64 signalValue = ++globalFenceValue_;
 	hr = queue_->Signal(fence_.Get(), signalValue);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Error: queue->Signal failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Warn(
+			"Error: queue->Signal failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 		return hr;
 	}
 
@@ -163,19 +187,17 @@ HRESULT CommandContext::MoveToNextFrame()
 	// --- コマンドアロケータをリセット ---
 	HRESULT hr = allocators_[nextIndex]->Reset();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"Warning: allocator->Reset failed for frame {} (hr=0x{:08X})\n",
-			nextIndex, static_cast<unsigned>(hr)
-		));
+		Utils::Logger::Warn(
+			"Warning: allocator->Reset failed for frame {} (hr=0x{:08X})\n",
+			nextIndex, static_cast<unsigned>(hr));
 	}
 
 	// --- コマンドリストをリセット ---
 	hr = list_->Reset(allocators_[nextIndex].Get(), nullptr);
 	if (FAILED(hr)) {
-		Utils::Log(std::format(
-			L"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n",
-			nextIndex, static_cast<unsigned>(hr)
-		));
+		Utils::Logger::Warn(
+			"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n",
+			nextIndex, static_cast<unsigned>(hr));
 	}
 
 	// --- ビューポート／シザー状態を初期化 ---
@@ -353,7 +375,9 @@ HRESULT CommandContext::CreateList()
 	// CreateCommandList は "recording" 状態で返るので、ここで一旦 Close しておく（呼び出し側で Reset して再利用）
 	hr = list_->Close();
 	if (FAILED(hr)) {
-		Utils::Log(std::format(L"Warning: Close initial command list failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+		Utils::Logger::Warn(
+			"Warning: Close initial command list failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
 	}
 
 	return S_OK;

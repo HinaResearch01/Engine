@@ -3,6 +3,7 @@
 #include "DX12/DX12Manager.h"
 #include "../Shader/ShaderLibrary.h"
 #include "../Rootsigs/RootSignatureLibrary.h"
+#include "Utils/Func/UtilFunc.h"
 #include <stdexcept>
 #include <locale>
 #include <codecvt>
@@ -33,12 +34,12 @@ void PSOLibrary::Register(const std::wstring& name, const D3D12_GRAPHICS_PIPELIN
     HRESULT hr = dx12Mgr_->GetDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso));
     if (FAILED(hr))
     {
-        Tsumi::Utils::Error(L"[PSO] " + name + L" の作成に失敗");
+        Tsumi::Utils::Logger::Error("[PSO] " + Tsumi::Utils::WstringToUtf8(name) + " の作成に失敗");
         return;
     }
 
     pipelines[name] = pso;
-    Tsumi::Utils::Info(L"[PSO] " + name + L" 登録完了");
+    Tsumi::Utils::Logger::Info("[PSO] " + Tsumi::Utils::WstringToUtf8(name) + " 登録完了");
 }
 
 ID3D12PipelineState* PSOLibrary::Get(const std::wstring& name)
@@ -66,7 +67,7 @@ void PSOLibrary::CreateObject3D()
     auto rootSig = rootsigs_->Get("Object3D");
     if (!rootSig)
     {
-        Tsumi::Utils::Error(L"[PSO] Object3D 用 RootSignature が見つかりません。");
+        Tsumi::Utils::Logger::Error("[PSO] Object3D 用 RootSignature が見つかりません。");
         return;
     }
 
@@ -87,7 +88,7 @@ void PSOLibrary::CreateObject3D()
 
     if (!vs || !ps)
     {
-        Tsumi::Utils::Error(L"[PSO] Object3D シェーダのロードに失敗しました。");
+        Tsumi::Utils::Logger::Error("[PSO] Object3D シェーダのロードに失敗しました。");
         return;
     }
 

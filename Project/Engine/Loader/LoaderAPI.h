@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include "Utils/Func/UtilFunc.h"
 #include  "Loader/Tex/TextureLoader.h"
 #include "Loader/Mesh/MeshLoader.h"
@@ -36,11 +36,10 @@ inline HRESULT AssetLoader::Load<mdl>(const std::string& fullPath, const std::st
 	HRESULT hr = Tsumi::Loader::ModelLoader::Load(fullPath, alias);
 
 	if (FAILED(hr)) {
-		Tsumi::Utils::Error(std::format(
-			L"[AssetLoader::Load<Model>] Failed to load model '{}' (HRESULT = 0x{:08X})",
+		Tsumi::Utils::Logger::Error(
+			"[AssetLoader::Load<Model>] Failed to load model '{}' (HRESULT = 0x{:08X})",
 			Tsumi::Utils::Utf8ToWstring(fullPath),
-			static_cast<unsigned>(hr)
-		));
+			static_cast<unsigned>(hr));
 		return hr;
 	}
 
@@ -53,11 +52,9 @@ inline HRESULT AssetLoader::Load<tex>(const std::string& fullPath, const std::st
 	HRESULT hr = Tsumi::Loader::TextureLoader::Load(fullPath, alias);
 
 	if (FAILED(hr)) {
-		Tsumi::Utils::Error(std::format(
-			L"[AssetLoader::Load<Tex>] Failed to load texture '{}' (HRESULT = 0x{:08X})",
+		Tsumi::Utils::Logger::Error("[AssetLoader::Load<Tex>] Failed to load texture '{}' (HRESULT = 0x{:08X})",
 			Tsumi::Utils::Utf8ToWstring(fullPath),
-			static_cast<unsigned>(hr)
-		));
+			static_cast<unsigned>(hr));
 		return hr;
 	}
 

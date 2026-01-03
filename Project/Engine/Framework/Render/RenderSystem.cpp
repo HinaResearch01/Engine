@@ -1,6 +1,6 @@
 #include "RenderSystem.h"
 #include "Framework/Scene/IScene.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::Framework;
 

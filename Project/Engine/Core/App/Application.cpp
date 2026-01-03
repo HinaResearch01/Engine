@@ -1,7 +1,7 @@
 #include "Application.h"
 #include <stdexcept>
 #include <memory>
-#include <Utils/Logger/UtilsLog.h>
+#include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Desc/DescriptorAllocator.h"

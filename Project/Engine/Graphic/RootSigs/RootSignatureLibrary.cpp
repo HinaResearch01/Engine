@@ -52,14 +52,14 @@ void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SI
             // エラーメッセージも UTF-16 に変換
             std::string err((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize());
             std::wstring werr = Utils::Utf8ToWstring(err);
-            Utils::Log(std::format(
-                L"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n",
-                wname, werr));
+            Utils::Logger::Error(
+				"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n",
+                wname, werr);
         }
         else {
-            Utils::Log(std::format(
-                L"RootSignatureLibrary::Register - シリアライズに失敗 '{}', hr=0x{:08X}\n",
-                wname, static_cast<unsigned>(hr)));
+            Utils::Logger::Error(
+				"RootSignatureLibrary::Register - シリアライズに失敗 '{}', hr=0x{:08X}\n",
+                wname, static_cast<unsigned>(hr));
         }
         throw std::runtime_error("RootSignature serialize failed: " + name);
     }
@@ -74,9 +74,9 @@ void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SI
     );
 
     if (FAILED(hr) || !rootSig) {
-        Utils::Log(std::format(
-            L"RootSignatureLibrary::Register - CreateRootSignature に失敗 '{}', hr=0x{:08X}\n",
-            wname, static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"RootSignatureLibrary::Register - CreateRootSignature に失敗 '{}', hr=0x{:08X}\n",
+            wname, static_cast<unsigned>(hr));
         throw std::runtime_error("RootSignature create failed: " + name);
     }
 
@@ -86,9 +86,9 @@ void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SI
         rootSigs_[name] = rootSig;
     }
 
-    Utils::Log(std::format(
-        L"RootSignatureLibrary::Register - 登録完了 '{}'\n",
-        wname));
+    Utils::Logger::Info(
+		"RootSignatureLibrary::Register - 登録完了 '{}'\n",
+        wname);
 }
 
 ID3D12RootSignature* RootSignatureLibrary::Get(const std::string& name) const

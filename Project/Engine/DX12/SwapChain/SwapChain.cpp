@@ -2,7 +2,7 @@
 #include "Core/App/Application.h"
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::DX12;
 using Microsoft::WRL::ComPtr;
@@ -50,7 +50,7 @@ HRESULT SwapChain::Create()
     // DXGIファクトリを取得して SwapChain を作成する準備
     IDXGIFactory4* factory4 = dx12Mgr_->GetFactory();
     if (!factory4) {
-        Utils::Log(L"Error: IDXGIFactory4 is null in SwapChain::Create()\n");
+        Utils::Logger::Error("Error: IDXGIFactory4 is null in SwapChain::Create()\n");
         return E_POINTER;
     }
 
@@ -64,14 +64,18 @@ HRESULT SwapChain::Create()
         &swapChain1);            // 作成されたスワップチェーンを受け取る
 
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Error: CreateSwapChainForHwnd failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Error: CreateSwapChainForHwnd failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 
     // IDXGISwapChain1 → IDXGISwapChain4 にキャスト
     hr = swapChain1.As(&swapChain_);
     if (FAILED(hr) || !swapChain_) {
-        Utils::Log(std::format(L"Error: swapChain1.As -> IDXGISwapChain4 failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Error: swapChain1.As -> IDXGISwapChain4 failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 
@@ -89,7 +93,9 @@ HRESULT Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)
 
     HRESULT hr = swapChain_->Present(syncInterval, flags);
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"SwapChain::Present failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"SwapChain::Present failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
     }
     return hr;
 }
@@ -108,7 +114,9 @@ HRESULT SwapChain::GetBuffer(UINT index, ID3D12Resource** outResource) const
 
     HRESULT hr = swapChain_->GetBuffer(index, IID_PPV_ARGS(outResource));
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"SwapChain::GetBuffer failed for index {} (hr=0x{:08X})\n", index, static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"SwapChain::GetBuffer failed for index {} (hr=0x{:08X})\n", 
+			index, static_cast<unsigned>(hr));
     }
     return hr;
 }
@@ -126,12 +134,14 @@ HRESULT SwapChain::Resize(UINT width, UINT height)
 
     HRESULT hr = swapChain_->ResizeBuffers(bufCount, width, height, desc_.Format, 0);
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"SwapChain::Resize - ResizeBuffers failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"SwapChain::Resize - ResizeBuffers failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 
     desc_.Width = width;
     desc_.Height = height;
-    Utils::Log(std::format(L"SwapChain resized: {}x{}\n", width, height));
+    Utils::Logger::Info("SwapChain resized: {}x{}\n", width, height);
     return S_OK;
 }

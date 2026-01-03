@@ -1,6 +1,6 @@
 #include "DescriptorAllocator.h"
 #include "DX12/DX12Manager.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::DX12;
 
@@ -32,7 +32,9 @@ HRESULT DescriptorAllocator::Init(UINT numDescriptor, UINT frameBuckets)
 
     HRESULT hr = dx12Mgr_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap_));
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"DescriptorAllocator::Init - CreateDescriptorHeap failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"DescriptorAllocator::Init - CreateDescriptorHeap failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr;
     }
 

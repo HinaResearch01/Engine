@@ -197,6 +197,9 @@
     <ClCompile Include="Engine\Framework\Scene\IScene.cpp">
       <Filter>Engine\Framework\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Utils\Logger\Logger.cpp">
+      <Filter>Engine\Utils\Logger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -523,7 +526,7 @@
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h">
       <Filter>Engine\DX12\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Utils\Logger\UtilsLog.h">
+    <ClInclude Include="Engine\Utils\Logger\Logger.h">
       <Filter>Engine\Utils\Logger</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DX12\DX12Manager.h">
@@ -669,6 +672,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h">
       <Filter>Engine\Framework\Scene\CompView</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utils\Debug\DebugPrint.h">
+      <Filter>Engine\Utils\Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -911,6 +917,9 @@
     </Filter>
     <Filter Include="Engine\Framework\Scene\CompView">
       <UniqueIdentifier>{116c8838-2337-4b3f-bd63-577519e0b41b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\Debug">
+      <UniqueIdentifier>{4e0c5e4c-2f13-4179-8ffb-9042201290a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

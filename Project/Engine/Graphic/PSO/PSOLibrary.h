@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include "Utils/Logger/UtilsLog.h"
+
+#include "Utils/Logger/Logger.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {

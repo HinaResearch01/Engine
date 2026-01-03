@@ -1,5 +1,5 @@
 #include "MeshLoader.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include "Utils/Func/UtilFunc.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

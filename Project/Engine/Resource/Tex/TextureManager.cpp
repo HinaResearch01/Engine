@@ -1,7 +1,7 @@
 #include "TextureManager.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Desc/DescriptorAllocator.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include "Utils/Func/UtilFunc.h"
 #include <filesystem>
 #include <DirectXTex.h>

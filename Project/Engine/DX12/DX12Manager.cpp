@@ -1,5 +1,5 @@
 #include "DX12Manager.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include <chrono>
 #include <format>
 
@@ -62,7 +62,7 @@ void DX12Manager::Finalize()
 HRESULT DX12Manager::StartFrame()
 {
 	if (!cmdContext_ || !framebuf_ || !swapChain_ || !frameSync_) {
-		Utils::Log(L"DX12Manager::StartFrame - subsystem missing\n");
+		Utils::Logger::Error("DX12Manager::StartFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 
@@ -105,7 +105,7 @@ HRESULT DX12Manager::StartFrame()
 HRESULT DX12Manager::EndFrame()
 {
 	if (!cmdContext_ || !swapChain_ || !framebuf_ || !frameSync_) {
-		Utils::Log(L"DX12Manager::EndFrame - subsystem missing\n");
+		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 

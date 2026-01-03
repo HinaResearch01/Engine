@@ -1,5 +1,5 @@
 #include "DX12Device.h"
-#include "Utils/Logger/UtilsLog.h"
+#include "Utils/Logger/Logger.h"
 #include <format>
 #include <cassert>
 #include <wrl.h>
@@ -25,25 +25,33 @@ HRESULT DX12Device::Create()
     hr = CreateDebugLayer();
     if (FAILED(hr)) {
         // ログは残すが、継続する（環境によっては無視できる）
-        Utils::Log(std::format(L"Warning: CreateDebugLayer failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Warn(
+			"Warning: CreateDebugLayer failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
     }
 
     hr = CreateFactoryAndAdapter();
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Error: CreateFactoryAndAdapter failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Error: CreateFactoryAndAdapter failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr; // ここは致命的
     }
 
     hr = CreateDevice();
     if (FAILED(hr)) {
-        Utils::Log(std::format(L"Error: CreateDevice failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Error(
+			"Error: CreateDevice failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
         return hr; // ここも致命的
     }
 
     hr = DebugErrorInfoQueue();
     if (FAILED(hr)) {
         // InfoQueue の取得失敗は必ずしも致命的ではないがログに残す
-        Utils::Log(std::format(L"Warning: DebugErrorInfoQueue failed (hr=0x{:08X})\n", static_cast<unsigned>(hr)));
+        Utils::Logger::Warn(
+			"Warning: DebugErrorInfoQueue failed (hr=0x{:08X})\n", 
+			static_cast<unsigned>(hr));
     }
 
     return S_OK;
@@ -120,7 +128,7 @@ HRESULT Tsumi::DX12::DX12Device::CreateFactoryAndAdapter()
 
         // 採用
         useAdapter_ = adapter;
-        Utils::Log(std::format(L"USE Adapter: {}\n", desc.Description));
+        Utils::Logger::Info("USE Adapter: {}\n", desc.Description);
         break;
     }
 
@@ -153,7 +161,7 @@ HRESULT Tsumi::DX12::DX12Device::CreateDevice()
     for (size_t i = 0; i < featureLevels.size(); ++i) {
         hr = D3D12CreateDevice(useAdapter_.Get(), featureLevels[i], IID_PPV_ARGS(&device_));
         if (SUCCEEDED(hr) && device_) {
-            Utils::Log(std::format(L"FeatureLevel : {}\n", featureLevelStrings[i]));
+            Utils::Logger::Info("FeatureLevel : {}\n", featureLevelStrings[i]);
             break;
         }
     }
@@ -162,7 +170,7 @@ HRESULT Tsumi::DX12::DX12Device::CreateDevice()
         return hr == E_FAIL ? E_FAIL : hr;
     }
 
-    Utils::Log(L"Complete create D3D12Device!!!\n");
+    Utils::Logger::Info("Complete create D3D12Device!!!\n");
     return S_OK;
 }
 
