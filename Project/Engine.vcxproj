@@ -79,7 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalOptions>/source-charset:utf-8 
 /Zc:u8EscapeEncoding-
 
@@ -190,13 +190,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
-    <ClCompile Include="Engine\Framework\Camera\CameraSystem.cpp" />
     <ClCompile Include="Engine\Framework\Component\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
     <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
-    <ClCompile Include="Engine\Framework\Render\RenderSystem.cpp" />
-    <ClCompile Include="Engine\Framework\Scene\IScene.cpp" />
+    <ClCompile Include="Engine\Framework\System\CameraSystem.cpp" />
+    <ClCompile Include="Engine\Framework\System\RenderSystem.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -213,7 +212,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
     <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
-    <ClCompile Include="Engine\Utils\Logger\Logger.cpp" />
     <ClCompile Include="Engine\Win\Win32Window.cpp" />
     <ClCompile Include="externals\DirectXTex\BC.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -345,16 +343,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Framework\Actor\ActorTag.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />
-    <ClInclude Include="Engine\Framework\Camera\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderSystem.h" />
-    <ClInclude Include="Engine\Framework\Render\str\RenderStructure.h" />
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
-    <ClInclude Include="Engine\Framework\Scene\IScene.h" />
+    <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
+    <ClInclude Include="Engine\Framework\System\RenderSystem.h" />
+    <ClInclude Include="Engine\Framework\Update\UpdateManager.h" />
+    <ClInclude Include="Engine\Framework\Update\UpdateNode.h" />
+    <ClInclude Include="Engine\Framework\Update\UpdatePhase.h" />
+    <ClInclude Include="Engine\Framework\View\CameraContext.h" />
+    <ClInclude Include="Engine\Framework\View\RenderView.h" />
+    <ClInclude Include="Engine\Framework\World\World.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />

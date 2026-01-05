@@ -182,23 +182,17 @@
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Render\RenderSystem.cpp">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\Component\Camera\CameraComponent.cpp">
       <Filter>Engine\Framework\Component\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Framework\Camera\CameraSystem.cpp">
-      <Filter>Engine\Framework\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp">
       <Filter>Engine\Framework\Component\Material</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Scene\IScene.cpp">
-      <Filter>Engine\Framework\Scene</Filter>
+    <ClCompile Include="Engine\Framework\System\CameraSystem.cpp">
+      <Filter>Engine\Framework\System</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Utils\Logger\Logger.cpp">
-      <Filter>Engine\Utils\Logger</Filter>
+    <ClCompile Include="Engine\Framework\System\RenderSystem.cpp">
+      <Filter>Engine\Framework\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -649,17 +643,8 @@
     <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderSystem.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\str\RenderStructure.h">
-      <Filter>Engine\Framework\Render\str</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h">
       <Filter>Engine\Framework\Component\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Camera\CameraSystem.h">
-      <Filter>Engine\Framework\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\Actor\ActorTag.h">
       <Filter>Engine\Framework\Actor</Filter>
@@ -667,14 +652,35 @@
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h">
       <Filter>Engine\Framework\Component\Material</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Scene\IScene.h">
-      <Filter>Engine\Framework\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h">
       <Filter>Engine\Framework\Scene\CompView</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utils\Debug\DebugPrint.h">
       <Filter>Engine\Utils\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\World\World.h">
+      <Filter>Engine\Framework\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\View\CameraContext.h">
+      <Filter>Engine\Framework\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\View\RenderView.h">
+      <Filter>Engine\Framework\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\CameraSystem.h">
+      <Filter>Engine\Framework\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\RenderSystem.h">
+      <Filter>Engine\Framework\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Update\UpdateManager.h">
+      <Filter>Engine\Framework\Update</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Update\UpdateNode.h">
+      <Filter>Engine\Framework\Update</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Update\UpdatePhase.h">
+      <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -897,17 +903,8 @@
     <Filter Include="Engine\DX12\PerFrame">
       <UniqueIdentifier>{a8834c4a-1fc1-4c12-88a5-842e95f5d3fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\Render">
-      <UniqueIdentifier>{b56da0d0-e148-41b3-ab81-5095be1ed761}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Framework\Render\str">
-      <UniqueIdentifier>{5de7566e-5a19-44b5-8575-71d29ae20882}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Framework\Component\Camera">
       <UniqueIdentifier>{fea9b50f-851b-4a56-8e38-3cad77093a91}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Framework\Camera">
-      <UniqueIdentifier>{4f4e0768-9e06-4250-ad5a-35a6e8cadfc3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Framework\Component\Material">
       <UniqueIdentifier>{3fd83676-4d4b-464f-9d79-745a02e427e6}</UniqueIdentifier>
@@ -920,6 +917,18 @@
     </Filter>
     <Filter Include="Engine\Utils\Debug">
       <UniqueIdentifier>{4e0c5e4c-2f13-4179-8ffb-9042201290a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Update">
+      <UniqueIdentifier>{f022c029-8cfc-4831-a56c-bfc8b21f5f47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System">
+      <UniqueIdentifier>{fd8c4d85-def0-4e85-8c65-f0b4c0c76113}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\View">
+      <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\World">
+      <UniqueIdentifier>{66c8a253-6b32-4aa3-b023-d6ab6bfab1d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

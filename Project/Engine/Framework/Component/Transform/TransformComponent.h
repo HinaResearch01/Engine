@@ -79,8 +79,12 @@ private:
 public:
 	// SRT
 	SRT srt{};
+	// 基準ベクトル
+	Math::Vec3f forward{};
+	Math::Vec3f up{};
 
 private:
+	// 1フレーム前のSRT
 	SRT prevSRT_{};
 	// 行列
 	Math::Mat4x4 worldMat_{};

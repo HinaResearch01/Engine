@@ -29,17 +29,18 @@ public:
 	float nearZ = 0.1f;
 	float farZ = 1000.0f;
 	
-	bool  enabled = true;
+	bool  active = true;
+	// Mainが複数ある場合の優先度（大きいほど優先）
+	int priority = 0;
+	// ゲームカメラとして使用するならtrue
+	bool mainCandidate = true;
 
 	enum class Role {
+		Invalid = 0,
 		Main,
-		Debug,
-		CutScene,
+		Sub,
 		Shadow,
-		UI,
-	} role = Role::Main;
-
-	int priority = 0;
+	} role = Role::Invalid;
 };
 
 }
