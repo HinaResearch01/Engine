@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
+#include "Framework/View/CameraContext.h"
 #include "Framework/Scene/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
@@ -9,15 +10,6 @@ namespace Tsumi::Framework {
 class IScene;
 class IActor;
 class CameraComponent;
-
-// カメラ情報
-struct CameraContext {
-	bool valid = false;
-	Math::Mat4x4 view{};
-	Math::Mat4x4 proj{};
-	Math::Mat4x4 viewProj{};
-	Math::Vec3f position;
-};
 
 /* カメラシステム */
 class CameraSystem {

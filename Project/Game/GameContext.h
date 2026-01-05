@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include "Framework/Scene/IScene.h"
+#include "Framework/World/World.h"
 
 namespace Tsumi::Framework {
 
@@ -59,8 +59,8 @@ public:
 #pragma endregion
 
 private:
-	std::unordered_map<std::string, std::unique_ptr<Framework::IScene>> scenes_;
-	Framework::IScene* currentScene_ = nullptr;
+	std::unordered_map<std::string, std::unique_ptr<Framework::World>> scenes_;
+	Framework::World* currentScene_ = nullptr;
 	bool pendingInit_ = false;
 };
 
@@ -78,12 +78,12 @@ inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(
 template<typename T, typename ...Args>
 inline void GameContext::RegisterScene(const std::string& name, Args && ...args)
 {
-	// TはISceneを継承していなければいけない
-	static_assert(std::is_base_of<Framework::IScene, T>::value,
-		"RegisterScene: T must derive from IScene");
+	// TはWorldを継承していなければいけない
+	static_assert(std::is_base_of<Framework::World, T>::value,
+		"RegisterScene: T must derive from World");
 
 	using SceneType = T;
-	using BaseType = Framework::IScene;
+	using BaseType = Framework::World;
 
 	// mapに追加
 	std::unique_ptr<BaseType> ptr(

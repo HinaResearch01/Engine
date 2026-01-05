@@ -9,14 +9,9 @@
 #include "Framework/Component/Transform/TransformComponent.h"
 #include "Math/TMath.h"
 
-#include "str/RenderStructure.h"
-
 #include <cstdint>
 
 namespace Tsumi::Framework {
-
-// 前方宣言
-class IScene;
 
 using MeshHandle = std::string;
 using TextureHandle = std::string;
@@ -54,7 +49,7 @@ public:
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Render(IScene* scene);
+	void Render();
 
 #pragma region Accessor
 
@@ -80,7 +75,7 @@ private:
 	/// <summary>
 	/// GPU用Transformバッファのセットアップ
 	/// </summary>
-	GPUTransformCB SetupTransformCB(const RenderItem& item);
+	//GPUTransformCB SetupTransformCB(const RenderItem& item);
 
 private:
 	std::vector<RenderItem> items_;

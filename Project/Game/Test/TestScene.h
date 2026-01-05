@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Framework/Scene/IScene.h"
+#include "Framework/World/World.h"
 
 /* テスト用のsceneクラス */
-class TestScene : public Tsumi::Framework::IScene {
+class TestScene : public Tsumi::Framework::World {
 
 public:
 	TestScene() = default;
