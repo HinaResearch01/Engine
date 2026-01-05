@@ -194,6 +194,9 @@
     <ClCompile Include="Engine\Framework\System\RenderSystem.cpp">
       <Filter>Engine\Framework\System</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\System\TransformSystem.cpp">
+      <Filter>Engine\Framework\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -681,6 +684,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h">
       <Filter>Engine\Framework\Update</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\TransformSystem.h">
+      <Filter>Engine\Framework\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

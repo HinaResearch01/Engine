@@ -196,6 +196,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp" />
     <ClCompile Include="Engine\Framework\System\CameraSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\RenderSystem.cpp" />
+    <ClCompile Include="Engine\Framework\System\TransformSystem.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -351,6 +352,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
     <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\RenderSystem.h" />
+    <ClInclude Include="Engine\Framework\System\TransformSystem.h" />
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h" />
     <ClInclude Include="Engine\Framework\Update\UpdateNode.h" />
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h" />
