@@ -353,8 +353,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\RenderSystem.h" />
     <ClInclude Include="Engine\Framework\System\TransformSystem.h" />
+    <ClInclude Include="Engine\Framework\Update\IUpdatable.h" />
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h" />
-    <ClInclude Include="Engine\Framework\Update\UpdateNode.h" />
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h" />
     <ClInclude Include="Engine\Framework\View\CameraContext.h" />
     <ClInclude Include="Engine\Framework\View\RenderView.h" />

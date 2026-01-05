@@ -679,14 +679,14 @@
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Update\UpdateNode.h">
-      <Filter>Engine\Framework\Update</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\TransformSystem.h">
       <Filter>Engine\Framework\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
+      <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

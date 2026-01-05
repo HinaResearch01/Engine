@@ -29,8 +29,7 @@ public:
 	// ===============================================
 	virtual void Init() {}
 	virtual void Update(float deltaTime) {
-		UpdateActors(deltaTime);
-		CleanupDeadActorsInternal();
+		deltaTime; // 未使用回避
 	}
 	virtual void Finalize() {
 		ClearComponentView();
@@ -41,7 +40,9 @@ public:
 	// Actor Management
 	// ===============================================
 
+	/// <summary>
 	/// Actor生成
+	/// </summary>
 	template<class T, class... Args>
 	T* SpawnActor(Args&&... args) {
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
@@ -58,12 +59,16 @@ public:
 		return ptr;
 	}
 
-	/// Actor一覧取得（System用）
+	/// <summary>
+	/// Actor一覧取得
+	/// </summary>
 	const std::vector<std::unique_ptr<IActor>>& GetActors() const {
 		return actors_;
 	}
 
+	/// <summary>
 	/// ActorID発行
+	/// </summary>
 	IActor::ActorID GenerateActorID() { return nextActorId_++; }
 
 #pragma region Accessor
@@ -76,29 +81,6 @@ public:
 #pragma endregion
 
 protected:
-	// ===============================================
-	// Internal Update
-	// ===============================================
-
-	void UpdateActors(float dt) {
-		for (auto& a : actors_) {
-			a->UpdateActor(dt);
-		}
-	}
-
-	void CleanupDeadActorsInternal() {
-		// View から先に除外
-		for (auto& a : actors_) {
-			if (a->GetState() == IActor::State::Dead) {
-				UnregisterComponentViewActor(a.get());
-			}
-		}
-
-		std::erase_if(actors_, [](const std::unique_ptr<IActor>& a) {
-			return a->GetState() == IActor::State::Dead;
-		});
-	}
-
 	// ===============================================
 	// ComponentView Management
 	// ===============================================
