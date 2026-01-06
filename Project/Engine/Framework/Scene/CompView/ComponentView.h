@@ -3,66 +3,75 @@
 #include <vector>
 #include <unordered_set>
 #include <algorithm>
+#include <cassert>
+
 #include "Framework/Actor/IActor.h"
-#include "Framework/Component/IComponent.h"
 
 namespace Tsumi::Framework {
 
-/* 指定コンポーネントを持つアクターの一覧を管理するビュークラス */
+/* 指定コンポーネント T を「持っている Actor」だけを索引する View */
 template<class T>
 class ComponentView {
 public:
-	// 取得：System はこれだけを見る
-	const std::vector<IActor*>& Get() const { return actors_; }
+	/// <summary>
+	/// System 用：列挙専用アクセサ
+	/// </summary>
+	const std::vector<IActor*>& GetActors() const {
+		return actors_;
+	}
 
-	// 全消去（Scene::Finalizeなど）
+	/// <summary>
+	/// 全消去
+	/// </summary>
 	void Clear() {
 		actors_.clear();
 		set_.clear();
 	}
 
-	/*
-		Refresh(actor)
-		- actor が T を持つなら view に入れる
-		- actor が T を持たないなら view から外す
-		- 既に入っている/入っていない場合は何もしない
-	*/
+	/// <summary>
+	/// view に入れる
+	/// Component の追加 / 削除時に呼ばれる
+	/// </summary>
 	void Refresh(IActor* actor) {
 		if (!actor) return;
 
-		const bool has = actor->HasComp<T>();
-		const bool in = (set_.find(actor) != set_.end());
+		const bool hasComp = actor->HasComp<T>();
+		const bool inView = (set_.find(actor) != set_.end());
 
-		if (has && !in) {
+		if (hasComp && !inView) {
 			Add(actor);
 		}
-		else if (!has && in) {
+		else if (!hasComp && inView) {
 			Remove(actor);
 		}
+		// else : 状態変化なし → 何もしない
 	}
 
-	/*
-		Remove(actor)
-		- 強制的に view から外す（actor削除時など）
-		- actor が入っていなければ何もしない
-	*/
+	/// <summary>
+	/// view から外す
+	/// Actor 破棄時などに使用
+	/// </summary>
 	void Remove(IActor* actor) {
 		if (!actor) return;
-		if (set_.erase(actor) == 0) return;
 
-		// actors_ からも削除（線形だが、viewはカテゴリ毎の小さい集合になる想定）
+		if (set_.erase(actor) == 0)
+			return; // そもそも入っていない
+
 		std::erase(actors_, actor);
 	}
 
 private:
 	void Add(IActor* actor) {
+		assert(actor);
+		assert(set_.find(actor) == set_.end()); // 二重登録防止（Debug用）
+
 		set_.insert(actor);
 		actors_.push_back(actor);
 	}
 
 private:
-	std::vector<IActor*> actors_;          // 非所有：順序保持、走査用
-	std::unordered_set<IActor*> set_;      // 非所有：重複防止・存在判定用
+	std::vector<IActor*> actors_;          // 走査用（順序保持）
+	std::unordered_set<IActor*> set_;      // 存在判定・重複防止
 };
 
 }

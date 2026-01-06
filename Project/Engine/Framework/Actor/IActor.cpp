@@ -25,6 +25,20 @@ IActor::~IActor() {
 	transComp_.reset();
 }
 
+void IActor::Finalize()
+{
+	if (!world_) {
+		comps_.clear();
+		return;
+	}
+
+	for (auto& [type, comp] : comps_) {
+		world_->OnComponentRemoved(this, comp.get());
+	}
+
+	comps_.clear();
+}
+
 void IActor::EnsureTransform() {
 	if (transComp_) return;
 

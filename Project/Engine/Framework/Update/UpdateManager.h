@@ -32,7 +32,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void ExecuteUpdate(float deltaTime) {
+	void Execute(float deltaTime) {
 		for (size_t phase = 0; phase < static_cast<size_t>(UpdatePhase::Count); ++phase) {
 			auto& list = lists_[phase];
 			// 優先度順にソート（大きいほど先）

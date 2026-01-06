@@ -31,7 +31,7 @@ public:
 
 	virtual void Update(float deltaTime) {
 		// 更新の主体は UpdateManager
-		updateMgr_.ExecuteUpdate(deltaTime);
+		updateMgr_.Execute(deltaTime);
 
 		// Dead Actor の後処理
 		CleanupDeadActorsInternal();
@@ -53,16 +53,14 @@ public:
 		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
 		actor->SetID(GenerateActorID());
 
-		// ★ World を Actor に知らせる（重要）
+		// World を Actor に知らせる
 		actor->SetWorld(this);
 
 		actor->Init();
 
 		T* ptr = actor.get();
 		actors_.push_back(std::move(actor));
-
-		// Actor単位で View 登録
-		RegisterComponentView(ptr);
+		 
 		return ptr;
 	}
 
@@ -124,10 +122,12 @@ protected:
 	void CleanupDeadActorsInternal() {
 		for (auto& a : actors_) {
 			if (a->GetState() == IActor::State::Dead) {
-				// View から先に除外
-				UnregisterComponentViewActor(a.get());
 
-				// Component 側で OnComponentRemoved が呼ばれる前提
+				// View から除外（Actor単位）
+				renderables_.Remove(a.get());
+				cameras_.Remove(a.get());
+
+				// Component / Update の解除は Actor 側の責務
 				a->Finalize();
 			}
 		}
@@ -140,11 +140,6 @@ protected:
 	// ===============================================
 	// ComponentView Management
 	// ===============================================
-
-	void RegisterComponentView(IActor* actor) {
-		renderables_.Refresh(actor);
-		cameras_.Refresh(actor);
-	}
 
 	void UnregisterComponentViewActor(IActor* actor) {
 		renderables_.Remove(actor);

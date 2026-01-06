@@ -42,7 +42,7 @@ public:
 	// LifeCycle（Actor自身の責務のみ）
 	// ===============================================
 	virtual void Init() = 0;
-	virtual void Finalize() {}
+	virtual void Finalize();
 
 	// ===============================================
 	// Component Management
