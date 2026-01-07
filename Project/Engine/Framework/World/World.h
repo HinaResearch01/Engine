@@ -11,6 +11,7 @@
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Update/UpdateManager.h"
+#include "Framework/System/TransformSystem.h"
 #include "Framework/System/CameraSystem.h"
 #include "Framework/Scene/CompView/ComponentView.h"
 
@@ -24,9 +25,10 @@ class World {
 
 public:
 	World()
-		: cameraSystem_(*this)
+		: transformSystem_(*this), cameraSystem_(*this)
 	{
-		// CameraSystem を UpdateManager に登録
+		//  System系をUpdateManagerに登録
+		updateMgr_.Register(&transformSystem_);
 		updateMgr_.Register(&cameraSystem_);
 	}
 	virtual ~World() = default;
@@ -81,8 +83,9 @@ public:
 	GameContext* GetGameContext() const { return gameContext_; }
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
 
-	ComponentView<RenderComponent>& GetRenderables() { return renderables_; }
-	ComponentView<CameraComponent>& GetCameras() { return cameras_; }
+	ComponentView<TransformComponent>& GetTransforms() { return transformsView_; }
+	ComponentView<CameraComponent>& GetCameras() { return camerasView_; }
+	ComponentView<RenderComponent>& GetRenderables() { return rendersView_; }
 
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion
@@ -98,8 +101,9 @@ public:
 		if (!actor || !comp) return;
 
 		// View 更新（索引）
-		renderables_.Refresh(actor);
-		cameras_.Refresh(actor);
+		transformsView_.Refresh(actor);
+		camerasView_.Refresh(actor);
+		rendersView_.Refresh(actor);
 
 		// IUpdatable なら自動登録
 		if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
@@ -117,8 +121,9 @@ public:
 			updateMgr_.UnRegister(updatable);
 		}
 
-		renderables_.Refresh(actor);
-		cameras_.Refresh(actor);
+		transformsView_.Refresh(actor);
+		camerasView_.Refresh(actor);
+		rendersView_.Refresh(actor);
 	}
 
 protected:
@@ -131,8 +136,9 @@ protected:
 			if (a->GetState() == IActor::State::Dead) {
 
 				// View から除外（Actor単位）
-				renderables_.Remove(a.get());
-				cameras_.Remove(a.get());
+				transformsView_.Remove(a.get());
+				camerasView_.Remove(a.get());
+				rendersView_.Remove(a.get());
 
 				// Component / Update の解除は Actor 側の責務
 				a->Finalize();
@@ -149,13 +155,15 @@ protected:
 	// ===============================================
 
 	void UnregisterComponentViewActor(IActor* actor) {
-		renderables_.Remove(actor);
-		cameras_.Remove(actor);
+		transformsView_.Remove(actor);
+		camerasView_.Remove(actor);
+		rendersView_.Remove(actor);
 	}
 
 	void ClearComponentView() {
-		renderables_.Clear();
-		cameras_.Clear();
+		transformsView_.Clear();
+		camerasView_.Clear();
+		rendersView_.Clear();
 	}
 
 protected:
@@ -165,11 +173,13 @@ protected:
 
 	// ===== 各種システム =====
 	UpdateManager updateMgr_;
+	TransformSystem transformSystem_;
 	CameraSystem cameraSystem_;
 
 	// ===== ComponentView =====
-	ComponentView<RenderComponent> renderables_;
-	ComponentView<CameraComponent> cameras_;
+	ComponentView<TransformComponent> transformsView_;
+	ComponentView<CameraComponent> camerasView_;
+	ComponentView<RenderComponent> rendersView_;
 
 	// ===== GameContext =====
 	GameContext* gameContext_ = nullptr;

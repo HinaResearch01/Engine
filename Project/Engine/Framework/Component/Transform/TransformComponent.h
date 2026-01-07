@@ -20,24 +20,36 @@ struct SRT {
 class TransformComponent : public IComponent {
 
 public:
-	SRT local{};                 // ローカルSRT
-	Math::Mat4x4 world{};        // ワールド行列
-
-	Math::Vec3f forward{ 0,0,1 };
-	Math::Vec3f up{ 0,1,0 };
-
-	std::weak_ptr<TransformComponent> parent;
-
-	// dirty 判定用
-	SRT prevLocal{};
-
-	bool IsDirty() const {
-		return memcmp(&local, &prevLocal, sizeof(SRT)) != 0;
+	// 自身のSRTが変更されたか
+	bool IsSelfDirty() const {
+		return std::memcmp(&local, &prevLocal, sizeof(SRT)) != 0;
 	}
 
-	void MarkClean() {
+	// 現在のSRTを前回のSRTに同期
+	void SyncPrev() {
 		prevLocal = local;
 	}
+
+	// ワールド位置の取得
+	Math::Vec3f GetWorldPos() const {
+		return { world.m[3][0], world.m[3][1], world.m[3][2] };
+	}
+
+public:
+	// ===== 入力 =====
+	SRT local{};
+	SRT prevLocal{};
+
+	// ===== 派生（TransformSystem が更新）=====
+	Math::Mat4x4 world{};
+
+	Math::Vec3f right{ 1.0f, 0.0f, 0.0f };
+	Math::Vec3f up{ 0.0f, 1.0f, 0.0f };
+	Math::Vec3f forward{ 0.0f, 0.0f, 1.0f };
+
+	// ===== 階層 =====
+	std::weak_ptr<TransformComponent> parent;
+	bool parentDirty = true;
 };
 
 }
