@@ -20,77 +20,24 @@ struct SRT {
 class TransformComponent : public IComponent {
 
 public:
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	TransformComponent() = default;
+	SRT local{};                 // ローカルSRT
+	Math::Mat4x4 world{};        // ワールド行列
 
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~TransformComponent() = default;
+	Math::Vec3f forward{ 0,0,1 };
+	Math::Vec3f up{ 0,1,0 };
 
-	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	void Init() override;
+	std::weak_ptr<TransformComponent> parent;
 
-	/// <summary>
-	/// 描画処理
-	/// </summary>
-	void Update() override;
+	// dirty 判定用
+	SRT prevLocal{};
 
-	/// <summary>
-	/// 親の設定
-	/// </summary>
-	void AttachToParent(std::weak_ptr<TransformComponent> parent);
-	void DetachFromParent();
-
-	/// <summary>
-	/// 親がいるか
-	/// </summary>
-	bool HasParent() const {
-		return !parent_.expired();
+	bool IsDirty() const {
+		return memcmp(&local, &prevLocal, sizeof(SRT)) != 0;
 	}
 
-#pragma region Accessor
-	Math::Vec3f GetWorldPos() const { 
-		return { worldMat_.m[3][0], worldMat_.m[3][1], worldMat_.m[3][2] }; }
-	const Math::Mat4x4& GetWorldMatrix() const {
-		return worldMat_; }
-#pragma endregion 
-
-private:
-	/// <summary>
-	/// 行列の更新
-	/// </summary>
-	void UpdateMat();
-
-	/// <summary>
-	/// 更新が必要か
-	/// </summary>
-	bool NeedsUpdate();
-
-	/// <summary>
-	/// ImGuiの描画
-	/// </summary>
-	void DrawImGui(std::string label = "");
-
-public:
-	// SRT
-	SRT srt{};
-	// 基準ベクトル
-	Math::Vec3f forward{};
-	Math::Vec3f up{};
-
-private:
-	// 1フレーム前のSRT
-	SRT prevSRT_{};
-	// 行列
-	Math::Mat4x4 worldMat_{};
-	// 親子
-	std::weak_ptr<TransformComponent> parent_;
-	//std::vector<std::weak_ptr<TransformComponent>> children_;
+	void MarkClean() {
+		prevLocal = local;
+	}
 };
 
 }

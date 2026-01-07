@@ -1,84 +1,98 @@
 #include "CameraSystem.h"
+#include "Framework/World/World.h"
 #include "Framework/Actor/IActor.h"
 #include "Utils/Logger/Logger.h"
+#include <limits>
+#undef min
+#undef max
 
 using namespace Tsumi::Framework;
-//
-//void CameraSystem::Update()
-//{
-//	// カメラコンテキスト取得
-//	CameraContext& camCtx = scene.GetCameraContext();
-//	camCtx.valid = false;
-//
-//	// メインカメラ選択
-//	IActor* camActor = SelectMainCamera(scene.GetCameras());
-//	if (!camActor) return;
-//
-//	// 行列構築
-//	BuildMatrices(camActor, camCtx);
-//	camCtx.valid = true;
-//}
-//
-//IActor* CameraSystem::SelectMainCamera(const ComponentView<CameraComponent>& cameras)
-//{
-//	IActor* best = nullptr;
-//	int bestPriority = std::numeric_limits<int>::min();
-//	uint64_t bestId = UINT64_MAX;
-//
-//	int mainCount = 0;
-//
-//	for (auto* actor : cameras.Get()) {
-//		auto* cam = actor->GetComponent<CameraComponent>();
-//		if (!cam || !cam->enabled) continue;
-//		if (cam->role != CameraComponent::Role::Main) continue;
-//
-//		++mainCount;
-//
-//		const int p = cam->priority;
-//		const uint64_t id = actor->GetID();
-//
-//		if (p > bestPriority ||
-//			(p == bestPriority && id < bestId)) {
-//			best = actor;
-//			bestPriority = p;
-//			bestId = id;
-//		}
-//	}
-//
-//	// フォールバック：Main が無い場合
-//	if (!best) {
-//		for (auto* actor : cameras.Get()) {
-//			auto* cam = actor->GetComponent<CameraComponent>();
-//			if (cam && cam->enabled) {
-//				best = actor;
-//				break;
-//			}
-//		}
-//	}
-//
-//	return best;
-//}
-//
-//void CameraSystem::BuildMatrices(IActor* actor, CameraContext& out)
-//{
-//	// Component取得
-//	auto* trans = actor->GetTransform();
-//	auto* cam = actor->GetComponent<CameraComponent>();
-//	// 空チェック
-//	if (!trans || !cam) {
-//		return;
-//	}
-//
-//	// ビュー行列
-//	out.view = trans->GetWorldMatrix().Inverse();
-//	// プロジェクション行列
-//	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
-//		Math::Func::NUM::ToRadians(cam->fovY),
-//		cam->aspectRatio,
-//		cam->nearZ,
-//		cam->farZ);
-//	// ビュー・プロジェクション行列
-//	out.viewProj = out.view * out.proj;
-//	// カメラ位置
-//	out.position = trans->GetWorldPos();
-//}
+
+CameraSystem::CameraSystem(World& world)
+	: world_(world)
+{
+	BuildDefault(defaultCtx_);
+	activeCtx_ = defaultCtx_;
+}
+
+void CameraSystem::Update(float deltaTime)
+{
+	// デフォルトをまず採用（カメラ無しでも描画可）
+	activeCtx_ = defaultCtx_;
+
+	IActor* camActor = SelectCamera();
+	if (!camActor) {
+		return;
+	}
+
+	BuildFromActor(camActor, activeCtx_);
+}
+
+IActor* CameraSystem::SelectCamera() const
+{
+	IActor* best = nullptr;
+	int bestPriority = std::numeric_limits<int>::min();
+
+	const auto& cameras = world_.GetCameras().GetActors();
+	for (IActor* actor : cameras) {
+		auto* cam = actor->GetComponent<CameraComponent>();
+		if (!cam) continue;
+		if (!cam->active) continue;
+		if (!cam->mainCandidate) continue;
+
+		if (cam->priority > bestPriority) {
+			bestPriority = cam->priority;
+			best = actor;
+		}
+	}
+
+	return best;
+}
+
+void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
+{
+	auto* tr = actor->GetComponent<TransformComponent>();
+	auto* cam = actor->GetComponent<CameraComponent>();
+	if (!tr || !cam) return;
+
+	out.valid = true;
+
+	const Math::Vec3f s = Math::Vec3f{ 1.0f, 1.0f, 1.0f };
+	const Math::Vec3f r = tr->srt.rotate;
+	const Math::Vec3f t = tr->GetWorldPos();
+
+	out.position = t;
+
+	out.view = Math::Func::MAT4x4::AffineMatrix(s, r, t);
+	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
+		Math::Func::NUM::ToRadians(cam->fovY),
+		cam->aspect,
+		cam->nearZ,
+		cam->farZ
+	);
+	out.viewProj = out.view * out.proj;
+}
+
+void CameraSystem::BuildDefault(CameraContext& out)
+{
+	Math::Vec3f scale{ 1,1,1 };
+	Math::Vec3f rotate{ 0,0,0 };
+	Math::Vec3f translate{ 0,2,-6 };
+
+	out.view = Math::Func::MAT4x4::AffineMatrix(
+		scale,
+		-rotate,
+		-translate
+	);
+
+	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
+		Math::Func::NUM::ToRadians(60.0f),
+		16.0f / 9.0f,
+		0.1f,
+		1000.0f
+	);
+
+	out.viewProj = out.view * out.proj;
+	out.position = translate;
+	out.valid = true;
+}

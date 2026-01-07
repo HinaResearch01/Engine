@@ -6,11 +6,12 @@
 #include <algorithm>
 
 #include "Framework/Actor/IActor.h"
-#include "Framework/Update/UpdateManager.h"
-#include "Framework/Update/IUpdatable.h"
 #include "Framework/Component/IComponent.h"
-#include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Camera/CameraComponent.h"
+#include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Update/IUpdatable.h"
+#include "Framework/Update/UpdateManager.h"
+#include "Framework/System/CameraSystem.h"
 #include "Framework/Scene/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
@@ -22,6 +23,12 @@ class GameContext;
 class World {
 
 public:
+	World()
+		: cameraSystem_(*this)
+	{
+		// CameraSystem を UpdateManager に登録
+		updateMgr_.Register(&cameraSystem_);
+	}
 	virtual ~World() = default;
 
 	// ===============================================
@@ -152,20 +159,19 @@ protected:
 	}
 
 protected:
-	// Actor 群
+	// ===== Actor 管理 =====
 	std::vector<std::unique_ptr<IActor>> actors_;
-
-	// ActorID
 	IActor::ActorID nextActorId_ = 1;
 
-	// Update の中核
+	// ===== 各種システム =====
 	UpdateManager updateMgr_;
+	CameraSystem cameraSystem_;
 
-	// Component Views（索引）
+	// ===== ComponentView =====
 	ComponentView<RenderComponent> renderables_;
 	ComponentView<CameraComponent> cameras_;
 
-	// GameContext
+	// ===== GameContext =====
 	GameContext* gameContext_ = nullptr;
 };
 

@@ -25,22 +25,14 @@ public:
 
 public:
 	float fovY = 60.0f;
-	float aspectRatio = 16.0f / 9.0f;
+	float aspect = 16.0f / 9.0f;
 	float nearZ = 0.1f;
 	float farZ = 1000.0f;
 	
-	bool  active = true;
-	// Mainが複数ある場合の優先度（大きいほど優先）
-	int priority = 0;
-	// ゲームカメラとして使用するならtrue
+	bool active = true;
 	bool mainCandidate = true;
+	int  priority = 0;
 
-	enum class Role {
-		Invalid = 0,
-		Main,
-		Sub,
-		Shadow,
-	} role = Role::Invalid;
 };
 
 }

@@ -164,9 +164,6 @@
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp">
       <Filter>Engine\Loader\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\Component\Transform\TransformComponent.cpp">
-      <Filter>Engine\Framework\Component\Transform</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp">
       <Filter>Engine\Framework\Component\Render</Filter>
     </ClCompile>
