@@ -190,9 +190,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
-    <ClCompile Include="Engine\Framework\Component\Camera\CameraComponent.cpp" />
-    <ClCompile Include="Engine\Framework\Component\Material\MaterialComponent.cpp" />
-    <ClCompile Include="Engine\Framework\Component\Render\RenderComponent.cpp" />
     <ClCompile Include="Engine\Framework\System\CameraSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\RenderSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\TransformSystem.cpp" />

@@ -58,26 +58,6 @@ public:
 
 private:
 
-	/// <summary>
-	/// Itemの描画
-	/// </summary>
-	void DrawItem(ID3D12GraphicsCommandList* list, const RenderItem& item);
-
-	/// <summary>
-	/// Itemのソート
-	/// </summary>
-	void SortItems();
-
-	/// <summary>
-	/// PsoとRootSigの設定
-	/// </summary>
-	void SetPSOAndRootSig(ID3D12GraphicsCommandList* list);
-
-	/// <summary>
-	/// GPU用Transformバッファのセットアップ
-	/// </summary>
-	GpuTransformCB SetupTransformCB(const RenderItem& item);
-
 private:
 	std::vector<RenderItem> items_;
 	
