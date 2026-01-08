@@ -685,6 +685,9 @@
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderStructure.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -932,6 +935,9 @@
     </Filter>
     <Filter Include="Engine\Framework\World">
       <UniqueIdentifier>{66c8a253-6b32-4aa3-b023-d6ab6bfab1d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Render">
+      <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

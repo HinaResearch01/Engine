@@ -1,50 +1,51 @@
 #pragma once
 
-#include "DX12/DX12Manager.h"
-#include "Resource/ResourceSystem.h"
-#include "Resource/Tex/TextureManager.h"
-#include "Resource/Mesh/MeshManager.h"
-#include "Graphic/PSO/PSOLibrary.h"
-#include "Graphic/RootSigs/RootSignatureLibrary.h"
-#include "Framework/Component/Transform/TransformComponent.h"
 #include "Math/TMath.h"
+#include "Framework/Render/RenderStructure.h"
+#include "Framework/Update/IUpdatable.h"
 
 #include <cstdint>
 
+// 前方宣言
+namespace Tsumi::DX12 {
+class DX12Manager;
+}
+namespace Tsumi::Graphic {
+class PSOLibrary;
+class RootSignatureLibrary;
+}
+namespace Tsumi::Resource {
+class ResourceSystem;
+}
+
 namespace Tsumi::Framework {
 
-using MeshHandle = std::string;
-using TextureHandle = std::string;
-
-// 描画レイヤー
-enum class RenderLayer : uint8_t 
-{
-	Opaque,
-	Transparent,
-};
-// 描画アイテム情報
-struct RenderItem 
-{
-	MeshHandle mesh;
-	TextureHandle albedo;
-	RenderLayer layer;
-	Math::Mat4x4 world;
-	const Framework::TransformComponent* transform;
-};
+class World;
 
 /* 描画管理クラス */
-class RenderSystem {
+class RenderSystem : public IUpdatable {
 
 public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	RenderSystem();
+	RenderSystem() = default;
+	RenderSystem(World& world);
 
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
 	~RenderSystem() = default;
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	void Update(float deltaTime) override;
+
+	/// <summary>
+	/// Phaseの取得
+	/// </summary>
+	UpdatePhase Phase() const override { return UpdatePhase::Render; }
 
 	/// <summary>
 	/// 描画処理
@@ -75,11 +76,12 @@ private:
 	/// <summary>
 	/// GPU用Transformバッファのセットアップ
 	/// </summary>
-	//GPUTransformCB SetupTransformCB(const RenderItem& item);
+	GpuTransformCB SetupTransformCB(const RenderItem& item);
 
 private:
 	std::vector<RenderItem> items_;
 	
+	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Resource::ResourceSystem* resourceSys_ = nullptr;
 	Graphic::PSOLibrary* psoLib_ = nullptr;

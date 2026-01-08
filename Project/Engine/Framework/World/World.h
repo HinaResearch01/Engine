@@ -13,6 +13,7 @@
 #include "Framework/Update/UpdateManager.h"
 #include "Framework/System/TransformSystem.h"
 #include "Framework/System/CameraSystem.h"
+#include "Framework/System/RenderSystem.h"
 #include "Framework/Scene/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
@@ -25,11 +26,12 @@ class World {
 
 public:
 	World()
-		: transformSystem_(*this), cameraSystem_(*this)
+		: transformSystem_(*this), cameraSystem_(*this), renderSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
 		updateMgr_.Register(&transformSystem_);
 		updateMgr_.Register(&cameraSystem_);
+		updateMgr_.Register(&renderSystem_);
 	}
 	virtual ~World() = default;
 
@@ -175,6 +177,7 @@ protected:
 	UpdateManager updateMgr_;
 	TransformSystem transformSystem_;
 	CameraSystem cameraSystem_;
+	RenderSystem renderSystem_;
 
 	// ===== ComponentView =====
 	ComponentView<TransformComponent> transformsView_;

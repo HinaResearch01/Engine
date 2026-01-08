@@ -7,7 +7,7 @@ TransformSystem::TransformSystem(World& world)
 	: world_(world)
 {}
 
-void TransformSystem::Update(float deltaTime)
+void TransformSystem::Update(float)
 {
 	auto& view = world_.GetTransforms();
 	const auto& actors = view.GetActors();
@@ -43,9 +43,9 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	// 1. ローカル行列生成
 	// ==================================
 	const Math::Mat4x4 localMat =
-		Math::Mat4x4::Scale(tr.local.scale) *
-		Math::Mat4x4::Rotation(tr.local.rotate) *
-		Math::Mat4x4::Translation(tr.local.translate);
+		Math::Mat4x4::Scale(tr.srt.scale) *
+		Math::Mat4x4::Rotation(tr.srt.rotate) *
+		Math::Mat4x4::Translation(tr.srt.translate);
 
 	// ==================================
 	// 2. ワールド行列

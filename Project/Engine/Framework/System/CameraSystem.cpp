@@ -15,7 +15,7 @@ CameraSystem::CameraSystem(World& world)
 	activeCtx_ = defaultCtx_;
 }
 
-void CameraSystem::Update(float deltaTime)
+void CameraSystem::Update(float)
 {
 	// デフォルトをまず採用（カメラ無しでも描画可）
 	activeCtx_ = defaultCtx_;

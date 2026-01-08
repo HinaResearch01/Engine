@@ -60,4 +60,4 @@ void IActor::NotifyComponentRemoved(IComponent* comp) {
 	}
 }
 
-} // namespace Tsumi::Framework
+} 

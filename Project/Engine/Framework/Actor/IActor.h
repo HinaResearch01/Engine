@@ -62,7 +62,6 @@ public:
 			if (!transComp_) {
 				transComp_ = std::make_shared<TransformComponent>(std::forward<Args>(args)...);
 				transComp_->SetOwner(this);
-				transComp_->Init();
 				comps_[typeid(TransformComponent)] = transComp_;
 
 				NotifyComponentAdded(transComp_.get());

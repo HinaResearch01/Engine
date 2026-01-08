@@ -16,18 +16,18 @@ struct SRT {
 	{}
 };
 
-/* Actorの「位置・回転・スケール」を管理 */
+/* Actorの「位置・回転・スケール」を管理 データコンポーネント */
 class TransformComponent : public IComponent {
 
 public:
 	// 自身のSRTが変更されたか
 	bool IsSelfDirty() const {
-		return std::memcmp(&local, &prevLocal, sizeof(SRT)) != 0;
+		return std::memcmp(&srt, &prevLocal, sizeof(SRT)) != 0;
 	}
 
 	// 現在のSRTを前回のSRTに同期
 	void SyncPrev() {
-		prevLocal = local;
+		prevLocal = srt;
 	}
 
 	// ワールド位置の取得
@@ -37,7 +37,7 @@ public:
 
 public:
 	// ===== 入力 =====
-	SRT local{};
+	SRT srt{};
 	SRT prevLocal{};
 
 	// ===== 派生（TransformSystem が更新）=====

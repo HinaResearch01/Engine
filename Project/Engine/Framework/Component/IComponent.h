@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -29,7 +30,7 @@ public:
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	virtual void Init() = 0;
+	virtual void Init() {};
 
 	/// <summary>
 	/// 更新処理
@@ -50,4 +51,5 @@ private:
 	// 名前
 	std::string name_ = "default";
 };
+
 }
