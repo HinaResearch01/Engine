@@ -62,15 +62,14 @@ public:
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
 
 		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
-		actor->SetID(GenerateActorID());
-
-		// World を Actor に知らせる
-		actor->SetWorld(this);
-
-		actor->Init();
-
+		actor->SetID(GenerateActorID()); // IDの設定
+		actor->SetWorld(this);			 // Worldを知らせる
+		actor->Init();					 // 初期化処理
 		T* ptr = actor.get();
 		actors_.push_back(std::move(actor));
+
+		// ComponentViewに登録
+		RegisterActorToComponentViews(ptr);
 		 
 		return ptr;
 	}
@@ -92,43 +91,54 @@ public:
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion
 
-	// ===============================================
-	// Component Registration Hook（最重要）
-	// ===============================================
-
-	/// <summary>
-	/// Actor が Component を追加したときに呼ぶ
-	/// </summary>
-	void OnComponentAdded(IActor* actor, IComponent* comp) {
-		if (!actor || !comp) return;
-
-		// View 更新（索引）
-		transformsView_.Refresh(actor);
-		camerasView_.Refresh(actor);
-		rendersView_.Refresh(actor);
-
-		// IUpdatable なら自動登録
-		if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
-			updateMgr_.Register(updatable);
-		}
-	}
-
-	/// <summary>
-	/// Actor が Component を削除したときに呼ぶ
-	/// </summary>
-	void OnComponentRemoved(IActor* actor, IComponent* comp) {
-		if (!actor || !comp) return;
-
-		if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
-			updateMgr_.UnRegister(updatable);
-		}
-
-		transformsView_.Refresh(actor);
-		camerasView_.Refresh(actor);
-		rendersView_.Refresh(actor);
-	}
-
 protected:
+	// ===============================================
+	// UpdateManager Management
+	// ===============================================
+
+	void RegisterActorUpdatables(IActor* actor) {
+		actor->ForEachComponent([this](IComponent* comp) {
+			if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
+				updateMgr_.Register(updatable);
+			}
+		});
+	}
+
+	void UnregisterActorUpdatables(IActor* actor) {
+		actor->ForEachComponent([this](IComponent* comp) {
+			if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
+				updateMgr_.UnRegister(updatable);
+			}
+		});
+	}
+
+	// ===============================================
+	// ComponentView Management
+	// ===============================================
+
+	void RegisterActorToComponentViews(IActor* actor) {
+		if (!actor) return;
+
+		transformsView_.Refresh(actor);
+		camerasView_.Refresh(actor);
+		rendersView_.Refresh(actor);
+
+		// IUpdatable をまとめて登録
+		RegisterActorUpdatables(actor);
+	}
+
+	void UnregisterComponentViewActor(IActor* actor) {
+		transformsView_.Remove(actor);
+		camerasView_.Remove(actor);
+		rendersView_.Remove(actor);
+	}
+
+	void ClearComponentView() {
+		transformsView_.Clear();
+		camerasView_.Clear();
+		rendersView_.Clear();
+	}
+
 	// ===============================================
 	// Dead Actor Cleanup
 	// ===============================================
@@ -142,6 +152,8 @@ protected:
 				camerasView_.Remove(a.get());
 				rendersView_.Remove(a.get());
 
+				UnregisterActorUpdatables(a.get());
+
 				// Component / Update の解除は Actor 側の責務
 				a->Finalize();
 			}
@@ -150,22 +162,6 @@ protected:
 		std::erase_if(actors_, [](const std::unique_ptr<IActor>& a) {
 			return a->GetState() == IActor::State::Dead;
 		});
-	}
-
-	// ===============================================
-	// ComponentView Management
-	// ===============================================
-
-	void UnregisterComponentViewActor(IActor* actor) {
-		transformsView_.Remove(actor);
-		camerasView_.Remove(actor);
-		rendersView_.Remove(actor);
-	}
-
-	void ClearComponentView() {
-		transformsView_.Clear();
-		camerasView_.Clear();
-		rendersView_.Clear();
 	}
 
 protected:

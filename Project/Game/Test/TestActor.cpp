@@ -2,5 +2,5 @@
 
 void TestActor::Init()
 {
-
+	IActor::name_ = "TestActor";
 }

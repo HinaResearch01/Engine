@@ -60,11 +60,7 @@ public:
 		// Transformは必須＆特殊扱い
 		if constexpr (std::is_same_v<T, TransformComponent>) {
 			if (!transComp_) {
-				transComp_ = std::make_shared<TransformComponent>(std::forward<Args>(args)...);
-				transComp_->SetOwner(this);
-				comps_[typeid(TransformComponent)] = transComp_;
-
-				NotifyComponentAdded(transComp_.get());
+				EnsureTransform();
 			}
 			return transComp_.get();
 		}
@@ -81,7 +77,6 @@ public:
 
 		comps_[key] = comp;
 
-		NotifyComponentAdded(comp.get());
 		return comp.get();
 	}
 
@@ -100,7 +95,6 @@ public:
 		auto it = comps_.find(typeid(T));
 		if (it == comps_.end()) return false;
 
-		NotifyComponentRemoved(it->second.get());
 		comps_.erase(it);
 		return true;
 	}
@@ -111,7 +105,6 @@ public:
 
 	template<typename T>
 	bool HasComp() const {
-		std::lock_guard<std::mutex> lock(mutex_);
 		return comps_.contains(typeid(T));
 	}
 
@@ -136,6 +129,16 @@ public:
 		return transComp_.get();
 	}
 
+	template<typename F>
+	void ForEachComponent(F&& func) {
+		if (transComp_) {
+			func(transComp_.get());
+		}
+		for (auto& [_, comp] : comps_) {
+			func(comp.get());
+		}
+	}
+
 	// ===============================================
 	// Collision / Events
 	// ===============================================
@@ -154,18 +157,10 @@ public:
 	void SetWorld(World* w) { world_ = w; }
 #pragma endregion
 
-protected:
-	// ===============================================
-	// World Notification
-	// ===============================================
-
-	void NotifyComponentAdded(IComponent* comp);
-	void NotifyComponentRemoved(IComponent* comp);
-
 private:
 	void EnsureTransform();
 
-private:
+protected:
 	std::string name_ = "default";
 	State state_ = State::None;
 	ActorID id_ = 0;

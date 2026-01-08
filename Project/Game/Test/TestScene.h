@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Framework/World/World.h"
+#include "TestActor.h"
 
 /* テスト用のsceneクラス */
 class TestScene : public Tsumi::Framework::World {
