@@ -53,18 +53,24 @@ public:
 		actors_.clear();
 	}
 
-
 	// ===============================================
 	// System Accessor
 	// ===============================================
 
 	template<class T>
 	T* GetSystem() {
-		// 今回の構成ならメンバとして持っているので直接返すアクセッサでもOK
-		if constexpr (std::is_same_v<T, RenderSystem>) {
+		if constexpr (std::is_same_v<T, TransformSystem>) {
+			return &transformSystem_;
+		}
+		else if constexpr (std::is_same_v<T, CameraSystem>) {
+			return &cameraSystem_;
+		}
+		else if constexpr (std::is_same_v<T, RenderSystem>) {
 			return &renderSystem_;
 		}
-		return nullptr;
+		else {
+			return nullptr;
+		}
 	}
 
 	// ===============================================

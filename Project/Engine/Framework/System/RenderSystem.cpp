@@ -19,6 +19,17 @@ void RenderSystem::Update(float)
 {
 }
 
-void RenderSystem::Render()
+void RenderSystem::RenderBackSprite(DX12::CommandContext& cmd)
 {
+	cmd;
+}
+
+void RenderSystem::RenderModel(DX12::CommandContext& cmd)
+{
+	cmd;
+}
+
+void RenderSystem::RenderFrontSprite(DX12::CommandContext& cmd)
+{
+	cmd;
 }

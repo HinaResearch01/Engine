@@ -74,14 +74,14 @@ private:
 	/// <summary>
 	/// ソートキーの作成
 	/// </summary>
-	int64_t MakeSortKey(RenderQueue q, const Material* m, const Resource::MeshAsset* mesh)
+	/*int64_t MakeSortKey(RenderQueue q, const Material* m, const Resource::MeshAsset* mesh)
 	{
 		uint64_t key = 0;
 		key |= (uint64_t(q) & 0xFFFF) << 48;
 		key |= (uint64_t(m) & 0xFFFFFFFF) << 16;
 		key |= (uint64_t(mesh) & 0xFFFF);
 		return key;
-	}
+	}*/
 
 private:
 	
