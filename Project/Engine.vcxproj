@@ -345,7 +345,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderStructure.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderGpuStructure.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderMaterial.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderDefs.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderItem.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderSortKey.h" />
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
     <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\RenderSystem.h" />

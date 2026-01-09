@@ -9,7 +9,7 @@ TransformSystem::TransformSystem(World& world)
 
 void TransformSystem::Update(float)
 {
-	auto& view = world_.GetTransforms();
+	auto& view = world_.GetTransformsCompView();
 	const auto& actors = view.GetActors();
 
 	// ルート（親なし）から更新

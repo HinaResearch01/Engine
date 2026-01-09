@@ -84,9 +84,9 @@ public:
 	GameContext* GetGameContext() const { return gameContext_; }
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
 
-	ComponentView<TransformComponent>& GetTransforms() { return transformsView_; }
-	ComponentView<CameraComponent>& GetCameras() { return camerasView_; }
-	ComponentView<RenderComponent>& GetRenderables() { return rendersView_; }
+	ComponentView<TransformComponent>& GetTransformsCompView() { return transformsView_; }
+	ComponentView<CameraComponent>& GetCamerasCompView() { return camerasView_; }
+	ComponentView<RenderComponent>& GetRenderCompView() { return rendersView_; }
 
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion

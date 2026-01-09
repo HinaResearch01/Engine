@@ -676,7 +676,19 @@
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderStructure.h">
+    <ClInclude Include="Engine\Framework\Render\RenderMaterial.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderDefs.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderItem.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderSortKey.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderGpuStructure.h">
       <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
   </ItemGroup>

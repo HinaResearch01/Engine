@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "Framework/Render/RenderStructure.h"
 #include "Framework/Update/IUpdatable.h"
 
 #include <cstdint>
@@ -16,11 +15,13 @@ class RootSignatureLibrary;
 }
 namespace Tsumi::Resource {
 class ResourceSystem;
+struct MeshAsset;
 }
 
 namespace Tsumi::Framework {
 
 class World;
+class CameraSystem;
 
 /* 描画管理クラス */
 class RenderSystem : public IUpdatable {
@@ -57,9 +58,29 @@ public:
 #pragma	endregion
 
 private:
+	/// <summary>
+	/// queueの構築
+	/// </summary>
+	void BuildRenderQueue();
+
+	/// <summary>
+	/// queueのソート
+	/// </summary>
+	void SortRenderQueue();
+
+	/// <summary>
+	/// ソートキーの作成
+	/// </summary>
+	int64_t MakeSortKey(RenderQueue q, const Material* m, const Resource::MeshAsset* mesh)
+	{
+		uint64_t key = 0;
+		key |= (uint64_t(q) & 0xFFFF) << 48;
+		key |= (uint64_t(m) & 0xFFFFFFFF) << 16;
+		key |= (uint64_t(mesh) & 0xFFFF);
+		return key;
+	}
 
 private:
-	std::vector<RenderItem> items_;
 	
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;

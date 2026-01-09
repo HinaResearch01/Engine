@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../IComponent.h"
-#include "Framework/Render/RenderStructure.h"
+#include "Framework/Render/RenderMaterial.h"
+#include "Framework/Render/RenderSortKey.h"
 
 namespace Tsumi::Framework {
 
@@ -9,7 +10,12 @@ namespace Tsumi::Framework {
 class RenderComponent : public IComponent {
 
 public:
-	RenderItem renderItem{};
+	std::string mesh;              // Mesh key
+	MaterialInstance material;     // 個体差を含む
+
+	RenderQueue renderQueue = RenderQueue::Opaque;
+	uint32_t layerMask = RenderLayer::Default;
+	bool visible = true;
 };
 
 }

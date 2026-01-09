@@ -33,7 +33,7 @@ IActor* CameraSystem::SelectCamera() const
 	IActor* best = nullptr;
 	int bestPriority = std::numeric_limits<int>::min();
 
-	const auto& cameras = world_.GetCameras().GetActors();
+	const auto& cameras = world_.GetCamerasCompView().GetActors();
 	for (IActor* actor : cameras) {
 		auto* cam = actor->GetComponent<CameraComponent>();
 		if (!cam) continue;
