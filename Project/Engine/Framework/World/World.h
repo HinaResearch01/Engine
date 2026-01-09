@@ -53,6 +53,20 @@ public:
 		actors_.clear();
 	}
 
+
+	// ===============================================
+	// System Accessor
+	// ===============================================
+
+	template<class T>
+	T* GetSystem() {
+		// 今回の構成ならメンバとして持っているので直接返すアクセッサでもOK
+		if constexpr (std::is_same_v<T, RenderSystem>) {
+			return &renderSystem_;
+		}
+		return nullptr;
+	}
+
 	// ===============================================
 	// Actor Management
 	// ===============================================

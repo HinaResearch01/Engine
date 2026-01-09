@@ -65,24 +65,9 @@ void Application::Run()
         gameCtx_->Update();
 
         // ------------------ 描画フェーズ ------------------
-        {
-            dx12_->PreDraw4PE();
-
-            // 背景スプライト（2D）
-			gameCtx_->BKSpriteRender();
-
-            // 3Dオブジェクト
-            gameCtx_->ModelRender();
-
-            dx12_->PostDraw4PE();
-            dx12_->PreDraw4SC();
-
-            // 前景スプライト
-            gameCtx_->FTSpriteRender();
-
-            imgui_->Render(); // GUI
-            dx12_->PostDraw4SC();
-        }
+		gameCtx_->Render([this]() {
+			this->imgui_->Render();
+		});
 
         // ------------------ ループ終了フェーズ ------------------
         dx12_->EndFrame();

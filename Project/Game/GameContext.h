@@ -3,7 +3,9 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <functional>
 #include "Framework/World/World.h"
+#include "DX12/DX12Manager.h"
 
 namespace Tsumi::Framework {
 
@@ -33,9 +35,7 @@ public:
 	/// <summary>
 	/// 各描画処理
 	/// </summary>
-	void BKSpriteRender();
-	void ModelRender();
-	void FTSpriteRender();
+	void Render(std::function<void()> uiRenderCallBack);
 
 	/// <summary>
 	/// 解放処理
@@ -53,7 +53,6 @@ public:
 	/// </summary>
 	void ChangeScene(const std::string& name);
 
-
 #pragma region Accessor
 	bool GetPedingInit() const { return pendingInit_; }
 #pragma endregion
@@ -70,9 +69,49 @@ inline void GameContext::Init() {
 	currentScene_->Init(), pendingInit_ = false;
 }
 inline void GameContext::Update() {	if(currentScene_) currentScene_->Update(0); }
-inline void GameContext::BKSpriteRender() { }
-inline void GameContext::ModelRender() { }
-inline void GameContext::FTSpriteRender() { }
+inline void GameContext::Render(std::function<void()> uiRenderCallBack)
+{
+	if (!currentScene_) return;
+
+	// DX12Managerの取得（シングルトン前提）
+	auto* dx12 = DX12::DX12Manager::GetInstance();
+
+	// 現在のシーンからRenderSystemを取得
+	// ※WorldにGetSystem<T>()を追加するか、getterを用意してください
+	auto* renderSys = currentScene_->GetSystem<RenderSystem>();
+
+	// コマンドコンテキスト取得
+	auto* cmdContext = dx12->GetCommandContext();
+
+	// -------------------------------------------------
+	// 1. Primary Effect Pass (3D描画)
+	// -------------------------------------------------
+	dx12->PreDraw4PE();
+
+	// RenderSystemに描画命令を出させる
+	if (renderSys) {
+		renderSys->RenderBackSprite(*cmdContext); // 背景
+		renderSys->RenderModel(*cmdContext);      // モデル
+	}
+
+	dx12->PostDraw4PE();
+
+	// -------------------------------------------------
+	// 2. SwapChain Pass (UI / Final)
+	// -------------------------------------------------
+	dx12->PreDraw4SC();
+
+	if (renderSys) {
+		renderSys->RenderFrontSprite(*cmdContext); // 前景
+	}
+
+	// ImGui描画 
+	if (uiRenderCallBack) {
+		uiRenderCallBack();
+	}
+
+	dx12->PostDraw4SC();
+}
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }
 
 template<typename T, typename ...Args>

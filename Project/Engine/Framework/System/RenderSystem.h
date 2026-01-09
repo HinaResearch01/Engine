@@ -8,6 +8,7 @@
 // 前方宣言
 namespace Tsumi::DX12 {
 class DX12Manager;
+class CommandContext;
 }
 namespace Tsumi::Graphic {
 class PSOLibrary;
@@ -51,7 +52,9 @@ public:
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Render();
+	void RenderBackSprite(DX12::CommandContext& cmd);
+	void RenderModel(DX12::CommandContext& cmd);
+	void RenderFrontSprite(DX12::CommandContext& cmd);
 
 #pragma region Accessor
 
