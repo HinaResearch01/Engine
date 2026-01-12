@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../IComponent.h"
-#include "Framework/Render/RenderMaterial.h"
-#include "Framework/Render/RenderSortKey.h"
+#include "Framework/Material/MaterialInstance.h"
+
+namespace Tsumi::Resource { 
+struct MeshAsset;
+}
 
 namespace Tsumi::Framework {
 
@@ -10,12 +13,24 @@ namespace Tsumi::Framework {
 class RenderComponent : public IComponent {
 
 public:
-	std::string mesh;              // Mesh key
-	MaterialInstance material;     // 個体差を含む
+	// コンストラクタ
+	RenderComponent() : IComponent("RenderComponent") {}
 
-	RenderQueue renderQueue = RenderQueue::Opaque;
-	uint32_t layerMask = RenderLayer::Default;
-	bool visible = true;
+	// デストラクタ
+	~RenderComponent() = default;
+
+	void SetMesh(Resource::MeshAsset* mesh) { mesh_ = mesh; }
+	void SetMaterial(const std::string& alias) {
+		material_ = MaterialSystem::Get().Acquire(alias);
+	}
+
+	Resource::MeshAsset* GetMesh() const { return mesh_; }
+	MaterialInstance* GetMaterial() const { return material_; }
+
+
+private:
+	Resource::MeshAsset* mesh_ = nullptr;
+	MaterialInstance* material_ = nullptr;
 };
 
 }

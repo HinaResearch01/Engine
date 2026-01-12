@@ -1,19 +1,28 @@
 #pragma once
 
+#include <unordered_map>
 #include <string>
 #include "Math/TMath.h"
+#include "Resource/Tex/TextureManager.h"
 
 namespace Tsumi::Framework {
 
-// 
-struct Material {
-	std::string albedoTex;
+enum class BlendMode {
+	Opaque,
+	Masked,
+	Translucent
 };
 
-// 
-struct MaterialInstance {
-	const Material* base = nullptr;
-	Math::Vec4f baseColor{};
+enum class ShadingModel {
+	DefaultLit,
+	Unlit
+};
+
+struct RenderMaterial {
+	std::string shaderName;          // "Standard"
+	BlendMode   blendMode = BlendMode::Opaque;
+	ShadingModel shadingModel = ShadingModel::DefaultLit;
+	bool twoSided = false;
 };
 
 }

@@ -2,6 +2,8 @@
 
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
+#include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Render/RenderDefs.h"
 
 #include <cstdint>
 
@@ -62,28 +64,13 @@ public:
 
 private:
 	/// <summary>
-	/// queueの構築
+	/// シーン定数バッファの更新
 	/// </summary>
-	void BuildRenderQueue();
-
-	/// <summary>
-	/// queueのソート
-	/// </summary>
-	void SortRenderQueue();
-
-	/// <summary>
-	/// ソートキーの作成
-	/// </summary>
-	/*int64_t MakeSortKey(RenderQueue q, const Material* m, const Resource::MeshAsset* mesh)
-	{
-		uint64_t key = 0;
-		key |= (uint64_t(q) & 0xFFFF) << 48;
-		key |= (uint64_t(m) & 0xFFFFFFFF) << 16;
-		key |= (uint64_t(mesh) & 0xFFFF);
-		return key;
-	}*/
+	void BindSceneGlobalCB(DX12::CommandContext& cmd);
 
 private:
+	// 描画キュー
+	std::vector<RenderItem> renderQueue_;
 	
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;

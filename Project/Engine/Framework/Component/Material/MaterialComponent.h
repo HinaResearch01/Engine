@@ -2,6 +2,7 @@
 
 #include "Math/TMath.h"
 #include "../IComponent.h"
+#include "Framework/Render/rendermanteri"
 
 using TextureHandle = std::string;
 
@@ -11,25 +12,36 @@ namespace Tsumi::Framework {
 class MaterialComponent : public IComponent {
 
 public:
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	MaterialComponent() = default;
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
+	// コンストラクタ
+	MaterialComponent() : IComponent("MaterialComponent") {}
+
+	// デストラクタ
 	~MaterialComponent() = default;
 
-	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	void Init() override {}
+	void SetMaterial(const std::string& alias) {
+		if (matKey_ != alias) {
+			matKey_ = alias;
+			isDirty_ = true;
+			cachedMat_ = nullptr;
+		}
+	}
 
-public:
-	// ベースカラー
-	Math::Vec4f baseColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-	// アルベドテクスチャハンドル
-	TextureHandle texKey = "uvChecker.png";
+	void ResolveMaterial(RenderMaterial* ptr) { // shared_ptrの場合は適宜変更
+		cachedMat_ = ptr;
+		isDirty_ = false;
+	}
+
+	RenderMaterial* GetResolvedMaterial() const {
+		return cachedMat_;
+	}
+
+	bool IsDirty() const { return isDirty_; }
+	std::string GetKey() const { return matKey_; }
+
+private:
+	std::string matKey_ = "";
+	RenderMaterial* cachedMat_ = nullptr;
+	bool isDirty_ = false;
 };
 
 }

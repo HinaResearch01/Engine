@@ -185,6 +185,7 @@
     <ClCompile Include="Engine\Framework\System\TransformSystem.cpp">
       <Filter>Engine\Framework\System</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\System\MaterialSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -679,9 +680,6 @@
     <ClInclude Include="Engine\Framework\Render\RenderMaterial.h">
       <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderDefs.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Render\RenderItem.h">
       <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
@@ -691,6 +689,13 @@
     <ClInclude Include="Engine\Framework\Render\RenderGpuStructure.h">
       <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderDefs.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Material\MaterialInstance.h">
+      <Filter>Engine\Framework\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\MaterialSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -941,6 +946,9 @@
     </Filter>
     <Filter Include="Engine\Framework\Render">
       <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Material">
+      <UniqueIdentifier>{4781794b-902b-437c-8940-79fa704c0103}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

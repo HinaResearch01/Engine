@@ -9,19 +9,11 @@ namespace Tsumi::Framework {
 class CameraComponent : public IComponent {
 
 public:
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	CameraComponent() = default;
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~CameraComponent() = default;
+	// コンストラクタ
+	CameraComponent() : IComponent("CameraComponent") {}
 
-	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	void Init() override {};
+	// デストラクタ
+	~CameraComponent() = default;
 
 public:
 	float fovY = 60.0f;

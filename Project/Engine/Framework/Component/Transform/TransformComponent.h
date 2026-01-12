@@ -20,6 +20,12 @@ struct SRT {
 class TransformComponent : public IComponent {
 
 public:
+	// コンストラクタ
+	TransformComponent() : IComponent("TransformComponent") {}
+
+	// デストラクタ
+	~TransformComponent() = default;
+
 	// 自身のSRTが変更されたか
 	bool IsSelfDirty() const {
 		return std::memcmp(&srt, &prevLocal, sizeof(SRT)) != 0;

@@ -32,11 +32,6 @@ public:
 	/// </summary>
 	virtual void Init() {};
 
-	/// <summary>
-	/// 更新処理
-	/// </summary>
-	virtual void Update() {};
-
 #pragma region Accessor
 	// 親
 	IActor* GetOwner() const { return owner_; }
