@@ -17,7 +17,7 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 		return E_INVALIDARG;
 
 	// key = 正規化パス（TextureLoader と同一ルール）
-	std::string key = Utils::MakeKeyFromRoot("", fullPath);
+	std::string key = Utils::Func::MakeKeyFromRoot("", fullPath);
 	
 	// 既読チェック
 	if (TryResolveAlias(key, alias))

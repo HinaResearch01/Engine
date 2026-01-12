@@ -45,13 +45,13 @@ void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SI
     );
 
     // 名前を安全に wstring に変換
-    std::wstring wname = Utils::Utf8ToWstring(name);
+    std::wstring wname = Utils::Func::Utf8ToWstring(name);
 
     if (FAILED(hr)) {
         if (errorBlob) {
             // エラーメッセージも UTF-16 に変換
             std::string err((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize());
-            std::wstring werr = Utils::Utf8ToWstring(err);
+            std::wstring werr = Utils::Func::Utf8ToWstring(err);
             Utils::Logger::Error(
 				"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n",
                 wname, werr);

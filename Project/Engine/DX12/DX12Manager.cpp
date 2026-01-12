@@ -19,25 +19,25 @@ DX12Manager::DX12Manager()
 void DX12Manager::Init()
 {
 	try {
-		Utils::DX_CALL(dx12Device_->Create());
+		Utils::Exception::DX_CALL(dx12Device_->Create());
 		if(cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
 
-		Utils::DX_CALL(cmdContext_->Create());
-		Utils::DX_CALL(swapChain_->Create());
-		Utils::DX_CALL(framebuf_->Init());
-		Utils::DX_CALL(frameSync_->Init());
+		Utils::Exception::DX_CALL(cmdContext_->Create());
+		Utils::Exception::DX_CALL(swapChain_->Create());
+		Utils::Exception::DX_CALL(framebuf_->Init());
+		Utils::Exception::DX_CALL(frameSync_->Init());
 
-		Utils::DX_CALL(transientDescAlloc_->Init());
-		Utils::DX_CALL(persistentDescAlloc_->Init());
+		Utils::Exception::DX_CALL(transientDescAlloc_->Init());
+		Utils::Exception::DX_CALL(persistentDescAlloc_->Init());
 
 		frameResources_.clear();
 		frameResources_.resize(bufferCount_);
 		for (UINT i = 0; i < bufferCount_; ++i) {
 			frameResources_[i] = std::make_unique<PerFrameResource>();
-			Utils::DX_CALL(frameResources_[i]->Init(GetDevice(), /*uploadSize*/ 16 * 1024));
+			Utils::Exception::DX_CALL(frameResources_[i]->Init(GetDevice(), /*uploadSize*/ 16 * 1024));
 		}
 	}
-	catch (const Utils::DxException& e) {
+	catch (const Utils::Exception::DxException& e) {
 		// Visual Studio の出力ウィンドウにメッセージを出す
 		OutputDebugStringA(e.what());
 

@@ -25,7 +25,7 @@ HRESULT TextureLoader::Load(const std::string& fullPath, const std::string& alia
 
 	// 実キー（正規化されたパス）を生成
 	const std::string key =
-		Utils::MakeKeyFromRoot("", fullPath);
+		Utils::Func::MakeKeyFromRoot("", fullPath);
 
 	// すでに同じ実キーが登録済みの場合は
 	// alias の紐づけだけ行って早期リターン

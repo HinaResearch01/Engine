@@ -20,7 +20,7 @@ std::string Tsumi::Graphic::ShaderUtil::ComputeShaderCacheKey(const std::wstring
 
     std::ostringstream ss;
     // filePath を UTF-8 に変換してハッシュ化
-    std::string pathUtf8 = Tsumi::Utils::WstringToUtf8(filePath);
+    std::string pathUtf8 = Tsumi::Utils::Func::WstringToUtf8(filePath);
     ss << std::hash<std::string>{}(pathUtf8) << "_" << t << "_" << target << "_" << entry;
     return ss.str();
 }

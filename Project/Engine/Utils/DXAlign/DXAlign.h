@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <stdint.h>
 
-namespace Tsumi::Utils {
+namespace Tsumi::Utils::Align {
 
 /// <summary>
 /// 任意のアラインメントに切り上げ（例: AlignUp(300, 256) → 512）

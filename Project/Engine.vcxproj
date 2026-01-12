@@ -347,6 +347,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderItem.h" />
+    <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h" />
     <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
     <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\MaterialSystem.h" />
@@ -384,6 +386,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h" />
+    <ClInclude Include="Engine\Utils\Hash\FNV1a.h" />
     <ClInclude Include="Engine\Utils\Logger\Logger.h" />
     <ClInclude Include="Engine\Win\Win32Window.h" />
     <ClInclude Include="externals\assimp\include\assimp\aabb.h">

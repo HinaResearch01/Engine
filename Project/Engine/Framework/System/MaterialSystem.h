@@ -1,36 +1,60 @@
 #pragma once
+
+#include <vector>
 #include <unordered_map>
 #include <memory>
 #include <string>
 
 namespace Tsumi::Framework {
 
-// 前方宣言
-class MaterialInstance;
-struct RenderMaterial;
+using TextureHandle = std::string;
+using MaterialHandle = std::string;
+
+struct MaterialDesc
+{
+	TextureHandle albedo = "";
+	TextureHandle normal = "";
+	float metallic = 0.0f;
+	float roughness = 1.0f;
+
+	bool operator==(const MaterialDesc& rhs) const
+	{
+		return albedo == rhs.albedo &&
+			normal == rhs.normal &&
+			metallic == rhs.metallic &&
+			roughness == rhs.roughness;
+	}
+};
+
 
 /*  */
 class MaterialSystem {
 
 public:
-	// コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
 	MaterialSystem() = default;
 
-	// デストラクタ
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
 	~MaterialSystem() = default;
 
-	// 登録
-	void RegisterMaterial(const std::string& name, RenderMaterial* mat);
+	static MaterialSystem& Get();
 
-	// 
-	MaterialInstance* Acquire(const std::string& name);
+	MaterialHandle CreateMaterial(const MaterialDesc& desc);
 
-private:
-	MaterialInstance* CreateInstance(RenderMaterial* mat);
+	const MaterialDesc& GetMaterialDesc(MaterialHandle h) const;
 
 private:
-	std::unordered_map<std::string, RenderMaterial*> materials_;
-	std::unordered_map<std::string, std::unique_ptr<MaterialInstance>> instances_;
+
+	size_t Hash(const MaterialDesc& desc) const;
+
+public:
+	std::vector<MaterialDesc> materials_;
+	std::unordered_map<size_t, MaterialHandle> lookup_;
+
 };
 
 }

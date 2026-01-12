@@ -1,38 +1,23 @@
 #include "MaterialSystem.h"
-#include "Framework/Material/MaterialInstance.h"
 
 using namespace Tsumi::Framework;
 
-void MaterialSystem::RegisterMaterial(const std::string& name, RenderMaterial* mat)
+MaterialSystem& Tsumi::Framework::MaterialSystem::Get()
 {
-	materials_[name] = mat;
+	// TODO: return ステートメントをここに挿入します
 }
 
-MaterialInstance* MaterialSystem::Acquire(const std::string& name)
+MaterialHandle Tsumi::Framework::MaterialSystem::CreateMaterial(const MaterialDesc& desc)
 {
-	auto it = instances_.find(name);
-	if (it != instances_.end())
-		return it->second.get();
-
-	auto matIt = materials_.find(name);
-	if (matIt == materials_.end())
-		return nullptr;
-
-	auto inst = std::unique_ptr<MaterialInstance>(CreateInstance(matIt->second));
-	auto* ptr = inst.get();
-	instances_[name] = std::move(inst);
-	return ptr;
+	return MaterialHandle();
 }
 
-MaterialInstance* MaterialSystem::CreateInstance(RenderMaterial* mat)
+const MaterialDesc& Tsumi::Framework::MaterialSystem::GetMaterialDesc(MaterialHandle h) const
 {
-	auto* inst = new MaterialInstance();
-	mat;
-	//inst->parent = mat;
+	// TODO: return ステートメントをここに挿入します
+}
 
-	// 最小：Albedo だけ保証
-//	inst->SetTexture("Albedo", TextureManager::White());
-//	inst->SetTexture("Normal", TextureManager::Normal());
-
-	return inst;
+size_t Tsumi::Framework::MaterialSystem::Hash(const MaterialDesc& desc) const
+{
+	return size_t();
 }

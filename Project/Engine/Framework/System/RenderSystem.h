@@ -3,7 +3,6 @@
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Component/Render/RenderComponent.h"
-#include "Framework/Render/RenderDefs.h"
 
 #include <cstdint>
 

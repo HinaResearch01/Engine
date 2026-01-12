@@ -688,6 +688,15 @@
     <ClInclude Include="Engine\Framework\System\MaterialSystem.h">
       <Filter>Engine\Framework\System</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderItem.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Utils\Hash\FNV1a.h">
+      <Filter>Engine\Utils\Hash</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -939,14 +948,14 @@
     <Filter Include="Engine\Framework\Render">
       <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\Material">
-      <UniqueIdentifier>{4781794b-902b-437c-8940-79fa704c0103}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Graphics\PSO\Factory">
       <UniqueIdentifier>{9ff78ee6-ba52-4fb1-beed-4a07eb5b6598}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Graphics\PSO\Factory\Obj3D">
       <UniqueIdentifier>{84d1788e-82a1-4498-966e-4bd5c4720814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Utils\Hash">
+      <UniqueIdentifier>{94700807-9912-444e-918c-4404d93510fb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

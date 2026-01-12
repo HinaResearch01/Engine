@@ -127,7 +127,7 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
 {
     // シェーダソースが指定されていない場合は例外を投げる
     if (module.sources.empty()) {
-        throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + Tsumi::Utils::WstringToUtf8(name));
+        throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + Tsumi::Utils::Func::WstringToUtf8(name));
     }
     ShaderBlob compiled;
     HRESULT hr = S_OK;
@@ -205,7 +205,7 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
         if (shaderError && shaderError->GetStringLength() != 0) {
             Tsumi::Utils::Logger::Error(
 				"[ShaderLibrary] DXC error/warning ({}):\n{}",
-                filePath, Tsumi::Utils::Utf8ToWstring(shaderError->GetStringPointer()));
+                filePath, Tsumi::Utils::Func::Utf8ToWstring(shaderError->GetStringPointer()));
             return E_FAIL; // エラー扱いで中断
         }
 
