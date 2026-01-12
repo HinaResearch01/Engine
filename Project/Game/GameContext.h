@@ -73,11 +73,10 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 {
 	if (!currentScene_) return;
 
-	// DX12Managerの取得（シングルトン前提）
+	// DX12Managerの取得
 	auto* dx12 = DX12::DX12Manager::GetInstance();
 
 	// 現在のシーンからRenderSystemを取得
-	// ※WorldにGetSystem<T>()を追加するか、getterを用意してください
 	auto* renderSys = currentScene_->GetSystem<RenderSystem>();
 
 	// コマンドコンテキスト取得
@@ -88,7 +87,6 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 	// -------------------------------------------------
 	dx12->PreDraw4PE();
 
-	// RenderSystemに描画命令を出させる
 	if (renderSys) {
 		renderSys->RenderBackSprite(*cmdContext); // 背景
 		renderSys->RenderModel(*cmdContext);      // モデル
