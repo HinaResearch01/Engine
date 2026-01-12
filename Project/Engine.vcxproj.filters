@@ -682,23 +682,11 @@
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Material\MaterialInstance.h">
-      <Filter>Engine\Framework\Material</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h">
       <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\MaterialSystem.h">
       <Filter>Engine\Framework\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderItem.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderMaterial.h">
-      <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
