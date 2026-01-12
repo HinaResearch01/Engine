@@ -24,7 +24,7 @@ namespace Tsumi::Graphic {
 class PSOLibrary {
 
 private: // シングルトン
-	PSOLibrary();
+	PSOLibrary() = default;
 	~PSOLibrary() = default;
 	PSOLibrary(const PSOLibrary&) = delete;
 	const PSOLibrary& operator=(const PSOLibrary&) = delete;
@@ -46,7 +46,7 @@ public:
 	/// <summary>
 	/// PipelineStateの取得
 	/// </summary>
-	void Register(const std::wstring& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc);
+	void Register(const std::wstring& name, ID3D12PipelineState* pso);
 
 	/// <summary>
 	/// PipelineStateの取得
@@ -58,22 +58,9 @@ public:
 	/// </summary>
 	bool Has(const std::wstring& name) const;
 
-#pragma region Accessor	
-
-#pragma endregion
-
-private:
-	/// <summary>
-	/// PipelineStateの生成
-	/// </summary>
-	void CreateObject3D();
-
 private:
 	mutable std::mutex mutex_;
-	std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D12PipelineState>> pipelines;
+	std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D12PipelineState>> pipelineMap_;
 
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
-	ShaderLibrary* shaders_ = nullptr;
-	RootSignatureLibrary* rootsigs_ = nullptr;
 };
 }

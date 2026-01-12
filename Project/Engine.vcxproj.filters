@@ -185,7 +185,12 @@
     <ClCompile Include="Engine\Framework\System\TransformSystem.cpp">
       <Filter>Engine\Framework\System</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\System\MaterialSystem.cpp" />
+    <ClCompile Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.cpp">
+      <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\MaterialSystem.cpp">
+      <Filter>Engine\Framework\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -695,7 +700,12 @@
     <ClInclude Include="Engine\Framework\Material\MaterialInstance.h">
       <Filter>Engine\Framework\Material</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\System\MaterialSystem.h" />
+    <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h">
+      <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\MaterialSystem.h">
+      <Filter>Engine\Framework\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -949,6 +959,12 @@
     </Filter>
     <Filter Include="Engine\Framework\Material">
       <UniqueIdentifier>{4781794b-902b-437c-8940-79fa704c0103}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\PSO\Factory">
+      <UniqueIdentifier>{9ff78ee6-ba52-4fb1-beed-4a07eb5b6598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\PSO\Factory\Obj3D">
+      <UniqueIdentifier>{84d1788e-82a1-4498-966e-4bd5c4720814}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
