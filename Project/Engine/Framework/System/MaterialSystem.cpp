@@ -27,11 +27,12 @@ MaterialInstance* MaterialSystem::Acquire(const std::string& name)
 MaterialInstance* MaterialSystem::CreateInstance(RenderMaterial* mat)
 {
 	auto* inst = new MaterialInstance();
-	inst->parent = mat;
+	mat;
+	//inst->parent = mat;
 
 	// 最小：Albedo だけ保証
-	inst->SetTexture("Albedo", TextureManager::White());
-	inst->SetTexture("Normal", TextureManager::Normal());
+//	inst->SetTexture("Albedo", TextureManager::White());
+//	inst->SetTexture("Normal", TextureManager::Normal());
 
 	return inst;
 }

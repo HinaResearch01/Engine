@@ -6,17 +6,19 @@
 
 using namespace Tsumi::Graphic;
 
+static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthWrite, PSOLibrary& lib);
+
 void Object3DPSOFactory::Build(PSOLibrary& lib)
 {
-	BuildObject3D(L"Object3D_Opaque", BlendMode::None, true, lib);
-	BuildObject3D(L"Object3D_Masked", BlendMode::None, true, lib);
-	BuildObject3D(L"Object3D_Translucent", BlendMode::None, true, lib);
-	BuildObject3D(L"Object3D_Additive", BlendMode::None, true, lib);
+	BuildObject3D(L"Object3D_Opaque",		BlendMode::None, true, lib);
+	BuildObject3D(L"Object3D_Masked",		BlendMode::None, true, lib);
+	BuildObject3D(L"Object3D_Translucent",	BlendMode::None, false, lib);
+	BuildObject3D(L"Object3D_Additive",		BlendMode::None, false, lib);
 }
 
 static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthWrite, PSOLibrary& lib)
 {
-	if (lib.Has(L"name"))
+	if (lib.Has(name))
 		return;
 
 	auto device = Tsumi::DX12::DX12Manager::GetInstance()->GetDevice();
@@ -26,6 +28,9 @@ static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthW
 	auto rootSig = rootsigs->Get("Object3D");
 	auto vs = shaders->Get(L"Object3D", ShaderType::VS);
 	auto ps = shaders->Get(L"Object3D", ShaderType::PS);
+
+	if (!rootSig || !vs || !ps)
+		throw std::runtime_error("Object3DPSOFactory: shader or rootsig not found");
 
 	static const D3D12_INPUT_ELEMENT_DESC layout[] = {
 		PSOUtil::SetUpInputElementDescs("POSITION"),
@@ -59,7 +64,9 @@ static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthW
 	desc.SampleDesc.Count = 1;
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pso;
-	device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso));
+	HRESULT hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso));
+	if (FAILED(hr))
+		throw std::runtime_error("Object3DPSOFactory: CreateGraphicsPipelineState failed");
 
-	lib.Register(name, pso.Get());
+	lib.Register(name, pso);
 }

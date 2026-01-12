@@ -21,7 +21,8 @@ public:
 
 	void SetMesh(Resource::MeshAsset* mesh) { mesh_ = mesh; }
 	void SetMaterial(const std::string& alias) {
-		material_ = MaterialSystem::Get().Acquire(alias);
+		alias;
+		//material_ = MaterialSystem::Get().Acquire(alias);
 	}
 
 	Resource::MeshAsset* GetMesh() const { return mesh_; }

@@ -11,7 +11,7 @@ void PSOLibrary::Init()
 	Object3DPSOFactory::Build(*this);
 }
 
-void PSOLibrary::Register(const std::wstring& name, ID3D12PipelineState* pso)
+void PSOLibrary::Register(const std::wstring& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	if (pipelineMap_.contains(name)) return;

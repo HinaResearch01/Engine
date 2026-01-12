@@ -46,7 +46,7 @@ public:
 	/// <summary>
 	/// PipelineStateの取得
 	/// </summary>
-	void Register(const std::wstring& name, ID3D12PipelineState* pso);
+	void Register(const std::wstring& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso);
 
 	/// <summary>
 	/// PipelineStateの取得

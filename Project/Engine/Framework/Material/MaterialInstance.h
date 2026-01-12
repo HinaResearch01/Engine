@@ -9,7 +9,7 @@
 namespace Tsumi::Framework {
 
 // 前方宣言
-class RenderMaterial;
+//class RenderMaterial;
 
 /*  */
 class MaterialInstance {
@@ -30,7 +30,7 @@ public:
 	}
 
 public:
-	RenderMaterial* parent = nullptr;
+	//RenderMaterial* parent = nullptr;
 
 private:
 	std::unordered_map<std::string, Resource::TextureAsset*> textures;
