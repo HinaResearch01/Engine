@@ -4,7 +4,12 @@
 #include <vector>
 #include <type_traits>
 #include <algorithm>
+#include <unordered_map>
+#include <typeindex>
+#include <cassert>
 
+#include "Framework/World/CompView/ComponentView.h"
+#include "Framework/World/CompView/ComponentViewRange.h"
 #include "Framework/Actor/IActor.h"
 #include "Framework/Component/IComponent.h"
 #include "Framework/Component/Camera/CameraComponent.h"
@@ -17,7 +22,6 @@
 #include "Framework/System/MaterialSystem.h"
 #include "Framework/System/RenderSystem.h"
 #include "Framework/System/TransformSystem.h"
-#include "Framework/Scene/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
 
@@ -36,6 +40,9 @@ public:
 		updateMgr_.Register(&materialSystem_);
 		updateMgr_.Register(&renderSystem_);
 		updateMgr_.Register(&transformSystem_);
+
+		// Viewの登録
+		RegisterDefaultViews();
 	}
 	virtual ~World() = default;
 
@@ -101,14 +108,49 @@ public:
 
 	IActor::ActorID GenerateActorID() { return nextActorId_++; }
 
+	// ===============================================
+	// ComponentView View 
+	// ===============================================
+
+	template<class T>
+	ComponentView<T>& GetView()
+	{
+		const std::type_index ti = typeid(T);
+		auto it = views_.find(ti);
+		assert(it != views_.end());
+		return *static_cast<ComponentView<T>*>(it->second);
+	}
+
+	template<class... Cs>
+	auto View()
+	{
+		const std::vector<IActor*>* base = nullptr;
+		size_t minSize = SIZE_MAX;
+
+		auto pickBase = [&](const auto& view)
+		{
+			const auto& v = view.GetActors();
+			if (v.size() < minSize)
+			{
+				minSize = v.size();
+				base = &v;
+			}
+		};
+
+		(pickBase(GetView<Cs>()), ...);
+
+		assert(base);
+		return ViewRange<Cs...>(*this, *base);
+	}
+
 #pragma region Accessor
 	GameContext* GetGameContext() const { return gameContext_; }
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
 
-	ComponentView<CameraComponent>& GetCamerasCompView() { return camerasView_; }
-	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialsView_; }
-	ComponentView<RenderComponent>& GetRenderCompView() { return rendersView_; }
-	ComponentView<TransformComponent>& GetTransformsCompView() { return transformsView_; }
+	ComponentView<CameraComponent>& GetCamerasCompView() { return cameraCompView_; }
+	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialCompView_; }
+	ComponentView<RenderComponent>& GetRenderCompView() { return renderCompView_; }
+	ComponentView<TransformComponent>& GetTransformsCompView() { return transformCompView_; }
 
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion
@@ -148,30 +190,41 @@ protected:
 	// ComponentView Management
 	// ===============================================
 
+	template<class T>
+	void RegisterView(ComponentView<T>& view)
+	{
+		views_[typeid(T)] = &view;
+	}
+
+	void RegisterDefaultViews()
+	{
+		// ここで World::View<T>() が生きる
+		RegisterView(cameraCompView_);
+		RegisterView(materialCompView_);
+		RegisterView(renderCompView_);
+		RegisterView(transformCompView_);
+	}
+
 	void RegisterActorToComponentViews(IActor* actor) {
 		if (!actor) return;
 
-		camerasView_.Refresh(actor);
-		materialsView_.Refresh(actor);
-		rendersView_.Refresh(actor);
-		transformsView_.Refresh(actor);
+		// 全Viewを走査してRefresh
+		for (auto& [type, viewBase] : views_)
+			viewBase->Refresh(actor);
 
-		// IUpdatable をまとめて登録
 		RegisterActorUpdatables(actor);
 	}
 
 	void UnregisterComponentViewActor(IActor* actor) {
-		camerasView_.Remove(actor);
-		materialsView_.Remove(actor);
-		rendersView_.Remove(actor);
-		transformsView_.Remove(actor);
+		if (!actor) return;
+
+		for (auto& [type, viewBase] : views_)
+			viewBase->Remove(actor);
 	}
 
 	void ClearComponentView() {
-		camerasView_.Clear();
-		materialsView_.Clear();
-		rendersView_.Clear();
-		transformsView_.Clear();
+		for (auto& [type, viewBase] : views_)
+			viewBase->Clear();
 	}
 
 	// ===============================================
@@ -209,13 +262,14 @@ protected:
 	TransformSystem transformSystem_;
 
 	// ===== ComponentView =====
-	ComponentView<CameraComponent> camerasView_;
-	ComponentView<MaterialComponent> materialsView_;
-	ComponentView<RenderComponent> rendersView_;
-	ComponentView<TransformComponent> transformsView_;
+	std::unordered_map<std::type_index, IComponentViewBase*> views_;
+	ComponentView<CameraComponent> cameraCompView_;
+	ComponentView<MaterialComponent> materialCompView_;
+	ComponentView<RenderComponent> renderCompView_;
+	ComponentView<TransformComponent> transformCompView_;
 
 	// ===== GameContext =====
 	GameContext* gameContext_ = nullptr;
 };
 
-} 
+}

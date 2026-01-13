@@ -649,9 +649,6 @@
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h">
       <Filter>Engine\Framework\Component\Material</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h">
-      <Filter>Engine\Framework\Scene\CompView</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\Debug\DebugPrint.h">
       <Filter>Engine\Utils\Debug</Filter>
     </ClInclude>
@@ -705,6 +702,15 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\Render\RenderPassTable.h">
       <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\World\CompView\ComponentView.h">
+      <Filter>Engine\Framework\World\CompView</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\World\CompView\IComponentViewBase.h">
+      <Filter>Engine\Framework\World\CompView</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\World\CompView\ComponentViewRange.h">
+      <Filter>Engine\Framework\World\CompView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -933,12 +939,6 @@
     <Filter Include="Engine\Framework\Component\Material">
       <UniqueIdentifier>{3fd83676-4d4b-464f-9d79-745a02e427e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\Scene">
-      <UniqueIdentifier>{5c5e490f-376a-48ac-9de6-35f9c52a5d5e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Framework\Scene\CompView">
-      <UniqueIdentifier>{116c8838-2337-4b3f-bd63-577519e0b41b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Utils\Debug">
       <UniqueIdentifier>{4e0c5e4c-2f13-4179-8ffb-9042201290a0}</UniqueIdentifier>
     </Filter>
@@ -965,6 +965,9 @@
     </Filter>
     <Filter Include="Engine\Utils\Hash">
       <UniqueIdentifier>{94700807-9912-444e-918c-4404d93510fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\World\CompView">
+      <UniqueIdentifier>{b7400f76-e953-4bbc-a832-fb886b7f2470}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

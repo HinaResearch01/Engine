@@ -3,7 +3,7 @@
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/View/CameraContext.h"
-#include "Framework/Scene/CompView/ComponentView.h"
+#include "Framework/World/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
 

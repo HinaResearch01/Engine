@@ -352,7 +352,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Render\RenderPacket.h" />
     <ClInclude Include="Engine\Framework\Render\RenderPassTable.h" />
     <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h" />
-    <ClInclude Include="Engine\Framework\Scene\CompView\ComponentView.h" />
     <ClInclude Include="Engine\Framework\System\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\MaterialSystem.h" />
     <ClInclude Include="Engine\Framework\System\RenderSystem.h" />
@@ -362,6 +361,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h" />
     <ClInclude Include="Engine\Framework\View\CameraContext.h" />
     <ClInclude Include="Engine\Framework\View\RenderView.h" />
+    <ClInclude Include="Engine\Framework\World\CompView\ComponentView.h" />
+    <ClInclude Include="Engine\Framework\World\CompView\ComponentViewRange.h" />
+    <ClInclude Include="Engine\Framework\World\CompView\IComponentViewBase.h" />
     <ClInclude Include="Engine\Framework\World\World.h" />
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />

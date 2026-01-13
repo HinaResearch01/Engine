@@ -4,14 +4,14 @@
 #include <unordered_set>
 #include <algorithm>
 #include <cassert>
-
+#include "IComponentViewBase.h"
 #include "Framework/Actor/IActor.h"
 
 namespace Tsumi::Framework {
 
 /* 指定コンポーネント T を「持っている Actor」だけを索引する View */
 template<class T>
-class ComponentView {
+class ComponentView : public IComponentViewBase {
 public:
 	/// <summary>
 	/// System 用：列挙専用アクセサ
@@ -23,7 +23,7 @@ public:
 	/// <summary>
 	/// 全消去
 	/// </summary>
-	void Clear() {
+	void Clear() override {
 		actors_.clear();
 		set_.clear();
 	}
@@ -32,7 +32,7 @@ public:
 	/// view に入れる
 	/// Component の追加 / 削除時に呼ばれる
 	/// </summary>
-	void Refresh(IActor* actor) {
+	void Refresh(IActor* actor) override {
 		if (!actor) return;
 
 		const bool hasComp = actor->HasComp<T>();
@@ -51,7 +51,7 @@ public:
 	/// view から外す
 	/// Actor 破棄時などに使用
 	/// </summary>
-	void Remove(IActor* actor) {
+	void Remove(IActor* actor) override {
 		if (!actor) return;
 
 		if (set_.erase(actor) == 0)

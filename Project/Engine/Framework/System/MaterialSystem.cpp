@@ -14,30 +14,35 @@ void MaterialSystem::Update(float)
 {
 	cache_.clear();
 
-	// MaterialComponent を持つ Actor だけを見る
-	for (IActor* actor : world_.GetMaterialsCompView().GetActors())
+	// MaterialComponent を持つ Actor を View で列挙
+	for (auto [mc] : world_.View<MaterialComponent>())
 	{
-		auto* mc = actor->GetComponent<MaterialComponent>();
-		if (!mc || !mc->visible) continue;
+		if (!mc.visible)
+			continue;
 
 		MaterialKey key{
-			mc->surface,
-			mc->albedo,
-			mc->normal,
-			mc->metallic,
-			mc->roughness
+			mc.surface,
+			mc.albedo,
+			mc.normal,
+			mc.metallic,
+			mc.roughness
 		};
 
 		auto& pkt = cache_[key];
 
 		// GPU material CB
-		pkt.cb.metallic = mc->metallic;
-		pkt.cb.roughness = mc->roughness;
+		pkt.cb.metallic = mc.metallic;
+		pkt.cb.roughness = mc.roughness;
 		pkt.cb.baseColor = { 1,1,1,1 };
 
 		// TextureManager から GPU リソースを取得
-		pkt.albedo = mc->albedo.empty() ? nullptr : resourceSys_->GetTextureManager()->GetTexture(mc->albedo);
-		pkt.normal = mc->normal.empty() ? nullptr : resourceSys_->GetTextureManager()->GetTexture(mc->normal);
+		pkt.albedo = mc.albedo.empty()
+			? nullptr
+			: resourceSys_->GetTextureManager()->GetTexture(mc.albedo);
+
+		pkt.normal = mc.normal.empty()
+			? nullptr
+			: resourceSys_->GetTextureManager()->GetTexture(mc.normal);
 	}
 }
 
