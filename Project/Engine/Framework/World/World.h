@@ -8,12 +8,15 @@
 #include "Framework/Actor/IActor.h"
 #include "Framework/Component/IComponent.h"
 #include "Framework/Component/Camera/CameraComponent.h"
+#include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Component/Transform/TransformComponent.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Update/UpdateManager.h"
-#include "Framework/System/TransformSystem.h"
 #include "Framework/System/CameraSystem.h"
+#include "Framework/System/MaterialSystem.h"
 #include "Framework/System/RenderSystem.h"
+#include "Framework/System/TransformSystem.h"
 #include "Framework/Scene/CompView/ComponentView.h"
 
 namespace Tsumi::Framework {
@@ -26,12 +29,13 @@ class World {
 
 public:
 	World()
-		: transformSystem_(*this), cameraSystem_(*this), renderSystem_(*this)
+		: cameraSystem_(*this), materialSystem_(*this), renderSystem_(*this), transformSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
-		updateMgr_.Register(&transformSystem_);
 		updateMgr_.Register(&cameraSystem_);
+		updateMgr_.Register(&materialSystem_);
 		updateMgr_.Register(&renderSystem_);
+		updateMgr_.Register(&transformSystem_);
 	}
 	virtual ~World() = default;
 
@@ -39,15 +43,9 @@ public:
 	// World LifeCycle
 	// ===============================================
 	virtual void Init() {}
-
 	virtual void Update(float deltaTime) {
-		// 更新の主体は UpdateManager
-		updateMgr_.Execute(deltaTime);
-
-		// Dead Actor の後処理
-		CleanupDeadActorsInternal();
+		WorldUpdate(deltaTime);
 	}
-
 	virtual void Finalize() {
 		ClearComponentView();
 		actors_.clear();
@@ -59,14 +57,17 @@ public:
 
 	template<class T>
 	T* GetSystem() {
-		if constexpr (std::is_same_v<T, TransformSystem>) {
-			return &transformSystem_;
-		}
-		else if constexpr (std::is_same_v<T, CameraSystem>) {
+		if constexpr (std::is_same_v<T, CameraSystem>) {
 			return &cameraSystem_;
+		}
+		else if constexpr (std::is_same_v<T, MaterialSystem>) {
+			return &materialSystem_;
 		}
 		else if constexpr (std::is_same_v<T, RenderSystem>) {
 			return &renderSystem_;
+		}
+		else if constexpr (std::is_same_v<T, TransformSystem>) {
+			return &transformSystem_;
 		}
 		else {
 			return nullptr;
@@ -104,14 +105,25 @@ public:
 	GameContext* GetGameContext() const { return gameContext_; }
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
 
-	ComponentView<TransformComponent>& GetTransformsCompView() { return transformsView_; }
 	ComponentView<CameraComponent>& GetCamerasCompView() { return camerasView_; }
+	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialsView_; }
 	ComponentView<RenderComponent>& GetRenderCompView() { return rendersView_; }
+	ComponentView<TransformComponent>& GetTransformsCompView() { return transformsView_; }
 
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion
 
 protected:
+	// ===============================================
+	// World Update
+	// ===============================================
+	void WorldUpdate(float deltaTime) {
+		// 更新の主体は UpdateManager
+		updateMgr_.Execute(deltaTime);
+		// Dead Actor の後処理
+		CleanupDeadActorsInternal();
+	}
+
 	// ===============================================
 	// UpdateManager Management
 	// ===============================================
@@ -139,24 +151,27 @@ protected:
 	void RegisterActorToComponentViews(IActor* actor) {
 		if (!actor) return;
 
-		transformsView_.Refresh(actor);
 		camerasView_.Refresh(actor);
+		materialsView_.Refresh(actor);
 		rendersView_.Refresh(actor);
+		transformsView_.Refresh(actor);
 
 		// IUpdatable をまとめて登録
 		RegisterActorUpdatables(actor);
 	}
 
 	void UnregisterComponentViewActor(IActor* actor) {
-		transformsView_.Remove(actor);
 		camerasView_.Remove(actor);
+		materialsView_.Remove(actor);
 		rendersView_.Remove(actor);
+		transformsView_.Remove(actor);
 	}
 
 	void ClearComponentView() {
-		transformsView_.Clear();
 		camerasView_.Clear();
+		materialsView_.Clear();
 		rendersView_.Clear();
+		transformsView_.Clear();
 	}
 
 	// ===============================================
@@ -168,10 +183,7 @@ protected:
 			if (a->GetState() == IActor::State::Dead) {
 
 				// View から除外（Actor単位）
-				transformsView_.Remove(a.get());
-				camerasView_.Remove(a.get());
-				rendersView_.Remove(a.get());
-
+				UnregisterComponentViewActor(a.get());
 				UnregisterActorUpdatables(a.get());
 
 				// Component / Update の解除は Actor 側の責務
@@ -191,14 +203,16 @@ protected:
 
 	// ===== 各種システム =====
 	UpdateManager updateMgr_;
-	TransformSystem transformSystem_;
 	CameraSystem cameraSystem_;
+	MaterialSystem materialSystem_;
 	RenderSystem renderSystem_;
+	TransformSystem transformSystem_;
 
 	// ===== ComponentView =====
-	ComponentView<TransformComponent> transformsView_;
 	ComponentView<CameraComponent> camerasView_;
+	ComponentView<MaterialComponent> materialsView_;
 	ComponentView<RenderComponent> rendersView_;
+	ComponentView<TransformComponent> transformsView_;
 
 	// ===== GameContext =====
 	GameContext* gameContext_ = nullptr;

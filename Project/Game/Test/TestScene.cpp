@@ -16,9 +16,8 @@ void TestScene::Init()
 
 void TestScene::Update(float deltaTime)
 {
-	deltaTime;
+	WorldUpdate(deltaTime);
 #ifdef _DEBUG
-	
 #endif // _DEBUG
 }
 

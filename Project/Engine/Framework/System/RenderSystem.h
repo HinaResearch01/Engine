@@ -1,10 +1,13 @@
 #pragma once
 
+#include <cstdint>
+#include <array>
+#include <vector>
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Component/Render/RenderComponent.h"
-
-#include <cstdint>
+#include "Framework/Render/RenderPacket.h"
+#include "Framework/Render/RenderSurfaceType.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
@@ -24,6 +27,7 @@ namespace Tsumi::Framework {
 
 class World;
 class CameraSystem;
+class MaterialSystem;
 
 /* 描画管理クラス */
 class RenderSystem : public IUpdatable {
@@ -63,13 +67,13 @@ public:
 
 private:
 	/// <summary>
-	/// シーン定数バッファの更新
+	/// 描画リストのソート
 	/// </summary>
-	void BindSceneGlobalCB(DX12::CommandContext& cmd);
+	void SortLists();
 
 private:
-	// 描画キュー
-	std::vector<RenderItem> renderQueue_;
+	using List = std::vector<DrawPacket>;
+	std::array<List, static_cast<size_t>(SurfaceType::Count)> lists_;
 	
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;

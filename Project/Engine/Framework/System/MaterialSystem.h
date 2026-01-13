@@ -4,57 +4,86 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include "Framework/Update/IUpdatable.h"
+#include "Framework/Component/Material/MaterialComponent.h"
+#include "Framework/Render/MaterialPacket.h"
+#include "Framework/Render/RenderSurfaceType.h"
+
+// 前方宣言
+namespace Tsumi::Resource { class ResourceSystem; }
 
 namespace Tsumi::Framework {
 
-using TextureHandle = std::string;
-using MaterialHandle = std::string;
+// 前方宣言
+class World;
 
-struct MaterialDesc
-{
-	TextureHandle albedo = "";
-	TextureHandle normal = "";
+struct MaterialKey {
+	SurfaceType surface{};
+	std::string albedoKey;
+	std::string normalKey;
 	float metallic = 0.0f;
 	float roughness = 1.0f;
 
-	bool operator==(const MaterialDesc& rhs) const
+	bool operator==(const MaterialKey& r) const
 	{
-		return albedo == rhs.albedo &&
-			normal == rhs.normal &&
-			metallic == rhs.metallic &&
-			roughness == rhs.roughness;
+		return surface == r.surface
+			&& albedoKey == r.albedoKey
+			&& normalKey == r.normalKey
+			&& metallic == r.metallic
+			&& roughness == r.roughness;
 	}
 };
 
+struct MaterialKeyHash
+{
+	size_t operator()(const MaterialKey& k) const noexcept
+	{
+		// 最小hash（後でFNV1a等に置換OK）
+		size_t h = static_cast<size_t>(k.surface);
+		auto mix = [&](size_t v) { h ^= v + 0x9e3779b97f4a7c15ull + (h << 6) + (h >> 2); };
 
-/*  */
-class MaterialSystem {
+		mix(std::hash<std::string>{}(k.albedoKey));
+		mix(std::hash<std::string>{}(k.normalKey));
+		mix(std::hash<float>{}(k.metallic));
+		mix(std::hash<float>{}(k.roughness));
+		return h;
+	}
+};
+
+class MaterialSystem : public IUpdatable {
 
 public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	MaterialSystem() = default;
+	MaterialSystem(World& world);
 
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
 	~MaterialSystem() = default;
 
-	static MaterialSystem& Get();
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	void Update(float deltaTime) override;
 
-	MaterialHandle CreateMaterial(const MaterialDesc& desc);
+	/// <summary>
+	/// Phaseの取得
+	/// </summary>
+	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepare; }
 
-	const MaterialDesc& GetMaterialDesc(MaterialHandle h) const;
+	/// <summary>
+	/// Packetの取得
+	/// </summary>
+	const MaterialPacket* GetPacket(const MaterialComponent& mc) const;
 
 private:
+	std::unordered_map<MaterialKey, MaterialPacket, MaterialKeyHash> cache_;
 
-	size_t Hash(const MaterialDesc& desc) const;
-
-public:
-	std::vector<MaterialDesc> materials_;
-	std::unordered_map<size_t, MaterialHandle> lookup_;
-
+	World& world_;
+	Resource::ResourceSystem* resourceSys_ = nullptr;
 };
 
 }

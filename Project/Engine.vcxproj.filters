@@ -691,11 +691,20 @@
     <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h">
       <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderItem.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\Hash\FNV1a.h">
       <Filter>Engine\Utils\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderGpuPackets.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\MaterialPacket.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderPacket.h">
+      <Filter>Engine\Framework\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Render\RenderPassTable.h">
+      <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

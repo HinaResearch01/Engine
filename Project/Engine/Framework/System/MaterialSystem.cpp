@@ -1,23 +1,56 @@
 #include "MaterialSystem.h"
+#include "Framework/World/World.h"
+#include "Resource/ResourceSystem.h"
 
 using namespace Tsumi::Framework;
 
-MaterialSystem& Tsumi::Framework::MaterialSystem::Get()
+MaterialSystem::MaterialSystem(World& world)
+	: world_(world)
 {
-	// TODO: return ステートメントをここに挿入します
+	resourceSys_ = Resource::ResourceSystem::GetInstance();
 }
 
-MaterialHandle Tsumi::Framework::MaterialSystem::CreateMaterial(const MaterialDesc& desc)
+void MaterialSystem::Update(float)
 {
-	return MaterialHandle();
+	cache_.clear();
+
+	// MaterialComponent を持つ Actor だけを見る
+	for (IActor* actor : world_.GetMaterialsCompView().GetActors())
+	{
+		auto* mc = actor->GetComponent<MaterialComponent>();
+		if (!mc || !mc->visible) continue;
+
+		MaterialKey key{
+			mc->surface,
+			mc->albedo,
+			mc->normal,
+			mc->metallic,
+			mc->roughness
+		};
+
+		auto& pkt = cache_[key];
+
+		// GPU material CB
+		pkt.cb.metallic = mc->metallic;
+		pkt.cb.roughness = mc->roughness;
+		pkt.cb.baseColor = { 1,1,1,1 };
+
+		// TextureManager から GPU リソースを取得
+		pkt.albedo = mc->albedo.empty() ? nullptr : resourceSys_->GetTextureManager()->GetTexture(mc->albedo);
+		pkt.normal = mc->normal.empty() ? nullptr : resourceSys_->GetTextureManager()->GetTexture(mc->normal);
+	}
 }
 
-const MaterialDesc& Tsumi::Framework::MaterialSystem::GetMaterialDesc(MaterialHandle h) const
+const MaterialPacket* MaterialSystem::GetPacket(const MaterialComponent& mc) const
 {
-	// TODO: return ステートメントをここに挿入します
-}
+	MaterialKey key{
+		mc.surface,
+		mc.albedo,
+		mc.normal,
+		mc.metallic,
+		mc.roughness
+	};
 
-size_t Tsumi::Framework::MaterialSystem::Hash(const MaterialDesc& desc) const
-{
-	return size_t();
+	auto it = cache_.find(key);
+	return (it != cache_.end()) ? &it->second : nullptr;
 }
