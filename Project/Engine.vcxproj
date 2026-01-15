@@ -326,7 +326,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imguidocking\imgui_widgets.cpp" />
     <ClCompile Include="Game\GameContext.cpp" />
     <ClCompile Include="Game\Test\TestActor.cpp" />
-    <ClCompile Include="Game\Test\TestScene.cpp" />
+    <ClCompile Include="Game\Test\TestWorld.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -866,7 +866,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\stb_image\stb_image.h" />
     <ClInclude Include="Game\GameContext.h" />
     <ClInclude Include="Game\Test\TestActor.h" />
-    <ClInclude Include="Game\Test\TestScene.h" />
+    <ClInclude Include="Game\Test\TestMaterialComponent.h" />
+    <ClInclude Include="Game\Test\TestRenderComponent.h" />
+    <ClInclude Include="Game\Test\TestWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\assimp\include\assimp\.editorconfig">

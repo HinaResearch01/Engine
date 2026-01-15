@@ -10,7 +10,7 @@ class CameraComponent : public IComponent {
 
 public:
 	// コンストラクタ
-	CameraComponent() : IComponent("CameraComponent") {}
+	CameraComponent() = default;
 
 	// デストラクタ
 	~CameraComponent() = default;

@@ -57,12 +57,12 @@ public:
 
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		// Transformは必須＆特殊扱い
+		// Transform は必須＆1つのみ
 		if constexpr (std::is_same_v<T, TransformComponent>) {
-			if (!transComp_) {
-				EnsureTransform();
-			}
-			return transComp_.get();
+			auto it = comps_.find(typeid(TransformComponent));
+			return it != comps_.end()
+				? static_cast<T*>(it->second.get())
+				: nullptr;
 		}
 
 		// 既に存在する場合は差し替えない
@@ -124,16 +124,8 @@ public:
 		return std::dynamic_pointer_cast<T>(it->second);
 	}
 
-	TransformComponent* GetTransform() {
-		std::lock_guard<std::mutex> lock(mutex_);
-		return transComp_.get();
-	}
-
 	template<typename F>
 	void ForEachComponent(F&& func) {
-		if (transComp_) {
-			func(transComp_.get());
-		}
 		for (auto& [_, comp] : comps_) {
 			func(comp.get());
 		}
@@ -168,7 +160,6 @@ protected:
 	std::bitset<32> tags_{};
 
 	std::unordered_map<std::type_index, std::shared_ptr<IComponent>> comps_;
-	std::shared_ptr<TransformComponent> transComp_;
 
 	World* world_ = nullptr;
 

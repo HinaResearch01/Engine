@@ -18,9 +18,6 @@ public:
 	/// デストラクタ
 	/// </summary>
 	IComponent() = default;
-	IComponent(const std::string& name)
-		: name_(name)
-	{};
 
 	/// <summary>
 	/// 仮想デストラクタ
@@ -36,15 +33,11 @@ public:
 	// 親
 	IActor* GetOwner() const { return owner_; }
 	void SetOwner(IActor* ptr) { owner_ = ptr; } 
-	// 名前
-	std::string GetName() const { return name_; }
 #pragma endregion
 
 private:
 	// 親
 	IActor* owner_ = nullptr;
-	// 名前
-	std::string name_ = "default";
 };
 
 }

@@ -21,7 +21,7 @@ class TransformComponent : public IComponent {
 
 public:
 	// コンストラクタ
-	TransformComponent() : IComponent("TransformComponent") {}
+	TransformComponent() = default;
 
 	// デストラクタ
 	~TransformComponent() = default;

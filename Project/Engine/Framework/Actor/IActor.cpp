@@ -18,7 +18,6 @@ IActor::~IActor() {
 	std::lock_guard<std::mutex> lock(mutex_);
 
 	comps_.clear();
-	transComp_.reset();
 }
 
 void IActor::Finalize()
@@ -32,12 +31,14 @@ void IActor::Finalize()
 }
 
 void IActor::EnsureTransform() {
-	if (transComp_) return;
+	if (comps_.contains(typeid(TransformComponent)))
+		return;
 
-	transComp_ = std::make_shared<TransformComponent>();
-	transComp_->SetOwner(this);
-	transComp_->Init();
-	comps_[typeid(TransformComponent)] = transComp_;
+	auto trans = std::make_shared<TransformComponent>();
+	trans->SetOwner(this);
+	trans->Init();
+
+	comps_[typeid(TransformComponent)] = trans;
 }
 
 } 

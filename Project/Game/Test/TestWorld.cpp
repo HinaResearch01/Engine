@@ -1,8 +1,8 @@
-#include "TestScene.h"
+#include "TestWorld.h"
 #include "imgui.h"
 #include "Loader/LoaderAPI.h"
 
-void TestScene::Init()
+void TestWorld::Init()
 {
 	// テクスチャ読み込み
 	tme::API::AssetLoader::Load<tex>("Resources/Texture/uvChecker.png", "uvChecker");
@@ -12,15 +12,4 @@ void TestScene::Init()
 
 	// TestActorの追加
 	World::SpawnActor<TestActor>();
-}
-
-void TestScene::Update(float deltaTime)
-{
-	WorldUpdate(deltaTime);
-#ifdef _DEBUG
-#endif // _DEBUG
-}
-
-void TestScene::Finalize()
-{
 }

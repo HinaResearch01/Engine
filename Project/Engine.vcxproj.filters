@@ -167,7 +167,7 @@
     <ClCompile Include="Game\Test\TestActor.cpp">
       <Filter>Game\Test</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\TestScene.cpp">
+    <ClCompile Include="Game\Test\TestWorld.cpp">
       <Filter>Game\Test</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Resource\ResourceSystem.cpp">
@@ -631,7 +631,7 @@
     <ClInclude Include="Game\Test\TestActor.h">
       <Filter>Game\Test</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\TestScene.h">
+    <ClInclude Include="Game\Test\TestWorld.h">
       <Filter>Game\Test</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Resource\ResourceSystem.h">
@@ -711,6 +711,12 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\World\CompView\ComponentViewRange.h">
       <Filter>Engine\Framework\World\CompView</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\TestMaterialComponent.h">
+      <Filter>Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\TestRenderComponent.h">
+      <Filter>Game\Test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

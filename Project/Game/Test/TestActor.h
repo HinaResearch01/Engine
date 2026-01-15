@@ -7,7 +7,6 @@ class TestActor : public Tsumi::Framework::IActor {
 public:
     TestActor() = default;
     ~TestActor() = default;
-
 	void Init() override;
 private:
 };
