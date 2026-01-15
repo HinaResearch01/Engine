@@ -5,4 +5,5 @@
 void TestActor::Init()
 {
 	IActor::AddComp<TestMaterialComponent>();
+	IActor::AddComp<TestRenderComponent>();
 }

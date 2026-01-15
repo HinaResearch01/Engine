@@ -50,9 +50,9 @@ public:
 	/// <summary>
 	/// コンポーネント追加（型で1つまで）
 	/// </summary>
-	template<typename T, typename... Args>
-	T* AddComp(Args&&... args) {
-		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+	template<typename T>
+	T* AddComp() {
+		static_assert(std::is_base_of_v<IComponent, T>);
 
 		std::lock_guard<std::mutex> lock(mutex_);
 
@@ -64,18 +64,16 @@ public:
 				: nullptr;
 		}
 
-		// 既に存在する場合は差し替えない
 		auto key = std::type_index(typeid(T));
 		if (comps_.contains(key)) {
-			return dynamic_cast<T*>(comps_[key].get());
+			return static_cast<T*>(comps_[key].get());
 		}
 
-		auto comp = std::make_shared<T>(std::forward<Args>(args)...);
+		auto comp = std::make_shared<T>();
 		comp->SetOwner(this);
 		comp->Init();
 
 		comps_[key] = comp;
-
 		return comp.get();
 	}
 
