@@ -42,10 +42,8 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	// ==================================
 	// 1. ローカル行列生成
 	// ==================================
-	const Math::Mat4x4 localMat =
-		Math::Mat4x4::Scale(tr.srt.scale) *
-		Math::Mat4x4::Rotation(tr.srt.rotate) *
-		Math::Mat4x4::Translation(tr.srt.translate);
+	const Math::Mat4x4 localMat = Math::Func::MAT4x4::AffineMatrix(
+		tr.srt.scale, tr.srt.rotate, tr.srt.translate);
 
 	// ==================================
 	// 2. ワールド行列
@@ -84,9 +82,9 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	};
 
 	// 非一様スケール対策：正規直交化
-	r.Normalize();
-	u = (u - r * Math::Func::VEC3::Dot(u, r)).Normalize();
-	f = Math::Func::VEC3::Cross(r, u).Normalize();
+	r = r.Normalized();
+	u = (u - r * Math::Func::VEC3::Dot(u, r)).Normalized();
+	f = Math::Func::VEC3::Cross(r, u).Normalized();
 
 	tr.right = r;
 	tr.up = u;

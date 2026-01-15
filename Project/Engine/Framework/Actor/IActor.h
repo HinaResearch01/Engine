@@ -102,23 +102,54 @@ public:
 
 	template<typename T>
 	bool HasComp() const {
-		return comps_.contains(typeid(T));
+		// 1. 完全一致
+		if (comps_.contains(typeid(T))) return true;
+
+		// 2. 継承関係チェック
+		for (const auto& [_, comp] : comps_) {
+			if (dynamic_cast<T*>(comp.get())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	template<typename T>
 	T* GetComponent() {
 		std::lock_guard<std::mutex> lock(mutex_);
+
+		// 1. 完全一致
 		auto it = comps_.find(typeid(T));
-		if (it == comps_.end()) return nullptr;
-		return dynamic_cast<T*>(it->second.get());
+		if (it != comps_.end()) {
+			return dynamic_cast<T*>(it->second.get());
+		}
+
+		// 2. 継承関係チェック
+		for (auto& [_, comp] : comps_) {
+			if (auto* ptr = dynamic_cast<T*>(comp.get())) {
+				return ptr;
+			}
+		}
+		return nullptr;
 	}
 
 	template<typename T>
 	std::shared_ptr<T> GetComponentShared() {
 		std::lock_guard<std::mutex> lock(mutex_);
+
+		// 1. 完全一致
 		auto it = comps_.find(typeid(T));
-		if (it == comps_.end()) return nullptr;
-		return std::dynamic_pointer_cast<T>(it->second);
+		if (it != comps_.end()) {
+			return std::dynamic_pointer_cast<T>(it->second);
+		}
+
+		// 2. 継承関係チェック
+		for (auto& [key, comp] : comps_) {
+			if (auto ptr = std::dynamic_pointer_cast<T>(comp)) {
+				return ptr;
+			}
+		}
+		return nullptr;
 	}
 
 	template<typename F>
@@ -150,6 +181,8 @@ private:
 protected:
 	State state_ = State::None;
 	ActorID id_ = 0;
+
+	std::string name_ = "";
 
 	std::bitset<32> tags_{};
 

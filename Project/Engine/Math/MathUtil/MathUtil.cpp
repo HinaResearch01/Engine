@@ -62,7 +62,8 @@ Vec2f VEC2::Absolute(const Vec2f& v)
 
 Vec2f VEC2::Project(const Vec2f& v1, const Vec2f& v2)
 {
-	return Dot(v1, v2.Normalize()) * v2.Normalize();
+	Vec2f n = v2.Normalize();
+	return Dot(v1, n) * n;
 }
 
 float VEC3::Dot(const Vec3f& v1, const Vec3f& v2)
@@ -91,7 +92,8 @@ Vec3f VEC3::Absolute(const Vec3f& v)
 
 Vec3f VEC3::Project(const Vec3f& v1, const Vec3f& v2)
 {
-	return Dot(v1, v2.Normalize()) * v2.Normalize();
+	Vec3f n = v2.Normalized();
+	return Dot(v1, n) * n;
 }
 
 Vec3f VEC3::Lerp(const Vec3f& start, const Vec3f& end, const float t)
@@ -101,14 +103,15 @@ Vec3f VEC3::Lerp(const Vec3f& start, const Vec3f& end, const float t)
 
 Vec3f VEC3::SLerp(const Vec3f& start, const Vec3f& end, const float t)
 {
-	Vec3f v0 = start.Normalize();
-	Vec3f v1 = end.Normalize();
+	Vec3f v0 = start.Normalized();
+	Vec3f v1 = end.Normalized();
 
 	float dot = VEC3::Dot(v0, v1);
 	dot = std::clamp(dot, -1.0f, 1.0f);
 
 	float theta = std::acos(dot) * t;
-	Vec3f relative = (v1 - v0 * dot).Normalize();
+
+	Vec3f relative = (v1 - v0 * dot).Normalized();
 
 	return v0 * std::cos(theta) + relative * std::sin(theta);
 }
@@ -274,13 +277,11 @@ float VEC4::Distance(const Vec4f& a, const Vec4f& b)
 
 Mat4x4 MAT4x4::AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f& translate)
 {
-	Mat4x4 s{};
-	s.Scale(scale);
-	Mat4x4 r{};
-	r.Rotation(rotate);
-	Mat4x4 t{};
-	t.Translation(translate);
-	return s * (r * t);
+	Mat4x4 s = Mat4x4::Scale(scale);
+	Mat4x4 r = Mat4x4::Rotation(rotate);
+	Mat4x4 t = Mat4x4::Translation(translate);
+
+	return s * r * t;
 }
 
 Mat4x4 MAT4x4::PerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
@@ -371,7 +372,7 @@ Mat4x4 MAT4x4::RotateAxisAngle(const Vec3f& axis, float angle)
 	float sinTheta = sinf(angle);
 
 	Mat4x4 result{};
-	result.Identity();
+	result = Mat4x4::Identity();
 
 	result.m[0][0] = (axis.x * axis.x) * (1 - cosTheta) + cosTheta;
 	result.m[0][1] = (axis.x * axis.y) * (1 - cosTheta) - axis.z * sinTheta;
@@ -391,7 +392,7 @@ Mat4x4 MAT4x4::RotateAxisAngle(const Vec3f& axis, float angle)
 Mat4x4 MAT4x4::RotateAxisAngle(const Vec3f& axis, float cos, float sin)
 {
 	Mat4x4 result{};
-	result.Identity();
+	result = Mat4x4::Identity();
 
 	result.m[0][0] = axis.x * axis.x * (1 - cos) + cos;
 	result.m[0][1] = axis.x * axis.y * (1 - cos) - axis.z * sin;
@@ -410,10 +411,9 @@ Mat4x4 MAT4x4::RotateAxisAngle(const Vec3f& axis, float cos, float sin)
 
 Mat4x4 MAT4x4::DirectionToDirection(const Vec3f& from, const Vec3f& to)
 {
-	Vec3f fromVector = from.Normalize();
-	Vec3f toVector = to.Normalize();
-	Vec3f n = VEC3::Cross(fromVector, toVector);
-	n.Normalize();
+	Vec3f fromVector = from.Normalized();
+	Vec3f toVector = to.Normalized();
+	Vec3f n = VEC3::Cross(fromVector, toVector).Normalized();
 
 	float cos = VEC3::Dot(fromVector, toVector);
 	float sin = VEC3::Cross(fromVector, toVector).Length();
