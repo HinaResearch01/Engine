@@ -18,10 +18,10 @@
 #include "Framework/Component/Transform/TransformComponent.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Update/UpdateManager.h"
-#include "Framework/System/CameraSystem.h"
-#include "Framework/System/MaterialSystem.h"
-#include "Framework/System/RenderSystem.h"
-#include "Framework/System/TransformSystem.h"
+#include "Framework/System/Camera/CameraSystem.h"
+#include "Framework/System/Material/MaterialSystem.h"
+#include "Framework/System/Render/RenderSystem.h"
+#include "Framework/System/Transform/TransformSystem.h"
 
 namespace Tsumi::Framework {
 

@@ -176,20 +176,20 @@
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\System\CameraSystem.cpp">
-      <Filter>Engine\Framework\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Framework\System\RenderSystem.cpp">
-      <Filter>Engine\Framework\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Framework\System\TransformSystem.cpp">
-      <Filter>Engine\Framework\System</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.cpp">
       <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Framework\System\MaterialSystem.cpp">
-      <Filter>Engine\Framework\System</Filter>
+    <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp">
+      <Filter>Engine\Framework\System\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Material\MaterialSystem.cpp">
+      <Filter>Engine\Framework\System\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Render\RenderSystem.cpp">
+      <Filter>Engine\Framework\System\Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp">
+      <Filter>Engine\Framework\System\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -661,29 +661,17 @@
     <ClInclude Include="Engine\Framework\View\RenderView.h">
       <Filter>Engine\Framework\View</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\System\CameraSystem.h">
-      <Filter>Engine\Framework\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\System\RenderSystem.h">
-      <Filter>Engine\Framework\System</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\System\TransformSystem.h">
-      <Filter>Engine\Framework\System</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h">
       <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\System\MaterialSystem.h">
-      <Filter>Engine\Framework\System</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h">
       <Filter>Engine\Framework\Render</Filter>
@@ -717,6 +705,18 @@
     </ClInclude>
     <ClInclude Include="Game\Test\TestRenderComponent.h">
       <Filter>Game\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Camera\CameraSystem.h">
+      <Filter>Engine\Framework\System\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h">
+      <Filter>Engine\Framework\System\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Render\RenderSystem.h">
+      <Filter>Engine\Framework\System\Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Transform\TransformSystem.h">
+      <Filter>Engine\Framework\System\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -974,6 +974,18 @@
     </Filter>
     <Filter Include="Engine\Framework\World\CompView">
       <UniqueIdentifier>{b7400f76-e953-4bbc-a832-fb886b7f2470}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Camera">
+      <UniqueIdentifier>{29799421-f462-4cf9-ad12-52af422be483}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Material">
+      <UniqueIdentifier>{c1cb391f-84bf-4b38-84fb-6313a5b44d9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Render">
+      <UniqueIdentifier>{3a5d817b-6852-4a55-8b12-af7a5ed5bbda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Transform">
+      <UniqueIdentifier>{dda36c48-1b29-4c83-8a37-fa013aa02be9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

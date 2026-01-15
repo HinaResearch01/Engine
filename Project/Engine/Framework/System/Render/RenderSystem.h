@@ -13,7 +13,7 @@
 #include "Framework/Render/RenderPacket.h"
 #include "Framework/Render/RenderPassTable.h"
 #include "Framework/Render/RenderSurfaceType.h"
-#include "Framework/System/CameraSystem.h"
+#include "Framework/System/Camera/CameraSystem.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
