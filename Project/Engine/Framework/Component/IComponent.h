@@ -15,7 +15,7 @@ class IComponent {
 
 public:
 	/// <summary>
-	/// デストラクタ
+	/// コンストラクタ
 	/// </summary>
 	IComponent() = default;
 

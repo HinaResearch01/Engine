@@ -360,7 +360,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h" />
     <ClInclude Include="Engine\Framework\Update\UpdatePhase.h" />
     <ClInclude Include="Engine\Framework\View\CameraContext.h" />
-    <ClInclude Include="Engine\Framework\View\RenderView.h" />
     <ClInclude Include="Engine\Framework\World\CompView\ComponentView.h" />
     <ClInclude Include="Engine\Framework\World\CompView\ComponentViewRange.h" />
     <ClInclude Include="Engine\Framework\World\CompView\IComponentViewBase.h" />

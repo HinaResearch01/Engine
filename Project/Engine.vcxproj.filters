@@ -658,9 +658,6 @@
     <ClInclude Include="Engine\Framework\View\CameraContext.h">
       <Filter>Engine\Framework\View</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\View\RenderView.h">
-      <Filter>Engine\Framework\View</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>

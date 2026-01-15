@@ -132,18 +132,22 @@ HRESULT DX12Manager::EndFrame()
 
 void DX12Manager::PreDraw4PE()
 {
+	// TODO
 }
 
 void DX12Manager::PostDraw4PE()
 {	 
+	// TODO
 }	 
 	 
 void DX12Manager::PreDraw4SC()
 {	 
+	// TODO
 }	 
 	 
 void DX12Manager::PostDraw4SC()
 {
+	// TODO
 }
 
 void DX12Manager::PrepareBackBuffer(UINT currIndex, ID3D12Resource* backBuffer)
