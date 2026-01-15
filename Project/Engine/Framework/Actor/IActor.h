@@ -34,8 +34,7 @@ public:
 	};
 
 public:
-	IActor();
-	explicit IActor(const std::string& name);
+	explicit IActor();
 	virtual ~IActor();
 
 	// ===============================================
@@ -137,8 +136,6 @@ public:
 	virtual void OnCollision() {}
 
 #pragma region Accessor
-	std::string GetName() const { return name_; }
-
 	ActorID GetID() const { return id_; }
 	void SetID(ActorID id) { id_ = id; }
 
@@ -153,7 +150,6 @@ private:
 	void EnsureTransform();
 
 protected:
-	std::string name_ = "default";
 	State state_ = State::None;
 	ActorID id_ = 0;
 

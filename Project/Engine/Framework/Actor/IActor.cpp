@@ -8,15 +8,8 @@ IActor::IActor() {
 	EnsureTransform();
 }
 
-IActor::IActor(const std::string& name)
-	: name_(name) {
-	state_ = State::Active;
-	EnsureTransform();
-}
-
 IActor::~IActor() {
 	std::lock_guard<std::mutex> lock(mutex_);
-
 	comps_.clear();
 }
 

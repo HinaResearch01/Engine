@@ -4,6 +4,5 @@
 
 void TestActor::Init()
 {
-	IActor::name_ = "TestActor";
 	IActor::AddComp<TestMaterialComponent>();
 }
