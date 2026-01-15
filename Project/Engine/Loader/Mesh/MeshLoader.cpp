@@ -77,8 +77,15 @@ HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& k
 	if (FAILED(hr))
 		return hr;
 
+	// デフォルトテクスチャのキーを予測
+	std::string defaultTexKey = "";
+	if (scene->mNumMeshes > 0) {
+		unsigned int matIdx = scene->mMeshes[0]->mMaterialIndex;
+		defaultTexKey = alias + "_diffuse_" + std::to_string(matIdx);
+	}
+
 	// GPU リソースの生成・登録は MeshManager に任せる
-	hr = meshMgr->RegisterMesh(key, vertices, indices);
+	hr = meshMgr->RegisterMesh(key, vertices, indices, defaultTexKey);
 	if (FAILED(hr))
 		return hr;
 

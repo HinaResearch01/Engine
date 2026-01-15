@@ -6,9 +6,9 @@ void TestActor::Init()
 {
 	IActor::name_ = "TestActor";
 
-	auto* matComp = IActor::AddComp<TestMaterialComponent>();
-	matComp->albedo = "";
+	IActor::AddComp<TestMaterialComponent>();
+	//matComp->albedo = "";
 
 	auto* rendComp = IActor::AddComp<TestRenderComponent>();
 	rendComp->mesh = "Axis";
-}
+}	

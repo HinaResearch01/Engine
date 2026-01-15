@@ -1,4 +1,5 @@
 #include "TextureLoader.h"
+#include "Resource/ResourceSystem.h" // 追加
 #include "DX12/DX12Manager.h"
 #include "DX12/Desc/DescriptorAllocator.h"
 #include "Utils/Logger/Logger.h"
@@ -83,6 +84,19 @@ HRESULT TextureLoader::LoadFromScene(const aiScene* scene, const std::string& mo
 			fullTexPath.string(),
 			buildAlias,
 			srgb);
+
+		// ★追加: 最初のテクスチャ、あるいは「明示的に同じ名前で呼びたい」場合のために
+		// ベース名(alias)単体でもアクセスできるように登録しておく。
+		// ただし、複数マテリアルがある場合は上書きされるので「最後の1つ」か「最初の1つ」になる。
+		// ここでは「最初の1つ」を優先する（あるいはユーザー運用でカバー）
+		if (SUCCEEDED(hr)) {
+			// まだ登録されてなければベース名も登録
+			if (!ResourceSystem::GetInstance()->GetTextureManager()->HasAlias(alias)) {
+				// 実キーを取得してエイリアス登録
+				std::string key = Utils::Func::MakeKeyFromRoot("", fullTexPath.string());
+				ResourceSystem::GetInstance()->GetTextureManager()->RegisterAlias(alias, key);
+			}
+		}
 
 		// 失敗は記録するが、他のマテリアルは処理を続行
 		if (FAILED(hr))

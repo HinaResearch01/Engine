@@ -82,6 +82,15 @@ void RenderSystem::BuildDrawPackets()
 		pkt.mesh = mesh;
 		pkt.material = mat;
 
+		// テクスチャ未設定時のフォールバック
+		if (!pkt.material->albedo && !mesh->defaultTextureKey.empty()) {
+			// MeshAssetが持っているデフォルトキーで検索を試みる
+			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
+			if (tex) {
+				const_cast<MaterialPacket*>(pkt.material)->albedo = tex;
+			}
+		}
+
 		FillTransformPacket(pkt, tc);
 
 		const auto& pass = RenderPassTable::Get(pkt.surface);

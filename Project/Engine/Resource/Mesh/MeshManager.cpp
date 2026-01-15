@@ -22,9 +22,13 @@ MeshManager::MeshManager()
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
 
-HRESULT MeshManager::RegisterMesh(const std::string& key, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+HRESULT MeshManager::RegisterMesh(
+	const std::string& key, 
+	const std::vector<Vertex>& vertices, 
+	const std::vector<uint32_t>& indices,
+	const std::string& textureKey)
 {
-	// すでに同じ実キー（正規化パス）で登録済みの場合は何もしない
+	// すでに同じ実キーで登録済みの場合は何もしない
 	// → 二重ロード防止（同一メッシュの多重GPU生成を防ぐ）
 	if (HasKey(key))
 		return S_OK;
@@ -44,6 +48,7 @@ HRESULT MeshManager::RegisterMesh(const std::string& key, const std::vector<Vert
 	// 登録するメッシュ実体を構築
 	MeshAsset asset{};
 	asset.key = key;
+	asset.defaultTextureKey = textureKey; // 保存
 	asset.vertexCount = static_cast<uint32_t>(vertices.size());
 	asset.indexCount = static_cast<uint32_t>(indices.size());
 	asset.stride = sizeof(Vertex);

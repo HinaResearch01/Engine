@@ -39,6 +39,9 @@ struct MeshAsset {
 	UINT indexCount = 0;
 	UINT stride = sizeof(Vertex);
 	DXGI_FORMAT indexFormat = DXGI_FORMAT_R32_UINT;
+	
+	// デフォルトマテリアル情報
+	std::string defaultTextureKey; 
 };
 
 /* メッシュ管理 */
@@ -61,7 +64,8 @@ public:
 	HRESULT RegisterMesh(
 		const std::string& key,
 		const std::vector<Vertex>& vertices,
-		const std::vector<uint32_t>& indices);
+		const std::vector<uint32_t>& indices,
+		const std::string& textureKey);
 	void RegisterAlias(const std::string& alias, const std::string& key);
 
 	/// <summary>
