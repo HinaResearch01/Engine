@@ -21,7 +21,7 @@ class DX12Manager;
 namespace TexFileExt {
 const std::pair<std::string, uint32_t> PNG = { ".png", 0 };
 const std::pair<std::string, uint32_t> JPEG = { ".jpeg", 1 };
-const std::pair<std::string, uint32_t> DSS = { ".dds", 2 };
+const std::pair<std::string, uint32_t> DDS = { ".dds", 2 };
 }
 
 namespace Tsumi::Resource {

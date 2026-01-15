@@ -46,21 +46,21 @@ public:
 	/// <summary>
 	/// PipelineStateの取得
 	/// </summary>
-	void Register(const std::wstring& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso);
+	void Register(const std::string& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso);
 
 	/// <summary>
 	/// PipelineStateの取得
 	/// </summary>
-	ID3D12PipelineState* Get(const std::wstring& name);
+	ID3D12PipelineState* Get(const std::string& name);
 
 	/// <summary>
 	/// 指定名のPipelienStateが登録されているか
 	/// </summary>
-	bool Has(const std::wstring& name) const;
+	bool Has(const std::string& name) const;
 
 private:
 	mutable std::mutex mutex_;
-	std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D12PipelineState>> pipelineMap_;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> pipelineMap_;
 
 };
 }

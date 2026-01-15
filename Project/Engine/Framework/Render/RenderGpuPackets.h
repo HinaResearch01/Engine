@@ -20,4 +20,13 @@ struct GpuMaterialCB
 	uint32_t pad = 0;
 };
 
+struct GpuViewCB
+{
+	Math::Mat4x4 view;
+	Math::Mat4x4 proj;
+	Math::Mat4x4 viewProj;
+	Math::Vec3f cameraPos;
+	float pad;
+};
+
 }

@@ -6,17 +6,17 @@
 
 using namespace Tsumi::Graphic;
 
-static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthWrite, PSOLibrary& lib);
+static void BuildObject3D(const std::string& name, BlendMode blend, bool depthWrite, PSOLibrary& lib);
 
 void Object3DPSOFactory::Build(PSOLibrary& lib)
 {
-	BuildObject3D(L"Object3D_Opaque",		BlendMode::None, true, lib);
-	BuildObject3D(L"Object3D_Masked",		BlendMode::None, true, lib);
-	BuildObject3D(L"Object3D_Translucent",	BlendMode::None, false, lib);
-	BuildObject3D(L"Object3D_Additive",		BlendMode::None, false, lib);
+	BuildObject3D("Object3D_Opaque",		BlendMode::None, true, lib);
+	BuildObject3D("Object3D_Masked",		BlendMode::None, true, lib);
+	BuildObject3D("Object3D_Translucent",	BlendMode::None, false, lib);
+	BuildObject3D("Object3D_Additive",		BlendMode::None, false, lib);
 }
 
-static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthWrite, PSOLibrary& lib)
+static void BuildObject3D(const std::string& name, BlendMode blend, bool depthWrite, PSOLibrary& lib)
 {
 	if (lib.Has(name))
 		return;
@@ -26,8 +26,8 @@ static void BuildObject3D(const std::wstring& name, BlendMode blend, bool depthW
 	auto rootsigs = RootSignatureLibrary::GetInstance();
 
 	auto rootSig = rootsigs->Get("Object3D");
-	auto vs = shaders->Get(L"Object3D", ShaderType::VS);
-	auto ps = shaders->Get(L"Object3D", ShaderType::PS);
+	auto vs = shaders->Get("Object3D", ShaderType::VS);
+	auto ps = shaders->Get("Object3D", ShaderType::PS);
 
 	if (!rootSig || !vs || !ps)
 		throw std::runtime_error("Object3DPSOFactory: shader or rootsig not found");

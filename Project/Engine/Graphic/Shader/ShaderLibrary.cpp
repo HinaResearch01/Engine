@@ -35,7 +35,7 @@ void ShaderLibrary::Init()
 void ShaderLibrary::CompileAllShader()
 {
     // ロード関数
-    auto tryCompile = [&](const std::wstring& name, const ShaderLoadModule& desc) {
+    auto tryCompile = [&](const std::string& name, const ShaderLoadModule& desc) {
         try {
             // シェーダーのロード
             Compile(name, desc);
@@ -43,12 +43,12 @@ void ShaderLibrary::CompileAllShader()
         catch (const std::exception& e) {
             // 標準的な例外（エラーメッセージ付き）
             std::wcerr << L"ShaderLibrary::LoadAllShaders - failed to load shader '"
-                << name << L"': " << e.what() << std::endl;
+                << name.c_str() << L"': " << e.what() << std::endl;
         }
         catch (...) {
             // その他の未知の例外
             std::wcerr << L"ShaderLibrary::LoadAllShaders - failed to load shader '"
-                << name << L"': unknown error" << std::endl;
+                << name.c_str() << L"': unknown error" << std::endl;
         }
         };
 
@@ -66,9 +66,9 @@ void ShaderLibrary::CompileAllShader()
     {
         // 3Dオブジェクト描画
         ShaderLoadModule m;
-        m.sources[ShaderType::VS] = L"Resources/Shaders/VS/Object3D_Static.VS.hlsl";
-        m.sources[ShaderType::PS] = L"Resources/Shaders/PS/Object3D_Static.PS.hlsl";
-        tryCompile(L"Object3D", m);
+        m.sources[ShaderType::VS] = "Resources/Shaders/VS/Object3D_Static.VS.hlsl";
+        m.sources[ShaderType::PS] = "Resources/Shaders/PS/Object3D_Static.PS.hlsl";
+        tryCompile("Object3D", m);
     }
 
     // -------------------------------
@@ -107,7 +107,7 @@ void ShaderLibrary::CompileAllShader()
     Tsumi::Utils::Logger::Info("[ShaderLibrary] LoadAllShaders - completed (errors were logged per-shader if any)");
 }
 
-IDxcBlob* ShaderLibrary::Get(const std::wstring& name, ShaderType stage) const
+IDxcBlob* ShaderLibrary::Get(const std::string& name, ShaderType stage) const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = shaders_.find(name);
@@ -117,17 +117,17 @@ IDxcBlob* ShaderLibrary::Get(const std::wstring& name, ShaderType stage) const
     return itStage->second.Get();
 }
 
-bool ShaderLibrary::Has(const std::wstring& name) const
+bool ShaderLibrary::Has(const std::string& name) const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return shaders_.find(name) != shaders_.end();
 }
 
-HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule& module)
+HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& module)
 {
     // シェーダソースが指定されていない場合は例外を投げる
     if (module.sources.empty()) {
-        throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + Tsumi::Utils::Func::WstringToUtf8(name));
+        throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + name);
     }
     ShaderBlob compiled;
     HRESULT hr = S_OK;
@@ -135,7 +135,7 @@ HRESULT ShaderLibrary::Compile(const std::wstring& name, const ShaderLoadModule&
     for (auto& kv : module.sources) {
 
         ShaderType stage = kv.first;
-        const std::wstring& filePath = kv.second;
+        const std::wstring& filePath = Tsumi::Utils::Func::Utf8ToWstring(kv.second);
 
         // -------------------------------
         // hlslファイルを読む

@@ -11,21 +11,21 @@ void PSOLibrary::Init()
 	Object3DPSOFactory::Build(*this);
 }
 
-void PSOLibrary::Register(const std::wstring& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso)
+void PSOLibrary::Register(const std::string& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	if (pipelineMap_.contains(name)) return;
 	pipelineMap_[name] = pso;
 }
 
-ID3D12PipelineState* PSOLibrary::Get(const std::wstring& name)
+ID3D12PipelineState* PSOLibrary::Get(const std::string& name)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	auto it = pipelineMap_.find(name);
 	return (it != pipelineMap_.end()) ? it->second.Get() : nullptr;
 }
 
-bool PSOLibrary::Has(const std::wstring& name) const
+bool PSOLibrary::Has(const std::string& name) const
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	return pipelineMap_.contains(name);

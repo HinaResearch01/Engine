@@ -118,6 +118,10 @@ void TextureManager::UnloadAll()
 	if (dx12Mgr_->GetFrameSync())
 		frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
 
+	// GPU がテクスチャを使用中でないことを保証
+	if (dx12Mgr_ && dx12Mgr_->GetCommandContext())
+		dx12Mgr_->GetCommandContext()->WaitForGpu();
+
 	{
 		// テクスチャ実体・alias 管理テーブルをまとめて操作するためロック
 		std::lock_guard lock(mutex_);

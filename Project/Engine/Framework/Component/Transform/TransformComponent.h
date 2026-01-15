@@ -48,6 +48,7 @@ public:
 
 	// ===== 派生（TransformSystem が更新）=====
 	Math::Mat4x4 world{};
+	Math::Mat4x4 worldInvTranspose{};
 
 	Math::Vec3f right{ 1.0f, 0.0f, 0.0f };
 	Math::Vec3f up{ 0.0f, 1.0f, 0.0f };

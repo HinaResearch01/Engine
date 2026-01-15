@@ -5,9 +5,15 @@
 #include <vector>
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
+#include "Framework/Component/Camera/CameraComponent.h"
+#include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Component/Transform/TransformComponent.h"
+#include "Framework/Render/RenderGpuPackets.h"
 #include "Framework/Render/RenderPacket.h"
+#include "Framework/Render/RenderPassTable.h"
 #include "Framework/Render/RenderSurfaceType.h"
+#include "Framework/System/CameraSystem.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
@@ -67,9 +73,62 @@ public:
 
 private:
 	/// <summary>
+	/// パケットの組み立て
+	/// </summary>
+	void BuildDrawPackets();
+
+	/// <summary>
+	/// Transformの行列計算
+	/// </summary>
+	void FillTransformPacket(DrawPacket& pkt, const TransformComponent& tc);
+
+	/// <summary>
+	/// 描画リストのクリア
+	/// </summary>
+	void ClearLists();
+
+	/// <summary>
 	/// 描画リストのソート
 	/// </summary>
 	void SortLists();
+
+	/// <summary>
+	/// ViewCB アップロード
+	/// </summary>
+	D3D12_GPU_VIRTUAL_ADDRESS UploadViewCB();
+
+	/// <summary>
+	/// Pass 単位描画
+	/// </summary>
+	void RenderSurfacePass(
+		DX12::CommandContext& cmd,
+		SurfaceType surface,
+		D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr);
+
+	/// <summary>
+	/// RenderPassDescの設定
+	/// </summary>
+	void SetupPassState(
+		DX12::CommandContext& cmd,
+		const RenderPassDesc& pass,
+		D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr);
+
+	/// <summary>
+	/// 各パケットの描画処理
+	/// </summary>
+	void RenderPacket(DX12::CommandContext& cmd, const DrawPacket& pkt);
+
+	/// <summary>
+	/// バインド処理
+	/// </summary>
+	void BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt);
+	void BindTransform(DX12::CommandContext& cmd, const DrawPacket& pkt);
+	void BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt);
+
+	/// <summary>
+	/// 描画コマンド
+	/// </summary>
+	void DrawCommand(DX12::CommandContext& cmd, const DrawPacket& pkt);
 
 private:
 	using List = std::vector<DrawPacket>;

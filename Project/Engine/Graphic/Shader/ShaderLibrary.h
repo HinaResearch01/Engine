@@ -20,7 +20,7 @@ namespace Tsumi::Graphic {
 enum class ShaderType { VS, PS, GS, HS, DS, CS };
 
 struct ShaderLoadModule {
-    std::unordered_map<ShaderType, std::wstring> sources;
+    std::unordered_map<ShaderType, std::string> sources;
 };
 struct ShaderBlob {
     std::unordered_map<ShaderType, Microsoft::WRL::ComPtr<IDxcBlob>> blob;
@@ -57,19 +57,19 @@ public:
     /// <summary>
     /// 取得
     /// </summary>
-    IDxcBlob* Get(const std::wstring& name, ShaderType stage) const;
+    IDxcBlob* Get(const std::string& name, ShaderType stage) const;
 
     /// <summary>
     /// 読みこみ済み確認
     /// </summary>
-    bool Has(const std::wstring& name) const;
+    bool Has(const std::string& name) const;
 
 private:
 
     /// <summary>
     /// コンパイル
     /// </summary>
-    HRESULT Compile(const std::wstring& name, const ShaderLoadModule& desc);
+    HRESULT Compile(const std::string& name, const ShaderLoadModule& desc);
 
     /// <summary>
     /// DXCの初期化処理
@@ -77,7 +77,7 @@ private:
     HRESULT InitDXC();
 
 private:
-    std::unordered_map<std::wstring, ShaderBlob> shaders_;
+    std::unordered_map<std::string, ShaderBlob> shaders_;
     mutable std::mutex mutex_;
 
     Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;

@@ -22,9 +22,9 @@ public:
 
 private:
 	static inline const std::array<RenderPassDesc, static_cast<size_t>(SurfaceType::Count)> table_ = {
-		RenderPassDesc{ "Object3D_Opaque",       "Object3D", false }, // Opaque
-		RenderPassDesc{ "Object3D_Cutout",       "Object3D", false }, // Cutout
-		RenderPassDesc{ "Object3D_Transparent",  "Object3D", true  }, // Transparent
+		RenderPassDesc{ "Object3D_Opaque",      "Object3D", false }, // Opaque
+		RenderPassDesc{ "Object3D_Masked",      "Object3D", false }, // Masked
+		RenderPassDesc{ "Object3D_Translucent", "Object3D", true  }, // Translucent
 		RenderPassDesc{ "ShadowCaster",         "Shadow",   false }, // ShadowCaster
 		RenderPassDesc{ "Skybox",               "Skybox",   false }, // Skybox
 		RenderPassDesc{ "UI",                   "UI",       true  }, // UI

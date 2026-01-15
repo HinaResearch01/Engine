@@ -52,10 +52,12 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	// ==================================
 	if (auto p = tr.parent.lock()) {
 		tr.world = p->world * localMat;
+		tr.worldInvTranspose = tr.world.Inverse().Transpose();
 		tr.parentDirty = p->IsSelfDirty() || p->parentDirty;
 	}
 	else {
 		tr.world = localMat;
+		tr.worldInvTranspose = tr.world.Inverse().Transpose();
 		tr.parentDirty = false;
 	}
 
