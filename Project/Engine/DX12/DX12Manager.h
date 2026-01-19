@@ -102,6 +102,7 @@ public:
 
 	SwapChain* GetSwapChain() const { return swapChain_.get(); }
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
+	CommandContext* GetUploadCmdContext() const { return uploadCmdContext_.get(); }
 	DescriptorAllocator* GetTransientDescAlloc() const { return transientDescAlloc_.get(); }
 	DescriptorAllocator* GetPersistentDescAlloc() const { return persistentDescAlloc_.get(); }
 	Framebuffer* GetFramebuffer() const { return framebuf_.get(); }
@@ -122,6 +123,7 @@ private:
 
 private:
 	std::unique_ptr<CommandContext> cmdContext_;
+	std::unique_ptr<CommandContext> uploadCmdContext_;
 	std::unique_ptr<DescriptorAllocator> transientDescAlloc_;
 	std::unique_ptr<DescriptorAllocator> persistentDescAlloc_;
 	std::unique_ptr<DX12Device> dx12Device_;

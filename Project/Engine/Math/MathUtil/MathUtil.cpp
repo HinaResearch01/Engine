@@ -275,13 +275,21 @@ float VEC4::Distance(const Vec4f& a, const Vec4f& b)
 	return (a - b).Length();
 }
 
+Mat3x3 MAT3x3::BuildUVMatrix(const UVTransform& uv)
+{
+	return
+		Mat3x3::Scale(uv.scale) *
+		Mat3x3::Rotation(uv.rotation) *
+		Mat3x3::Translation(uv.translate);
+}
+
 Mat4x4 MAT4x4::AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f& translate)
 {
 	Mat4x4 s = Mat4x4::Scale(scale);
 	Mat4x4 r = Mat4x4::Rotation(rotate);
 	Mat4x4 t = Mat4x4::Translation(translate);
 
-	return s * r * t;
+	return t * r * s;
 }
 
 Mat4x4 MAT4x4::PerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)

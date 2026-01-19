@@ -40,11 +40,10 @@ struct Mat3x3 {
 		mat.m[0][0] = mat.m[1][1] = mat.m[2][2] = 1.0f;
 		return mat;
 	}
-	[[nodiscard]] static Mat3x3 Scale(const Vec3f& s) {
+	[[nodiscard]] static Mat3x3 Scale(const Vec2f& s) {
 		Mat3x3 mat = Identity();
 		mat.m[0][0] = s.x;
 		mat.m[1][1] = s.y;
-		mat.m[2][2] = s.z;
 		return mat;
 	}
 	[[nodiscard]] static Mat3x3 RotationX(float angle) {
@@ -77,7 +76,29 @@ struct Mat3x3 {
 		mat.m[1][1] = c;
 		return mat;
 	}
+	[[nodiscard]] static Mat3x3 Rotation(float rad)
+	{
+		float c = std::cos(rad);
+		float s = std::sin(rad);
+
+		// 行ベクトル用（右手系）
+		return {
+			 c,  s, 0,
+			-s,  c, 0,
+			 0,  0, 1
+		};
+	}
+	[[nodiscard]] static Mat3x3 Translation(const Vec2f& t)
+	{
+		return {
+			1, 0, 0,
+			0, 1, 0,
+			t.x, t.y, 1
+		};
+	}
+
 	// ===== Mutating =====
+
 
 	// ===== Math =====
 	// 行列変換
@@ -305,11 +326,13 @@ struct Mat4x4 {
 		mat.m[3][2] = t.z;
 		return mat;
 	}
+
 	// ===== Mutating =====
 	void SetIdentity() {}
 	void ApplyScale(const Vec3f&) {}
 	void ApplyRotation(const Vec3f&) {}
 	void ApplyTranslation(const Vec3f&) {}
+
 	// ===== Math =====
 	// 行列変換
 	[[nodiscard]] Mat4x4 Transpose() const

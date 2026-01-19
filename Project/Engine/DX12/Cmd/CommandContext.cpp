@@ -9,10 +9,11 @@
 using namespace Tsumi::DX12;
 using Microsoft::WRL::ComPtr;
 
-CommandContext::CommandContext(DX12Manager* ptr)
-{
-	dx12Mgr_ = ptr;
-}
+CommandContext::CommandContext(DX12Manager* ptr,
+							   D3D12_COMMAND_LIST_TYPE type)
+	: dx12Mgr_(ptr)
+	, listType_(type)
+{}
 
 CommandContext::~CommandContext()
 {
@@ -92,12 +93,15 @@ HRESULT CommandContext::ExecuteAndWait()
 
 	HRESULT hr = S_OK;
 
-	// Close してから実行
-	hr = list_->Close();
-	if (FAILED(hr)) {
-		Utils::Logger::Error(
-			"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
+	// Openなら閉じる
+	if (isListOpen_) {
+		hr = list_->Close();
+		if (FAILED(hr)) {
+			Utils::Logger::Error(
+				"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
+				static_cast<unsigned>(hr));
+		}
+		isListOpen_ = false;
 	}
 
 	ID3D12CommandList* lists[] = { list_.Get() };
@@ -127,6 +131,9 @@ HRESULT CommandContext::ExecuteAndWait()
 		if (FAILED(hr)) Utils::Logger::Warn(
 			"Warning: list_->Reset failed (hr=0x{:08X})\n", 
 			static_cast<unsigned>(hr));
+		else {
+			isListOpen_ = true; // Reset後はOpen
+		}
 	}
 
 	return S_OK;
@@ -140,12 +147,15 @@ HRESULT CommandContext::ExecuteAndSignal()
 
 	HRESULT hr = S_OK;
 
-	// Close (無視可能)
-	hr = list_->Close();
-	if (FAILED(hr)) {
-		Utils::Logger::Warn(
-			"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
+	// Openなら閉じる
+	if (isListOpen_) {
+		hr = list_->Close();
+		if (FAILED(hr)) {
+			Utils::Logger::Warn(
+				"Warning: Close command list failed before execute (hr=0x{:08X})\n", 
+				static_cast<unsigned>(hr));
+		}
+		isListOpen_ = false;
 	}
 
 	ID3D12CommandList* lists[] = { list_.Get() };
@@ -193,11 +203,20 @@ HRESULT CommandContext::MoveToNextFrame()
 	}
 
 	// --- コマンドリストをリセット ---
+	// もしリストが開いていれば閉じる（ただし通常EndFrameで閉じてるはずだが、Init直後の移行などでOpenの場合もある）
+	if (isListOpen_) {
+		list_->Close();
+		isListOpen_ = false;
+	}
+
 	hr = list_->Reset(allocators_[nextIndex].Get(), nullptr);
 	if (FAILED(hr)) {
 		Utils::Logger::Warn(
 			"Warning: list_->Reset failed for frame {} (hr=0x{:08X})\n",
 			nextIndex, static_cast<unsigned>(hr));
+	}
+	else {
+		isListOpen_ = true; // Reset後はOpen
 	}
 
 	// --- ビューポート／シザー状態を初期化 ---
@@ -206,6 +225,25 @@ HRESULT CommandContext::MoveToNextFrame()
 	// 現在のフレームインデックスを更新
 	currentFrameIndex_ = nextIndex;
 
+	return S_OK;
+}
+
+HRESULT CommandContext::CreateList()
+{
+	ID3D12Device* device = dx12Mgr_->GetDevice();
+	if (!device) return E_POINTER;
+
+	HRESULT hr = device->CreateCommandList(
+		0,
+		listType_,
+		allocators_[currentFrameIndex_].Get(),
+		nullptr,
+		IID_PPV_ARGS(&list_)
+	);
+
+	if (FAILED(hr)) return hr;
+
+	isListOpen_ = true;
 	return S_OK;
 }
 
@@ -302,38 +340,21 @@ void CommandContext::SetFullScissorFromFramebuffer()
 
 HRESULT CommandContext::CreateQueue()
 {
-	HRESULT hr = S_OK;
+	ID3D12Device* device = dx12Mgr_->GetDevice();
+	if (!device) return E_POINTER;
 
-	ID3D12Device* device = nullptr;
-	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
-	if (!device) {
-		return E_POINTER;
-	}
+	D3D12_COMMAND_QUEUE_DESC desc{};
+	desc.Type = listType_;
+	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 
-	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	commandQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-	commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	commandQueueDesc.NodeMask = 0;
-
-	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&queue_));
-
-	if (FAILED(hr)) {
-		return hr;
-	}
-
-	return S_OK;
+	return device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue_));
 }
 
 HRESULT CommandContext::CreateAllocators(UINT frameCount)
 {
-	HRESULT hr = S_OK;
-
-	ID3D12Device* device = nullptr;
-	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
-	if (!device) {
-		return E_POINTER;
-	}
+	ID3D12Device* device = dx12Mgr_->GetDevice();
+	if (!device) return E_POINTER;
 
 	allocators_.resize(frameCount);
 	fenceValues_.assign(frameCount, 0);
@@ -341,47 +362,16 @@ HRESULT CommandContext::CreateAllocators(UINT frameCount)
 	currentFrameIndex_ = 0;
 
 	for (UINT i = 0; i < frameCount; ++i) {
-		hr = device->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			IID_PPV_ARGS(&allocators_[i]));
-		if (FAILED(hr)) {
-			return hr;
-		}
+		HRESULT hr = device->CreateCommandAllocator(
+			listType_,
+			IID_PPV_ARGS(&allocators_[i])
+		);
+		if (FAILED(hr)) return hr;
 	}
-
 	return S_OK;
 }
 
-HRESULT CommandContext::CreateList()
-{
-	HRESULT hr = S_OK;
 
-	ID3D12Device* device = nullptr;
-	if (dx12Mgr_) device = dx12Mgr_->GetDevice();
-	if (!device) {
-		return E_POINTER;
-	}
-
-	hr = device->CreateCommandList(
-		0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-		allocators_[currentFrameIndex_].Get(),
-		nullptr,
-		IID_PPV_ARGS(&list_));
-
-	if (FAILED(hr)) {
-		return hr;
-	}
-
-	// CreateCommandList は "recording" 状態で返るので、ここで一旦 Close しておく（呼び出し側で Reset して再利用）
-	hr = list_->Close();
-	if (FAILED(hr)) {
-		Utils::Logger::Warn(
-			"Warning: Close initial command list failed (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
-	}
-
-	return S_OK;
-}
 
 HRESULT CommandContext::CreateFence()
 {

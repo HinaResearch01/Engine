@@ -121,6 +121,7 @@ private:
 	/// <summary>
 	/// バインド処理
 	/// </summary>
+	void BindCamera();
 	void BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt);
 	void BindTransform(DX12::CommandContext& cmd, const DrawPacket& pkt);
 	void BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt);

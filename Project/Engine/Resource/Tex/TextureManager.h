@@ -35,6 +35,9 @@ struct TextureAsset {
 	uint32_t width = 0;
 	uint32_t height = 0;
 	UINT mipLevels = 1;
+
+	// State Tracking
+	D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON;
 };
 
 /* テクスチャ管理 */
@@ -80,8 +83,20 @@ public:
 #pragma region Accessor
 	TextureAsset* GetTexture(const std::string& key) {
 		std::lock_guard lock(mutex_);
-		auto it = textures_.find(key);
-		return (it != textures_.end()) ? it->second.get() : nullptr;
+		
+		// 1. 実キーで検索
+		if (auto it = textures_.find(key); it != textures_.end()) {
+			return it->second.get();
+		}
+
+		// 2. Alias解決
+		if (auto it = aliasToKey_.find(key); it != aliasToKey_.end()) {
+			if (auto tit = textures_.find(it->second); tit != textures_.end()) {
+				return tit->second.get();
+			}
+		}
+
+		return nullptr;
 	}
 #pragma endregion 
 

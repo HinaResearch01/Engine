@@ -14,13 +14,10 @@ class MaterialComponent : public IComponent {
 public:
 	SurfaceType surface = SurfaceType::Opaque;
 
-	Math::Vec4f baseColor{};
+	Math::Vec4f color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Math::UVTransform uv;
 
 	std::string albedo = "";
-	std::string normal = "";
-
-	float metallic = 0.0f;
-	float roughness = 1.0f;
 
 	bool visible = true;
 };

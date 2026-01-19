@@ -4,7 +4,7 @@
 struct MaterialCB
 {
     float4 color;
-    float4x4 uvTransform;
+    row_major float3x3 uvTransform;
 };
 
 #endif

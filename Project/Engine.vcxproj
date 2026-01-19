@@ -379,6 +379,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\MathUtil\MathUtil.h" />
     <ClInclude Include="Engine\Math\Matrix\Matrix.h" />
     <ClInclude Include="Engine\Math\TMath.h" />
+    <ClInclude Include="Engine\Math\Type\MathType.h" />
     <ClInclude Include="Engine\Math\Vector\Vector.h" />
     <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
     <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />

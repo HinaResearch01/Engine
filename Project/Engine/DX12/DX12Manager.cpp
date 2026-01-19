@@ -7,7 +7,12 @@ using namespace Tsumi::DX12;
 
 DX12Manager::DX12Manager()
 {
-	cmdContext_ = std::make_unique<CommandContext>(this);
+	cmdContext_ =
+		std::make_unique<CommandContext>(
+		this, D3D12_COMMAND_LIST_TYPE_DIRECT);
+	uploadCmdContext_ =
+		std::make_unique<CommandContext>(
+		this, D3D12_COMMAND_LIST_TYPE_COPY);
 	transientDescAlloc_ = std::make_unique<DescriptorAllocator>(this);
 	persistentDescAlloc_ = std::make_unique<DescriptorAllocator>(this);
 	dx12Device_ = std::make_unique<DX12Device>();
@@ -20,9 +25,11 @@ void DX12Manager::Init()
 {
 	try {
 		Utils::Exception::DX_CALL(dx12Device_->Create());
-		if(cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
+		if (cmdContext_) cmdContext_->SetFrameCount(bufferCount_);
+		if(uploadCmdContext_) uploadCmdContext_->SetFrameCount(1);
 
 		Utils::Exception::DX_CALL(cmdContext_->Create());
+		Utils::Exception::DX_CALL(uploadCmdContext_->Create());
 		Utils::Exception::DX_CALL(swapChain_->Create());
 		Utils::Exception::DX_CALL(framebuf_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
@@ -50,6 +57,7 @@ void DX12Manager::Init()
 void DX12Manager::Finalize()
 {
 	if (cmdContext_) cmdContext_->WaitForGpu();
+	if (uploadCmdContext_) uploadCmdContext_->WaitForGpu();
 	if (transientDescAlloc_) transientDescAlloc_.reset();
 	if(persistentDescAlloc_) persistentDescAlloc_.reset();
 
@@ -89,6 +97,12 @@ HRESULT DX12Manager::StartFrame()
 	if (FAILED(hr)) return hr;
 	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
 	if (!list) return E_FAIL;
+
+	// === Descriptor Heap 設定 (Problem 2 Fix) ===
+	if (persistentDescAlloc_) {
+		ID3D12DescriptorHeap* heaps[] = { persistentDescAlloc_->GetHeap() };
+		list->SetDescriptorHeaps(1, heaps);
+	}
 
 	// === バックバッファの準備 ===
 	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();

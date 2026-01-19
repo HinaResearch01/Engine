@@ -2,6 +2,7 @@
 
 #include "../Vector/Vector.h"
 #include "../Matrix/Matrix.h"
+#include "../Type/MathType.h"
 #include <iostream>
 #include <cstdint>
 #include <string>
@@ -93,6 +94,7 @@ float Distance(const Vec4f& a, const Vec4f& b);
 
 
 namespace MAT3x3 {
+Mat3x3 BuildUVMatrix(const UVTransform& uv);
 }
 
 

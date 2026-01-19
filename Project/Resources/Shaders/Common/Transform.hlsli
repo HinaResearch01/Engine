@@ -3,8 +3,8 @@
 
 struct TransformCB
 {
-    float4x4 world;
-    float4x4 worldInverseTranspose;
+    row_major float4x4 world;
+    row_major float4x4 worldInverseTranspose;
 };
 
 #endif

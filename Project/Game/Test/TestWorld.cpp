@@ -12,4 +12,5 @@ void TestWorld::Init()
 
 	// TestActorの追加
 	World::SpawnActor<TestActor>();
+
 }

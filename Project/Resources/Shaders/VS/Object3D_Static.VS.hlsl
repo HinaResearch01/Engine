@@ -12,8 +12,8 @@ struct VS_OUTPUT
     float2 texCoord : TEXCOORD0;
 };
 
-ConstantBuffer<TransformCB> gTransform : register(b0);
-ConstantBuffer<CameraMatricesCB> gCameraMat : register(b1);
+ConstantBuffer<CameraMatricesCB> gCameraMat : register(b0);
+ConstantBuffer<TransformCB> gTransform : register(b1);
 
 VS_OUTPUT main(VS_INPUT input)
 {

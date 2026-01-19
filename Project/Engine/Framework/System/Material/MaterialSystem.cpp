@@ -23,26 +23,18 @@ void MaterialSystem::Update(float)
 		MaterialKey key{
 			mc.surface,
 			mc.albedo,
-			mc.normal,
-			mc.metallic,
-			mc.roughness
 		};
 
 		auto& pkt = cache_[key];
 
 		// GPU material CB
-		pkt.cb.metallic = mc.metallic;
-		pkt.cb.roughness = mc.roughness;
-		pkt.cb.baseColor = { 1,1,1,1 };
+		pkt.cb.color = mc.color;
+		pkt.cb.uvTransform = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
 
 		// TextureManager から GPU リソースを取得
 		pkt.albedo = mc.albedo.empty()
 			? nullptr
 			: resourceSys_->GetTextureManager()->GetTexture(mc.albedo);
-
-		pkt.normal = mc.normal.empty()
-			? nullptr
-			: resourceSys_->GetTextureManager()->GetTexture(mc.normal);
 	}
 }
 
@@ -51,9 +43,6 @@ const MaterialPacket* MaterialSystem::GetPacket(const MaterialComponent& mc) con
 	MaterialKey key{
 		mc.surface,
 		mc.albedo,
-		mc.normal,
-		mc.metallic,
-		mc.roughness
 	};
 
 	auto it = cache_.find(key);

@@ -60,7 +60,8 @@ public:
 	/// コピー禁止
 	/// </summary>
 	CommandContext() = default;
-	CommandContext(DX12Manager* ptr);
+	CommandContext(DX12Manager* ptr,
+				   D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT);
 	CommandContext(const CommandContext&) = delete;
 	CommandContext& operator=(const CommandContext&) = delete;
 
@@ -164,17 +165,20 @@ private:
 	UINT64 globalFenceValue_ = 0; // シグナル時に増やす値
 	std::vector<UINT64> fenceValues_; // フレームごとの「このフレームの最後にシグナルした値」
 
-	// フレーム管理
-	UINT currentFrameIndex_ = 0;
-	UINT frameCount_ = 3; // デフォルトは 3（>=2）
-
-	// cached current state for avoiding redundant RSSet calls
-	Viewport currentViewport_;
-	Scissor currentScissor_;
-	bool viewportSet_ = false; // false means "not set since Reset"
-	bool scissorSet_ = false;
-
 	DX12Manager* dx12Mgr_ = nullptr;
+	UINT frameCount_ = 2;
+	UINT currentFrameIndex_ = 0;
+
+	// キャッシュ用ステート
+	bool viewportSet_ = false;
+	Viewport currentViewport_{};
+	bool scissorSet_ = false;
+	Scissor currentScissor_{};
+
+	// コマンドリストの状態管理 (Open/Closed)
+	bool isListOpen_ = false;
+
+	D3D12_COMMAND_LIST_TYPE listType_;
 };
 
 }

@@ -13,8 +13,7 @@ SamplerState gLinearSampler : register(s0);
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float2 uv =
-        mul(float4(input.texCoord, 0.0f, 1.0f), gMaterial.uvTransform).xy;
+    float2 uv = mul(float3(input.texCoord, 1.0f), gMaterial.uvTransform).xy;
 
     float4 texColor = gAlbedoTexture.Sample(gLinearSampler, uv);
 

@@ -28,9 +28,9 @@ static DXGI_FORMAT MakeTypelessIfNeeded(DXGI_FORMAT fmt)
     }
 }
 
-static DXGI_FORMAT ChooseViewFormat(DXGI_FORMAT resourceFmt, bool srgb)
+static DXGI_FORMAT ChooseViewFormat(DXGI_FORMAT baseFormat, bool srgb)
 {
-	switch (resourceFmt)
+	switch (baseFormat)
 	{
 		case DXGI_FORMAT_R8G8B8A8_UNORM:
 		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
@@ -45,7 +45,7 @@ static DXGI_FORMAT ChooseViewFormat(DXGI_FORMAT resourceFmt, bool srgb)
 				: DXGI_FORMAT_B8G8R8A8_UNORM;
 
 		default:
-			return resourceFmt; // その他のフォーマットはそのまま
+			return baseFormat; // その他のフォーマットはそのまま
 	}
 }
 
@@ -119,8 +119,8 @@ void TextureManager::UnloadAll()
 		frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
 
 	// GPU がテクスチャを使用中でないことを保証
-	if (dx12Mgr_ && dx12Mgr_->GetCommandContext())
-		dx12Mgr_->GetCommandContext()->WaitForGpu();
+	if (dx12Mgr_ && dx12Mgr_->GetUploadCmdContext())
+		dx12Mgr_->GetUploadCmdContext()->WaitForGpu();
 
 	{
 		// テクスチャ実体・alias 管理テーブルをまとめて操作するためロック
@@ -153,7 +153,7 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		return E_INVALIDARG;
 
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	CommandContext* ctx = dx12Mgr_->GetCommandContext();
+	CommandContext* ctx = dx12Mgr_->GetUploadCmdContext();
 	if (!device || !ctx)
 		return E_FAIL;
 
@@ -186,7 +186,7 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		&heap,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
-		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&texture));
 
@@ -225,12 +225,7 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		(UINT)subres.size(),
 		subres.data());
 
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		texture.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	ctx->GetList()->ResourceBarrier(1, &barrier);
+	// Execute upload
 	hr = ctx->ExecuteAndWait();
 	if (FAILED(hr)) return hr;
 
@@ -240,6 +235,7 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 	outAsset.height = (uint32_t)meta.height;
 	outAsset.mipLevels = mipCount;
 	outAsset.format = viewFormat;
+	outAsset.currentState = D3D12_RESOURCE_STATE_COMMON;
 
 	return S_OK;
 }
@@ -260,7 +256,11 @@ HRESULT TextureManager::CreateTextureSRV(const DirectX::TexMetadata& meta, Textu
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
 	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srv.Format = ChooseViewFormat(meta.format, asset.format);
+	bool srgb =
+		asset.format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
+		asset.format == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+
+	srv.Format = ChooseViewFormat(meta.format, srgb);
 
 	if (isArray)
 	{

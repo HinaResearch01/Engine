@@ -5,9 +5,11 @@
 #include "Framework/View/CameraContext.h"
 #include "Framework/World/CompView/ComponentView.h"
 
+// 前方宣言
+namespace Tsumi::Win32 { class Win32Window; }
+
 namespace Tsumi::Framework {
 
-// 前方宣言
 class World;
 class IActor;
 class CameraComponent;
@@ -59,11 +61,14 @@ private:
 	/// </summary>
 	void BuildDefault(CameraContext& out);
 
+
+
 private:
-	CameraContext defaultCtx_;
 	CameraContext activeCtx_;
 
 	World& world_;
+
+	Win32::Win32Window* win32_ = nullptr;
 };
 
 }

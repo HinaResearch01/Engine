@@ -13,11 +13,8 @@ struct GpuTransformCB
 
 struct GpuMaterialCB
 {
-	Math::Vec4f baseColor;
-	float metallic = 0.0f;
-	float roughness = 1.0f;
-	uint32_t flags = 0;
-	uint32_t pad = 0;
+	Math::Vec4f color;
+	Math::Mat3x3 uvTransform;
 };
 
 struct GpuViewCB

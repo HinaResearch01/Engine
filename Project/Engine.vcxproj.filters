@@ -186,10 +186,10 @@
       <Filter>Engine\Framework\System\Material</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Framework\System\Render\RenderSystem.cpp">
-      <Filter>Engine\Framework\System\Transform</Filter>
+      <Filter>Engine\Framework\System\Render</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp">
-      <Filter>Engine\Framework\System\Render</Filter>
+      <Filter>Engine\Framework\System\Transform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -709,11 +709,14 @@
     <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h">
       <Filter>Engine\Framework\System\Material</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Math\Type\MathType.h">
+      <Filter>Engine\Math\Type</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Framework\System\Render\RenderSystem.h">
-      <Filter>Engine\Framework\System\Transform</Filter>
+      <Filter>Engine\Framework\System\Render</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\Transform\TransformSystem.h">
-      <Filter>Engine\Framework\System\Render</Filter>
+      <Filter>Engine\Framework\System\Transform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -983,6 +986,9 @@
     </Filter>
     <Filter Include="Engine\Framework\System\Transform">
       <UniqueIdentifier>{dda36c48-1b29-4c83-8a37-fa013aa02be9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math\Type">
+      <UniqueIdentifier>{4d2cc15b-7dac-4ad1-8ee6-f444589fe4f8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include <d3dx12.h>
 #include "Framework/World/World.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Cmd/CommandContext.h"
@@ -103,7 +104,7 @@ void RenderSystem::BuildDrawPackets()
 void RenderSystem::FillTransformPacket(DrawPacket& pkt, const TransformComponent& tc)
 {
 	pkt.xform.world = tc.world;
-	pkt.xform.worldInvTranspose = tc.world;
+	pkt.xform.worldInvTranspose = tc.worldInvTranspose;
 }
 
 void RenderSystem::ClearLists()
@@ -153,6 +154,12 @@ void RenderSystem::RenderSurfacePass(DX12::CommandContext& cmd, SurfaceType surf
 	const auto& pass = RenderPassTable::Get(surface);
 	auto& list = lists_[static_cast<size_t>(surface)];
 
+	// ヒープの取得と選択
+	ID3D12DescriptorHeap* desc[] = {
+		dx12Mgr_->GetPersistentDescAlloc()->GetHeap()
+	};
+	cmd.GetList()->SetDescriptorHeaps(1, desc);
+
 	SetupPassState(cmd, pass, viewCBAddr);
 
 	for (auto& pkt : list) {
@@ -185,6 +192,26 @@ void RenderSystem::BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt)
 {
 	if (!pkt.mesh) return;
 
+
+	if (pkt.mesh->currentState != D3D12_RESOURCE_STATE_GENERIC_READ) {
+		D3D12_RESOURCE_BARRIER barriers[2];
+		int count = 0;
+		// VB
+		barriers[count++] = CD3DX12_RESOURCE_BARRIER::Transition(
+			pkt.mesh->vertexBuffer.Get(),
+			pkt.mesh->currentState,
+			D3D12_RESOURCE_STATE_GENERIC_READ
+		);
+		// IB
+		barriers[count++] = CD3DX12_RESOURCE_BARRIER::Transition(
+			pkt.mesh->indexBuffer.Get(),
+			pkt.mesh->currentState,
+			D3D12_RESOURCE_STATE_GENERIC_READ
+		);
+		cmd.GetList()->ResourceBarrier(count, barriers);
+		pkt.mesh->currentState = D3D12_RESOURCE_STATE_GENERIC_READ;
+	}
+
 	cmd.GetList()->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
 	cmd.GetList()->IASetIndexBuffer(&pkt.mesh->ibView);
 }
@@ -203,9 +230,25 @@ void RenderSystem::BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt
 		resourceSys_->GetFrameCBManager()->UploadCB(pkt.material->cb);
 	cmd.GetList()->SetGraphicsRootConstantBufferView(2, matAddr);
 
-	if (pkt.material->albedo) {
+	// テクスチャバインド (albedo がなければ White を使う)
+	Tsumi::Resource::TextureAsset* tex = pkt.material->albedo;
+	if (!tex) {
+		tex = resourceSys_->GetTextureManager()->GetTexture("White");
+	}
+
+	if (tex) {
+		if (tex->currentState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+			auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+				tex->resource.Get(),
+				tex->currentState,
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+			);
+			cmd.GetList()->ResourceBarrier(1, &barrier);
+			tex->currentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		}
+
 		cmd.GetList()->SetGraphicsRootDescriptorTable(
-			3, pkt.material->albedo->srvDesc.gpuHandle);
+			3, tex->srvDesc.gpuHandle);
 	}
 }
 

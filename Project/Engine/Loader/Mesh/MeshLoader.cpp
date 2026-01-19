@@ -6,6 +6,7 @@
 #include <assimp/postprocess.h>
 #include <filesystem>
 #include <format>
+#include <functional>
 
 using namespace Tsumi::Loader;
 using namespace Tsumi::Resource;
@@ -35,13 +36,12 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 	// ・接線空間計算
 	const unsigned int flags =
 		aiProcess_Triangulate |
-		aiProcess_FlipWindingOrder |
+		aiProcess_ConvertToLeftHanded |   // 右手→左手、winding/transform含めて整合
 		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace;
 
-	// メッシュファイル読み込み
-	const aiScene* scene =
-		importer.ReadFile(fullPath, flags);
+	// aiProcess_FlipWindingOrder は不要
+	const aiScene* scene = importer.ReadFile(fullPath, flags);
 
 	// 読み込み失敗、またはメッシュが含まれていない場合は失敗
 	if (!scene || !scene->HasMeshes())
@@ -97,86 +97,108 @@ HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& k
 HRESULT MeshLoader::ParseScene(const aiScene* scene, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
 {
 	// 不正チェック
-	if (!scene || !scene->HasMeshes())
+		// ・scene が存在すること
+		// ・root node があること（Assimp のシーングラフ前提）
+		// ・少なくとも 1 つ以上の mesh を含むこと
+	if (!scene || !scene->mRootNode || !scene->HasMeshes())
 		return E_FAIL;
 
+	// 出力バッファを初期化
+	outVertices.clear();
+	outIndices.clear();
+
+	// 複数 mesh を 1 つの Vertex / Index バッファにまとめるためのオフセット
 	uint32_t vertexOffset = 0;
 
-	// シーン内の全メッシュを順番に処理
-	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-		const aiMesh* mesh = scene->mMeshes[meshIndex];
+	// ---------------------------------------------
+	// ノードを再帰的に辿るためのラムダ
+	//
+	// parent:
+	//   ルートから現在の node までに累積された transform
+	// ---------------------------------------------
+	std::function<void(const aiNode*, const aiMatrix4x4&)> visit =
+		[&](const aiNode* node, const aiMatrix4x4& parent)
+	{
+		// 親の transform と、この node 自身の local transform を合成
+		// → ルートから見た「この node のグローバル transform」
+		const aiMatrix4x4 global = parent * node->mTransformation;
 
-		std::vector<Vertex> localVertices;
-		std::vector<uint32_t> localIndices;
+		// Assimp の行列をエンジンの Mat4x4 に変換
+		//（row-major・左手系・エンジン規約）
+		const Math::Mat4x4 M = ToMat4x4(global);
 
-		// aiMesh を CPU メッシュデータに変換
-		if (!ParseAiMesh(mesh, localVertices, localIndices))
-			continue;
+		// -----------------------------------------
+		// この node が参照している mesh を処理
+		// -----------------------------------------
+		for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
+			const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			if (!mesh || !mesh->HasPositions())
+				continue;
 
-		// 頂点データをまとめて追加
-		outVertices.insert(
-			outVertices.end(),
-			localVertices.begin(),
-			localVertices.end());
+			// この mesh の頂点が始まる base index
+			const uint32_t baseVertex = vertexOffset;
 
-		// インデックスは頂点オフセットを加算して追加
-		for (uint32_t idx : localIndices)
-			outIndices.push_back(vertexOffset + idx);
+			// -------------------------
+			// Vertex の展開
+			// -------------------------
+			for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+				Vertex dst{};
 
-		vertexOffset += static_cast<uint32_t>(localVertices.size());
-	}
+				// position
+				// ・Assimp で ConvertToLeftHanded 済み
+				// ・node transform をここで bake する
+				const aiVector3D& p = mesh->mVertices[v];
+				dst.pos = TransformPoint(M, { p.x, p.y, p.z });
 
-	// 有効なメッシュが1つもなかった場合は失敗
-	if (outVertices.empty() || outIndices.empty())
-		return E_FAIL;
+				// normal
+				// ・非一様スケール対応のため逆転置で変換
+				if (mesh->HasNormals()) {
+					const aiVector3D& n = mesh->mNormals[v];
+					dst.normal = TransformNormal(M, { n.x, n.y, n.z });
+				}
 
-	return S_OK;
-}
+				// UV（0 番目のみ使用）
+				if (mesh->HasTextureCoords(0)) {
+					const aiVector3D& uv = mesh->mTextureCoords[0][v];
+					dst.uv = { uv.x, uv.y };
+				}
 
-bool MeshLoader::ParseAiMesh(const aiMesh* mesh, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
-{
-	// 頂点が存在しないメッシュは無効
-	if (!mesh || !mesh->HasPositions())
-		return false;
+				outVertices.push_back(dst);
+			}
 
-	// 頂点数分の領域を確保
-	outVertices.resize(mesh->mNumVertices);
+			// -------------------------
+			// Index の展開
+			// ・三角形化は Assimp 側で保証
+			// ・vertexOffset を加算して結合
+			// -------------------------
+			for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+				const aiFace& face = mesh->mFaces[f];
+				if (face.mNumIndices != 3)
+					continue;
 
-	// 頂点データの変換
-	for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
-		Vertex v{};
+				outIndices.push_back(baseVertex + face.mIndices[0]);
+				outIndices.push_back(baseVertex + face.mIndices[1]);
+				outIndices.push_back(baseVertex + face.mIndices[2]);
+			}
 
-		// position（右手系 → 左手系）
-		const aiVector3D& pos = mesh->mVertices[i];
-		v.pos = { -pos.x, pos.y, pos.z };
-
-		// normal（存在する場合のみ）
-		if (mesh->HasNormals()) {
-			const aiVector3D& n = mesh->mNormals[i];
-			v.normal = { -n.x, n.y, n.z };
+			// 次の mesh 用にオフセットを進める
+			vertexOffset += mesh->mNumVertices;
 		}
 
-		// UV（0番目のUVセットのみ使用）
-		if (mesh->HasTextureCoords(0)) {
-			const aiVector3D& uv = mesh->mTextureCoords[0][i];
-			v.uv = { uv.x, uv.y };
-		}
+		// -----------------------------------------
+		// 子ノードを再帰的に処理
+		// -----------------------------------------
+		for (unsigned int c = 0; c < node->mNumChildren; ++c)
+			visit(node->mChildren[c], global);
+	};
 
-		outVertices[i] = v;
-	}
+	// ルートから traversal 開始
+	// aiMatrix4x4 のデフォルトコンストラクタは identity
+	aiMatrix4x4 identity;
+	visit(scene->mRootNode, identity);
 
-	// インデックスデータ（三角形のみ想定）
-	outIndices.clear();
-	for (uint32_t f = 0; f < mesh->mNumFaces; ++f) {
-		const aiFace& face = mesh->mFaces[f];
-		if (face.mNumIndices == 3) {
-			outIndices.push_back(face.mIndices[0]);
-			outIndices.push_back(face.mIndices[1]);
-			outIndices.push_back(face.mIndices[2]);
-		}
-	}
-
-	return true;
+	// 有効なジオメトリが生成できていなければ失敗
+	return (outVertices.empty() || outIndices.empty()) ? E_FAIL : S_OK;
 }
 
 bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alias)
@@ -188,4 +210,25 @@ bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alia
 		return true; // すでに登録済み
 	}
 	return false;
+}
+
+Tsumi::Math::Mat4x4 MeshLoader::ToMat4x4(const aiMatrix4x4& a)
+{
+	return Math::Mat4x4(
+		a.a1, a.a2, a.a3, a.a4,
+		a.b1, a.b2, a.b3, a.b4,
+		a.c1, a.c2, a.c3, a.c4,
+		a.d1, a.d2, a.d3, a.d4
+	);
+}
+
+Tsumi::Math::Vec3f MeshLoader::TransformPoint(const Math::Mat4x4& m, const Math::Vec3f& p)
+{
+	return m.TransformPoint(p);
+}
+
+Tsumi::Math::Vec3f MeshLoader::TransformNormal(const Math::Mat4x4& m, const Math::Vec3f& n)
+{
+	Math::Mat4x4 invT = m.Inverse().Transpose();
+	return invT.TransformVector(n).Normalized();
 }

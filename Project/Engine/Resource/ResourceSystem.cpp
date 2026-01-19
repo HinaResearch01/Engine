@@ -3,6 +3,7 @@
 #include "Resource/Mesh/MeshManager.h"
 #include "Resource/Tex/TextureManager.h"
 #include "Resource/CB/FrameCBManager.h"
+#include <DirectXTex.h>
 
 using namespace Tsumi::Resource;
 
@@ -19,6 +20,20 @@ ResourceSystem::~ResourceSystem() = default;
 void ResourceSystem::Init()
 {
 	cbMgr_->Init();
+
+	// デフォルト "White" テクスチャの生成
+	{
+		DirectX::ScratchImage image;
+		image.Initialize2D(DXGI_FORMAT_R8G8B8A8_UNORM, 1, 1, 1, 1);
+		uint8_t* pixels = image.GetPixels();
+		pixels[0] = 0xFF; 
+		pixels[1] = 0xFF; 
+		pixels[2] = 0xFF; 
+		pixels[3] = 0xFF;
+		
+		// 登録 (viewFormatはデフォルト)
+		texMgr_->RegisterTexture("White", image, DXGI_FORMAT_R8G8B8A8_UNORM);
+	}
 }
 
 void ResourceSystem::BeginFrame(uint32_t frameIndex)

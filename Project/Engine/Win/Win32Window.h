@@ -54,12 +54,11 @@ public:
     void OnFinalize();
 
 #pragma region Accessor
-
     bool ShouldClose() const { return shouldClose_; }
     const HWND& GetHWND() const { return hwnd_; }
     const Win32Desc& GetDesc() const { return desc_; }
     void SetDesc(const Win32Desc& desc) { desc_ = desc; }
-
+	const double GetAspectRatio() const { return aspectRatio_; }
 #pragma endregion
 
 

@@ -1,4 +1,5 @@
 #include "CameraSystem.h"
+#include "Win/Win32Window.h"
 #include "Framework/World/World.h"
 #include "Framework/Actor/IActor.h"
 #include "Utils/Logger/Logger.h"
@@ -11,21 +12,19 @@ using namespace Tsumi::Framework;
 CameraSystem::CameraSystem(World& world)
 	: world_(world)
 {
-	BuildDefault(defaultCtx_);
-	activeCtx_ = defaultCtx_;
+	win32_ = Win32::Win32Window::GetInstance();
+	BuildDefault(activeCtx_);
 }
 
 void CameraSystem::Update(float)
 {
-	// デフォルトをまず採用（カメラ無しでも描画可）
-	activeCtx_ = defaultCtx_;
+	// 毎フレーム default を作る
+	BuildDefault(activeCtx_);
 
-	IActor* camActor = SelectCamera();
-	if (!camActor) {
-		return;
+	// カメラActorがあれば上書き
+	if (IActor* camActor = SelectCamera()) {
+		BuildFromActor(camActor, activeCtx_);
 	}
-
-	BuildFromActor(camActor, activeCtx_);
 }
 
 IActor* CameraSystem::SelectCamera() const
@@ -55,22 +54,28 @@ void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
 	auto* cam = actor->GetComponent<CameraComponent>();
 	if (!tr || !cam) return;
 
-	out.valid = true;
-
-	const Math::Vec3f s = Math::Vec3f{ 1.0f, 1.0f, 1.0f };
-	const Math::Vec3f r = tr->srt.rotate;
-	const Math::Vec3f t = tr->GetWorldPos();
+	Math::Vec3f s{ 1,1,1 };
+	Math::Vec3f r = tr->srt.rotate;
+	Math::Vec3f t = tr->GetWorldPos();
 
 	out.position = t;
 
-	out.view = Math::Func::MAT4x4::AffineMatrix(s, r, t);
+	Math::Mat4x4 camWorld =
+		Math::Func::MAT4x4::AffineMatrix(s, r, t);
+
+	out.view = camWorld.Inverse();
+
+	const float aspect = float(win32_->GetAspectRatio());
+
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
 		Math::Func::NUM::ToRadians(cam->fovY),
-		cam->aspect,
+		aspect,
 		cam->nearZ,
 		cam->farZ
 	);
-	out.viewProj = out.view * out.proj;
+
+	out.viewProj = out.proj * out.view;
+	out.valid = true;
 }
 
 void CameraSystem::BuildDefault(CameraContext& out)
@@ -79,20 +84,21 @@ void CameraSystem::BuildDefault(CameraContext& out)
 	Math::Vec3f rotate{ 0,0,0 };
 	Math::Vec3f translate{ 0,2,-6 };
 
-	out.view = Math::Func::MAT4x4::AffineMatrix(
-		scale,
-		-rotate,
-		-translate
-	);
+	Math::Mat4x4 camWorld =
+		Math::Func::MAT4x4::AffineMatrix(scale, rotate, translate);
+
+	out.view = camWorld.Inverse();
+
+	const float aspect = float(win32_->GetAspectRatio());
 
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
 		Math::Func::NUM::ToRadians(60.0f),
-		16.0f / 9.0f,
+		aspect,
 		0.1f,
 		1000.0f
 	);
 
-	out.viewProj = out.view * out.proj;
+	out.viewProj = out.proj * out.view;
 	out.position = translate;
 	out.valid = true;
 }

@@ -42,6 +42,9 @@ struct MeshAsset {
 	
 	// デフォルトマテリアル情報
 	std::string defaultTextureKey; 
+
+	// State Tracking
+	D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON;
 };
 
 /* メッシュ管理 */
@@ -88,8 +91,21 @@ public:
 #pragma region Accessor
 	MeshAsset* GetMesh(const std::string& name) {
 		std::lock_guard lock(mutex_);
-		auto it = meshes_.find(name);
-		return (it != meshes_.end()) ? it->second.get() : nullptr;
+		
+		// 1. 実キーで検索
+		if (auto it = meshes_.find(name); it != meshes_.end()) {
+			return it->second.get();
+		}
+
+		// 2. Alias解決
+		if (auto it = aliasToKey_.find(name); it != aliasToKey_.end()) {
+			// Aliasが指す実キーで再検索
+			if (auto mit = meshes_.find(it->second); mit != meshes_.end()) {
+				return mit->second.get();
+			}
+		}
+
+		return nullptr;
 	}
 #pragma endregion
 

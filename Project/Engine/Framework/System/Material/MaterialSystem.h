@@ -20,17 +20,11 @@ class World;
 struct MaterialKey {
 	SurfaceType surface{};
 	std::string albedoKey;
-	std::string normalKey;
-	float metallic = 0.0f;
-	float roughness = 1.0f;
 
 	bool operator==(const MaterialKey& r) const
 	{
 		return surface == r.surface
-			&& albedoKey == r.albedoKey
-			&& normalKey == r.normalKey
-			&& metallic == r.metallic
-			&& roughness == r.roughness;
+			&& albedoKey == r.albedoKey;
 	}
 };
 
@@ -43,9 +37,6 @@ struct MaterialKeyHash
 		auto mix = [&](size_t v) { h ^= v + 0x9e3779b97f4a7c15ull + (h << 6) + (h >> 2); };
 
 		mix(std::hash<std::string>{}(k.albedoKey));
-		mix(std::hash<std::string>{}(k.normalKey));
-		mix(std::hash<float>{}(k.metallic));
-		mix(std::hash<float>{}(k.roughness));
 		return h;
 	}
 };

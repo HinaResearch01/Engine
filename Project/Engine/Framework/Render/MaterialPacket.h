@@ -12,7 +12,6 @@ struct MaterialPacket
 
 	// GPUリソース
 	Tsumi::Resource::TextureAsset* albedo = nullptr;
-	Tsumi::Resource::TextureAsset* normal = nullptr;
 };
 
 }

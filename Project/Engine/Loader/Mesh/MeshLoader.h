@@ -44,19 +44,26 @@ private:
 		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 
 	/// <summary>
-	/// aiMesh を Vertex / Index に変換
-	/// </summary>
-	static bool ParseAiMesh(
-		const aiMesh* mesh,
-		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
-
-	/// <summary>
 	/// 既読チェック専用関数
 	/// </summary>
 	static bool TryResolveAlias(
 		const std::string& key,
 		const std::string& alias);
 
+	/// <summary>
+	/// transform を適用してメッシュをパース
+	/// </summary>
+	static Math::Mat4x4 ToMat4x4(const aiMatrix4x4& a);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	static Math::Vec3f TransformPoint(const Math::Mat4x4& m, const Math::Vec3f& p);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	static Math::Vec3f TransformNormal(const Math::Mat4x4& m, const Math::Vec3f& n);
 };
 
 }

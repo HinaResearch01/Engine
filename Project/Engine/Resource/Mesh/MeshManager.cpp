@@ -38,7 +38,7 @@ HRESULT MeshManager::RegisterMesh(
 		return E_INVALIDARG;
 
 	// ListとContextの取得と空チェック
-	CommandContext* ctx = dx12Mgr_->GetCommandContext();
+	CommandContext* ctx = dx12Mgr_->GetUploadCmdContext();
 	if (!ctx)
 		return E_POINTER;
 	ID3D12GraphicsCommandList* list = ctx->GetList();
@@ -100,8 +100,8 @@ void MeshManager::RegisterAlias(const std::string& alias, const std::string& key
 void MeshManager::UnloadAll()
 {
 	// GPU がメッシュを使用中でないことを保証
-	if (dx12Mgr_ && dx12Mgr_->GetCommandContext())
-		dx12Mgr_->GetCommandContext()->WaitForGpu();
+	if (dx12Mgr_ && dx12Mgr_->GetUploadCmdContext())
+		dx12Mgr_->GetUploadCmdContext()->WaitForGpu();
 
 	std::lock_guard lock(mutex_);
 	meshes_.clear();
@@ -123,12 +123,8 @@ HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const s
 		outUploadVB);
 	if (FAILED(hr)) return hr;
 
-	// COPY_DEST -> VB 用ステートに遷移（コマンドを積むだけ）
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		out.vertexBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	list->ResourceBarrier(1, &barrier);
+	// Barrier REMOVED (Implicit State Transition used)
+	// list->ResourceBarrier(1, &barrier);
 
 	out.vbView.BufferLocation = out.vertexBuffer->GetGPUVirtualAddress();
 	out.vbView.SizeInBytes = static_cast<UINT>(size);
@@ -152,12 +148,8 @@ HRESULT MeshManager::CreateIndexBuffer(ID3D12GraphicsCommandList* list, const st
 		outUploadIB);
 	if (FAILED(hr)) return hr;
 
-	// COPY_DEST -> IB 用ステートに遷移（コマンドを積むだけ）
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		out.indexBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	list->ResourceBarrier(1, &barrier);
+	// Barrier REMOVED (Implicit State Transition used)
+	// list->ResourceBarrier(1, &barrier);
 
 	out.ibView.BufferLocation = out.indexBuffer->GetGPUVirtualAddress();
 	out.ibView.SizeInBytes = static_cast<UINT>(size);
@@ -200,7 +192,8 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 		IID_PPV_ARGS(&outUpload));
 	if (FAILED(hr)) return hr;
 
-	// COMMON -> COPY_DEST
+	// Barrier REMOVED (Implicit Promotion from COMMON to COPY_DEST)
+	/*
 	{
 		auto b = CD3DX12_RESOURCE_BARRIER::Transition(
 			outDefault.Get(),
@@ -208,6 +201,7 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 			D3D12_RESOURCE_STATE_COPY_DEST);
 		list->ResourceBarrier(1, &b);
 	}
+	*/
 
 	// CPU -> Upload -> Default のコピーコマンドを積む
 	D3D12_SUBRESOURCE_DATA sub{};
