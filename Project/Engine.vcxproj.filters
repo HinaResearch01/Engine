@@ -191,6 +191,9 @@
     <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp">
       <Filter>Engine\Framework\System\Transform</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.cpp">
+      <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -718,6 +721,9 @@
     <ClInclude Include="Engine\Framework\System\Transform\TransformSystem.h">
       <Filter>Engine\Framework\System\Transform</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.h">
+      <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -990,7 +996,7 @@
     <Filter Include="Engine\Math\Type">
       <UniqueIdentifier>{4d2cc15b-7dac-4ad1-8ee6-f444589fe4f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory\Shadow">
+    <Filter Include="Engine\Graphics\PSO\Factory\ShadowDir">
       <UniqueIdentifier>{8661638a-ea8a-4c20-83c5-acaaa8a5f69c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

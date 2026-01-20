@@ -1,4 +1,4 @@
-float4 main() : SV_TARGET
+void main()
 {
-    return float4(0.0, 0.0, 0.0, 0.0);
+    // Do nothing
 }

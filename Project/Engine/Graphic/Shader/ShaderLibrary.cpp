@@ -71,6 +71,17 @@ void ShaderLibrary::CompileAllShader()
         tryCompile("Object3D", m);
     }
 
+
+	// -------------------------------
+	// シャドーマップ群
+	// -------------------------------
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = "Resources/Shaders/VS/ShadowCaster_Directional.VS.hlsl";
+		m.sources[ShaderType::PS] = "Resources/Shaders/PS/ShadowCaster_Directional.PS.hlsl";
+		tryCompile("ShadowCaster_Directional", m);
+	}
+
     // -------------------------------
     // ポストエフェクト群（共通VS + 個別PS）
     // -------------------------------

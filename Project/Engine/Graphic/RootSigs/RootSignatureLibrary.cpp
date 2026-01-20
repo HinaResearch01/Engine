@@ -17,7 +17,7 @@ void RootSignatureLibrary::Init()
 {
     // よく使うルートシグネチャをここで登録する
     CreateObject3D();
-    CreateShadow();
+    CreateShadowDir();
 }
 
 void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc,
@@ -120,20 +120,21 @@ void RootSignatureLibrary::CreateObject3D()
 	// -------------------------
 	CD3DX12_ROOT_PARAMETER params[4]{};
 
-	// VS: 定数バッファ
+	// VS: Camera (b0)
 	params[0].InitAsConstantBufferView(
-		0, // b0 
+		0,
 		0, D3D12_SHADER_VISIBILITY_VERTEX);
+	// VS: Transform (b1)
 	params[1].InitAsConstantBufferView(
 		1, // b1
 		0, D3D12_SHADER_VISIBILITY_VERTEX);
 
-	// PS: 定数バッファ
+	// PS: Material (b2)
 	params[2].InitAsConstantBufferView(
 		2, // b2
 		0, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	// PS: テクスチャ SRV t0
+	// PS: Texture Albedo (t0)
 	params[3].InitAsDescriptorTable(
 		1,
 		&srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -187,14 +188,18 @@ void RootSignatureLibrary::CreateObject3D()
 	Register("Object3D", desc, staticSamplers);
 }
 
-void RootSignatureLibrary::CreateShadow()
+void RootSignatureLibrary::CreateShadowDir()
 {
 	CD3DX12_ROOT_PARAMETER params[2]{};
 
-	// VS: Light ViewProj (b0)
-	params[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+	// VS: Light (b0)
+	params[0].InitAsConstantBufferView(
+		0, 
+		0, D3D12_SHADER_VISIBILITY_VERTEX);
 	// VS: Transform (b1)
-	params[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+	params[1].InitAsConstantBufferView(
+		1, 
+		0, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	D3D12_ROOT_SIGNATURE_DESC desc{};
 	desc.NumParameters = _countof(params);
@@ -203,5 +208,5 @@ void RootSignatureLibrary::CreateShadow()
 	desc.pStaticSamplers = nullptr;
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	Register("Shadow", desc, {});
+	Register("ShadowCaster_Directional", desc, {});
 }
