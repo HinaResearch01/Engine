@@ -3,6 +3,8 @@
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/Shader/ShaderLibrary.h"
 #include "DX12/DX12Manager.h"
+#include <cstddef>
+#include "Resource/Mesh/MeshManager.h"
 
 using namespace Tsumi::Graphic;
 
@@ -32,9 +34,32 @@ static void BuildObject3D(const std::string& name, BlendMode blend, bool depthWr
 	if (!rootSig || !vs || !ps)
 		throw std::runtime_error("Object3DPSOFactory: shader or rootsig not found");
 
-	static const D3D12_INPUT_ELEMENT_DESC layout[] = {
-		PSOUtil::SetUpInputElementDescs("POSITION"),
-		PSOUtil::SetUpInputElementDescs("TEXCOORD"),
+	static const D3D12_INPUT_ELEMENT_DESC layout[] =
+	{
+		{
+			"POSITION", 0,
+			DXGI_FORMAT_R32G32B32_FLOAT,
+			0,
+			(UINT)offsetof(Tsumi::Resource::Vertex, pos),     // 0
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+			0
+		},
+		{
+			"NORMAL", 0,
+			DXGI_FORMAT_R32G32B32_FLOAT,
+			0,
+			(UINT)offsetof(Tsumi::Resource::Vertex, normal),  // 12
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+			0
+		},
+		{
+			"TEXCOORD", 0,
+			DXGI_FORMAT_R32G32_FLOAT,
+			0,
+			(UINT)offsetof(Tsumi::Resource::Vertex, uv),      // 24
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+			0
+		}
 	};
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
@@ -49,7 +74,9 @@ static void BuildObject3D(const std::string& name, BlendMode blend, bool depthWr
 	desc.BlendState = blendDesc;
 
 	// Raster
-	desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	D3D12_RASTERIZER_DESC rs = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	rs.CullMode = D3D12_CULL_MODE_BACK;
+	desc.RasterizerState = rs;
 
 	// Depth
 	D3D12_DEPTH_STENCIL_DESC depth = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);

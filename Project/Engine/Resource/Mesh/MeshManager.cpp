@@ -128,7 +128,7 @@ HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const s
 
 	out.vbView.BufferLocation = out.vertexBuffer->GetGPUVirtualAddress();
 	out.vbView.SizeInBytes = static_cast<UINT>(size);
-	out.vbView.StrideInBytes = out.stride;
+	out.vbView.StrideInBytes = (UINT)sizeof(Vertex);
 
 	return S_OK;
 }

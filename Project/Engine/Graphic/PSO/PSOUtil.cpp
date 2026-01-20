@@ -1,4 +1,6 @@
 #include "PSOUtil.h"
+#include <cstddef>
+#include "Resource/Mesh/MeshManager.h"
 
 D3D12_INPUT_ELEMENT_DESC Tsumi::Graphic::PSOUtil::SetUpInputElementDescs(LPCSTR SemanticName)
 {

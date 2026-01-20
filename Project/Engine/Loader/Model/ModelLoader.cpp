@@ -23,11 +23,15 @@ HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias,
 	Assimp::Importer importer;
 
 	// Assimp 後処理フラグ
+	// ・三角形化
+	// ・左手系変換 (MakeLeftHanded | FlipUVs | FlipWindingOrder)
+	// ・接線空間計算
+	// ・ノード変換を頂点にベイク (PreTransformVertices)
 	const unsigned int flags =
 		aiProcess_Triangulate |
-		aiProcess_FlipWindingOrder |
-		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace;
+		aiProcess_ConvertToLeftHanded |
+		aiProcess_CalcTangentSpace |
+		aiProcess_PreTransformVertices;
 
 	// モデル読み込み（ここは 1 回だけ）
 	const aiScene* scene = importer.ReadFile(fullPath, flags);

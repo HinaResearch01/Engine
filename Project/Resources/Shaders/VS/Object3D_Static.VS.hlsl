@@ -19,8 +19,8 @@ VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
 
-    float4 worldPos = mul(gTransform.world, float4(input.position, 1.0f));
-    output.position = mul(gCameraMat.viewProj, worldPos);
+    float4 worldPos = mul(float4(input.position, 1.0f), gTransform.world);
+    output.position = mul(worldPos, gCameraMat.viewProj);
     output.texCoord = input.texCoord;
 
     return output;
