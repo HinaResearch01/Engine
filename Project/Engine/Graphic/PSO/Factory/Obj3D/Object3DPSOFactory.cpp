@@ -34,32 +34,9 @@ static void BuildObject3D(const std::string& name, BlendMode blend, bool depthWr
 	if (!rootSig || !vs || !ps)
 		throw std::runtime_error("Object3DPSOFactory: shader or rootsig not found");
 
-	static const D3D12_INPUT_ELEMENT_DESC layout[] =
-	{
-		{
-			"POSITION", 0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			(UINT)offsetof(Tsumi::Resource::Vertex, pos),     // 0
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-			0
-		},
-		{
-			"NORMAL", 0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			(UINT)offsetof(Tsumi::Resource::Vertex, normal),  // 12
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-			0
-		},
-		{
-			"TEXCOORD", 0,
-			DXGI_FORMAT_R32G32_FLOAT,
-			0,
-			(UINT)offsetof(Tsumi::Resource::Vertex, uv),      // 24
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-			0
-		}
+	static const D3D12_INPUT_ELEMENT_DESC layout[] = {
+		PSOUtil::SetUpInputElementDescs("POSITION"),
+		PSOUtil::SetUpInputElementDescs("TEXCOORD"),
 	};
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};

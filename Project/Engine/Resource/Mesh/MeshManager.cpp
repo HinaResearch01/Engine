@@ -123,9 +123,6 @@ HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const s
 		outUploadVB);
 	if (FAILED(hr)) return hr;
 
-	// Barrier REMOVED (Implicit State Transition used)
-	// list->ResourceBarrier(1, &barrier);
-
 	out.vbView.BufferLocation = out.vertexBuffer->GetGPUVirtualAddress();
 	out.vbView.SizeInBytes = static_cast<UINT>(size);
 	out.vbView.StrideInBytes = (UINT)sizeof(Vertex);
@@ -147,9 +144,6 @@ HRESULT MeshManager::CreateIndexBuffer(ID3D12GraphicsCommandList* list, const st
 		out.indexBuffer,
 		outUploadIB);
 	if (FAILED(hr)) return hr;
-
-	// Barrier REMOVED (Implicit State Transition used)
-	// list->ResourceBarrier(1, &barrier);
 
 	out.ibView.BufferLocation = out.indexBuffer->GetGPUVirtualAddress();
 	out.ibView.SizeInBytes = static_cast<UINT>(size);
@@ -191,17 +185,6 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 		nullptr,
 		IID_PPV_ARGS(&outUpload));
 	if (FAILED(hr)) return hr;
-
-	// Barrier REMOVED (Implicit Promotion from COMMON to COPY_DEST)
-	/*
-	{
-		auto b = CD3DX12_RESOURCE_BARRIER::Transition(
-			outDefault.Get(),
-			D3D12_RESOURCE_STATE_COMMON,
-			D3D12_RESOURCE_STATE_COPY_DEST);
-		list->ResourceBarrier(1, &b);
-	}
-	*/
 
 	// CPU -> Upload -> Default のコピーコマンドを積む
 	D3D12_SUBRESOURCE_DATA sub{};

@@ -58,7 +58,21 @@ public:
     const HWND& GetHWND() const { return hwnd_; }
     const Win32Desc& GetDesc() const { return desc_; }
     void SetDesc(const Win32Desc& desc) { desc_ = desc; }
-	const double GetAspectRatio() const { return aspectRatio_; }
+	uint32_t GetClientWidth() const { 
+		RECT r;
+		GetClientRect(hwnd_, &r);
+		return static_cast<uint32_t>(r.right - r.left);
+	}
+	uint32_t GetClientHeight() const { 
+		RECT r;
+		GetClientRect(hwnd_, &r);
+		return static_cast<uint32_t>(r.bottom - r.top);
+	}
+	float GetCurrentAspectRatio() const { 
+		uint32_t w = GetClientWidth();
+		uint32_t h = GetClientHeight();
+		return (h != 0) ? static_cast<float>(w) / static_cast<float>(h) : 1.0f;
+	}
 #pragma endregion
 
 
@@ -76,7 +90,7 @@ private:
     bool shouldClose_ = false;
 
     // アスペクト比をクライアント領域に対して維持するための値
-    double aspectRatio_ = 16.0 / 9.0;
+	double targetAspectRatio_ = 16.0 / 9.0;
 
     // 最小クライアントサイズ（必要なら）
     int minClientWidth_ = 200;

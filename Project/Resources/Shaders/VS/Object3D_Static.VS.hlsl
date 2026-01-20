@@ -17,11 +17,15 @@ ConstantBuffer<TransformCB> gTransform : register(b1);
 
 VS_OUTPUT main(VS_INPUT input)
 {
-    VS_OUTPUT output;
+    VS_OUTPUT o;
+    float4 pos = float4(input.position, 1.0f);
 
-    float4 worldPos = mul(float4(input.position, 1.0f), gTransform.world);
-    output.position = mul(worldPos, gCameraMat.viewProj);
-    output.texCoord = input.texCoord;
+    // 行列が Row-Major の場合、ベクトルを左に置く
+    pos = mul(pos, gTransform.world);
+    pos = mul(pos, gCameraMat.view);
+    pos = mul(pos, gCameraMat.proj);
 
-    return output;
+    o.position = pos;
+    o.texCoord = input.texCoord;
+    return o;
 }

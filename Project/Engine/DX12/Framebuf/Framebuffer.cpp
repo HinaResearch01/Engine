@@ -26,11 +26,11 @@ HRESULT Framebuffer::Init()
         return E_POINTER;
     }
 
-    Win32::Win32Desc desc = Win32::Win32Window::GetInstance()->GetDesc();
-    width_ = desc.windowWidth;
-    height_ = desc.windowHeight;
+	Win32::Win32Desc desc = Win32::Win32Window::GetInstance()->GetDesc();
+	width_ = desc.windowWidth;
+	height_ = desc.windowHeight;
 
-    return CreateHeapsAndViews(width_, height_);
+	return CreateHeapsAndViews(width_, height_);
 }
 
 void Tsumi::DX12::Framebuffer::Destroy()

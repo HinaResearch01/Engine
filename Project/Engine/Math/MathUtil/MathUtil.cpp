@@ -295,24 +295,17 @@ Mat4x4 MAT4x4::AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f
 Mat4x4 MAT4x4::PerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)
 {
 	Mat4x4 result{};
-	result.m[0][0] = (1 / aspectRatio) * 1 / std::tan(fovY / 2);
-	result.m[0][1] = 0.0f;
-	result.m[0][2] = 0.0f;
-	result.m[0][3] = 0.0f;
 
-	result.m[1][0] = 0.0f;
-	result.m[1][1] = 1 / std::tan(fovY / 2);
-	result.m[1][2] = 0.0f;
-	result.m[1][3] = 0.0f;
+	const float yScale = 1.0f / std::tan(fovY * 0.5f);
+	const float xScale = yScale / aspectRatio;
 
-	result.m[2][0] = 0.0f;
-	result.m[2][1] = 0.0f;
+	result.m[0][0] = xScale;
+	result.m[1][1] = yScale;
+
 	result.m[2][2] = farClip / (farClip - nearClip);
 	result.m[2][3] = 1.0f;
 
-	result.m[3][0] = 0.0f;
-	result.m[3][1] = 0.0f;
-	result.m[3][2] = -nearClip * farClip / (farClip - nearClip);
+	result.m[3][2] = -(nearClip * farClip) / (farClip - nearClip);
 	result.m[3][3] = 0.0f;
 
 	return result;

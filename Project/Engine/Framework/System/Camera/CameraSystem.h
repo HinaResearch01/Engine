@@ -6,7 +6,7 @@
 #include "Framework/World/CompView/ComponentView.h"
 
 // 前方宣言
-namespace Tsumi::Win32 { class Win32Window; }
+namespace Tsumi::DX12 { class DX12Manager; }
 
 namespace Tsumi::Framework {
 
@@ -68,7 +68,7 @@ private:
 
 	World& world_;
 
-	Win32::Win32Window* win32_ = nullptr;
+	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

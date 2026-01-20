@@ -5,33 +5,29 @@ using namespace Tsumi::Win32;
 void Win32Window::CreateMainWindow(const Win32Desc& desc)
 {
 	desc_ = desc;
-
-	// アスペクト比をクライアント幅/高さで決める
-	if (desc_.windowHeight != 0) {
-		aspectRatio_ = static_cast<double>(desc_.windowWidth) / static_cast<double>(desc_.windowHeight);
-	}
+	targetAspectRatio_ = static_cast<double>(desc_.windowWidth) / static_cast<double>(desc_.windowHeight);
 
 	WNDCLASS wc = {};
 	wc.lpfnWndProc = WndProc;
 	wc.hInstance = desc_.hInstance;
 	wc.lpszClassName = L"EngineWindowClass";
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	// 背景を白にする。これがないと未描画領域が黒く見えることがある
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	// wc.style = CS_HREDRAW | CS_VREDRAW; // 必要なら
+
 	if (!RegisterClass(&wc)) {
 		throw std::runtime_error("Failed to register window class.");
 	}
 
-	// CreateWindowEx の lpParam に this を渡して、WndProc でインスタンスを関連づける
-	// CreateWindowEx にはウィンドウ全体サイズを渡すため、まずクライアントサイズからウィンドウサイズを求める
+	// 1. クライアントサイズからウィンドウ全体のサイズを逆算
 	DWORD style = WS_OVERLAPPEDWINDOW;
 	DWORD exStyle = 0;
 	RECT clientRect = { 0, 0, static_cast<LONG>(desc_.windowWidth), static_cast<LONG>(desc_.windowHeight) };
 	AdjustWindowRectEx(&clientRect, style, FALSE, exStyle);
+
 	int windowWidth = clientRect.right - clientRect.left;
 	int windowHeight = clientRect.bottom - clientRect.top;
 
+	// 2. ウィンドウ生成
 	hwnd_ = CreateWindowEx(
 		exStyle,
 		wc.lpszClassName,
@@ -39,7 +35,7 @@ void Win32Window::CreateMainWindow(const Win32Desc& desc)
 		style,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		windowWidth, windowHeight,
-		nullptr, nullptr, desc_.hInstance, this // lpParam に this を渡す
+		nullptr, nullptr, desc_.hInstance, this
 	);
 
 	if (!hwnd_) {
@@ -47,7 +43,6 @@ void Win32Window::CreateMainWindow(const Win32Desc& desc)
 		throw std::runtime_error("Failed to create window.");
 	}
 
-	// 表示
 	ShowWindow(hwnd_, SW_SHOW);
 	UpdateWindow(hwnd_);
 }
@@ -95,147 +90,47 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 		case WM_DESTROY:
-			PostQuitMessage(0);
-			return 0;
+		PostQuitMessage(0);
+		return 0;
 
-		case WM_SIZING:
-		{
+		case WM_SIZE:
+		// 必要に応じてここでDX12のリソース（SwapChain）再作成フラグを立てる
+		return 0;
+
+		case WM_SIZING: {
 			RECT* prc = reinterpret_cast<RECT*>(lParam);
-			if (!prc) {
-				return DefWindowProc(hwnd_, msg, wParam, lParam);
+			RECT wndR, cliR;
+			GetWindowRect(hwnd_, &wndR);
+			GetClientRect(hwnd_, &cliR);
+
+			int borderW = (wndR.right - wndR.left) - (cliR.right - cliR.left);
+			int borderH = (wndR.bottom - wndR.top) - (cliR.bottom - cliR.top);
+
+			int targetW = prc->right - prc->left - borderW;
+			int targetH = prc->bottom - prc->top - borderH;
+
+			// 比率維持ロジック
+			if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT) {
+				targetH = static_cast<int>(targetW / targetAspectRatio_);
+			}
+			else {
+				targetW = static_cast<int>(targetH * targetAspectRatio_);
 			}
 
-			RECT currentWndRect;
-			RECT currentClientRect;
-			GetWindowRect(hwnd_, &currentWndRect);
-			GetClientRect(hwnd_, &currentClientRect);
+			// サイズ適用
+			int finalW = targetW + borderW;
+			int finalH = targetH + borderH;
 
-			int currentWindowW = currentWndRect.right - currentWndRect.left;
-			int currentWindowH = currentWndRect.bottom - currentWndRect.top;
-			int currentClientW = currentClientRect.right - currentClientRect.left;
-			int currentClientH = currentClientRect.bottom - currentClientRect.top;
+			if (wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT) prc->top = prc->bottom - finalH;
+			else prc->bottom = prc->top + finalH;
 
-			int borderW = currentWindowW - currentClientW;
-			int borderH = currentWindowH - currentClientH;
-
-			int newWindowW = prc->right - prc->left;
-			int newWindowH = prc->bottom - prc->top;
-
-			int newClientW = newWindowW - borderW;
-			int newClientH = newWindowH - borderH;
-
-			if (newClientW < minClientWidth_) newClientW = minClientWidth_;
-			if (newClientH < minClientHeight_) newClientH = minClientHeight_;
-
-			int edge = static_cast<int>(wParam);
-
-			int adjustedClientW = newClientW;
-			int adjustedClientH = newClientH;
-
-			switch (edge) {
-				case WMSZ_LEFT:
-				case WMSZ_RIGHT:
-				case WMSZ_TOPLEFT:
-				case WMSZ_TOPRIGHT:
-				case WMSZ_BOTTOMLEFT:
-				case WMSZ_BOTTOMRIGHT:
-					adjustedClientW = newClientW;
-					adjustedClientH = static_cast<int>(std::round(adjustedClientW / aspectRatio_));
-					if (adjustedClientH < minClientHeight_) {
-						adjustedClientH = minClientHeight_;
-						adjustedClientW = static_cast<int>(std::round(adjustedClientH * aspectRatio_));
-					}
-					break;
-
-				case WMSZ_TOP:
-				case WMSZ_BOTTOM:
-				default:
-					adjustedClientH = newClientH;
-					adjustedClientW = static_cast<int>(std::round(adjustedClientH * aspectRatio_));
-					if (adjustedClientW < minClientWidth_) {
-						adjustedClientW = minClientWidth_;
-						adjustedClientH = static_cast<int>(std::round(adjustedClientW / aspectRatio_));
-					}
-					break;
-			}
-
-			int desiredWindowW = adjustedClientW + borderW;
-			int desiredWindowH = adjustedClientH + borderH;
-
-			switch (edge) {
-				case WMSZ_LEFT:
-					prc->left = prc->right - desiredWindowW;
-					prc->bottom = prc->top + desiredWindowH;
-					break;
-				case WMSZ_RIGHT:
-					prc->right = prc->left + desiredWindowW;
-					prc->bottom = prc->top + desiredWindowH;
-					break;
-				case WMSZ_TOP:
-					prc->top = prc->bottom - desiredWindowH;
-					prc->right = prc->left + desiredWindowW;
-					break;
-				case WMSZ_BOTTOM:
-					prc->bottom = prc->top + desiredWindowH;
-					prc->right = prc->left + desiredWindowW;
-					break;
-				case WMSZ_TOPLEFT:
-					prc->left = prc->right - desiredWindowW;
-					prc->top = prc->bottom - desiredWindowH;
-					break;
-				case WMSZ_TOPRIGHT:
-					prc->right = prc->left + desiredWindowW;
-					prc->top = prc->bottom - desiredWindowH;
-					break;
-				case WMSZ_BOTTOMLEFT:
-					prc->left = prc->right - desiredWindowW;
-					prc->bottom = prc->top + desiredWindowH;
-					break;
-				case WMSZ_BOTTOMRIGHT:
-					prc->right = prc->left + desiredWindowW;
-					prc->bottom = prc->top + desiredWindowH;
-					break;
-				default:
-					break;
-			}
-
-			// リサイズ中に再描画を促す（必要に応じてコメントアウト可）
-			InvalidateRect(hwnd_, nullptr, TRUE);
+			if (wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT) prc->left = prc->right - finalW;
+			else prc->right = prc->left + finalW;
 
 			return TRUE;
 		}
-
-		case WM_GETMINMAXINFO:
-		{
-			MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
-			if (info) {
-				RECT wndRect;
-				RECT cliRect;
-				GetWindowRect(hwnd_, &wndRect);
-				GetClientRect(hwnd_, &cliRect);
-
-				int borderW = (wndRect.right - wndRect.left) - (cliRect.right - cliRect.left);
-				int borderH = (wndRect.bottom - wndRect.top) - (cliRect.bottom - cliRect.top);
-
-				info->ptMinTrackSize.x = minClientWidth_ + borderW;
-				info->ptMinTrackSize.y = minClientHeight_ + borderH;
-			}
-			return 0;
-		}
-
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hwnd_, &ps);
-			// 背景を白で塗る（ウィンドウクラスの背景が効かないケース向けの保険）
-			FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-			EndPaint(hwnd_, &ps);
-			return 0;
-		}
-
-		default:
-			return DefWindowProc(hwnd_, msg, wParam, lParam);
 	}
+	return DefWindowProc(hwnd_, msg, wParam, lParam);
 }
 
 void Win32Window::OnFinalize()

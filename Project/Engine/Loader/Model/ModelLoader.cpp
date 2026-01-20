@@ -24,12 +24,12 @@ HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias,
 
 	// Assimp 後処理フラグ
 	// ・三角形化
-	// ・左手系変換 (MakeLeftHanded | FlipUVs | FlipWindingOrder)
+	// ・UV反転 (FlipUVs)
 	// ・接線空間計算
 	// ・ノード変換を頂点にベイク (PreTransformVertices)
 	const unsigned int flags =
 		aiProcess_Triangulate |
-		aiProcess_ConvertToLeftHanded |
+		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace |
 		aiProcess_PreTransformVertices;
 

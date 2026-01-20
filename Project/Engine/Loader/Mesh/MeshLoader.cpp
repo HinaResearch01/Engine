@@ -7,6 +7,10 @@
 #include <filesystem>
 #include <format>
 #include <functional>
+#include <algorithm>
+#include <cfloat>
+#undef min
+#undef max
 
 using namespace Tsumi::Loader;
 using namespace Tsumi::Resource;
@@ -31,12 +35,12 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 	Assimp::Importer importer;
 	// 読み込み時の後処理フラグ
 	// ・三角形化
-	// ・左手系変換 (MakeLeftHanded | FlipUVs | FlipWindingOrder)
+	// ・UV反転
 	// ・接線空間計算
 	// ・ノード変換を頂点にベイク (PreTransformVertices)
 	const unsigned int flags =
 		aiProcess_Triangulate |
-		aiProcess_ConvertToLeftHanded |
+		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace |
 		aiProcess_PreTransformVertices;
 
@@ -94,7 +98,10 @@ HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& k
 	return S_OK;
 }
 
-HRESULT MeshLoader::ParseScene(const aiScene* scene, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
+HRESULT MeshLoader::ParseScene(
+	const aiScene* scene,
+	std::vector<Vertex>& outVertices,
+	std::vector<uint32_t>& outIndices)
 {
 	if (!scene || !scene->HasMeshes())
 		return E_FAIL;
@@ -104,32 +111,39 @@ HRESULT MeshLoader::ParseScene(const aiScene* scene, std::vector<Vertex>& outVer
 
 	uint32_t vertexOffset = 0;
 
-	// PreTransformVertices を使用しているため、ノード階層を辿る必要はない
-	// mMeshes に全てのメッシュが（変換済みで）格納されている
-	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+	{
 		const aiMesh* mesh = scene->mMeshes[i];
 		if (!mesh || !mesh->HasPositions())
 			continue;
 
 		// -------------------------
-		// Vertex の展開
+		// Vertex 展開
 		// -------------------------
-		for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+		for (unsigned int v = 0; v < mesh->mNumVertices; ++v)
+		{
+			const aiVector3D& p = mesh->mVertices[v];
 			Vertex dst{};
 
+			// -------------------------
 			// position
-			// Assimpで既に Transform & LeftHanded済み
-			const aiVector3D& p = mesh->mVertices[v];
-			dst.pos = { p.x, p.y, p.z };
+			// -------------------------
+			dst.pos = { -p.x, p.y, p.z };
 
+			// -------------------------
 			// normal
-			if (mesh->HasNormals()) {
+			// -------------------------
+			if (mesh->HasNormals())
+			{
 				const aiVector3D& n = mesh->mNormals[v];
-				dst.normal = { n.x, n.y, n.z };
+				dst.normal = { -n.x, n.y, -n.z };
 			}
 
+			// -------------------------
 			// UV
-			if (mesh->HasTextureCoords(0)) {
+			// -------------------------
+			if (mesh->HasTextureCoords(0))
+			{
 				const aiVector3D& uv = mesh->mTextureCoords[0][v];
 				dst.uv = { uv.x, uv.y };
 			}
@@ -138,16 +152,17 @@ HRESULT MeshLoader::ParseScene(const aiScene* scene, std::vector<Vertex>& outVer
 		}
 
 		// -------------------------
-		// Index の展開
+		// Index 展開
 		// -------------------------
-		for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+		for (unsigned int f = 0; f < mesh->mNumFaces; ++f)
+		{
 			const aiFace& face = mesh->mFaces[f];
 			if (face.mNumIndices != 3)
 				continue;
 
 			outIndices.push_back(vertexOffset + face.mIndices[0]);
-			outIndices.push_back(vertexOffset + face.mIndices[1]);
 			outIndices.push_back(vertexOffset + face.mIndices[2]);
+			outIndices.push_back(vertexOffset + face.mIndices[1]);
 		}
 
 		vertexOffset += mesh->mNumVertices;

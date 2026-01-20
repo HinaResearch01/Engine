@@ -182,9 +182,30 @@ void DX12Manager::PrepareBackBuffer(UINT currIndex, ID3D12Resource* backBuffer)
 
 void DX12Manager::BindRenderTargets(UINT currIndex)
 {
+	auto list = cmdContext_->GetList();
+
+	// 1. レンダリングターゲットのバインド
 	D3D12_CPU_DESCRIPTOR_HANDLE rtv = framebuf_->GetRtvHandle(currIndex);
 	D3D12_CPU_DESCRIPTOR_HANDLE dsv = framebuf_->GetDsvHandle();
-	cmdContext_->GetList()->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	list->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+	// 2. ビューポートとシザー矩形を Framebuffer の現在のサイズで更新
+	D3D12_VIEWPORT viewport{};
+	viewport.Width = static_cast<float>(framebuf_->GetWidth());
+	viewport.Height = static_cast<float>(framebuf_->GetHeight());
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	D3D12_RECT scissorRect{};
+	scissorRect.left = 0;
+	scissorRect.top = 0;
+	scissorRect.right = framebuf_->GetWidth();
+	scissorRect.bottom = framebuf_->GetHeight();
+
+	list->RSSetViewports(1, &viewport);
+	list->RSSetScissorRects(1, &scissorRect);
 }
 
 void DX12Manager::ClearRenderTargets(UINT currIndex)
