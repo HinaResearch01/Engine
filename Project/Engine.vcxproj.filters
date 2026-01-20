@@ -1121,6 +1121,9 @@
     <None Include="Resources\Shaders\Common\Camera.hlsli">
       <Filter>Resources\Shaders\Common</Filter>
     </None>
+    <None Include="Resources\Shaders\Common\Light.hlsli">
+      <Filter>Resources\Shaders\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
@@ -1133,6 +1136,12 @@
       <Filter>Resources\Shaders\PS</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\VS\Object3D_Static.VS.hlsl">
+      <Filter>Resources\Shaders\VS</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PS\ShadowCaster_Directional.PS.hlsl">
+      <Filter>Resources\Shaders\PS</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\VS\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\VS</Filter>
     </FxCompile>
   </ItemGroup>
