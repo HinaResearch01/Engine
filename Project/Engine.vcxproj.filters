@@ -990,6 +990,9 @@
     <Filter Include="Engine\Math\Type">
       <UniqueIdentifier>{4d2cc15b-7dac-4ad1-8ee6-f444589fe4f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Graphics\PSO\Factory\Shadow">
+      <UniqueIdentifier>{8661638a-ea8a-4c20-83c5-acaaa8a5f69c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc">

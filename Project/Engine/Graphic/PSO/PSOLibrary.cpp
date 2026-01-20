@@ -1,6 +1,7 @@
 #include "PSOLibrary.h"
 
 #include "Factory/Obj3D/Object3DPSOFactory.h"
+#include "Factory/Shadow/ShadowPSOFactory.h"
 
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
@@ -9,6 +10,7 @@ void PSOLibrary::Init()
 {
     // PSOの生成
 	Object3DPSOFactory::Build(*this);
+	ShadowPSOFactory::Build(*this);
 }
 
 void PSOLibrary::Register(const std::string& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso)

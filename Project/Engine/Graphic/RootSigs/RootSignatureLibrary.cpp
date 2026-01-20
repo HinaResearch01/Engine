@@ -17,6 +17,7 @@ void RootSignatureLibrary::Init()
 {
     // よく使うルートシグネチャをここで登録する
     CreateObject3D();
+    CreateShadow();
 }
 
 void RootSignatureLibrary::Register(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc,
@@ -184,4 +185,23 @@ void RootSignatureLibrary::CreateObject3D()
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	Register("Object3D", desc, staticSamplers);
+}
+
+void RootSignatureLibrary::CreateShadow()
+{
+	CD3DX12_ROOT_PARAMETER params[2]{};
+
+	// VS: Light ViewProj (b0)
+	params[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+	// VS: Transform (b1)
+	params[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+
+	D3D12_ROOT_SIGNATURE_DESC desc{};
+	desc.NumParameters = _countof(params);
+	desc.pParameters = params;
+	desc.NumStaticSamplers = 0;
+	desc.pStaticSamplers = nullptr;
+	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	Register("Shadow", desc, {});
 }
