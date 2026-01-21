@@ -58,7 +58,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::Render; }
+	UpdatePhase Phase() const override { return UpdatePhase::RenderPass; }
 
 	/// <summary>
 	/// 描画処理

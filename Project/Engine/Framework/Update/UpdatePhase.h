@@ -9,7 +9,8 @@ enum class UpdatePhase : uint8_t {
 	PostLogic,      // 後処理・整合性
 	Camera,         // カメラ評価
 	RenderPrepare,  // 描画準備
-	Render,         // 描画
+	ShadowPass,     // シャドウ
+	RenderPass,     // 描画
 	Count
 };
 
