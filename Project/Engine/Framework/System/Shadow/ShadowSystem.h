@@ -3,7 +3,7 @@
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Context/ShadowContext.h"
-#include "Framework/Component/Light/LightComponent.h"
+#include "Framework/Component/Light/DirectionalLightComponent.h"
 
 namespace Tsumi::Framework {
 

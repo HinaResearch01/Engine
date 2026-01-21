@@ -197,7 +197,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\System\Shadow\ShadowSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.cpp" />
-    <ClCompile Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
@@ -376,7 +375,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\World\CompView\IComponentViewBase.h" />
     <ClInclude Include="Engine\Framework\World\World.h" />
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h" />
-    <ClInclude Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />

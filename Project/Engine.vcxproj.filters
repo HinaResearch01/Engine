@@ -191,9 +191,6 @@
     <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp">
       <Filter>Engine\Framework\System\Transform</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.cpp">
-      <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\System\Light\LightSystem.cpp">
       <Filter>Engine\Framework\System\Light</Filter>
     </ClCompile>
@@ -709,9 +706,6 @@
     <ClInclude Include="Engine\Framework\System\Transform\TransformSystem.h">
       <Filter>Engine\Framework\System\Transform</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.h">
-      <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Component\Light\DirectionalLightComponent.h">
       <Filter>Engine\Framework\Component\Light</Filter>
     </ClInclude>
@@ -1019,9 +1013,6 @@
     </Filter>
     <Filter Include="Engine\Math\Type">
       <UniqueIdentifier>{4d2cc15b-7dac-4ad1-8ee6-f444589fe4f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory\ShadowDir">
-      <UniqueIdentifier>{8661638a-ea8a-4c20-83c5-acaaa8a5f69c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Framework\Component\Light">
       <UniqueIdentifier>{d8fbef7e-0ddd-477c-ad41-1adf50336e71}</UniqueIdentifier>

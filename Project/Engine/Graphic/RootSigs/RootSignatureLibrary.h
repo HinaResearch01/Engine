@@ -64,7 +64,6 @@ private:
 	/// ルートシグネチャの生成
 	/// </summary>
 	void CreateObject3D();
-	void CreateShadowDir();
 	
 private:
 	mutable std::mutex mutex_;

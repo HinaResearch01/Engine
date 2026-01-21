@@ -39,7 +39,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
     shaders_->Init();
-    shaders_->CompileAllShader();
+    shaders_->Init();
     rootsigs_->Init();
     psos_->Init();
 	resourceMgr_->Init();

@@ -17,73 +17,72 @@
 
 namespace Tsumi::Graphic {
 
-enum class ShaderType { VS, PS, GS, HS, DS, CS };
-
-struct ShaderLoadModule {
-    std::unordered_map<ShaderType, std::string> sources;
+enum class ShaderType : uint8_t {
+	VS,
+	PS,
+	GS,
+	HS,
+	DS,
+	CS
 };
-struct ShaderBlob {
-    std::unordered_map<ShaderType, Microsoft::WRL::ComPtr<IDxcBlob>> blob;
+
+// 1ステージ分の定義（同一hlslにVS/PSが共存してもOK）
+struct ShaderStageDesc
+{
+	std::string file;   // 例: "Resources/Shaders/Deferred/GBuffer.hlsl"
+	std::string entry;  // 例: "GBufferVS"（省略時は "main"）
 };
 
-/* シェーダー管理 */
+struct ShaderLoadModule
+{
+	// ステージ → (file, entry)
+	std::unordered_map<ShaderType, ShaderStageDesc> sources;
+};
+
+struct ShaderBlob
+{
+	std::unordered_map<ShaderType, Microsoft::WRL::ComPtr<IDxcBlob>> blob;
+};
+
 class ShaderLibrary {
 
 private: // シングルトン
-    ShaderLibrary() = default;
-    ~ShaderLibrary() = default;
-    ShaderLibrary(const ShaderLibrary&) = delete;
-    const ShaderLibrary& operator=(const ShaderLibrary&) = delete;
+	ShaderLibrary() = default;
+	~ShaderLibrary() = default;
+	ShaderLibrary(const ShaderLibrary&) = delete;
+	const ShaderLibrary operrator(const ShaderLibrary&) = delete;
 
 public:
-    /// <summary>
-    /// インスタンスの取得
-    /// </summary>
-    static ShaderLibrary* GetInstance() {
-        static ShaderLibrary instance;
-        return &instance;
-    }
+	/// <summary>
+	/// インスタンス取得
+	/// </summary>
+	static ShaderLibrary* GetInstance() {
+		static ShaderLibrary instance;
+		return &instance;
+	}
 
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
-    void Init();
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	void Init();
 
-    /// <summary>
-    /// 前者シェーダー一括読み込み
-    /// </summary>
-    void CompileAllShader();
-
-    /// <summary>
-    /// 取得
-    /// </summary>
-    IDxcBlob* Get(const std::string& name, ShaderType stage) const;
-
-    /// <summary>
-    /// 読みこみ済み確認
-    /// </summary>
-    bool Has(const std::string& name) const;
+	IDxcBlob* Get(const std::string& name, ShaderType stage) const;
+	bool Has(const std::string& name) const;
 
 private:
-
-    /// <summary>
-    /// コンパイル
-    /// </summary>
-    HRESULT Compile(const std::string& name, const ShaderLoadModule& desc);
-
-    /// <summary>
-    /// DXCの初期化処理
-    /// </summary>
-    HRESULT InitDXC();
+	void CompileAllShader();
+	HRESULT Compile(const std::string& name, const ShaderLoadModule& module);
+	HRESULT InitDXC();
 
 private:
-    std::unordered_map<std::string, ShaderBlob> shaders_;
-    mutable std::mutex mutex_;
+	mutable std::mutex mutex_;
+	std::unordered_map<std::string, ShaderBlob> shaders_;
 
-    Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
-    Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
-    Microsoft::WRL::ComPtr<IDxcIncludeHandler> dxcIncludeHandler_;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> dxcIncludeHandler_;
 };
+
 
 
 }

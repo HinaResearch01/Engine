@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Render/RenderGpuPackets.h"
+#include "Framework/Str/RenderGpuPackets.h"
 #include "Resource/Tex/TextureManager.h"
 
 namespace Tsumi::Framework {

@@ -21,28 +21,7 @@ ShadowSystem::ShadowSystem(World& world)
 
 void ShadowSystem::Update(float)
 {
-	// まず無効化
-	context_ = {};
-
-	// ---- LightContextを取得 ----
-	auto& lctx = world_.GetSystem<LightSystem>()->GetLightContext();
-
-	const auto& main = lctx.mainDir;
-	if (!main.valid || !main.shadow.castShadow)
-	    return;
-
-	context_.enabled = true;
-	context_.shadowMapSize = main.shadow.shadowMapSize;
-	context_.cascadeCount = 1;
-
-	Math::Vec3f centerWS{ 0,0,0 };
-
-	auto& c0 = context_.cascades[0];
-	c0.view = BuildLightView(main.dirWS, centerWS);
-	c0.proj = BuildOrthoDX(main.shadow.orthoHalfSize, main.shadow.nearZ, main.shadow.farZ);
-	c0.viewProj = c0.view * c0.proj;
-
-	context_.shadowTargetId = 0;
+	
 }
 
 Math::Mat4x4 ShadowSystem::BuildOrthoDX(float halfSize, float nearZ, float farZ) const

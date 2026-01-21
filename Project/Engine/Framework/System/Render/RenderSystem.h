@@ -9,11 +9,10 @@
 #include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
-#include "Framework/Render/RenderGpuPackets.h"
-#include "Framework/Render/RenderPacket.h"
-#include "Framework/Render/RenderPassTable.h"
-#include "Framework/Render/RenderSurfaceType.h"
-#include "Framework/System/Camera/CameraSystem.h"
+#include "Framework/Str/RenderGpuPackets.h"
+#include "Framework/Str/RenderPacket.h"
+#include "Framework/Str/RenderPassTable.h"
+#include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {

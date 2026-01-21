@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include "Framework/Render/RenderSurfaceType.h"
-#include "Framework/Render/RenderGpuPackets.h"
-#include "Framework/Render/MaterialPacket.h"
+#include "Framework/Str/RenderSurfaceType.h"
+#include "Framework/Str/RenderGpuPackets.h"
+#include "Framework/Str/MaterialPacket.h"
 #include "Resource/Mesh/MeshManager.h"
 
 namespace Tsumi::Framework {

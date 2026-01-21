@@ -2,7 +2,7 @@
 
 #include "../IComponent.h"
 #include "Math/TMath.h"
-#include "Framework/Render/RenderSurfaceType.h"
+#include "Framework/Str/RenderSurfaceType.h"
 
 namespace Tsumi::Framework {
 

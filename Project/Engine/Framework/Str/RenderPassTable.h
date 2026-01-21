@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <string_view>
-#include "Framework/Render/RenderSurfaceType.h"
+#include "Framework/Str/RenderSurfaceType.h"
 
 namespace Tsumi::Framework {
 

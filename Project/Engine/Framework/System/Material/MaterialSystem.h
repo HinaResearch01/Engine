@@ -6,8 +6,8 @@
 #include <string>
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Component/Material/MaterialComponent.h"
-#include "Framework/Render/MaterialPacket.h"
-#include "Framework/Render/RenderSurfaceType.h"
+#include "Framework/Str/MaterialPacket.h"
+#include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
 namespace Tsumi::Resource { class ResourceSystem; }
