@@ -1,5 +1,7 @@
 #include "PSOLibrary.h"
 
+#include "Factory/GBuffer/GBufferPSOFactory.h"
+#include "Factory/LightingDir/LightingDirectionalPSOFactory.h"
 #include "Factory/Obj3D/Object3DPSOFactory.h"
 
 using namespace Tsumi::Graphic;
@@ -8,6 +10,8 @@ using namespace Microsoft::WRL;
 void PSOLibrary::Init() 
 {
     // PSOの生成
+	GBufferPSOFactory::Build(*this);
+	LightingDirectionalPSOFactory::Build(*this);
 	Object3DPSOFactory::Build(*this);
 }
 
