@@ -112,6 +112,10 @@ Mat4x4 RotateAxisAngle(const Vec3f& axis, float angle);
 Mat4x4 RotateAxisAngle(const Vec3f& axis, float cos, float sin);
 // ある方向からある方向への回転
 Mat4x4 DirectionToDirection(const Vec3f& from, const Vec3f& to);
+// 左手系の View 行列を生成する
+Mat4x4 LookAtLH(const Vec3f& eye, const Vec3f& at, const Vec3f& up);
+// 左手系の正射影行列を生成する
+Mat4x4 OrthoLH(float width, float height, float zn, float zf);
 }
 
 

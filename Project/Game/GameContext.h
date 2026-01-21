@@ -58,7 +58,7 @@ public:
 #pragma endregion
 
 private:
-	std::unordered_map<std::string, std::unique_ptr<Framework::World>> scenes_;
+	std::unordered_map<std::string, std::unique_ptr<Framework::World>> world_;
 	Framework::World* currentScene_ = nullptr;
 	bool pendingInit_ = false;
 };
@@ -127,13 +127,13 @@ inline void GameContext::RegisterScene(const std::string& name, Args && ...args)
 		new SceneType(std::forward<Args>(args)...)
 	);
 	ptr->SetGameContext(this); // このクラスのptrを渡す
-	scenes_[name] = std::move(ptr);
+	world_[name] = std::move(ptr);
 }
 
 inline void GameContext::ChangeScene(const std::string& name) 
 {
-	auto it = scenes_.find(name);
-	if (it == scenes_.end()) {
+	auto it = world_.find(name);
+	if (it == world_.end()) {
 		return;
 	}
 	currentScene_ = it->second.get();

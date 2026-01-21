@@ -435,3 +435,73 @@ Mat4x4 MAT4x4::DirectionToDirection(const Vec3f& from, const Vec3f& to)
 
 	return result;
 }
+
+Mat4x4 MAT4x4::LookAtLH(const Vec3f& eye, const Vec3f& at, const Vec3f& up)
+{
+	// 前方向（Z+ が前になる）
+	Vec3f zAxis = (at - eye).Normalized();
+
+	// 右方向
+	Vec3f xAxis = VEC3::Cross(up, zAxis).Normalized();
+
+	// 上方向（直交化）
+	Vec3f yAxis = VEC3::Cross(zAxis, xAxis);
+
+	Mat4x4 m{};
+
+	// 行ベクトル前提（row-major）
+	m.m[0][0] = xAxis.x;
+	m.m[0][1] = yAxis.x;
+	m.m[0][2] = zAxis.x;
+	m.m[0][3] = 0.0f;
+
+	m.m[1][0] = xAxis.y;
+	m.m[1][1] = yAxis.y;
+	m.m[1][2] = zAxis.y;
+	m.m[1][3] = 0.0f;
+
+	m.m[2][0] = xAxis.z;
+	m.m[2][1] = yAxis.z;
+	m.m[2][2] = zAxis.z;
+	m.m[2][3] = 0.0f;
+
+	// 平行移動（-dot(axis, eye)）
+	m.m[3][0] = -VEC3::Dot(xAxis, eye);
+	m.m[3][1] = -VEC3::Dot(yAxis, eye);
+	m.m[3][2] = -VEC3::Dot(zAxis, eye);
+	m.m[3][3] = 1.0f;
+
+	return m;
+}
+
+Mat4x4 MAT4x4::OrthoLH(float width, float height, float zn, float zf)
+{
+	Mat4x4 m{};
+
+	const float invW = 1.0f / width;
+	const float invH = 1.0f / height;
+	const float invD = 1.0f / (zf - zn);
+
+	// 行ベクトル前提（row-major）
+	m.m[0][0] = 2.0f * invW;
+	m.m[0][1] = 0.0f;
+	m.m[0][2] = 0.0f;
+	m.m[0][3] = 0.0f;
+
+	m.m[1][0] = 0.0f;
+	m.m[1][1] = 2.0f * invH;
+	m.m[1][2] = 0.0f;
+	m.m[1][3] = 0.0f;
+
+	m.m[2][0] = 0.0f;
+	m.m[2][1] = 0.0f;
+	m.m[2][2] = invD;
+	m.m[2][3] = 0.0f;
+
+	m.m[3][0] = 0.0f;
+	m.m[3][1] = 0.0f;
+	m.m[3][2] = -zn * invD;
+	m.m[3][3] = 1.0f;
+
+	return m;
+}

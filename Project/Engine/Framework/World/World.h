@@ -19,6 +19,7 @@
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Update/UpdateManager.h"
 #include "Framework/System/Camera/CameraSystem.h"
+#include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
 #include "Framework/System/Render/RenderSystem.h"
 #include "Framework/System/Transform/TransformSystem.h"
@@ -33,7 +34,7 @@ class World {
 
 public:
 	World()
-		: cameraSystem_(*this), materialSystem_(*this), renderSystem_(*this), transformSystem_(*this)
+		: cameraSystem_(*this), lightSystem_(*this), materialSystem_(*this), renderSystem_(*this), transformSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
 		updateMgr_.Register(&cameraSystem_);
@@ -257,6 +258,7 @@ protected:
 	// ===== 各種システム =====
 	UpdateManager updateMgr_;
 	CameraSystem cameraSystem_;
+	LightSystem lightSystem_;
 	MaterialSystem materialSystem_;
 	RenderSystem renderSystem_;
 	TransformSystem transformSystem_;

@@ -2,7 +2,7 @@
 
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
-#include "Framework/View/CameraContext.h"
+#include "Framework/Context/CameraContext.h"
 #include "Framework/World/CompView/ComponentView.h"
 
 // 前方宣言

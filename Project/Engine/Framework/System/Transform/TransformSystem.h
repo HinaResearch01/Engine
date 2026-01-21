@@ -20,6 +20,11 @@ public:
 	TransformSystem(World& world);
 
 	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~TransformSystem() = default;
+
+	/// <summary>
 	/// 更新処理
 	/// </summary>
 	void Update(float deltaTime) override;

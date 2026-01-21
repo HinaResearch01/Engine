@@ -194,6 +194,12 @@
     <ClCompile Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.cpp">
       <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Light\LightSystem.cpp">
+      <Filter>Engine\Framework\System\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Shadow\ShadowSystem.cpp">
+      <Filter>Engine\Framework\System\Shadow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -658,9 +664,6 @@
     <ClInclude Include="Engine\Framework\World\World.h">
       <Filter>Engine\Framework\World</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\View\CameraContext.h">
-      <Filter>Engine\Framework\View</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Update\UpdateManager.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
@@ -723,6 +726,24 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\Factory\ShadowDir\ShadowCasterDirectionalFactory.h">
       <Filter>Engine\Graphics\PSO\Factory\ShadowDir</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Light\DirectionalLightComponent.h">
+      <Filter>Engine\Framework\Component\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Light\LightSystem.h">
+      <Filter>Engine\Framework\System\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Context\CameraContext.h">
+      <Filter>Engine\Framework\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Context\LightContext.h">
+      <Filter>Engine\Framework\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Context\ShadowContext.h">
+      <Filter>Engine\Framework\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Shadow\ShadowSystem.h">
+      <Filter>Engine\Framework\System\Shadow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -960,9 +981,6 @@
     <Filter Include="Engine\Framework\System">
       <UniqueIdentifier>{fd8c4d85-def0-4e85-8c65-f0b4c0c76113}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\View">
-      <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Framework\World">
       <UniqueIdentifier>{66c8a253-6b32-4aa3-b023-d6ab6bfab1d5}</UniqueIdentifier>
     </Filter>
@@ -998,6 +1016,18 @@
     </Filter>
     <Filter Include="Engine\Graphics\PSO\Factory\ShadowDir">
       <UniqueIdentifier>{8661638a-ea8a-4c20-83c5-acaaa8a5f69c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Component\Light">
+      <UniqueIdentifier>{d8fbef7e-0ddd-477c-ad41-1adf50336e71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Light">
+      <UniqueIdentifier>{7859dc7d-ecf9-40ab-a65e-0b73078ce578}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Context">
+      <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Shadow">
+      <UniqueIdentifier>{233216cf-2eb6-4b4f-a9ba-03b271360743}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
