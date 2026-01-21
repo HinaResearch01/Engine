@@ -40,17 +40,6 @@ public:
 #pragma endregion 
 
 private:
-	/// <summary>
-	/// 
-	/// </summary>
-	void BuildMainDirectional();
-
-	/// <summary>
-	/// 
-	/// </summary>
-	static Math::Vec3f SafeNormalize(const Math::Vec3f& v);
-
-private:
 	World& world_;
 
 	LightContext context_{};

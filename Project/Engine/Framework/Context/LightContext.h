@@ -4,16 +4,18 @@
 
 namespace Tsumi::Framework {
 
+struct DirectionalLightData {
+	Math::Vec3f direction;
+	Math::Vec3f color;
+	float intensity;
+	bool castShadow;
+};
+
 // ライト情報
 struct LightContext {
-	bool valid = false;
-
-	Math::Mat4x4 view{};
-	Math::Mat4x4 proj{};
-	Math::Mat4x4 viewProj{};
-
-	Math::Vec3f position{};
-	Math::Vec3f forward{};
+	bool hasDirectional = false;
+	DirectionalLightData mainDirectional;
+	// 将来: point / spot 配列
 };
 
 }
