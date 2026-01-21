@@ -1035,7 +1035,7 @@
     <Filter Include="Resources\Shaders\Debug">
       <UniqueIdentifier>{77aa2756-3b08-4423-a302-f913b2ee8256}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Shaders\GBuffer">
+    <Filter Include="Resources\Shaders\Deferred">
       <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -1195,14 +1195,14 @@
     <FxCompile Include="Resources\Shaders\VS\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\VS</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\GB\GeometryBuffer.hlsl">
-      <Filter>Resources\Shaders\GBuffer</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Lighting\LightingDirectional.hlsl">
-      <Filter>Resources\Shaders\Lighting</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\Shaders\Debug\GBufferDebug.hlsl">
       <Filter>Resources\Shaders\Debug</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Deferred\LightingDirectional.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
