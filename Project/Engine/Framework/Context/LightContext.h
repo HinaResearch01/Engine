@@ -1,21 +1,36 @@
 #pragma once
 
 #include "Math/TMath.h"
+#include <optional>
+#include <vector>
 
 namespace Tsumi::Framework {
 
-struct DirectionalLightData {
-	Math::Vec3f direction;
-	Math::Vec3f color;
-	float intensity;
-	bool castShadow;
+struct DirectionalLightResolved {
+	bool enabled = false;
+	Math::Vec3f dirWS;
+	Math::Vec3f radiance;
 };
 
-// ライト情報
+struct PointLightResolved {
+	Math::Vec3f positionWS;
+	float range;
+	Math::Vec3f radiance;
+};
+
+struct SpotLightResolved {
+	Math::Vec3f positionWS;
+	float range;
+	Math::Vec3f directionWS;
+	float innerCos;
+	float outerCos;
+	Math::Vec3f radiance;
+};
+
 struct LightContext {
-	bool hasDirectional = false;
-	DirectionalLightData mainDirectional;
-	// 将来: point / spot 配列
+	DirectionalLightResolved directional;
+	std::vector<PointLightResolved> points;
+	std::vector<SpotLightResolved> spots;
 };
 
 }

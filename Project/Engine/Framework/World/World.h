@@ -13,6 +13,9 @@
 #include "Framework/Actor/IActor.h"
 #include "Framework/Component/IComponent.h"
 #include "Framework/Component/Camera/CameraComponent.h"
+#include "Framework/Component/Light/DirectionalLightComponent.h"
+#include "Framework/Component/Light/PointLightComponent.h"
+#include "Framework/Component/Light/SpotLightComponent.h"
 #include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
@@ -149,6 +152,9 @@ public:
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
 
 	ComponentView<CameraComponent>& GetCamerasCompView() { return cameraCompView_; }
+	ComponentView<DirectionalLightComponent>& GetDirectionalLightCompView() { return dirLightCompView_; }
+	ComponentView<PointLightComponent>& GetPointLightCompView() { return pointLightCompView_; }
+	ComponentView<SpotLightComponent>& GetSpotLightCompView() { return spotLightCompView_; }
 	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialCompView_; }
 	ComponentView<RenderComponent>& GetRenderCompView() { return renderCompView_; }
 	ComponentView<TransformComponent>& GetTransformsCompView() { return transformCompView_; }
@@ -201,6 +207,9 @@ protected:
 	{
 		// ここで World::View<T>() が生きる
 		RegisterView(cameraCompView_);
+		RegisterView(dirLightCompView_);
+		RegisterView(pointLightCompView_);
+		RegisterView(spotLightCompView_);
 		RegisterView(materialCompView_);
 		RegisterView(renderCompView_);
 		RegisterView(transformCompView_);
@@ -266,6 +275,9 @@ protected:
 	// ===== ComponentView =====
 	std::unordered_map<std::type_index, IComponentViewBase*> views_;
 	ComponentView<CameraComponent> cameraCompView_;
+	ComponentView<DirectionalLightComponent> dirLightCompView_;
+	ComponentView<PointLightComponent> pointLightCompView_;
+	ComponentView<SpotLightComponent> spotLightCompView_;
 	ComponentView<MaterialComponent> materialCompView_;
 	ComponentView<RenderComponent> renderCompView_;
 	ComponentView<TransformComponent> transformCompView_;

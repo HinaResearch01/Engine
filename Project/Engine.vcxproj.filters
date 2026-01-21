@@ -676,23 +676,8 @@
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h">
       <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\Hash\FNV1a.h">
       <Filter>Engine\Utils\Hash</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderGpuPackets.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\MaterialPacket.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderPacket.h">
-      <Filter>Engine\Framework\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Render\RenderPassTable.h">
-      <Filter>Engine\Framework\Render</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\World\CompView\ComponentView.h">
       <Filter>Engine\Framework\World\CompView</Filter>
@@ -744,6 +729,30 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\Shadow\ShadowSystem.h">
       <Filter>Engine\Framework\System\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\LightType.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\MaterialPacket.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\RenderGpuPackets.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\RenderPacket.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\RenderPassTable.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\RenderSurfaceType.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Light\PointLightComponent.h">
+      <Filter>Engine\Framework\Component\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Light\SpotLightComponent.h">
+      <Filter>Engine\Framework\Component\Light</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -984,9 +993,6 @@
     <Filter Include="Engine\Framework\World">
       <UniqueIdentifier>{66c8a253-6b32-4aa3-b023-d6ab6bfab1d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\Render">
-      <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Graphics\PSO\Factory">
       <UniqueIdentifier>{9ff78ee6-ba52-4fb1-beed-4a07eb5b6598}</UniqueIdentifier>
     </Filter>
@@ -1028,6 +1034,18 @@
     </Filter>
     <Filter Include="Engine\Framework\System\Shadow">
       <UniqueIdentifier>{233216cf-2eb6-4b4f-a9ba-03b271360743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Str">
+      <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Lighting">
+      <UniqueIdentifier>{3ccf188b-9880-4a3c-addf-ce397dc89cb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Debug">
+      <UniqueIdentifier>{77aa2756-3b08-4423-a302-f913b2ee8256}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\GBuffer">
+      <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1163,6 +1181,9 @@
     <None Include="Resources\Shaders\Common\Light.hlsli">
       <Filter>Resources\Shaders\Common</Filter>
     </None>
+    <None Include="Resources\Shaders\Common\DeferredCommon.hlsli">
+      <Filter>Resources\Shaders\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
@@ -1182,6 +1203,15 @@
     </FxCompile>
     <FxCompile Include="Resources\Shaders\VS\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\VS</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GB\GeometryBuffer.hlsl">
+      <Filter>Resources\Shaders\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Lighting\LightingDirectional.hlsl">
+      <Filter>Resources\Shaders\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Debug\GBufferDebug.hlsl">
+      <Filter>Resources\Shaders\Debug</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,130 @@
+// ================================
+// DeferredCommon.hlsli
+// ================================
+#ifndef TSUMI_DEFERRED_COMMON_HLSLI
+#define TSUMI_DEFERRED_COMMON_HLSLI
+
+// --------------------------------
+// Register Policy
+// --------------------------------
+// b0 : CameraCB
+// b1 : ObjectCB
+// b2 : MaterialCB
+// b3 : DirectionalLightCB（Lighting passのみ）
+//
+// t0 : AlbedoTex（GBuffer pass）
+// s0 : LinearWrap
+//
+// Lighting pass（GBuffer SRV）
+// t10 : GBuffer0_Albedo
+// t11 : GBuffer1_NormalWS
+// t12 : GBuffer2_Material
+// t13 : Depth (SRV)
+// s1  : PointClamp
+
+// --------------------------------
+// Common structs
+// --------------------------------
+struct VS_INPUT_GBUFFER
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float2 uv : TEXCOORD0;
+};
+
+struct VS_OUTPUT_GBUFFER
+{
+    float4 positionCS : SV_POSITION; // Clip
+    float3 positionWS : TEXCOORD0; // WorldPos
+    float3 normalWS : TEXCOORD1; // WorldNormal
+    float2 uv : TEXCOORD2;
+};
+
+struct GBUFFER_OUT
+{
+    float4 albedo : SV_Target0; // rgb=albedo
+    float4 normalWS : SV_Target1; // xyz=normalWS (-1..1)
+    float4 material : SV_Target2; // r=rough g=metal b=ao a=unused
+};
+
+// Fullscreen（Lighting pass）
+struct VS_OUTPUT_FULLSCREEN
+{
+    float4 positionCS : SV_POSITION;
+    float2 uv : TEXCOORD0;
+};
+
+// --------------------------------
+// Constant Buffers
+// --------------------------------
+cbuffer CameraCB : register(b0)
+{
+    float4x4 gView;
+    float4x4 gProj;
+    float4x4 gViewProj;
+    float4x4 gInvView;
+    float4x4 gInvProj;
+    float4x4 gInvViewProj;
+};
+
+cbuffer ObjectCB : register(b1)
+{
+    float4x4 gWorld;
+};
+
+cbuffer MaterialCB : register(b2)
+{
+    float3 gBaseColor; // fallback albedo
+    float gRoughness; // 0..1
+    float gMetallic; // 0..1
+    float gAO; // 0..1
+    float gUseAlbedoTex; // 0/1
+};
+
+// Lighting pass only
+cbuffer DirectionalLightCB : register(b3)
+{
+    float3 gLightDirWS;
+    float _pad0;
+    float3 gRadiance; // color * intensity（線形）
+    float _pad1;
+};
+
+// --------------------------------
+// Textures / Samplers
+// --------------------------------
+// GBuffer pass
+Texture2D gAlbedoTex : register(t0);
+SamplerState gLinearWrap : register(s0);
+
+// Lighting pass (SRV)
+Texture2D gGBuffer0_Albedo : register(t10);
+Texture2D gGBuffer1_NormalWS : register(t11);
+Texture2D gGBuffer2_Material : register(t12);
+Texture2D gDepth01 : register(t13);
+SamplerState gPointClamp : register(s1);
+
+// --------------------------------
+// Utilities
+// --------------------------------
+static float3 SafeNormalize(float3 v)
+{
+    float len2 = dot(v, v);
+    if (len2 < 1e-12f)
+        return float3(0, 1, 0);
+    return v * rsqrt(len2);
+}
+
+// Depth01 + invViewProj で WorldPos を復元
+static float3 ReconstructWorldPosFromDepth(float2 uv, float depth01)
+{
+    float ndcX = uv.x * 2.0f - 1.0f;
+    float ndcY = 1.0f - uv.y * 2.0f; // ここが合わなければ反転を外す
+
+    float4 clip = float4(ndcX, ndcY, depth01, 1.0f);
+    float4 wpos = mul(gInvViewProj, clip);
+    wpos.xyz /= max(wpos.w, 1e-6f);
+    return wpos.xyz;
+}
+
+#endif // TSUMI_DEFERRED_COMMON_HLSLI

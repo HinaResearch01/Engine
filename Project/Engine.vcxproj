@@ -348,17 +348,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Framework\Component\IComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Light\DirectionalLightComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Light\PointLightComponent.h" />
+    <ClInclude Include="Engine\Framework\Component\Light\SpotLightComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Material\MaterialComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Render\RenderComponent.h" />
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
     <ClInclude Include="Engine\Framework\Context\CameraContext.h" />
     <ClInclude Include="Engine\Framework\Context\LightContext.h" />
     <ClInclude Include="Engine\Framework\Context\ShadowContext.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderGpuPackets.h" />
-    <ClInclude Include="Engine\Framework\Render\MaterialPacket.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderPacket.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderPassTable.h" />
-    <ClInclude Include="Engine\Framework\Render\RenderSurfaceType.h" />
+    <ClInclude Include="Engine\Framework\Str\LightType.h" />
+    <ClInclude Include="Engine\Framework\Str\MaterialPacket.h" />
+    <ClInclude Include="Engine\Framework\Str\RenderGpuPackets.h" />
+    <ClInclude Include="Engine\Framework\Str\RenderPacket.h" />
+    <ClInclude Include="Engine\Framework\Str\RenderPassTable.h" />
+    <ClInclude Include="Engine\Framework\Str\RenderSurfaceType.h" />
     <ClInclude Include="Engine\Framework\System\Camera\CameraSystem.h" />
     <ClInclude Include="Engine\Framework\System\Light\LightSystem.h" />
     <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h" />
@@ -1081,6 +1084,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Resources\Shaders\Common\Camera.hlsli" />
+    <None Include="Resources\Shaders\Common\DeferredCommon.hlsli" />
     <None Include="Resources\Shaders\Common\Light.hlsli" />
     <None Include="Resources\Shaders\Common\Material.hlsli" />
     <None Include="Resources\Shaders\Common\Transform.hlsli" />
@@ -1095,6 +1099,33 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Debug\GBufferDebug.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\GB\GeometryBuffer.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Lighting\LightingDirectional.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\PS\Object3D_Static.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

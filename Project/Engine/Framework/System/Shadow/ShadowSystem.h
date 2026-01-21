@@ -3,7 +3,7 @@
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Context/ShadowContext.h"
-#include "Framework/Component/Light/DirectionalLightComponent.h"
+#include "Framework/Component/Light/LightComponent.h"
 
 namespace Tsumi::Framework {
 
@@ -38,6 +38,17 @@ public:
 #pragma region Accessor
 	const ShadowContext& GetShadowContext() const { return context_; }
 #pragma endregion 
+
+private:
+	/// <summary>
+	/// 
+	/// </summary>
+	Math::Mat4x4 BuildOrthoDX(float halfSize, float nearZ, float farZ) const;
+
+	/// <summary>
+	///  影ビュー行列
+	/// </summary>
+	Math::Mat4x4 BuildLightView(const Math::Vec3f& dirWS, const Math::Vec3f& centerWS) const;
 
 private:
 	World& world_;

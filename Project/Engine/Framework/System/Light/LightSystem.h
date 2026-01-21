@@ -3,7 +3,6 @@
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Context/LightContext.h"
-#include "Framework/Component/Light/DirectionalLightComponent.h"
 
 namespace Tsumi::Framework {
 
@@ -38,6 +37,12 @@ public:
 #pragma region Accessor
 	const LightContext& GetLightContext() const { return context_; }
 #pragma endregion 
+
+private:
+	/// <summary>
+	/// LightContextを組み立てる
+	/// </summary>
+	void BuildLightContext();
 
 private:
 	World& world_;
