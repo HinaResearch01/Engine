@@ -203,6 +203,9 @@
     <ClCompile Include="Engine\Graphic\PSO\Factory\LightingDir\LightingDirectionalPSOFactory.cpp">
       <Filter>Engine\Graphics\PSO\Factory\LightingDir</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp">
+      <Filter>Engine\Framework\System\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -759,6 +762,15 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\Factory\LightingDir\LightingDirectionalPSOFactory.h">
       <Filter>Engine\Graphics\PSO\Factory\LightingDir</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Render\RenderPrepareSystem.h">
+      <Filter>Engine\Framework\System\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\LightGpuPackets.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\LightPacket.h">
+      <Filter>Engine\Framework\Str</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

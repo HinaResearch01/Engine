@@ -24,6 +24,7 @@
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
+#include "Framework/System/Render/RenderPrepareSystem.h"
 #include "Framework/System/Render/RenderSystem.h"
 #include "Framework/System/Transform/TransformSystem.h"
 
@@ -37,11 +38,14 @@ class World {
 
 public:
 	World()
-		: cameraSystem_(*this), lightSystem_(*this), materialSystem_(*this), renderSystem_(*this), transformSystem_(*this)
+		: cameraSystem_(*this), lightSystem_(*this), materialSystem_(*this), 
+		renderPrepareSystem_(*this), renderSystem_(*this), transformSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
 		updateMgr_.Register(&cameraSystem_);
+		updateMgr_.Register(&lightSystem_);
 		updateMgr_.Register(&materialSystem_);
+		updateMgr_.Register(&renderPrepareSystem_);
 		updateMgr_.Register(&renderSystem_);
 		updateMgr_.Register(&transformSystem_);
 
@@ -73,6 +77,9 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, MaterialSystem>) {
 			return &materialSystem_;
+		}
+		else if constexpr (std::is_same_v<T, RenderPrepareSystem>) {
+			return &renderPrepareSystem_;
 		}
 		else if constexpr (std::is_same_v<T, RenderSystem>) {
 			return &renderSystem_;
@@ -269,6 +276,7 @@ protected:
 	CameraSystem cameraSystem_;
 	LightSystem lightSystem_;
 	MaterialSystem materialSystem_;
+	RenderPrepareSystem renderPrepareSystem_;
 	RenderSystem renderSystem_;
 	TransformSystem transformSystem_;
 

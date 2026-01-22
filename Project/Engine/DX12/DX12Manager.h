@@ -76,9 +76,88 @@ public:
 	/// </summary>
 	void PostDraw4SC();
 
+	/// <summary>
+	/// Viewportの取得
+	/// </summary>
+	Viewport GetMainViewport() const {
+		Viewport vp{};
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		vp.Width = static_cast<float>(framebuf_->GetWidth());
+		vp.Height = static_cast<float>(framebuf_->GetHeight());
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		return vp;
+	}
+
+	/// <summary>
+	/// Scissorの取得
+	/// </summary>
+	Scissor GetMainScissor() const {
+		Scissor rc{};
+		rc.Left = 0;
+		rc.Top = 0;
+		rc.Right = framebuf_->GetWidth();
+		rc.Bottom = framebuf_->GetHeight();
+		return rc;
+	}
+
+	/// <summary>
+	/// GBufferSRVTableの取得
+	/// </summary>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGBufferSRVTable() const {
+		return framebuf_->GetGBufferSrvTable();
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void SetGBufferRenderTargets(CommandContext* cmd) {
+		auto list = cmd->GetList();
+		// RTVs (3)
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvs[3] = {
+			framebuf_->GetGBufferRtv(0),
+			framebuf_->GetGBufferRtv(1),
+			framebuf_->GetGBufferRtv(2)
+		};
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv =
+			framebuf_->GetGBufferDsv();
+
+		list->OMSetRenderTargets(3, rtvs, FALSE, &dsv);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void ClearGBuffer() {
+		auto list = cmdContext_->GetList();
+		FLOAT clearAlbedo[4] = { 0,0,0,1 };
+		FLOAT clearNormal[4] = { 0,0,1,0 };
+		FLOAT clearMaterial[4] = { 1,0,1,0 };
+		framebuf_->ClearGBufferRT(list, 0, clearAlbedo);
+		framebuf_->ClearGBufferRT(list, 1, clearNormal);
+		framebuf_->ClearGBufferRT(list, 2, clearMaterial);
+		framebuf_->ClearGBufferDepth(list);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void SetBackBufferAsRenderTarget() {
+		UINT idx = swapChain_->GetCurrentBackBufferIndex();
+		PrepareBackBuffer(idx, framebuf_->GetBackBuffer(idx));
+		BindRenderTargets(idx);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void ClearBackBuffer() {
+		UINT idx = swapChain_->GetCurrentBackBufferIndex();
+		ClearRenderTargets(idx);
+	}
 
 #pragma region Accessor
-
 	ID3D12Device* GetDevice() const {
 		return dx12Device_ ? dx12Device_->GetDevice() : nullptr;
 	}
@@ -98,8 +177,7 @@ public:
 		return swapChain_ ? swapChain_->GetSwapChain() : nullptr;
 	}
 	UINT GetBufferCount() const { return bufferCount_; }
-	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; } // 最小 2 を保証
-
+	void SetBufferCount(UINT c) { bufferCount_ = (c >= 2) ? c : 2; }
 	SwapChain* GetSwapChain() const { return swapChain_.get(); }
 	CommandContext* GetCommandContext() const { return cmdContext_.get(); }
 	CommandContext* GetUploadCmdContext() const { return uploadCmdContext_.get(); }

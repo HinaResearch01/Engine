@@ -1,6 +1,10 @@
 #include "RenderSystem.h"
 #include <d3dx12.h>
 #include "Framework/World/World.h"
+#include "Framework/Component/Camera/CameraComponent.h"
+#include "Framework/Component/Material/MaterialComponent.h"
+#include "Framework/Component/Render/RenderComponent.h"
+#include "Framework/Component/Transform/TransformComponent.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Cmd/CommandContext.h"
 #include "Resource/ResourceSystem.h"
@@ -12,7 +16,7 @@
 
 using namespace Tsumi::Framework;
 
-uint64_t MakeSortKey(const DrawPacket& p, bool transparent)
+uint64_t MakeSortKey(const RenderPacket& p, bool transparent)
 {
 	uint64_t a = static_cast<uint64_t>(p.surface) & 0xFF;
 	uint64_t b = (reinterpret_cast<uintptr_t>(p.material) >> 4) & 0xFFFFFF;
@@ -33,162 +37,120 @@ RenderSystem::RenderSystem(World& world)
 
 void RenderSystem::Update(float)
 {
-	ClearLists();
+	auto prep = world_.GetSystem<RenderPrepareSystem>();
+	if (!prep) return;
 
-	// パケットを構築し、ソート処理
-	BuildDrawPackets();
-	SortLists();
+	GBufferPass(prep->GetRenderPackets());
+	LightingPass(prep->GetLightPacket());
 }
 
-void RenderSystem::RenderBackSprite(DX12::CommandContext& cmd)
+void RenderSystem::RenderBackSprite(DX12::CommandContext&) {}
+
+void RenderSystem::RenderModel(DX12::CommandContext&) {}
+
+void RenderSystem::RenderFrontSprite(DX12::CommandContext&) {}
+
+void RenderSystem::GBufferPass(const std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)>& lists)
 {
-	cmd;
-}
+	auto* cmd = dx12Mgr_->GetCommandContext();
 
-void RenderSystem::RenderModel(DX12::CommandContext& cmd)
-{
-	auto viewCBAddr = UploadViewCB();
-	if (viewCBAddr == 0) return;
-
-	for (size_t i = 0; i < lists_.size(); ++i)
-	{
-		if (lists_[i].empty()) continue;
-		RenderSurfacePass(cmd, static_cast<SurfaceType>(i), viewCBAddr);
-	}
-}
-
-void RenderSystem::RenderFrontSprite(DX12::CommandContext& cmd)
-{
-	cmd;
-}
-
-void RenderSystem::BuildDrawPackets()
-{
-	auto materialSys = world_.GetSystem<MaterialSystem>();
-
-	for (auto [rc, mc, tc] :
-		 world_.View<RenderComponent, MaterialComponent, TransformComponent>())
-	{
-		if (!rc.visible || !mc.visible) continue;
-		if (rc.mesh.empty()) continue;
-
-		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
-		if (!mesh) continue;
-
-		auto* mat = materialSys->GetPacket(mc);
-		if (!mat) continue;
-
-		DrawPacket pkt{};
-		pkt.surface = mc.surface;
-		pkt.mesh = mesh;
-		pkt.material = mat;
-
-		// テクスチャ未設定時のフォールバック
-		if (!pkt.material->albedo && !mesh->defaultTextureKey.empty()) {
-			// MeshAssetが持っているデフォルトキーで検索を試みる
-			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
-			if (tex) {
-				const_cast<MaterialPacket*>(pkt.material)->albedo = tex;
-			}
-		}
-
-		FillTransformPacket(pkt, tc);
-
-		const auto& pass = RenderPassTable::Get(pkt.surface);
-		pkt.sortKey = MakeSortKey(pkt, pass.transparent);
-
-		lists_[static_cast<size_t>(pkt.surface)].push_back(pkt);
-	}
-}
-
-void RenderSystem::FillTransformPacket(DrawPacket& pkt, const TransformComponent& tc)
-{
-	pkt.xform.world = tc.world;
-	pkt.xform.worldInvTranspose = tc.worldInvTranspose;
-}
-
-void RenderSystem::ClearLists()
-{
-	for (auto& l : lists_) {
-		l.clear();
-	}
-}
-
-void RenderSystem::SortLists()
-{
-	for (size_t i = 0; i < lists_.size(); ++i)
-	{
-		auto surface = static_cast<SurfaceType>(i);
-		const auto& pass = RenderPassTable::Get(surface);
-		pass;
-
-		auto& list = lists_[i];
-		if (list.empty()) continue;
-
-		std::sort(list.begin(), list.end(), [&](const DrawPacket& a, const DrawPacket& b)
-		{
-			// opaque: 状態変更最小化
-			// transparent: depthが入ったら遠→近にする（TODO 今は未実装）
-			return a.sortKey < b.sortKey;
-		});
-	}
-}
-
-D3D12_GPU_VIRTUAL_ADDRESS RenderSystem::UploadViewCB()
-{
+	// Camera CB（GBuffer用）
 	auto cameraSys = world_.GetSystem<CameraSystem>();
 	const auto& cam = cameraSys->GetCameraContext();
-	if (!cam.valid) return 0; // または描画スキップ
+	if (!cam.valid) return;
 
-	GpuViewCB cb{};
-	cb.view = cam.view;
-	cb.proj = cam.proj;
-	cb.viewProj = cam.viewProj;
-	cb.cameraPos = cam.position;
+	GpuViewCB viewCB{};
+	viewCB.view = cam.view;
+	viewCB.proj = cam.proj;
+	viewCB.viewProj = cam.viewProj;
+	viewCB.cameraPos = cam.position;
 
-	return resourceSys_->GetFrameCBManager()->UploadCB(cb);
-}
+	auto viewCBAddr = resourceSys_->GetFrameCBManager()->UploadCB(viewCB);
 
-void RenderSystem::RenderSurfacePass(DX12::CommandContext& cmd, SurfaceType surface, D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr)
-{
-	const auto& pass = RenderPassTable::Get(surface);
-	auto& list = lists_[static_cast<size_t>(surface)];
+	// RT設定
+	dx12Mgr_->SetGBufferRenderTargets(cmd);
+	dx12Mgr_->ClearGBuffer();
+	cmd->SetViewport(dx12Mgr_->GetMainViewport());
+	cmd->SetScissor(dx12Mgr_->GetMainScissor());
 
-	// ヒープの取得と選択
-	ID3D12DescriptorHeap* desc[] = {
-		dx12Mgr_->GetPersistentDescAlloc()->GetHeap()
-	};
-	cmd.GetList()->SetDescriptorHeaps(1, desc);
+	// PSO / RootSig
+	cmd->GetList()->SetPipelineState(psoLib_->Get("GBuffer"));
+	cmd->GetList()->SetGraphicsRootSignature(rootSigLib_->Get("GBuffer"));
 
-	SetupPassState(cmd, pass, viewCBAddr);
+	// DescriptorHeap
+	ID3D12DescriptorHeap* heaps[] = { dx12Mgr_->GetPersistentDescAlloc()->GetHeap() };
+	cmd->GetList()->SetDescriptorHeaps(1, heaps);
 
-	for (auto& pkt : list) {
-		RenderPacket(cmd, pkt);
+	// Opaque のみ（まずは）
+	const auto& list = lists[static_cast<size_t>(SurfaceType::Opaque)];
+	if (list.empty()) return;
+
+	cmd->GetList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// RootParam[0] : ViewCB (b0)
+	cmd->GetList()->SetGraphicsRootConstantBufferView(0, viewCBAddr);
+
+	for (const auto& pkt : list)
+	{
+		RenderPackets(*cmd, pkt);
 	}
 }
 
-void RenderSystem::SetupPassState(DX12::CommandContext& cmd, const RenderPassDesc& pass, D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr)
+void RenderSystem::LightingPass(const LightPacket& lightPacket)
 {
-	cmd.GetList()->SetGraphicsRootSignature(
-		rootSigLib_->Get(pass.rootName.data()));
-	cmd.GetList()->SetPipelineState(
-		psoLib_->Get(pass.psoName.data()));
-	cmd.GetList()->IASetPrimitiveTopology(
-		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	auto* cmd = dx12Mgr_->GetCommandContext();
 
-	// RootParam[0] : ViewCB
-	cmd.GetList()->SetGraphicsRootConstantBufferView(0, viewCBAddr);
+	// BackBuffer
+	dx12Mgr_->SetBackBufferAsRenderTarget();
+	dx12Mgr_->ClearBackBuffer();
+	cmd->SetViewport(dx12Mgr_->GetMainViewport());
+	cmd->SetScissor(dx12Mgr_->GetMainScissor());
+
+	// PSO / RootSig
+	cmd->GetList()->SetPipelineState(psoLib_->Get("LightingDirectional"));
+	cmd->GetList()->SetGraphicsRootSignature(rootSigLib_->Get("LightingDirectional"));
+
+	// DescriptorHeap
+	ID3D12DescriptorHeap* heaps[] = { dx12Mgr_->GetPersistentDescAlloc()->GetHeap() };
+	cmd->GetList()->SetDescriptorHeaps(1, heaps);
+
+	// Camera CB（Lighting用）
+	auto cameraSys = world_.GetSystem<CameraSystem>();
+	const auto& cam = cameraSys->GetCameraContext();
+	if (!cam.valid) return;
+
+	GpuViewCB viewCB{};
+	viewCB.view = cam.view;
+	viewCB.proj = cam.proj;
+	viewCB.viewProj = cam.viewProj;
+	viewCB.cameraPos = cam.position;
+
+	auto camCBAddr = resourceSys_->GetFrameCBManager()->UploadCB(viewCB);
+
+	// DirectionalLightCB
+	auto lightCBAddr = resourceSys_->GetFrameCBManager()->UploadCB(lightPacket.dirCB);
+
+	// Root params
+	cmd->GetList()->SetGraphicsRootConstantBufferView(0, camCBAddr);    // b0 Camera
+	cmd->GetList()->SetGraphicsRootConstantBufferView(1, lightCBAddr);  // b1 Light
+	cmd->GetList()->SetGraphicsRootDescriptorTable(2, dx12Mgr_->GetGBufferSRVTable()); // t10.. etc
+
+	// Fullscreen triangle
+	cmd->GetList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	cmd->GetList()->DrawInstanced(3, 1, 0, 0);
 }
 
-void RenderSystem::RenderPacket(DX12::CommandContext& cmd, const DrawPacket& pkt)
+void RenderSystem::RenderPackets(DX12::CommandContext& cmd, const RenderPacket& pkt)
 {
 	BindMesh(cmd, pkt);
 	BindTransform(cmd, pkt);
 	BindMaterial(cmd, pkt);
-	DrawCommand(cmd, pkt);
+
+	cmd.GetList()->DrawIndexedInstanced(
+		pkt.mesh->indexCount, 1, 0, 0, 0);
 }
 
-void RenderSystem::BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt)
+void RenderSystem::BindMesh(DX12::CommandContext& cmd, const RenderPacket& pkt)
 {
 	if (!pkt.mesh) return;
 
@@ -216,13 +178,13 @@ void RenderSystem::BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt)
 	cmd.GetList()->IASetIndexBuffer(&pkt.mesh->ibView);
 }
 
-void RenderSystem::BindTransform(DX12::CommandContext& cmd, const DrawPacket& pkt)
+void RenderSystem::BindTransform(DX12::CommandContext& cmd, const RenderPacket& pkt)
 {
 	auto addr = resourceSys_->GetFrameCBManager()->UploadCB(pkt.xform);
 	cmd.GetList()->SetGraphicsRootConstantBufferView(1, addr);
 }
 
-void RenderSystem::BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt)
+void RenderSystem::BindMaterial(DX12::CommandContext& cmd, const RenderPacket& pkt)
 {
 	if (!pkt.material) return;
 
@@ -252,7 +214,7 @@ void RenderSystem::BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt
 	}
 }
 
-void RenderSystem::DrawCommand(DX12::CommandContext& cmd, const DrawPacket& pkt)
+void RenderSystem::DrawCommand(DX12::CommandContext& cmd, const RenderPacket& pkt)
 {
 	if (!pkt.mesh) return;
 

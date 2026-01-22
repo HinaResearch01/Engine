@@ -3,6 +3,7 @@
 #include "Math/TMath.h"
 #include <optional>
 #include <vector>
+#include "Framework/Str/LightPacket.h"
 
 namespace Tsumi::Framework {
 
@@ -31,6 +32,8 @@ struct LightContext {
 	DirectionalLightResolved directional;
 	std::vector<PointLightResolved> points;
 	std::vector<SpotLightResolved> spots;
+
+	LightPacket packet;
 };
 
 }

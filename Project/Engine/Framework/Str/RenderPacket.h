@@ -8,7 +8,7 @@
 
 namespace Tsumi::Framework {
 
-struct DrawPacket
+struct RenderPacket
 {
 	SurfaceType surface{};
 

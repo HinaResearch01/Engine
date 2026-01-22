@@ -5,14 +5,8 @@
 #include <vector>
 #include "Math/TMath.h"
 #include "Framework/Update/IUpdatable.h"
-#include "Framework/Component/Camera/CameraComponent.h"
-#include "Framework/Component/Material/MaterialComponent.h"
-#include "Framework/Component/Render/RenderComponent.h"
-#include "Framework/Component/Transform/TransformComponent.h"
-#include "Framework/Str/RenderGpuPackets.h"
 #include "Framework/Str/RenderPacket.h"
-#include "Framework/Str/RenderPassTable.h"
-#include "Framework/Str/RenderSurfaceType.h"
+#include "Framework/Str/LightPacket.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
@@ -33,6 +27,7 @@ namespace Tsumi::Framework {
 class World;
 class CameraSystem;
 class MaterialSystem;
+class TransformComponent;
 
 /* 描画管理クラス */
 class RenderSystem : public IUpdatable {
@@ -66,74 +61,31 @@ public:
 	void RenderModel(DX12::CommandContext& cmd);
 	void RenderFrontSprite(DX12::CommandContext& cmd);
 
-#pragma region Accessor
-
-#pragma	endregion
-
 private:
 	/// <summary>
-	/// パケットの組み立て
+	/// Pass
 	/// </summary>
-	void BuildDrawPackets();
-
-	/// <summary>
-	/// Transformの行列計算
-	/// </summary>
-	void FillTransformPacket(DrawPacket& pkt, const TransformComponent& tc);
-
-	/// <summary>
-	/// 描画リストのクリア
-	/// </summary>
-	void ClearLists();
-
-	/// <summary>
-	/// 描画リストのソート
-	/// </summary>
-	void SortLists();
-
-	/// <summary>
-	/// ViewCB アップロード
-	/// </summary>
-	D3D12_GPU_VIRTUAL_ADDRESS UploadViewCB();
-
-	/// <summary>
-	/// Pass 単位描画
-	/// </summary>
-	void RenderSurfacePass(
-		DX12::CommandContext& cmd,
-		SurfaceType surface,
-		D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr);
-
-	/// <summary>
-	/// RenderPassDescの設定
-	/// </summary>
-	void SetupPassState(
-		DX12::CommandContext& cmd,
-		const RenderPassDesc& pass,
-		D3D12_GPU_VIRTUAL_ADDRESS viewCBAddr);
+	void GBufferPass(const std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)>& lists);
+	void LightingPass(const LightPacket& lightPacket);
 
 	/// <summary>
 	/// 各パケットの描画処理
 	/// </summary>
-	void RenderPacket(DX12::CommandContext& cmd, const DrawPacket& pkt);
+	void RenderPackets(DX12::CommandContext& cmd, const RenderPacket& pkt);
 
 	/// <summary>
 	/// バインド処理
 	/// </summary>
-	void BindCamera();
-	void BindMesh(DX12::CommandContext& cmd, const DrawPacket& pkt);
-	void BindTransform(DX12::CommandContext& cmd, const DrawPacket& pkt);
-	void BindMaterial(DX12::CommandContext& cmd, const DrawPacket& pkt);
+	void BindMesh(DX12::CommandContext& cmd, const RenderPacket& pkt);
+	void BindTransform(DX12::CommandContext& cmd, const RenderPacket& pkt);
+	void BindMaterial(DX12::CommandContext& cmd, const RenderPacket& pkt);
 
 	/// <summary>
 	/// 描画コマンド
 	/// </summary>
-	void DrawCommand(DX12::CommandContext& cmd, const DrawPacket& pkt);
+	void DrawCommand(DX12::CommandContext& cmd, const RenderPacket& pkt);
 
 private:
-	using List = std::vector<DrawPacket>;
-	std::array<List, static_cast<size_t>(SurfaceType::Count)> lists_;
-	
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Resource::ResourceSystem* resourceSys_ = nullptr;

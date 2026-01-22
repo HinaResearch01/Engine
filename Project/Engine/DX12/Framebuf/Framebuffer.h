@@ -1,11 +1,21 @@
 #pragma once
 
 #include <d3d12.h>
+#include <d3dx12.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <vector>
 
 namespace Tsumi::DX12 {
+
+// Framebuffer.h の上の方
+constexpr UINT GBUFFER_COUNT = 3;
+
+enum class GBufferType : UINT {
+	Albedo = 0,
+	Normal = 1,
+	Material = 2,
+};
 
 // 前方宣言
 class DX12Manager;
@@ -70,6 +80,42 @@ public:
 	D3D12_RESOURCE_STATES GetBackBufferState(UINT index) const;
 	void SetBackBufferState(UINT index, D3D12_RESOURCE_STATES state);
 
+	/// <summary>
+	/// GBuffer RTV
+	/// </summary>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferRtv(UINT index) const {
+		return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			gbufferRtvHeap_->GetCPUDescriptorHandleForHeapStart(),
+			index, gbufferRtvDescriptorSize_);
+	}
+
+	/// <summary>
+	/// GBuffer DSV
+	/// </summary>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDsv() const {
+		return gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart();
+	}
+
+	/// <summary>
+	/// GBuffer SRV (連続テーブル先頭)
+	/// </summary>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGBufferSrvTable() const {
+		return gbufferSrvHeap_->GetGPUDescriptorHandleForHeapStart();
+	}
+
+	/// <summary>
+	/// Clear
+	/// </summary>
+	void ClearGBufferRT(ID3D12GraphicsCommandList* cmdList, UINT index, const FLOAT clearColor[4]) const {
+		cmdList->ClearRenderTargetView(
+			GetGBufferRtv(index), clearColor, 0, nullptr);
+	}
+	void ClearGBufferDepth(ID3D12GraphicsCommandList* cmdList) const {
+		cmdList->ClearDepthStencilView(
+			GetGBufferDsv(), D3D12_CLEAR_FLAG_DEPTH,
+			1.0f, 0, 0, nullptr);
+	}
+
 #pragma region Accessor
 	
 	UINT GetWidth() const { return width_; }
@@ -78,7 +124,6 @@ public:
 	UINT GetBackBufferCount() const { return static_cast<UINT>(backBuffers_.size()); }
 
 #pragma endregion
-
 
 private:
 	/// <summary>
@@ -109,6 +154,26 @@ private:
 	DXGI_FORMAT depthStencilFormat_ = DXGI_FORMAT_D32_FLOAT;
 	UINT width_ = 0;
 	UINT height_ = 0;
+
+	// Resources
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> gbufferRTs_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> gbufferDepth_;
+
+	// Formats
+	DXGI_FORMAT gbufferFormats_[GBUFFER_COUNT] = {
+		DXGI_FORMAT_R8G8B8A8_UNORM,      // Albedo
+		DXGI_FORMAT_R16G16B16A16_FLOAT, // Normal
+		DXGI_FORMAT_R8G8B8A8_UNORM       // Material
+	};
+
+	// Descriptor Heaps (RTV / SRV / DSV)
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferRtvHeap_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferSrvHeap_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferDsvHeap_;
+
+	UINT gbufferRtvDescriptorSize_ = 0;
+	UINT gbufferSrvDescriptorSize_ = 0;
+	UINT gbufferDsvDescriptorSize_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };
