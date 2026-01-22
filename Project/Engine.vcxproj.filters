@@ -206,6 +206,9 @@
     <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp">
       <Filter>Engine\Framework\System\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\RootSigs\RootSignatureDesc.cpp">
+      <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -772,6 +775,9 @@
     <ClInclude Include="Engine\Framework\Str\LightPacket.h">
       <Filter>Engine\Framework\Str</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureDesc.h">
+      <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1225,14 +1231,17 @@
     <FxCompile Include="Resources\Shaders\VS\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\VS</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Debug\GBufferDebug.hlsl">
-      <Filter>Resources\Shaders\Debug</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Deferred\LightingDirectional.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.VS.hlsl">
+      <Filter>Resources\Shaders\Debug</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.PS.hlsl">
+      <Filter>Resources\Shaders\Debug</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

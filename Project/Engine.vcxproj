@@ -202,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp" />
+    <ClCompile Include="Engine\Graphic\RootSigs\RootSignatureDesc.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
@@ -385,6 +386,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h" />
+    <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureDesc.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
@@ -1106,7 +1108,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Debug\GBufferDebug.hlsl">
+    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>

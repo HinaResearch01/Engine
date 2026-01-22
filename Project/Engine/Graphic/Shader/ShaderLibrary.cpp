@@ -82,6 +82,16 @@ void ShaderLibrary::CompileAllShader()
 		tryCompile("LightingDirectional", m);
 	}
 
+	// -------------------------------
+	// Deferred : DebugFullscreen Pass
+	// -------------------------------
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Debug/DebugFullscreen.VS.hlsl", "main" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Debug/DebugFullscreen.PS.hlsl", "main" };
+		tryCompile("DebugFullscreen", m);
+	}
+
 	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader - completed (errors were logged per-shader if any)");
 }
 

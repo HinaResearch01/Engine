@@ -130,14 +130,11 @@ public:
 	/// 
 	/// </summary>
 	void ClearGBuffer() {
-		auto list = cmdContext_->GetList();
-		FLOAT clearAlbedo[4] = { 0,0,0,1 };
-		FLOAT clearNormal[4] = { 0,0,1,0 };
-		FLOAT clearMaterial[4] = { 1,0,1,0 };
-		framebuf_->ClearGBufferRT(list, 0, clearAlbedo);
-		framebuf_->ClearGBufferRT(list, 1, clearNormal);
-		framebuf_->ClearGBufferRT(list, 2, clearMaterial);
-		framebuf_->ClearGBufferDepth(list);
+		// cmdContext_ が null だと KernelBase 系で落ちやすいのでガード
+		if (!cmdContext_ || !framebuf_) return;
+		ID3D12GraphicsCommandList* list = cmdContext_->GetList();
+		if (!list) return;
+		framebuf_->ClearGBuffer(list);
 	}
 
 	/// <summary>

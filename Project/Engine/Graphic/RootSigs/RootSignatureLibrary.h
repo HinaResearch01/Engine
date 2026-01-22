@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 #include <mutex>
-
 #include "Utils/Logger/Logger.h"
+#include "RootSignatureDesc.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
@@ -42,8 +42,7 @@ public:
 	/// <summary>
 	/// ルートシグネチャの登録
 	/// </summary>
-	void Register(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc,
-		const std::vector<D3D12_STATIC_SAMPLER_DESC>& staticSamplers = {});
+	void Register(const std::string& name, RootSignatureDesc& rs);
 
 	/// <summary>
 	/// 指定名のルートシグネチャを取得（存在しない場合は nullptr を返す）
@@ -60,12 +59,16 @@ public:
 #pragma endregion
 
 private:
+	void RegisterFromDesc(const std::string& name,const D3D12_ROOT_SIGNATURE_DESC& desc,
+						  const std::vector<D3D12_STATIC_SAMPLER_DESC>& samplers);
+
 	/// <summary>
 	/// ルートシグネチャの生成
 	/// </summary>
 	void CreateObject3D();
 	void CreateGBuffer();
 	void CreateLightingDirectional();
+	void CreateDebugFullScreen();
 	
 private:
 	mutable std::mutex mutex_;

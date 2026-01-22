@@ -16,16 +16,6 @@
 
 using namespace Tsumi::Framework;
 
-uint64_t MakeSortKey(const RenderPacket& p, bool transparent)
-{
-	uint64_t a = static_cast<uint64_t>(p.surface) & 0xFF;
-	uint64_t b = (reinterpret_cast<uintptr_t>(p.material) >> 4) & 0xFFFFFF;
-	uint64_t c = (reinterpret_cast<uintptr_t>(p.mesh) >> 4) & 0xFFFFFF;
-	uint64_t d = 0; // depth (TODO)
-	transparent;
-	return (a << 56) | (b << 32) | (c << 8) | d;
-}
-
 RenderSystem::RenderSystem(World& world)
 	: world_(world)
 {
@@ -37,16 +27,19 @@ RenderSystem::RenderSystem(World& world)
 
 void RenderSystem::Update(float)
 {
+	
+}
+
+void RenderSystem::RenderBackSprite(DX12::CommandContext&) {}
+
+void RenderSystem::RenderModel(DX12::CommandContext&) 
+{
 	auto prep = world_.GetSystem<RenderPrepareSystem>();
 	if (!prep) return;
 
 	GBufferPass(prep->GetRenderPackets());
 	LightingPass(prep->GetLightPacket());
 }
-
-void RenderSystem::RenderBackSprite(DX12::CommandContext&) {}
-
-void RenderSystem::RenderModel(DX12::CommandContext&) {}
 
 void RenderSystem::RenderFrontSprite(DX12::CommandContext&) {}
 

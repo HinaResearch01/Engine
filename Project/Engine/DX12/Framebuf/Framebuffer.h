@@ -84,6 +84,8 @@ public:
 	/// GBuffer RTV
 	/// </summary>
 	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferRtv(UINT index) const {
+		if (!gbufferRtvHeap_) return {};
+		if (index >= GBUFFER_COUNT) return {};
 		return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			gbufferRtvHeap_->GetCPUDescriptorHandleForHeapStart(),
 			index, gbufferRtvDescriptorSize_);
@@ -93,6 +95,7 @@ public:
 	/// GBuffer DSV
 	/// </summary>
 	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDsv() const {
+		if (!gbufferDsvHeap_) return {};
 		return gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart();
 	}
 
@@ -100,29 +103,65 @@ public:
 	/// GBuffer SRV (連続テーブル先頭)
 	/// </summary>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGBufferSrvTable() const {
+		if (!gbufferSrvHeap_) return {};
 		return gbufferSrvHeap_->GetGPUDescriptorHandleForHeapStart();
+	}
+
+	/// <summary>
+	/// CreateCommittedResource の ClearValue と完全一致する値でクリアする
+	/// </summary>
+	static const FLOAT* GetGBufferClearColor(GBufferType type) {
+		switch (type) {
+			case GBufferType::Albedo: {
+				static const FLOAT c[4] = { 0,0,0,1 };
+				return c;
+			}
+			case GBufferType::Normal: {
+				static const FLOAT c[4] = { 0,0,1,1 }; // A=1 推奨
+				return c;
+			}
+			case GBufferType::Material: {
+				static const FLOAT c[4] = { 1,0,1,1 };
+				return c;
+			}
+			default: {
+				static const FLOAT c[4] = { 0,0,0,1 };
+				return c;
+			}
+		}
 	}
 
 	/// <summary>
 	/// Clear
 	/// </summary>
 	void ClearGBufferRT(ID3D12GraphicsCommandList* cmdList, UINT index, const FLOAT clearColor[4]) const {
-		cmdList->ClearRenderTargetView(
-			GetGBufferRtv(index), clearColor, 0, nullptr);
+		if (!cmdList) return;
+		if (!gbufferRtvHeap_) return;
+		if (gbufferRtvDescriptorSize_ == 0) return;
+		if (index >= GBUFFER_COUNT) return;
+
+		auto rtv = GetGBufferRtv(index);
+		if (rtv.ptr == 0) return;
+
+		cmdList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
 	void ClearGBufferDepth(ID3D12GraphicsCommandList* cmdList) const {
-		cmdList->ClearDepthStencilView(
-			GetGBufferDsv(), D3D12_CLEAR_FLAG_DEPTH,
-			1.0f, 0, 0, nullptr);
+		if (!cmdList) return;
+		auto dsv = GetGBufferDsv();
+		if (dsv.ptr == 0) return;
+		cmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
+	void ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const {
+		ClearGBufferRT(cmdList, 0, GetGBufferClearColor(GBufferType::Albedo));
+		ClearGBufferRT(cmdList, 1, GetGBufferClearColor(GBufferType::Normal));
+		ClearGBufferRT(cmdList, 2, GetGBufferClearColor(GBufferType::Material));
+		ClearGBufferDepth(cmdList);
 	}
 
 #pragma region Accessor
-	
 	UINT GetWidth() const { return width_; }
 	UINT GetHeight() const { return height_; }
-
 	UINT GetBackBufferCount() const { return static_cast<UINT>(backBuffers_.size()); }
-
 #pragma endregion
 
 private:
