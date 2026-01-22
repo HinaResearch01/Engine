@@ -28,16 +28,22 @@ public:
 		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_PIXEL
 	);
 
+	void SetFlags(D3D12_ROOT_SIGNATURE_FLAGS flags);
+
 	D3D12_ROOT_SIGNATURE_DESC BuildDesc();
 
 	const std::vector<D3D12_STATIC_SAMPLER_DESC>& GetStaticSamplers() const {
 		return staticSamplers_;
 	}
+	
 
 private:
 	std::vector<CD3DX12_ROOT_PARAMETER> params_;
 	std::vector<CD3DX12_DESCRIPTOR_RANGE> ranges_;
 	std::vector<D3D12_STATIC_SAMPLER_DESC> staticSamplers_;
+
+	D3D12_ROOT_SIGNATURE_FLAGS flags_ =
+		D3D12_ROOT_SIGNATURE_FLAG_NONE;
 };
 
 }

@@ -149,11 +149,9 @@ void RootSignatureLibrary::CreateObject3D()
 		D3D12_SHADER_VISIBILITY_PIXEL
 	);
 
-	// IA 入力があるので Allow IA
-	auto desc = rs.BuildDesc();
-	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
-	RegisterFromDesc("Object3D", desc, rs.GetStaticSamplers());
+	Register("Object3D", rs);
 }
 
 void RootSignatureLibrary::CreateGBuffer()
@@ -188,7 +186,7 @@ void RootSignatureLibrary::CreateGBuffer()
 	auto desc = rs.BuildDesc();
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	RegisterFromDesc("GBuffer", desc, rs.GetStaticSamplers());
+	Register("GBuffer", rs);
 }
 
 void RootSignatureLibrary::CreateLightingDirectional()
@@ -217,7 +215,7 @@ void RootSignatureLibrary::CreateLightingDirectional()
 	auto desc = rs.BuildDesc();
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
 
-	RegisterFromDesc("LightingDirectional", desc, rs.GetStaticSamplers());
+	Register("LightingDirectional", rs);
 }
 
 void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()

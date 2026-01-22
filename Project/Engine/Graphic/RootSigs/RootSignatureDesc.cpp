@@ -45,6 +45,11 @@ void RootSignatureDesc::AddStaticSampler(
 	staticSamplers_.push_back(s);
 }
 
+void RootSignatureDesc::SetFlags(D3D12_ROOT_SIGNATURE_FLAGS flags)
+{
+	flags_ = flags;
+}
+
 D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc::BuildDesc()
 {
 	D3D12_ROOT_SIGNATURE_DESC desc{};
@@ -52,6 +57,6 @@ D3D12_ROOT_SIGNATURE_DESC RootSignatureDesc::BuildDesc()
 	desc.pParameters = params_.data();
 	desc.NumStaticSamplers = static_cast<UINT>(staticSamplers_.size());
 	desc.pStaticSamplers = staticSamplers_.data();
-	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
+	desc.Flags = flags_;
 	return desc;
 }
