@@ -6,9 +6,9 @@
 namespace Tsumi::Framework {
 
 struct GpuDirectionalLightCB {
-	// 光の向き（正規化済み）
+	// 光の向き
 	Math::Vec3f directionWS;
-	float pad0;
+	int enabled = 0;
 
 	// 放射輝度（HDR）
 	Math::Vec3f radiance;
@@ -19,8 +19,28 @@ struct GpuDirectionalLightCB {
 	Math::Vec3f pad2;
 };
 
-struct GpuPointLightCB {}; // TODO
+struct GpuPointLightCB {
+	// 座標
+	Math::Vec3f positionWS;
+	float range;
 
-struct GpuSpotLightCB {}; // TODO
+	// 放射輝度（HDR）
+	Math::Vec3f radiance;
+	float _pad0;
+};
+
+struct GpuSpotLightCB {
+	// 座標
+	Math::Vec3f positionWS;
+	float range;
+
+	// 光の向き
+	Math::Vec3f directionWS;
+	float innerCos;
+
+	// 放射輝度（HDR）
+	Math::Vec3f radiance;
+	float outerCos;
+};
 
 }

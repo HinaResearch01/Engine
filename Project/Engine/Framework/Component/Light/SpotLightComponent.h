@@ -15,8 +15,14 @@ public:
 	Math::Vec3f color{ 1,1,1 };
 	float intensity = 1.0f;
 	float range = 10.0f;
+
+	// 角度
 	float innerAngle;
 	float outerAngle;
+
+	// GPU 用
+	float innerCos;
+	float outerCos;
 };
 
 }
