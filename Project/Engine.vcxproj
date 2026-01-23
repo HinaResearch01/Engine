@@ -203,6 +203,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
+    <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp" />
     <ClCompile Include="Engine\Loader\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp" />
     <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp" />
@@ -384,6 +385,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h" />
     <ClInclude Include="Engine\Loader\LoaderAPI.h" />
     <ClInclude Include="Engine\Loader\Mesh\MeshLoader.h" />
     <ClInclude Include="Engine\Loader\Model\ModelLoader.h" />

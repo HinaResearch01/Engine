@@ -203,6 +203,9 @@
     <ClCompile Include="Engine\Resource\GView\GpuViewManager.cpp">
       <Filter>Engine\Resource\GView</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -763,6 +766,9 @@
     <ClInclude Include="Engine\Resource\GView\GpuViewManager.h">
       <Filter>Engine\Resource\GView</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1046,6 +1052,9 @@
     </Filter>
     <Filter Include="Engine\Resource\GView">
       <UniqueIdentifier>{6f6f5649-8b75-4918-b7a6-ad943153a550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Graphics\ShadowDMap">
+      <UniqueIdentifier>{cabe9303-bab5-4239-a66e-ff31867ecaa4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
