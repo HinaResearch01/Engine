@@ -49,7 +49,7 @@ void RenderSystem::GBufferPass(const std::array<std::vector<RenderPacket>, stati
 
 	// Camera CB（GBuffer用）
 	auto cameraSys = world_.GetSystem<CameraSystem>();
-	const auto& cam = cameraSys->GetCameraContext();
+	const auto& cam = cameraSys->GetContext();
 	if (!cam.valid) return;
 
 	GpuViewCB viewCB{};
@@ -109,7 +109,7 @@ void RenderSystem::LightingPass(const LightPacket& lightPacket)
 
 	// Camera CB（Lighting用）
 	auto cameraSys = world_.GetSystem<CameraSystem>();
-	const auto& cam = cameraSys->GetCameraContext();
+	const auto& cam = cameraSys->GetContext();
 	if (!cam.valid) return;
 
 	GpuViewCB viewCB{};

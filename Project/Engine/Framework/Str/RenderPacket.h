@@ -2,11 +2,20 @@
 
 #include <cstdint>
 #include "Framework/Str/RenderSurfaceType.h"
-#include "Framework/Str/RenderGpuPackets.h"
-#include "Framework/Str/MaterialPacket.h"
+#include "Framework/Str/RenderGpuStructure.h"
 #include "Resource/Mesh/MeshManager.h"
+#include "Resource/Tex/TextureManager.h"
 
 namespace Tsumi::Framework {
+
+struct MaterialPacket
+{
+	// GPUに送る定数
+	GpuMaterialCB cb{};
+
+	// GPUリソース
+	Tsumi::Resource::TextureAsset* albedo = nullptr;
+};
 
 struct RenderPacket
 {

@@ -356,11 +356,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Context\CameraContext.h" />
     <ClInclude Include="Engine\Framework\Context\LightContext.h" />
     <ClInclude Include="Engine\Framework\Context\ShadowContext.h" />
-    <ClInclude Include="Engine\Framework\Str\LightGpuPackets.h" />
+    <ClInclude Include="Engine\Framework\Str\LightGpuStructure.h" />
     <ClInclude Include="Engine\Framework\Str\LightPacket.h" />
     <ClInclude Include="Engine\Framework\Str\LightType.h" />
-    <ClInclude Include="Engine\Framework\Str\MaterialPacket.h" />
-    <ClInclude Include="Engine\Framework\Str\RenderGpuPackets.h" />
+    <ClInclude Include="Engine\Framework\Str\RenderGpuStructure.h" />
     <ClInclude Include="Engine\Framework\Str\RenderPacket.h" />
     <ClInclude Include="Engine\Framework\Str\RenderPassTable.h" />
     <ClInclude Include="Engine\Framework\Str\RenderSurfaceType.h" />

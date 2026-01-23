@@ -12,7 +12,6 @@
 #include "Framework/Str/LightPacket.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/RenderSurfaceType.h"
-#include "Framework/Str/MaterialPacket.h"
 
 // 前方宣言
 namespace Tsumi::Resource {
@@ -54,6 +53,7 @@ public:
 #pragma region Accessor
 	const auto& GetRenderPackets() const { return renderPackets_; }
 	const LightPacket& GetLightPacket() const { return lightPacket_; }
+	const ShadowPacket& GetShadowPacket() const { return shadowPacket_; }
 #pragma endregion
 
 private:
@@ -73,6 +73,11 @@ private:
 	void BuildLightPacket();
 
 	/// <summary>
+	/// 
+	/// </summary>
+	void BuildShadowPacket();
+
+	/// <summary>
 	/// RenderPacketsのソート
 	/// </summary>
 	void SortRenderPackets();
@@ -85,6 +90,7 @@ private:
 private:
 	std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)> renderPackets_;
 	LightPacket lightPacket_{};
+	ShadowPacket shadowPacket_{};
 
 	World& world_;
 	Resource::ResourceSystem* resourceSys_ = nullptr;

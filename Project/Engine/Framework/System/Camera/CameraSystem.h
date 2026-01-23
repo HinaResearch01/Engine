@@ -42,7 +42,7 @@ public:
 	}
 
 #pragma region Accessor
-	const CameraContext& GetCameraContext() const { return activeCtx_; }
+	const CameraContext& GetContext() const { return activeCtx_; }
 #pragma endregion
 
 private:

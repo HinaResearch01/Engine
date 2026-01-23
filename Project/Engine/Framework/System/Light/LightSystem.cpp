@@ -58,20 +58,6 @@ void LightSystem::BuildLightContext()
 				ctx.directional.dirWS = dirWS;
 				ctx.directional.radiance = radiance;
 
-				// --- GPU Packet（Directional） ---
-				//ctx.packet.dirCB.enabled = 1;
-				//ctx.packet.dirCB.directionWS = { dirWS.x, dirWS.y, dirWS.z };
-				//ctx.packet.dirCB.radiance = { radiance.x, radiance.y, radiance.z };
-
-				break;
-			}
-			else if (!ctx.directional.enabled)
-			{
-				// GPU 側も disabled
-				//ctx.packet.dirCB.enabled = 0;
-				//ctx.packet.dirCB.directionWS = { 0, -1, 0 };
-				//ctx.packet.dirCB.radiance = { 0, 0, 0 };
-
 				break;
 			}
 		}
@@ -99,15 +85,6 @@ void LightSystem::BuildLightContext()
 			r.range = pl.range;
 			r.radiance = radiance;
 			ctx.points.push_back(r);
-
-			// GPU Packet
-			//GpuPointLightCB cb{};
-			//cb.positionWS = pos;
-			//cb.range = pl.range;
-			//cb.radiance = radiance;
-			//cb._pad0 = 0.0f;
-
-			//ctx.packet.pointCB.push_back(cb);
 		}
 	}
 
@@ -138,17 +115,6 @@ void LightSystem::BuildLightContext()
 			r.outerCos = sl.outerCos;
 			r.radiance = radiance;
 			ctx.spots.push_back(r);
-
-			//// GPU Packet
-			//GpuSpotLightCB cb{};
-			//cb.positionWS = pos;
-			//cb.range = sl.range;
-			//cb.directionWS = dir;
-			//cb.innerCos = sl.innerCos;
-			//cb.radiance = radiance;
-			//cb.outerCos = sl.outerCos;
-
-			//ctx.packet.spotCB.push_back(cb);
 		}
 	}
 

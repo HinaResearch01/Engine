@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "Framework/Str/LightGpuPackets.h"
+#include "Framework/Str/LightGpuStructure.h"
 
 namespace Tsumi::Framework {
 
@@ -11,6 +11,11 @@ struct LightPacket
 	GpuDirectionalLightCB dirCB{};
 	std::vector<GpuPointLightCB> pointCB;
 	std::vector<GpuSpotLightCB> spotCB;
+};
+
+struct ShadowPacket
+{
+	GpuShadowCSMCB csmCB{};
 };
 
 }

@@ -6,7 +6,7 @@
 #include <string>
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Component/Material/MaterialComponent.h"
-#include "Framework/Str/MaterialPacket.h"
+#include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言

@@ -26,6 +26,7 @@
 #include "Framework/System/Material/MaterialSystem.h"
 #include "Framework/System/Render/RenderPrepareSystem.h"
 #include "Framework/System/Render/RenderSystem.h"
+#include "Framework/System/Shadow/ShadowSystem.h"
 #include "Framework/System/Transform/TransformSystem.h"
 
 namespace Tsumi::Framework {
@@ -39,7 +40,8 @@ class World {
 public:
 	World()
 		: cameraSystem_(*this), lightSystem_(*this), materialSystem_(*this), 
-		renderPrepareSystem_(*this), renderSystem_(*this), transformSystem_(*this)
+		renderPrepareSystem_(*this), renderSystem_(*this), shadowSystem_(*this),
+		transformSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
 		updateMgr_.Register(&cameraSystem_);
@@ -47,6 +49,7 @@ public:
 		updateMgr_.Register(&materialSystem_);
 		updateMgr_.Register(&renderPrepareSystem_);
 		updateMgr_.Register(&renderSystem_);
+		updateMgr_.Register(&shadowSystem_);
 		updateMgr_.Register(&transformSystem_);
 
 		// Viewの登録
@@ -83,6 +86,9 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, RenderSystem>) {
 			return &renderSystem_;
+		}
+		else if constexpr (std::is_same_v<T, ShadowSystem>) {
+			return &shadowSystem_;
 		}
 		else if constexpr (std::is_same_v<T, TransformSystem>) {
 			return &transformSystem_;
@@ -278,6 +284,7 @@ protected:
 	MaterialSystem materialSystem_;
 	RenderPrepareSystem renderPrepareSystem_;
 	RenderSystem renderSystem_;
+	ShadowSystem shadowSystem_;
 	TransformSystem transformSystem_;
 
 	// ===== ComponentView =====

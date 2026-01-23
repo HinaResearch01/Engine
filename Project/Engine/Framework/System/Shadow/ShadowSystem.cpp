@@ -88,7 +88,7 @@ void ShadowSystem::BuildShadowContext()
 	// =====================================================
 	// ※ API は君の CameraSystem に合わせて差し替え
 	auto camSys = world_.GetSystem<CameraSystem>();
-	const CameraContext& cam = camSys->GetCameraContext();
+	const CameraContext& cam = camSys->GetContext();
 
 	if (!cam.valid)
 		return;

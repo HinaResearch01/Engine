@@ -724,10 +724,7 @@
     <ClInclude Include="Engine\Framework\Str\LightType.h">
       <Filter>Engine\Framework\Str</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Str\MaterialPacket.h">
-      <Filter>Engine\Framework\Str</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Framework\Str\RenderGpuPackets.h">
+    <ClInclude Include="Engine\Framework\Str\RenderGpuStructure.h">
       <Filter>Engine\Framework\Str</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\Str\RenderPacket.h">
@@ -748,7 +745,7 @@
     <ClInclude Include="Engine\Framework\System\Render\RenderPrepareSystem.h">
       <Filter>Engine\Framework\System\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework\Str\LightGpuPackets.h">
+    <ClInclude Include="Engine\Framework\Str\LightGpuStructure.h">
       <Filter>Engine\Framework\Str</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\Str\LightPacket.h">
@@ -1040,6 +1037,9 @@
     </Filter>
     <Filter Include="Resources\Shaders\Deferred">
       <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Resource\GView">
+      <UniqueIdentifier>{6f6f5649-8b75-4918-b7a6-ad943153a550}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

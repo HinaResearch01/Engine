@@ -36,7 +36,7 @@ public:
 	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepare; }
 
 #pragma region Accessor
-	const ShadowContext& GetShadowContext() const { return context_; }
+	const ShadowContext& GetContext() const { return context_; }
 #pragma endregion 
 
 private:

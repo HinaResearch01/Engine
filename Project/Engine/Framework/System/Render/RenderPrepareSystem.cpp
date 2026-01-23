@@ -81,18 +81,84 @@ void RenderPrepareSystem::BuildRenderPackets()
 
 void RenderPrepareSystem::BuildLightPacket()
 {
+	lightPacket_ = {};
+	lightPacket_.pointCB.clear();
+	lightPacket_.spotCB.clear();
+
+	// LightSystem から Context を取る
 	auto lightSys = world_.GetSystem<LightSystem>();
-	if (!lightSys) return;
+	const LightContext& ctx = lightSys->GetContext();
 
-	const auto& lc = lightSys->GetLightContext();
-
-	// Directiona
-	lightPacket_.dirCB = {};
-	if (lc.directional.enabled)
+	// -------------------------
+	// Directional
+	// -------------------------
+	if (ctx.directional.enabled)
 	{
-		lightPacket_.dirCB.directionWS = lc.directional.dirWS;
-		lightPacket_.dirCB.radiance = lc.directional.radiance;
-		lightPacket_.dirCB.castShadow = 1;
+		lightPacket_.dirCB.enabled = 1;
+		lightPacket_.dirCB.directionWS = ctx.directional.dirWS;
+		lightPacket_.dirCB.radiance = ctx.directional.radiance;
+	}
+	else
+	{
+		lightPacket_.dirCB.enabled = 0;
+		lightPacket_.dirCB.directionWS = { 0,-1,0 };
+		lightPacket_.dirCB.radiance = { 0,0,0 };
+	}
+
+	// -------------------------
+	// Point (CPU resolved -> GPU CB)
+	// -------------------------
+	lightPacket_.pointCB.reserve(ctx.points.size());
+	for (const auto& p : ctx.points)
+	{
+		GpuPointLightCB cb{};
+		cb.positionWS = p.positionWS;
+		cb.range = p.range;
+		cb.radiance = p.radiance;
+		cb._pad0 = 0.0f;
+		lightPacket_.pointCB.push_back(cb);
+	}
+
+	// -------------------------
+	// Spot
+	// -------------------------
+	lightPacket_.spotCB.reserve(ctx.spots.size());
+	for (const auto& s : ctx.spots)
+	{
+		GpuSpotLightCB cb{};
+		cb.positionWS = s.positionWS;
+		cb.range = s.range;
+		cb.directionWS = s.directionWS;
+		cb.innerCos = s.innerCos;
+		cb.radiance = s.radiance;
+		cb.outerCos = s.outerCos;
+		lightPacket_.spotCB.push_back(cb);
+	}
+}
+
+void RenderPrepareSystem::BuildShadowPacket()
+{
+	shadowPacket_ = {};
+
+	auto shadowSys = world_.GetSystem<ShadowSystem>();
+	const ShadowContext& ctx = shadowSys->GetContext();
+
+	auto& cb = shadowPacket_.csmCB;
+
+	cb.enabled = ctx.enabled ? 1 : 0;
+	cb.cascadeCount = static_cast<int>(ctx.cascadeCount);
+	cb.shadowMapSize = static_cast<float>(ctx.shadowMapSize);
+	cb.invShadowMapSize = (ctx.shadowMapSize > 0) ? (1.0f / cb.shadowMapSize) : 0.0f;
+
+	for (int i = 0; i < 4; ++i) cb.splitFar[i] = 0.0f; 
+
+	// cascades viewProj
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		if (ctx.enabled && i < ctx.cascadeCount)
+			cb.shadowViewProj[i] = ctx.cascades[i].viewProj;
+		else
+			cb.shadowViewProj[i] = Math::Mat4x4{}; // 0行列 or 単位行列
 	}
 }
 
