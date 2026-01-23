@@ -17,11 +17,14 @@ struct GpuMaterialCB
 	Math::Mat3x3 uvTransform;
 };
 
-struct GpuViewCB
+struct GpuCameraCB
 {
 	Math::Mat4x4 view;
 	Math::Mat4x4 proj;
 	Math::Mat4x4 viewProj;
+	Math::Mat4x4 invView;
+	Math::Mat4x4 invProj;
+	Math::Mat4x4 invViewProj;
 	Math::Vec3f cameraPos;
 	float pad;
 };

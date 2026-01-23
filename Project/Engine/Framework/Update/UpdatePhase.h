@@ -4,13 +4,28 @@ namespace Tsumi::Framework {
 
 /* 更新順序 */
 enum class UpdatePhase : uint8_t {
-	PreLogic = 0,   // 入力反映・事前準備
+	// --------------------
+	// Logic / Simulation
+	// --------------------
+	PreLogic = 0,   // 入力反映、外部イベント
 	Logic,          // ゲームロジック
-	PostLogic,      // 後処理・整合性
-	Camera,         // カメラ評価
-	RenderPrepare,  // 描画準備
-	ShadowPass,     // シャドウ
-	RenderPass,     // 描画
+	PostLogic,      // 整合性調整
+
+	// --------------------
+	// Render Preparation (CPU)
+	// --------------------
+	TransformSys,      // World行列確定
+	CameraSys,         // CameraContext構築
+	MaterialSys,       // MaterialInstance評価
+	LightSys,          // LightContext構築
+	ShadowSys,         // ShadowContext構築
+	RenderPrepareSys,  // DrawPacket / GBufferPacket生成
+
+	// --------------------
+	// Render Execution (GPU)
+	// --------------------
+	RenderSys,         // ShadowPass / GBuffer / Lighting / Debug
+
 	Count
 };
 

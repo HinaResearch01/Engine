@@ -41,9 +41,12 @@ void ShadowDepthMap::Create(uint32_t size)
 	clear.DepthStencil.Depth = 1.0f;
 	clear.DepthStencil.Stencil = 0;
 
+	CD3DX12_HEAP_PROPERTIES heap = 
+		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
 	tex_.Reset();
 	HRESULT hr = device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		&heap,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,

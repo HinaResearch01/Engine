@@ -79,8 +79,8 @@ public:
 	/// <summary>
 	/// Viewportの取得
 	/// </summary>
-	Viewport GetMainViewport() const {
-		Viewport vp{};
+	D3D12_VIEWPORT GetMainViewport() const {
+		D3D12_VIEWPORT vp{};
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
 		vp.Width = static_cast<float>(framebuf_->GetWidth());
@@ -93,12 +93,12 @@ public:
 	/// <summary>
 	/// Scissorの取得
 	/// </summary>
-	Scissor GetMainScissor() const {
-		Scissor rc{};
-		rc.Left = 0;
-		rc.Top = 0;
-		rc.Right = framebuf_->GetWidth();
-		rc.Bottom = framebuf_->GetHeight();
+	D3D12_RECT GetMainScissor() const {
+		D3D12_RECT rc{};
+		rc.left = 0;
+		rc.top = 0;
+		rc.right = framebuf_->GetWidth();
+		rc.bottom = framebuf_->GetHeight();
 		return rc;
 	}
 

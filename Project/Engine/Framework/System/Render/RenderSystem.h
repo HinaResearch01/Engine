@@ -53,7 +53,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::RenderPass; }
+	UpdatePhase Phase() const override { return UpdatePhase::RenderSys; }
 
 	/// <summary>
 	/// 描画処理
@@ -62,38 +62,51 @@ public:
 	void RenderModel(DX12::CommandContext& cmd);
 	void RenderFrontSprite(DX12::CommandContext& cmd);
 
+	void OnResize(uint32_t w, uint32_t h);
+
 private:
-	/// <summary>
-	/// Pass
-	/// </summary>
-	void GBufferPass(const std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)>& lists);
-	void LightingPass(const LightPacket& lightPacket);
+	// ---------------------------------------------------------
+	// High-level render flow
+	// ---------------------------------------------------------
+	void RenderFrame();
 
-	/// <summary>
-	/// 各パケットの描画処理
-	/// </summary>
-	void RenderPackets(DX12::CommandContext& cmd, const RenderPacket& pkt);
+	void DrawShadowPass(DX12::CommandContext* cmd);
+	void DrawGBufferPass(DX12::CommandContext* cmd);
+	void DrawLightingPass(DX12::CommandContext* cmd);
+	void DrawDebugPass(DX12::CommandContext* cmd);
 
-	/// <summary>
-	/// バインド処理
-	/// </summary>
-	void BindMesh(DX12::CommandContext& cmd, const RenderPacket& pkt);
-	void BindTransform(DX12::CommandContext& cmd, const RenderPacket& pkt);
-	void BindMaterial(DX12::CommandContext& cmd, const RenderPacket& pkt);
+	// ---------------------------------------------------------
+	// Resource sync
+	// ---------------------------------------------------------
+	void SyncShadowResources();     // ShadowDepthMap / DSV / SRV
+	void RegisterShadowSRV();       // GpuViewManager へ登録
+	void CreateShadowDSV();         // DSV heap & handle
 
-	/// <summary>
-	/// 描画コマンド
-	/// </summary>
-	void DrawCommand(DX12::CommandContext& cmd, const RenderPacket& pkt);
+	// ---------------------------------------------------------
+	// Binding helpers
+	// ---------------------------------------------------------
+	void BindGBufferCommon(DX12::CommandContext* cmd);
+	void BindLightingCommon(DX12::CommandContext* cmd);
+	void BindDebugCommon(DX12::CommandContext* cmd);
+
+	// ---------------------------------------------------------
+	// Draw helpers
+	// ---------------------------------------------------------
+	void DrawShadowCasters(DX12::CommandContext* cmd);
+	void DrawGBufferObjects(DX12::CommandContext* cmd);
 
 private:
 	std::unique_ptr<Graphic::ShadowDepthMap> shadowDMap_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> shadowDsvHeap_;
+	D3D12_CPU_DESCRIPTOR_HANDLE shadowDsv_{};
+	int debugMode_ = 0;
+	uint32_t cachedShadowSize_ = 0;
 
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Resource::ResourceSystem* resourceSys_ = nullptr;
 	Graphic::PSOLibrary* psoLib_ = nullptr;
-	Graphic::RootSignatureLibrary* rootSigLib_ = nullptr;
+	Graphic::RootSignatureLibrary* rsLib_ = nullptr;
 };
 
 }

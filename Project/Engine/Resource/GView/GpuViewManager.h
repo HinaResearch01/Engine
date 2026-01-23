@@ -19,7 +19,7 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	GpuViewManager() = default;
+	GpuViewManager();
 
 	/// <summary>
 	/// デストラクタ

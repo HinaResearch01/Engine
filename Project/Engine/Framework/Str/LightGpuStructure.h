@@ -56,4 +56,18 @@ struct GpuShadowCSMCB
 	Math::Mat4x4 shadowViewProj[4];
 };
 
+struct GpuShadowCasterCB
+{
+	Math::Mat4x4 lightViewProj{};
+};
+
+struct GpuDebugCB
+{
+	int mode = 0;
+	int channel = 0;
+	float value0 = 0.0f;
+	float value1 = 0.0f;
+};
+
+
 }

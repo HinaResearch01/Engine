@@ -32,7 +32,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepare; }
+	UpdatePhase Phase() const override { return UpdatePhase::LightSys; }
 
 #pragma region Accessor
 	const LightContext& GetContext() const { return context_; }

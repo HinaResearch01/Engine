@@ -33,7 +33,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepare; }
+	UpdatePhase Phase() const override { return UpdatePhase::ShadowSys; }
 
 #pragma region Accessor
 	const ShadowContext& GetContext() const { return context_; }

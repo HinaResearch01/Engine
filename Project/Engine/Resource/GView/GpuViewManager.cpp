@@ -5,7 +5,7 @@
 
 using namespace Tsumi::Resource;
 
-Tsumi::Resource::GpuViewManager::GpuViewManager()
+GpuViewManager::GpuViewManager()
 {
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
