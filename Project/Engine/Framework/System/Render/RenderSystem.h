@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include "Math/TMath.h"
+#include "Graphic/ShadowDMap/ShadowDepthMap.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/LightPacket.h"
@@ -86,6 +87,8 @@ private:
 	void DrawCommand(DX12::CommandContext& cmd, const RenderPacket& pkt);
 
 private:
+	std::unique_ptr<Graphic::ShadowDepthMap> shadowDMap_;
+
 	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Resource::ResourceSystem* resourceSys_ = nullptr;

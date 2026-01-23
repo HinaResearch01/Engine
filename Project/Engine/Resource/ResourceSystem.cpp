@@ -1,8 +1,9 @@
 #include "ResourceSystem.h"
 #include "DX12/DX12Manager.h"
-#include "Resource/Mesh/MeshManager.h"
-#include "Resource/Tex/TextureManager.h"
 #include "Resource/CB/FrameCBManager.h"
+#include "Resource/Mesh/MeshManager.h"
+#include "Resource/GView/GpuViewManager.h"
+#include "Resource/Tex/TextureManager.h"
 #include <DirectXTex.h>
 
 using namespace Tsumi::Resource;
@@ -10,9 +11,10 @@ using namespace Tsumi::Resource;
 ResourceSystem::ResourceSystem()
 {
 	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
-	meshMgr_ = std::make_unique<MeshManager>();
-	texMgr_ = std::make_unique<TextureManager>();
 	cbMgr_ = std::make_unique<FrameCBManager>();
+	meshMgr_ = std::make_unique<MeshManager>();
+	gViewMgr_ = std::make_unique<GpuViewManager>();
+	texMgr_ = std::make_unique<TextureManager>();
 }
 
 ResourceSystem::~ResourceSystem() = default;
