@@ -16,7 +16,9 @@ public:
 	/// </summary>
 	FrameCBManager()
 		: cbAllocator_(std::make_unique<DynamicCBAllocator>())
-	{}
+	{
+		dx12Mgr_ = DX12::DX12Manager::GetInstance();
+	}
 
 	/// <summary>
 	/// デストラクタ
@@ -34,7 +36,7 @@ public:
 	void BeginFrame(uint32_t frameIndex)
 	{
 		frameIndex; // 未使用
-		auto* fr = DX12::DX12Manager::GetInstance()->GetCurrentFrameResource();
+		auto* fr = dx12Mgr_->GetCurrentFrameResource();
 		assert(fr && "PerFrameResource is null");
 		cbAllocator_->Attach(fr);
 	}
@@ -66,7 +68,7 @@ public:
 
 		// 2) Allocate a descriptor from DescriptorAllocator
 		auto* transientAlloc =
-			DX12::DX12Manager::GetInstance()->GetTransientDescAlloc();
+			dx12Mgr_->GetTransientDescAlloc();
 		assert(transientAlloc && "Transient DescriptorAllocator is null");
 
 		auto descAlloc = transientAlloc->Allocate(1);
@@ -74,7 +76,7 @@ public:
 
 		// 3) Create CBV
 		ID3D12Device* device =
-			DX12::DX12Manager::GetInstance()->GetDevice();
+			dx12Mgr_->GetDevice();
 		assert(device && "D3D12 device is null");
 
 		const UINT sizeInBytes =
@@ -102,6 +104,8 @@ public:
 
 private:
 	std::unique_ptr<DynamicCBAllocator> cbAllocator_;
+
+	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

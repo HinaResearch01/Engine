@@ -200,6 +200,9 @@
     <ClCompile Include="Engine\Graphic\PSO\PSODesc.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Resource\GView\GpuViewManager.cpp">
+      <Filter>Engine\Resource\GView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -756,6 +759,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\PSODesc.h">
       <Filter>Engine\Graphics\PSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Resource\GView\GpuViewManager.h">
+      <Filter>Engine\Resource\GView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
