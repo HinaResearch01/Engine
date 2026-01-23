@@ -63,7 +63,7 @@ private:
 						  const std::vector<D3D12_STATIC_SAMPLER_DESC>& samplers);
 
 	/// <summary>
-	/// ルートシグネチャの生成
+	/// ルートシグネチャの生成と登録
 	/// </summary>
 	void CreateObject3D();
 	void CreateGBuffer();

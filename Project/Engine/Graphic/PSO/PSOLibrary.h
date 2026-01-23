@@ -6,25 +6,24 @@
 #include <string>
 #include <vector>
 #include <mutex>
-
+#include "PSODesc.h"
 #include "Utils/Logger/Logger.h"
 
 // 前方宣言
 namespace Tsumi::DX12 {
 class DX12Manager;
 }
-namespace Tsumi::Graphic {
-class ShaderLibrary;
-class RootSignatureLibrary;
-}
 
 namespace Tsumi::Graphic {
+
+class ShaderLibrary;
+class RootSignatureLibrary;
 
 /* PSO管理 */
 class PSOLibrary {
 
 private: // シングルトン
-	PSOLibrary() = default;
+	PSOLibrary();
 	~PSOLibrary() = default;
 	PSOLibrary(const PSOLibrary&) = delete;
 	const PSOLibrary& operator=(const PSOLibrary&) = delete;
@@ -46,7 +45,7 @@ public:
 	/// <summary>
 	/// PipelineStateの取得
 	/// </summary>
-	void Register(const std::string& name, Microsoft::WRL::ComPtr<ID3D12PipelineState> pso);
+	void Register(const std::string& name, PSODesc& pso);
 
 	/// <summary>
 	/// PipelineStateの取得
@@ -59,8 +58,27 @@ public:
 	bool Has(const std::string& name) const;
 
 private:
-	mutable std::mutex mutex_;
-	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> pipelineMap_;
+	/// <summary>
+	/// 
+	/// </summary>
+	void RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc);
 
+	/// <summary>
+	/// PSOの生成と登録
+	/// </summary>
+	void CreateObject3D();
+	void CreateGBuffer();
+	void CreateLightingDirectional();
+	void CreateDebugFullScreen();
+
+private:
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> psos_;
+
+	Tsumi::DX12::DX12Manager* dx12Mgr_ = nullptr;
+	ShaderLibrary* shaderLib_ = nullptr;
+	RootSignatureLibrary* rootSignsLib_ = nullptr;
+	
+	mutable std::mutex mutex_;
+	
 };
 }

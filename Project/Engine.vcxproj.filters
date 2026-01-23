@@ -125,9 +125,6 @@
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp">
       <Filter>Engine\Utils\Func</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\PSOUtil.cpp">
-      <Filter>Engine\Graphics\PSO</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp">
       <Filter>Engine\Math\MathUtil</Filter>
     </ClCompile>
@@ -176,9 +173,6 @@
     <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.cpp">
-      <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp">
       <Filter>Engine\Framework\System\Camera</Filter>
     </ClCompile>
@@ -197,17 +191,14 @@
     <ClCompile Include="Engine\Framework\System\Shadow\ShadowSystem.cpp">
       <Filter>Engine\Framework\System\Shadow</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\Factory\GBuffer\GBufferPSOFactory.cpp">
-      <Filter>Engine\Graphics\PSO\Factory\GBuffer</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Graphic\PSO\Factory\LightingDir\LightingDirectionalPSOFactory.cpp">
-      <Filter>Engine\Graphics\PSO\Factory\LightingDir</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp">
       <Filter>Engine\Framework\System\Render</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Graphic\RootSigs\RootSignatureDesc.cpp">
       <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\PSO\PSODesc.cpp">
+      <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -574,9 +565,6 @@
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h">
       <Filter>Engine\Utils\Func</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\PSOUtil.h">
-      <Filter>Engine\Graphics\PSO</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Component\IComponent.h">
       <Filter>Engine\Framework\Component</Filter>
     </ClInclude>
@@ -682,9 +670,6 @@
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h">
       <Filter>Engine\Framework\Update</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\Factory\Obj3D\Object3DPSOFactory.h">
-      <Filter>Engine\Graphics\PSO\Factory\Obj3D</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\Hash\FNV1a.h">
       <Filter>Engine\Utils\Hash</Filter>
     </ClInclude>
@@ -760,12 +745,6 @@
     <ClInclude Include="Engine\Framework\Component\Light\SpotLightComponent.h">
       <Filter>Engine\Framework\Component\Light</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\Factory\GBuffer\GBufferPSOFactory.h">
-      <Filter>Engine\Graphics\PSO\Factory\GBuffer</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Graphic\PSO\Factory\LightingDir\LightingDirectionalPSOFactory.h">
-      <Filter>Engine\Graphics\PSO\Factory\LightingDir</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\System\Render\RenderPrepareSystem.h">
       <Filter>Engine\Framework\System\Render</Filter>
     </ClInclude>
@@ -777,6 +756,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureDesc.h">
       <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\PSO\PSODesc.h">
+      <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1017,12 +999,6 @@
     <Filter Include="Engine\Framework\World">
       <UniqueIdentifier>{66c8a253-6b32-4aa3-b023-d6ab6bfab1d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory">
-      <UniqueIdentifier>{9ff78ee6-ba52-4fb1-beed-4a07eb5b6598}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory\Obj3D">
-      <UniqueIdentifier>{84d1788e-82a1-4498-966e-4bd5c4720814}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Utils\Hash">
       <UniqueIdentifier>{94700807-9912-444e-918c-4404d93510fb}</UniqueIdentifier>
     </Filter>
@@ -1059,20 +1035,11 @@
     <Filter Include="Engine\Framework\Str">
       <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Shaders\Lighting">
-      <UniqueIdentifier>{3ccf188b-9880-4a3c-addf-ce397dc89cb7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Shaders\Debug">
       <UniqueIdentifier>{77aa2756-3b08-4423-a302-f913b2ee8256}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resources\Shaders\Deferred">
       <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory\GBuffer">
-      <UniqueIdentifier>{2ffabb1a-8705-4ffa-8ce5-71d7250d44c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Graphics\PSO\Factory\LightingDir">
-      <UniqueIdentifier>{a8a5438b-29de-444a-ab98-80fb9f4e2b40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

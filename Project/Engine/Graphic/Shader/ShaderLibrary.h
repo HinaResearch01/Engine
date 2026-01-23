@@ -29,8 +29,8 @@ enum class ShaderType : uint8_t {
 // 1ステージ分の定義（同一hlslにVS/PSが共存してもOK）
 struct ShaderStageDesc
 {
-	std::string file;   // 例: "Resources/Shaders/Deferred/GBuffer.hlsl"
-	std::string entry;  // 例: "GBufferVS"（省略時は "main"）
+	std::string file;
+	std::string entry;
 };
 
 struct ShaderLoadModule
