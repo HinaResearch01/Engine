@@ -56,21 +56,24 @@ void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
 	auto* cam = actor->GetComponent<CameraComponent>();
 	if (!tr || !cam) return;
 
-	Math::Vec3f s{ 1,1,1 };
-	Math::Vec3f r = tr->srt.rotate;
-	Math::Vec3f t = tr->GetWorldPos();
-
-	out.position = t;
-
-	Math::Mat4x4 camWorld =
-		Math::Func::MAT4x4::AffineMatrix(s, r, t);
-
-	out.view = camWorld.Inverse();
-
 	auto fb = dx12Mgr_->GetFramebuffer();
 	float width = static_cast<float>(fb->GetWidth());
 	float height = static_cast<float>(fb->GetHeight());
 	float aspect = (height > 0) ? (width / height) : (1280.0f / 720.0f);
+
+	out.fovY = Math::Func::NUM::ToRadians(cam->fovY);
+	out.aspectRatio = aspect;
+	out.nearPlane = cam->nearZ;
+	out.farPlane = cam->farZ;
+	out.position = tr->GetWorldPos();
+
+	// scaleは固定、rotateはdegree->radianへ
+	Math::Vec3f s = Math::Vec3f{ 1,1,1 };
+	Math::Vec3f r = Math::Func::VEC3::ToRadians(tr->srt.rotate);
+	Math::Vec3f t = tr->GetWorldPos();
+	Math::Mat4x4 camWorld =	Math::Func::MAT4x4::AffineMatrix(s, r, t);
+
+	out.view = camWorld.Inverse();
 
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
 		Math::Func::NUM::ToRadians(cam->fovY),
@@ -85,28 +88,37 @@ void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
 
 void CameraSystem::BuildDefault(CameraContext& out)
 {
-	Math::Vec3f scale{ 1,1,1 };
-	Math::Vec3f rotate{ 0,0,0 };
-	Math::Vec3f translate{ 0,0,-25 };
-
-	Math::Mat4x4 camWorld =
-		Math::Func::MAT4x4::AffineMatrix(scale, rotate, translate);
-
-	out.view = camWorld.Inverse();
+	// デフォルトカメラなので基本数値固定
+	const float defFov = 60.0f;
+	const float defNear = 0.1f;
+	const float defFar = 1000.0f;
+	const Math::Vec3f defScale{ 1,1,1 };
+	const Math::Vec3f defRotate{ 0,0,0 };
+	const Math::Vec3f defTranslate{ 0,0,-25 };
 
 	auto fb = dx12Mgr_->GetFramebuffer();
 	float width = static_cast<float>(fb->GetWidth());
 	float height = static_cast<float>(fb->GetHeight());
 	float aspect = (height > 0) ? (width / height) : (1280.0f / 720.0f);
 
+	out.fovY = Math::Func::NUM::ToRadians(defFov);
+	out.aspectRatio = aspect;
+	out.nearPlane = defNear;
+	out.farPlane = defFar;
+	out.position = defTranslate;
+
+	Math::Mat4x4 camWorld =
+		Math::Func::MAT4x4::AffineMatrix(defScale, defRotate, defTranslate);
+
+	out.view = camWorld.Inverse();
+
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
-		Math::Func::NUM::ToRadians(60.0f),
+		Math::Func::NUM::ToRadians(defFov),
 		aspect,
-		0.1f,
-		100.0f
+		defNear,
+		defFar
 	);
 
 	out.viewProj = out.view * out.proj;
-	out.position = translate;
 	out.valid = true;
 }

@@ -41,19 +41,14 @@ public:
 
 private:
 	/// <summary>
-	/// 
+	/// ShadowContextを組み立てる
 	/// </summary>
-	Math::Mat4x4 BuildOrthoDX(float halfSize, float nearZ, float farZ) const;
-
-	/// <summary>
-	///  影ビュー行列
-	/// </summary>
-	Math::Mat4x4 BuildLightView(const Math::Vec3f& dirWS, const Math::Vec3f& centerWS) const;
+	void BuildShadowContext();
 
 private:
-	World& world_;
-
 	ShadowContext context_{};
+	
+	World& world_;
 };
 
 }

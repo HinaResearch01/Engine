@@ -23,7 +23,6 @@ public:
 	bool active = true;
 	bool mainCandidate = true;
 	int  priority = 0;
-
 };
 
 }

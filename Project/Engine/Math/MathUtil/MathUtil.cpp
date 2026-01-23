@@ -24,7 +24,7 @@ float NUM::ToRadians(float degrees)
 	return degrees * (Const::PI / 180.0f);
 }
 
-float NUM::ConvertToRange(Vec2f input, Vec2f output, float value)
+float NUM::ConvertToRange(const Vec2f& input, const Vec2f& output, float value)
 {
 	// 入力値を入力範囲に正規化
 	float normalize = (value - input.x) / (input.y - input.x);
@@ -263,6 +263,16 @@ float VEC3::ShortestAngle(float currentAngle, float targetAngle)
 	while (angleDifference < -Math::Const::PI) angleDifference += 2.0f * Math::Const::PI;
 
 	return angleDifference; // 最短回転角度を返す
+}
+
+Vec3f VEC3::ToRadians(const Vec3f& degree)
+{
+	Vec3f result = {
+		NUM::ToRadians(degree.x),
+		NUM::ToRadians(degree.y),
+		NUM::ToRadians(degree.z),
+	};
+	return result;
 }
 
 float VEC4::Dot(const Vec4f& a, const Vec4f& b)

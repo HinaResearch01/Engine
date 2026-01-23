@@ -28,7 +28,7 @@ float APOneAsZeroCloser(float value);
 // 角度を度からラジアンに変換する処理
 float ToRadians(float degrees);
 // 範囲に変換
-float ConvertToRange(Vec2f input, Vec2f output, float value);
+float ConvertToRange(const Vec2f& input, const Vec2f& output, float value);
 }
 
 
@@ -84,6 +84,8 @@ Vec3f TransformWithPerspective(const Vec3f& v, const Mat4x4& m);
 float NormalizeAngle(float angle);
 // 最短回転角度を求める
 float ShortestAngle(float currentAngle, float targetAngle);
+// 角度を度からラジアンに変換する処理
+Vec3f ToRadians(const Vec3f& degree);
 }
 
 

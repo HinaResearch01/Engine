@@ -32,8 +32,6 @@ struct LightContext {
 	DirectionalLightResolved directional;
 	std::vector<PointLightResolved> points;
 	std::vector<SpotLightResolved> spots;
-
-	LightPacket packet;
 };
 
 }

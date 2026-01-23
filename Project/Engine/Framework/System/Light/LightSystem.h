@@ -45,9 +45,9 @@ private:
 	void BuildLightContext();
 
 private:
-	World& world_;
-
 	LightContext context_{};
+
+	World& world_;
 };
 
 }

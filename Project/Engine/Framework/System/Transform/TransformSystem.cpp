@@ -43,7 +43,7 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	// 1. ローカル行列生成
 	// ==================================
 	const Math::Mat4x4 localMat = Math::Func::MAT4x4::AffineMatrix(
-		tr.srt.scale, tr.srt.rotate, tr.srt.translate);
+		tr.srt.scale, Math::Func::VEC3::ToRadians(tr.srt.rotate), tr.srt.translate);
 
 	// ==================================
 	// 2. ワールド行列
