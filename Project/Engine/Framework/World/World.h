@@ -78,6 +78,9 @@ public:
 		if constexpr (std::is_same_v<T, CameraSystem>) {
 			return &cameraSystem_;
 		}
+		else if constexpr (std::is_same_v<T, LightSystem>) {
+			return &lightSystem_;
+		}
 		else if constexpr (std::is_same_v<T, MaterialSystem>) {
 			return &materialSystem_;
 		}
