@@ -14,9 +14,10 @@ class DX12Manager;
 struct DescAlloc {
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle{};
-	UINT startIndex = UINT_MAX;
-	UINT descriptorCount = 0;
-	bool valid() const { return startIndex != UINT_MAX; }
+	uint32_t count = 0;
+	bool valid() const {
+		return cpuHandle.ptr != 0 && gpuHandle.ptr != 0 && count > 0;
+	}
 };
 
 /* ディスクリプタアロケータ */
@@ -56,7 +57,7 @@ public:
 
 	/// <summary>
 	/// 指定の割り当てを「フレームが完了するまで保留」しておく（GPU 側での使用が終わるまで安全に解放しない）
-	/// frameIndex: フレームインデックス（例: FrameSync::GetFrameIndex()）
+	/// frameIndex: フレームインデックス
 	/// </summary>
 	void DeferFree(const DescAlloc& alloc, UINT frameIndex);
 

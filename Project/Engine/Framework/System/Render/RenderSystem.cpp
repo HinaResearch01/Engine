@@ -35,25 +35,6 @@ void RenderSystem::RenderBackSprite(DX12::CommandContext&) {}
 
 void RenderSystem::RenderModel(DX12::CommandContext&)
 {
-	//auto prep = world_.GetSystem<RenderPrepareSystem>();
-	//if (!prep) return;
-
-	//GBufferPass(prep->GetRenderPackets());
-	//LightingPass(prep->GetLightPacket());
-}
-
-void RenderSystem::RenderFrontSprite(DX12::CommandContext&) {}
-
-void RenderSystem::OnResize(uint32_t w, uint32_t h)
-{
-	w, h;
-	// Framebuffer のリサイズが走った後に呼ばれる想定
-	// Shadow は ShadowMapSize で管理
-	// GBuffer SRV は Framebuffer 側が作っているなら何もしなくてよい
-}
-
-void RenderSystem::RenderFrame()
-{
 	auto* cmd = dx12Mgr_->GetCommandContext();
 	assert(cmd);
 
@@ -77,6 +58,16 @@ void RenderSystem::RenderFrame()
 	// =========================================================
 	if (debugMode_ != 0)
 		DrawDebugPass(cmd);
+}
+
+void RenderSystem::RenderFrontSprite(DX12::CommandContext&) {}
+
+void RenderSystem::OnResize(uint32_t w, uint32_t h)
+{
+	w, h;
+	// Framebuffer のリサイズが走った後に呼ばれる想定
+	// Shadow は ShadowMapSize で管理
+	// GBuffer SRV は Framebuffer 側が作っているなら何もしなくてよい
 }
 
 void RenderSystem::DrawShadowPass(DX12::CommandContext* cmd)

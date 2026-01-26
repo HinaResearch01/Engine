@@ -68,8 +68,6 @@ private:
 	// ---------------------------------------------------------
 	// High-level render flow
 	// ---------------------------------------------------------
-	void RenderFrame();
-
 	void DrawShadowPass(DX12::CommandContext* cmd);
 	void DrawGBufferPass(DX12::CommandContext* cmd);
 	void DrawLightingPass(DX12::CommandContext* cmd);

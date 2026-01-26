@@ -109,7 +109,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 	}
 
 	Utils::Logger::Info(
-		"RootSignatureLibrary::Register - 登録完了 '{}'\n",
+		"RootSignatureLibrary::Register - 登録完了 ",
 		wname);
 }
 
@@ -161,19 +161,18 @@ void RootSignatureLibrary::CreateGBuffer()
 	// -------------------------
 	// VS
 	// -------------------------
-	rs.AddCBV(0, D3D12_SHADER_VISIBILITY_VERTEX); // CameraCB (b0)
-	rs.AddCBV(1, D3D12_SHADER_VISIBILITY_VERTEX); // ObjectCB (b1)
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0 CameraCB
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b1 ObjectCB
 
 	// -------------------------
 	// PS
 	// -------------------------
-	rs.AddCBV(2, D3D12_SHADER_VISIBILITY_PIXEL); // MaterialCB (b2)
-	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL); // AlbedoTex (t0)
+	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b2 MaterialCB
+	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // t0 AlbedoTex
 
 	// -------------------------
 	// Sampler
 	// -------------------------
-	// Linear Wrap (s0)
 	rs.AddStaticSampler(
 		0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
@@ -182,7 +181,6 @@ void RootSignatureLibrary::CreateGBuffer()
 		D3D12_SHADER_VISIBILITY_PIXEL
 	);
 
-	// IA 入力があるので Allow IA
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	Register("GBuffer", rs);
@@ -195,14 +193,13 @@ void RootSignatureLibrary::CreateLightingDirectional()
 	// -------------------------
 	// PS
 	// -------------------------
-	rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL); // CameraCB (b0)
-	rs.AddCBV(3, D3D12_SHADER_VISIBILITY_PIXEL); // DirectionalLightCB (b3)
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // SRV Table (t10..t13)
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
+	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
+	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13 GBuffer
 
 	// -------------------------
 	// Sampler
 	// -------------------------
-	// Point Clamp (s1)
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
@@ -223,15 +220,14 @@ void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
 	// -------------------------
 	// PS
 	// -------------------------
-	rs.AddCBV(0, D3D12_SHADER_VISIBILITY_PIXEL); // CameraCB (b0)
-	rs.AddCBV(3, D3D12_SHADER_VISIBILITY_PIXEL); // DirectionalLightCB（b3）
-	rs.AddCBV(4, D3D12_SHADER_VISIBILITY_PIXEL); // DebugCB（b4）
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // SRV Table (t10..t13)
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
+	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
+	rs.AddCBVRange(4, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b4 DebugCB
+	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13
 
 	// -------------------------
 	// Sampler
 	// -------------------------
-	// s1 : Point Clamp
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
