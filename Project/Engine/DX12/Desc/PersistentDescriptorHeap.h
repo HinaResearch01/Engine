@@ -38,10 +38,9 @@ public:
 	/// </summary>
 	CpuDescHandle Allocate();
 
-	/// <summary>
-	/// ヒープの取得
-	/// </summary>
+#pragma region Accessor
 	ID3D12DescriptorHeap* GetHeap() const { return heap_.Get(); }
+#pragma endregion
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
