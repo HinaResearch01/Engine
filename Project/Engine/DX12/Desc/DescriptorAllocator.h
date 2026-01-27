@@ -18,6 +18,9 @@ struct DescAlloc {
 	bool valid() const {
 		return cpuHandle.ptr != 0 && gpuHandle.ptr != 0 && count > 0;
 	}
+	bool shaderVisible() const {
+		return gpuHandle.ptr != 0;
+	}
 };
 
 /* ディスクリプタアロケータ */
