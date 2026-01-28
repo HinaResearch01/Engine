@@ -4,7 +4,6 @@
 #include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
-#include "DX12/Desc/DescriptorAllocator.h"
 #include "Graphic/Shader/ShaderLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
 #include "Graphic/PSO/PSOLibrary.h"
@@ -53,7 +52,7 @@ void Application::Run()
 
         // ------------------ ループ開始フェーズ ------------------
         window_->ProcessMessages();
-        dx12_->StartFrame();
+        dx12_->BeginFrame();
 		resourceMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
         imgui_->BeginFrame();
 
