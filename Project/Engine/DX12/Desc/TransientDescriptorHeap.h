@@ -39,9 +39,16 @@ public:
 	/// </summary>
 	GpuTableHandle AllocTable(uint32_t count);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	D3D12_CPU_DESCRIPTOR_HANDLE CpuAt(const GpuTableHandle& table, uint32_t offset);
+
 #pragma region Accessor
 	ID3D12DescriptorHeap* GetHeap() const { return heap_.Get(); }
 	HeapId GetHeapId() const { return heapId_; }
+	uint32_t Used() const { return used_; }
+	uint32_t Capacity() const { return capacity_; }
 #pragma endregion
 
 private:

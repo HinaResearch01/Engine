@@ -5,6 +5,8 @@
 #include <wrl.h>
 #include <memory>
 #include <vector>
+#include <assert.h>
+#include "DX12/Desc/DescriptorHandles.h"
 
 namespace Tsumi::DX12 {
 
@@ -118,14 +120,17 @@ public:
 	void SetFullViewportFromFramebuffer();
 	void SetFullScissorFromFramebuffer();
 
-#pragma region Accessor
+	void SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps, HeapId srvHeapId);
 
+	void SetGraphicsRootDescriptorTable(uint32_t rootIndex, const GpuTableHandle& table);
+
+#pragma region Accessor
 	ID3D12CommandQueue* const GetQueue() { return queue_.Get(); }
 	ID3D12CommandAllocator* GetCurrentAllocator() const {
 		return (currentFrameIndex_ < allocators_.size()) ? allocators_[currentFrameIndex_].Get() : nullptr;
 	}
 	ID3D12GraphicsCommandList* GetList() const { return list_.Get(); }
-
+	HeapId BoundSrvHeapId() const { return boundSrvHeapId_; }
 #pragma endregion
 
 private:
@@ -179,6 +184,8 @@ private:
 	bool isListOpen_ = false;
 
 	D3D12_COMMAND_LIST_TYPE listType_;
+
+	HeapId boundSrvHeapId_ = kInvalidHeapId;
 };
 
 }

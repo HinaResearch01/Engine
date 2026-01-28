@@ -47,3 +47,13 @@ GpuTableHandle TransientDescriptorHeap::AllocTable(uint32_t count)
 	used_ += count;
 	return t;
 }
+
+D3D12_CPU_DESCRIPTOR_HANDLE TransientDescriptorHeap::CpuAt(const GpuTableHandle& table, uint32_t offset)
+{
+	assert(table.heapId == heapId_);
+	assert(offset < table.count);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu = cpuStart_;
+	cpu.ptr += static_cast<SIZE_T>(table.baseIndex + offset) * incSize_;
+	return cpu;
+}

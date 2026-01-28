@@ -133,6 +133,7 @@ HRESULT CommandContext::ExecuteAndWait()
 			static_cast<unsigned>(hr));
 		else {
 			isListOpen_ = true; // Reset後はOpen
+			boundSrvHeapId_ = kInvalidHeapId;
 		}
 	}
 
@@ -217,6 +218,7 @@ HRESULT CommandContext::MoveToNextFrame()
 	}
 	else {
 		isListOpen_ = true; // Reset後はOpen
+		boundSrvHeapId_ = kInvalidHeapId;
 	}
 
 	// --- ビューポート／シザー状態を初期化 ---
@@ -244,6 +246,7 @@ HRESULT CommandContext::CreateList()
 	if (FAILED(hr)) return hr;
 
 	isListOpen_ = true;
+	boundSrvHeapId_ = kInvalidHeapId;
 	return S_OK;
 }
 
@@ -336,6 +339,27 @@ void CommandContext::SetFullScissorFromFramebuffer()
 	sc.Left = 0; sc.Top = 0; sc.Right = static_cast<LONG>(w); sc.Bottom = static_cast<LONG>(h);
 
 	SetScissor(sc);
+}
+
+void CommandContext::SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps, HeapId srvHeapId)
+{
+	assert(list_);
+	assert(count == 1 && "TsumiEngine rule: bind exactly 1 transient shader-visible heap in RenderFrame.");
+	assert(heaps && heaps[0]);
+
+	list_->SetDescriptorHeaps(count, heaps);
+	boundSrvHeapId_ = srvHeapId;
+}
+
+void CommandContext::SetGraphicsRootDescriptorTable(uint32_t rootIndex, const GpuTableHandle& table)
+{
+	assert(list_);
+	assert(listType_ == D3D12_COMMAND_LIST_TYPE_DIRECT && "Graphics root table requires DIRECT command list.");
+	assert(table.IsValid());
+	assert(boundSrvHeapId_ != kInvalidHeapId);
+	assert(table.heapId == boundSrvHeapId_ && "Descriptor table heap mismatch!");
+
+	list_->SetGraphicsRootDescriptorTable(rootIndex, table.gpu);
 }
 
 HRESULT CommandContext::CreateQueue()

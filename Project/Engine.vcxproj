@@ -182,7 +182,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Engine\Core\App\Application.cpp" />
     <ClCompile Include="Engine\DX12\Cmd\CommandContext.cpp" />
-    <ClCompile Include="Engine\DX12\Desc\DescriptorAllocator.cpp" />
+    <ClCompile Include="Engine\DX12\Desc\DescriptorCopier.cpp" />
     <ClCompile Include="Engine\DX12\Desc\PersistentDescriptorHeap.cpp" />
     <ClCompile Include="Engine\DX12\Desc\TransientDescriptorHeap.cpp" />
     <ClCompile Include="Engine\DX12\Device\DX12Device.cpp" />
@@ -342,7 +342,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\App\Application.h" />
     <ClInclude Include="Engine\Core\EntryPoint.h" />
     <ClInclude Include="Engine\DX12\Cmd\CommandContext.h" />
-    <ClInclude Include="Engine\DX12\Desc\DescriptorAllocator.h" />
+    <ClInclude Include="Engine\DX12\Desc\DescriptorCopier.h" />
     <ClInclude Include="Engine\DX12\Desc\DescriptorHandles.h" />
     <ClInclude Include="Engine\DX12\Desc\PersistentDescriptorHeap.h" />
     <ClInclude Include="Engine\DX12\Desc\TransientDescriptorHeap.h" />

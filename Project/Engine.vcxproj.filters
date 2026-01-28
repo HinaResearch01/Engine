@@ -107,9 +107,6 @@
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp">
       <Filter>Engine\DX12\Framebuf</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\Desc\DescriptorAllocator.cpp">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClCompile>
@@ -217,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="Engine\DX12\PerFrame\FrameBindingContext.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\Desc\DescriptorCopier.cpp">
+      <Filter>Engine\DX12\Desc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -565,9 +565,6 @@
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h">
       <Filter>Engine\DX12\Framebuf</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\Desc\DescriptorAllocator.h">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h">
       <Filter>Engine\Graphics\Shader</Filter>
     </ClInclude>
@@ -794,6 +791,9 @@
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DX12\Desc\DescriptorHandles.h">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\Desc\DescriptorCopier.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
   </ItemGroup>
