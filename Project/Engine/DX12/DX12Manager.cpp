@@ -20,22 +20,25 @@ void DX12Manager::Init()
 {
 	try {
 		Utils::Exception::DX_CALL(dx12Device_->Create());
-
 		if (graphicsCtx_) graphicsCtx_->SetFrameCount(bufferCount_);
 		if (uploadCtx_)   uploadCtx_->SetFrameCount(1);
-
 		Utils::Exception::DX_CALL(graphicsCtx_->Create());
 		Utils::Exception::DX_CALL(uploadCtx_->Create());
-
 		Utils::Exception::DX_CALL(swapChain_->Create());
 		Utils::Exception::DX_CALL(framebuffer_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
 
-		// =================================================
-		// Global descriptor heap を作る
-		// =================================================
+		// descriptor heap
 		constexpr uint32_t kTotalDescriptors = 65536;
-		GDescHeap_.Init(GetDevice(), kTotalDescriptors);
+		descHeap_.Init(
+			GetDevice(),
+			kTotalDescriptors,
+			true
+		);
+
+		// Persistent Descriptor Allocator
+		constexpr uint32_t kPersistentCap = 32768;
+		perDescAlloc_.Init(&descHeap_, kPersistentCap);
 
 		// ---- 配分 ----
 		constexpr uint32_t kPersistentBase = 0;
@@ -269,174 +272,3 @@ void DX12Manager::TransitionToPresent(UINT index)
 	graphicsCtx_->GetList()->ResourceBarrier(1, &b);
 	framebuffer_->SetBackBufferState(index, D3D12_RESOURCE_STATE_PRESENT);
 }
-
-
-//HRESULT DX12Manager::StartFrame()
-//{
-//	if (!cmdContext_ || !framebuf_ || !swapChain_ || !frameSync_) {
-//		Utils::Logger::Error("DX12Manager::StartFrame - subsystem missing\n");
-//		return E_POINTER;
-//	}
-//
-//	// === GPUフレーム同期 ===
-//	frameSync_->BeginFrame(); // GPUがこのフレームの使用を終えるまで待機
-//
-//	// Collect deferred frees for this frame (safe to reclaim now)
-//	uint32_t frameIndex = frameSync_->GetFrameIndex();
-//	if (transientDescAlloc_) transientDescAlloc_->CollectDeferred(frameIndex);
-//	if (persistentDescAlloc_) persistentDescAlloc_->CollectDeferred(frameIndex);
-//
-//	// Reset transient allocator only (persistent kept)
-//	if (transientDescAlloc_) {
-//		transientDescAlloc_->Reset();
-//	}
-//
-//	// Notify per-frame resource about frame start (hook for bookkeeping)
-//	if (frameIndex < frameResources_.size() && frameResources_[frameIndex]) {
-//		frameResources_[frameIndex]->BeginFrame(frameIndex);
-//	}
-//
-//	// === コマンドリストの準備 ===
-//	HRESULT hr = cmdContext_->MoveToNextFrame();
-//	if (FAILED(hr)) return hr;
-//	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
-//	if (!list) return E_FAIL;
-//
-//	// === Descriptor Heap 設定 (Problem 2 Fix) ===
-//	if (persistentDescAlloc_) {
-//		ID3D12DescriptorHeap* heaps[] = { persistentDescAlloc_->GetHeap() };
-//		list->SetDescriptorHeaps(1, heaps);
-//	}
-//
-//	// === バックバッファの準備 ===
-//	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
-//	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
-//	if (!backBuffer) return E_FAIL;
-//
-//	PrepareBackBuffer(currIndex, backBuffer);
-//	BindRenderTargets(currIndex);
-//	ClearRenderTargets(currIndex);
-//
-//	return S_OK;
-//}
-//
-//HRESULT DX12Manager::EndFrame()
-//{
-//	if (!cmdContext_ || !swapChain_ || !framebuf_ || !frameSync_) {
-//		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing\n");
-//		return E_POINTER;
-//	}
-//
-//	UINT currIndex = swapChain_->GetCurrentBackBufferIndex();
-//	ID3D12Resource* backBuffer = framebuf_->GetBackBuffer(currIndex);
-//	ID3D12GraphicsCommandList* list = cmdContext_->GetList();
-//	if (!list || !backBuffer) return E_FAIL;
-//
-//	// === RenderTarget -> Present へ遷移 ===
-//	TransitionToPresent(currIndex, backBuffer);
-//
-//	// === コマンド送信と Present ===
-//	HRESULT hr = cmdContext_->ExecuteAndSignal();
-//	if (FAILED(hr)) return hr;
-//
-//	hr = swapChain_->Present(1, 0);
-//	if (FAILED(hr)) return hr;
-//
-//	// === GPUにSignalして次フレームへ ===
-//	frameSync_->EndFrame();
-//
-//	return S_OK;
-//}
-//
-//void DX12Manager::PreDraw4PE()
-//{
-//	// TODO
-//}
-//
-//void DX12Manager::PostDraw4PE()
-//{	 
-//	// TODO
-//}	 
-//	 
-//void DX12Manager::PreDraw4SC()
-//{	 
-//	// TODO
-//}	 
-//	 
-//void DX12Manager::PostDraw4SC()
-//{
-//	// TODO
-//}
-//
-//void DX12Manager::PrepareBackBuffer(UINT currIndex, ID3D12Resource* backBuffer)
-//{
-//	D3D12_RESOURCE_STATES prevState = framebuf_->GetBackBufferState(currIndex);
-//	if (prevState == D3D12_RESOURCE_STATE_RENDER_TARGET) return;
-//
-//	D3D12_RESOURCE_BARRIER barrier{};
-//	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-//	barrier.Transition.pResource = backBuffer;
-//	barrier.Transition.StateBefore = prevState;
-//	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-//	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-//
-//	cmdContext_->GetList()->ResourceBarrier(1, &barrier);
-//	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_RENDER_TARGET);
-//}
-//
-//void DX12Manager::BindRenderTargets(UINT currIndex)
-//{
-//	auto list = cmdContext_->GetList();
-//
-//	// 1. レンダリングターゲットのバインド
-//	D3D12_CPU_DESCRIPTOR_HANDLE rtv = framebuf_->GetRtvHandle(currIndex);
-//	D3D12_CPU_DESCRIPTOR_HANDLE dsv = framebuf_->GetDsvHandle();
-//	list->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-//
-//	// 2. ビューポートとシザー矩形を Framebuffer の現在のサイズで更新
-//	D3D12_VIEWPORT viewport{};
-//	viewport.Width = static_cast<float>(framebuf_->GetWidth());
-//	viewport.Height = static_cast<float>(framebuf_->GetHeight());
-//	viewport.TopLeftX = 0;
-//	viewport.TopLeftY = 0;
-//	viewport.MinDepth = 0.0f;
-//	viewport.MaxDepth = 1.0f;
-//
-//	D3D12_RECT scissorRect{};
-//	scissorRect.left = 0;
-//	scissorRect.top = 0;
-//	scissorRect.right = framebuf_->GetWidth();
-//	scissorRect.bottom = framebuf_->GetHeight();
-//
-//	list->RSSetViewports(1, &viewport);
-//	list->RSSetScissorRects(1, &scissorRect);
-//}
-//
-//void DX12Manager::ClearRenderTargets(UINT currIndex)
-//{
-//	static auto start = std::chrono::high_resolution_clock::now();
-//	float t = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
-//	FLOAT color[4] = {
-//		0.2f + 0.3f * std::sinf(t),
-//		0.3f + 0.2f * std::cosf(t * 0.7f),
-//		0.4f, 1.0f
-//	};
-//	framebuf_->ClearRenderTarget(cmdContext_->GetList(), currIndex, color);
-//	framebuf_->ClearDepthStencil(cmdContext_->GetList());
-//}
-//
-//void DX12Manager::TransitionToPresent(UINT currIndex, ID3D12Resource* backBuffer)
-//{
-//	D3D12_RESOURCE_STATES prevState = framebuf_->GetBackBufferState(currIndex);
-//	if (prevState == D3D12_RESOURCE_STATE_PRESENT) return;
-//
-//	D3D12_RESOURCE_BARRIER barrier{};
-//	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-//	barrier.Transition.pResource = backBuffer;
-//	barrier.Transition.StateBefore = prevState;
-//	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-//	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-//
-//	cmdContext_->GetList()->ResourceBarrier(1, &barrier);
-//	framebuf_->SetBackBufferState(currIndex, D3D12_RESOURCE_STATE_PRESENT);
-//}

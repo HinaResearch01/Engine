@@ -3,23 +3,25 @@
 
 using namespace Tsumi::DX12;
 
-void DescriptorHeap::Init(ID3D12Device* device, uint32_t numDescriptors)
+void DescriptorHeap::Init(ID3D12Device* device, uint32_t numDescriptors, bool shaderVisible)
 {
-	assert(device);
 	capacity_ = numDescriptors;
+	D3D12_DESCRIPTOR_HEAP_TYPE type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
 	D3D12_DESCRIPTOR_HEAP_DESC desc{};
-	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	desc.Type = type;
 	desc.NumDescriptors = numDescriptors;
-	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	desc.NodeMask = 0;
+	desc.Flags = shaderVisible
+		? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+		: D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-	HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(heap_.ReleaseAndGetAddressOf()));
-	assert(SUCCEEDED(hr));
+	device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap_));
 
-	inc_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	inc_ = device->GetDescriptorHandleIncrementSize(type);
 	cpuBase_ = heap_->GetCPUDescriptorHandleForHeapStart();
-	gpuBase_ = heap_->GetGPUDescriptorHandleForHeapStart();
+	gpuBase_ = shaderVisible
+		? heap_->GetGPUDescriptorHandleForHeapStart()
+		: D3D12_GPU_DESCRIPTOR_HANDLE{};
 }
 
 void DescriptorHeap::Finalize()

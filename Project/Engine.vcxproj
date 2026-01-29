@@ -190,9 +190,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\DX12Manager.cpp" />
     <ClCompile Include="Engine\DX12\Framebuf\Framebuffer.cpp" />
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp" />
-    <ClCompile Include="Engine\DX12\PerFrame\FrameBindingContext.cpp" />
-    <ClCompile Include="Engine\DX12\PerFrame\FrameUploadAllocator.cpp" />
-    <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp" />
+    <ClCompile Include="Engine\DX12\PerFrame\FrameBindState.cpp" />
+    <ClCompile Include="Engine\DX12\PerFrame\FrameContext.cpp" />
+    <ClCompile Include="Engine\DX12\PerFrame\FrameUploadArena.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp" />
@@ -352,9 +352,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\DX12Manager.h" />
     <ClInclude Include="Engine\DX12\Framebuf\Framebuffer.h" />
     <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h" />
-    <ClInclude Include="Engine\DX12\PerFrame\FrameBindingContext.h" />
-    <ClInclude Include="Engine\DX12\PerFrame\FrameUploadAllocator.h" />
-    <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h" />
+    <ClInclude Include="Engine\DX12\PerFrame\FrameBindState.h" />
+    <ClInclude Include="Engine\DX12\PerFrame\FrameContext.h" />
+    <ClInclude Include="Engine\DX12\PerFrame\FrameUploadArena.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
     <ClInclude Include="Engine\Framework\Actor\ActorTag.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />

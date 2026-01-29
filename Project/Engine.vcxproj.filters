@@ -167,9 +167,6 @@
     <ClCompile Include="Engine\Resource\ResourceSystem.cpp">
       <Filter>Engine\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\PerFrame\PerFrameResource.cpp">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp">
       <Filter>Engine\Framework\System\Camera</Filter>
     </ClCompile>
@@ -203,12 +200,6 @@
     <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\PerFrame\FrameUploadAllocator.cpp">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DX12\PerFrame\FrameBindingContext.cpp">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\DX12\Desc\DescriptorHeap.cpp">
       <Filter>Engine\DX12\Desc</Filter>
     </ClCompile>
@@ -220,6 +211,15 @@
     </ClCompile>
     <ClCompile Include="Engine\DX12\Desc\TransientDescAllocator.cpp">
       <Filter>Engine\DX12\Desc</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\PerFrame\FrameContext.cpp">
+      <Filter>Engine\DX12\PerFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\PerFrame\FrameUploadArena.cpp">
+      <Filter>Engine\DX12\PerFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\PerFrame\FrameBindState.cpp">
+      <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -661,9 +661,6 @@
     <ClInclude Include="Engine\Resource\ResourceSystem.h">
       <Filter>Engine\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\PerFrame\PerFrameResource.h">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h">
       <Filter>Engine\Framework\Component\Camera</Filter>
     </ClInclude>
@@ -781,12 +778,6 @@
     <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\PerFrame\FrameUploadAllocator.h">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\DX12\PerFrame\FrameBindingContext.h">
-      <Filter>Engine\DX12\PerFrame</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\Desc\DescriptorHeap.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
@@ -801,6 +792,15 @@
     </ClInclude>
     <ClInclude Include="Engine\DX12\Desc\DescriptorUtils.h">
       <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\PerFrame\FrameContext.h">
+      <Filter>Engine\DX12\PerFrame</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\PerFrame\FrameUploadArena.h">
+      <Filter>Engine\DX12\PerFrame</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\PerFrame\FrameBindState.h">
+      <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -24,7 +24,7 @@ public:
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	void Init(ID3D12Device* device, uint32_t numDescriptors);
+	void Init(ID3D12Device* device, uint32_t numDescriptors, bool shaderVisible);
 
 	/// <summary>
 	/// 解放処理

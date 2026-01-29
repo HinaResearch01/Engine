@@ -5,11 +5,13 @@
 #include <memory>
 #include <vector>
 #include "Cmd/CommandContext.h"
-#include "Desc/Global/GlobalDescriptorHeap.h"
+#include "Desc/DescriptorHeap.h"
+#include "Desc/PersistentDescAllocator.h"
 #include "Device/DX12Device.h"
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
 #include "FrameSync/FrameSync.h"
+#include "PerFrame/FrameContext.h"
 #include "PerFrame/PerFrameResource.h"
 
 namespace Tsumi::DX12 {
@@ -70,16 +72,14 @@ public:
 	FrameSync* GetFrameSync() const {
 		return frameSync_.get();
 	}
-	ID3D12DescriptorHeap* GetGlobalCbvSrvUavHeap() const {
-		return GDescHeap_.GetHeap();
-	}
 #pragma endregion
 
 private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> graphicsCtx_;
 	std::unique_ptr<CommandContext> uploadCtx_;
-	GlobalDescriptorHeap GDescHeap_;
+	DescriptorHeap descHeap_;
+	PersistentDescAllocator perDescAlloc_;
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuffer_;
 	std::unique_ptr<FrameSync> frameSync_;
