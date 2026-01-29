@@ -3,84 +3,36 @@
 
 using namespace Tsumi::DX12;
 
-FrameBindingContext::FrameBindingContext(DX12Manager* ptr)
-	: dx12Mgr_(ptr)
-{}
-
-void FrameBindingContext::Init()
+void FrameBindingContext::BeginFrame(CommandContext& cmd, ID3D12DescriptorHeap* globalCbvSrvUavHeap)
 {
-	device_ = dx12Mgr_->GetDevice();
-	cmd_ = dx12Mgr_->GetCommandContext();
-	//heap_ = dx12Mgr_->GetTransDescHeap();
-	//upload_ = dx12Mgr_->GetFrameUploadAlloc();
+	auto* list = cmd.GetList();
+	if (!list || !globalCbvSrvUavHeap) return;
+
+	ID3D12DescriptorHeap* heaps[] = { globalCbvSrvUavHeap };
+	list->SetDescriptorHeaps(1, heaps);
+	heapsSet_ = true;
 }
 
-void FrameBindingContext::BeginFrame()
+D3D12_GPU_DESCRIPTOR_HANDLE FrameBindingContext::BuildSrvTable(PerFrameResource& fr, std::span<const DescriptorHandle> persistentHandles)
 {
-	assert(!active_);
-	assert(device_);
+	D3D12_GPU_DESCRIPTOR_HANDLE nullGpu{ 0 };
+	if (persistentHandles.empty()) return nullGpu;
 
-	heapId_ = heap_->GetHeapId();
-	assert(heapId_ != kInvalidHeapId);
-
-	heap_->Reset();
-	upload_->Reset();
-	BindTransientHeap();
-
-	active_ = true;
-}
-
-void FrameBindingContext::EndFrame()
-{
-	assert(active_);
-	active_ = false;
-
-	device_ = nullptr;
-	cmd_ = nullptr;
-	heap_ = nullptr;
-	upload_ = nullptr;
-	heapId_ = kInvalidHeapId;
-}
-
-GpuTableHandle FrameBindingContext::AllocTable(uint32_t count, std::string_view tag)
-{
-	assert(active_);
-	return heap_->AllocTable(count);
-}
-
-GpuTableHandle FrameBindingContext::BuildTableFromCpuDescs(const CpuDescHandle* src, uint32_t count, DescriptorCopier& copier, std::string_view tag)
-{
-	assert(active_);
-	assert(src && count > 0);
-
-	auto table = heap_->AllocTable(count);
-
-	for (uint32_t i = 0; i < count; ++i) {
-		assert(src[i].IsValid());
-		auto dstCpu = heap_->CpuAt(table, i);
-		copier.Copy1(src[i], dstCpu);
+	// source は “CPU handle” でコピーする（同じGlobalHeap内でもOK）
+	std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> srcCpu;
+	srcCpu.reserve(persistentHandles.size());
+	for (auto& h : persistentHandles) {
+		srcCpu.push_back(h.cpu);
 	}
 
-	return table;
+	return fr.GetTableBuilder().BuildTable(srcCpu);
 }
 
-uint32_t FrameBindingContext::TransientUsed() const
+void FrameBindingContext::BindTable(CommandContext& cmd, uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE tableGpu) const
 {
-	assert(heap_);
-	return heap_->Used();
-}
+	if (!heapsSet_ || tableGpu.ptr == 0) return;
+	auto* list = cmd.GetList();
+	if (!list) return;
 
-uint32_t FrameBindingContext::TransientCapacity() const
-{
-	assert(heap_);
-	return heap_->Capacity();
-}
-
-void FrameBindingContext::BindTransientHeap()
-{
-	assert(cmd_);
-	assert(heap_);
-
-	ID3D12DescriptorHeap* heaps[] = { heap_->GetHeap() };
-	cmd_->SetDescriptorHeaps(1, heaps, heapId_);
+	list->SetGraphicsRootDescriptorTable(rootIndex, tableGpu);
 }

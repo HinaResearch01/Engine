@@ -3,13 +3,8 @@
 
 using namespace Tsumi::DX12;
 
-FrameUploadAllocator::FrameUploadAllocator(DX12Manager* ptr)
-	: dx12Mgr_(ptr)
-{}
-
-void FrameUploadAllocator::Init(uint32_t bytes)
+void FrameUploadAllocator::Init(ID3D12Device* device, uint32_t bytes)
 {
-	auto device = dx12Mgr_->GetDevice();
 	assert(device);
 	size_ = bytes;
 

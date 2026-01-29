@@ -85,19 +85,19 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 	// -------------------------------------------------
 	// 1. Primary Effect Pass (3D描画)
 	// -------------------------------------------------
-	dx12->PreDraw4PE();
+	dx12->BeginGBufferPass();
 
 	if (renderSys) {
 		renderSys->RenderBackSprite(*cmdContext); // 背景
 		renderSys->RenderModel(*cmdContext);      // モデル
 	}
 
-	dx12->PostDraw4PE();
+	dx12->ClearGBuffer();
 
 	// -------------------------------------------------
 	// 2. SwapChain Pass (UI / Final)
 	// -------------------------------------------------
-	dx12->PreDraw4SC();
+	dx12->BeginBackBufferPass();
 
 	if (renderSys) {
 		renderSys->RenderFrontSprite(*cmdContext); // 前景
@@ -108,7 +108,7 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 		uiRenderCallBack();
 	}
 
-	dx12->PostDraw4SC();
+	dx12->ClearBackBuffer();
 }
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }
 

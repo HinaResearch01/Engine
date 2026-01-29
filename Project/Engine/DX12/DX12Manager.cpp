@@ -31,12 +31,34 @@ void DX12Manager::Init()
 		Utils::Exception::DX_CALL(framebuffer_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
 
-		// PerFrameResource（upload allocator等）を frame count 分
-		frameResources_.clear();
+		// =================================================
+		// Global descriptor heap を作る
+		// =================================================
+		constexpr uint32_t kTotalDescriptors = 65536;
+		GDescHeap_.Init(GetDevice(), kTotalDescriptors);
+
+		// ---- 配分 ----
+		constexpr uint32_t kPersistentBase = 0;
+		constexpr uint32_t kPersistentCap = 32768;
+		constexpr uint32_t kTableBase = kPersistentBase + kPersistentCap;
+		constexpr uint32_t kTableCapPerFrame = 8192;
+
+		// =================================================
+		// PerFrameResource 初期化 + descriptor 配線
+		// =================================================
 		frameResources_.resize(bufferCount_);
-		for (UINT i = 0; i < bufferCount_; ++i) {
+		for (uint32_t i = 0; i < bufferCount_; ++i) {
 			frameResources_[i] = std::make_unique<PerFrameResource>();
-			Utils::Exception::DX_CALL(frameResources_[i]->Init(GetDevice(), /*uploadSize*/ 16 * 1024));
+			Utils::Exception::DX_CALL(
+				frameResources_[i]->Init(GetDevice(), 16 * 1024)
+			);
+
+			frameResources_[i]->InitDescriptors(
+				GDescHeap_,
+				bufferCount_,
+				kTableBase,
+				kTableCapPerFrame
+			);
 		}
 	}
 	catch (const Utils::Exception::DxException& e) {
@@ -110,9 +132,9 @@ HRESULT DX12Manager::EndFrame()
 	return S_OK;
 }
 
-void DX12Manager::BeginGBufferPass(CommandContext& cmd)
+void DX12Manager::BeginGBufferPass()
 {
-	auto* list = cmd.GetList();
+	auto* list = graphicsCtx_->GetList();
 	if (!list || !framebuffer_) return;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvs[3] = {
@@ -130,25 +152,25 @@ void DX12Manager::BeginGBufferPass(CommandContext& cmd)
 	list->RSSetScissorRects(1, &sc);
 }
 
-void DX12Manager::ClearGBuffer(CommandContext& cmd)
+void DX12Manager::ClearGBuffer()
 {
-	auto* list = cmd.GetList();
+	auto* list = graphicsCtx_->GetList();
 	if (!list || !framebuffer_) return;
 	framebuffer_->ClearGBuffer(list);
 }
 
-void DX12Manager::BeginBackBufferPass(CommandContext& cmd)
+void DX12Manager::BeginBackBufferPass()
 {
-	(void)cmd;
+	(void)graphicsCtx_;
 
 	const UINT index = swapChain_ ? swapChain_->GetCurrentBackBufferIndex() : 0;
 	PrepareBackBuffer(index);
 	BindBackBuffer(index);
 }
 
-void DX12Manager::ClearBackBuffer(CommandContext& cmd)
+void DX12Manager::ClearBackBuffer()
 {
-	auto* list = cmd.GetList();
+	auto* list = graphicsCtx_->GetList();
 	if (!list || !framebuffer_ || !swapChain_) return;
 
 	const UINT index = swapChain_->GetCurrentBackBufferIndex();

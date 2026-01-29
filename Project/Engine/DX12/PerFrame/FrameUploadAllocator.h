@@ -7,9 +7,6 @@
 
 namespace Tsumi::DX12 {
 
-// 前方宣言
-class DX12Manager;
-
 /*  */
 class FrameUploadAllocator {
 
@@ -18,7 +15,6 @@ public:
 	/// コンストラクタ
 	/// </summary>
 	FrameUploadAllocator() = default;
-	FrameUploadAllocator(DX12Manager* ptr);
 
 	/// <summary>
 	/// デストラクタ
@@ -28,7 +24,7 @@ public:
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	void Init(uint32_t bytes);
+	void Init(ID3D12Device* device, uint32_t bytes);
 
 	/// <summary>
 	/// リセット
@@ -56,8 +52,6 @@ private:
 	uint32_t size_ = 0;
 	uint32_t offset_ = 0;
 	D3D12_GPU_VIRTUAL_ADDRESS baseGpu_ = 0;
-
-	DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

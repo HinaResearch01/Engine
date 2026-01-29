@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 #include <assert.h>
-#include "DX12/Desc/DescriptorHandles.h"
 
 namespace Tsumi::DX12 {
 
@@ -120,18 +119,15 @@ public:
 	void SetFullViewportFromFramebuffer();
 	void SetFullScissorFromFramebuffer();
 
-	void SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps, HeapId srvHeapId);
+	/// <summary>
+	/// descriptor heap binding
+	/// </summary>
+	void SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps);
 
-	void SetGraphicsRootDescriptorTable(uint32_t rootIndex, const GpuTableHandle& table);
-
-#pragma region Accessor
-	ID3D12CommandQueue* const GetQueue() { return queue_.Get(); }
-	ID3D12CommandAllocator* GetCurrentAllocator() const {
-		return (currentFrameIndex_ < allocators_.size()) ? allocators_[currentFrameIndex_].Get() : nullptr;
-	}
-	ID3D12GraphicsCommandList* GetList() const { return list_.Get(); }
-	HeapId BoundSrvHeapId() const { return boundSrvHeapId_; }
-#pragma endregion
+	/// <summary>
+	/// Root descriptor table
+	/// </summary>
+	void SetGraphicsRootDescriptorTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table);
 
 private:
 	/// <summary>
@@ -159,33 +155,42 @@ private:
 	/// </summary>
 	void ResetCachedRasterState();
 
+public:
+
+#pragma region Accessor
+	ID3D12CommandQueue* GetQueue() const { return queue_.Get(); }
+	ID3D12CommandAllocator* GetCurrentAllocator() const {
+		return (currentFrameIndex_ < allocators_.size()) ? allocators_[currentFrameIndex_].Get() : nullptr;
+	}
+	ID3D12GraphicsCommandList* GetList() const { return list_.Get(); }
+	D3D12_COMMAND_LIST_TYPE GetListType() const { return listType_; }
+#pragma endregion
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> queue_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> allocators_;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list_;
 
-	// フェンス同期（グローバルフェンスとフレームごとの期待値）
+	// fence sync
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	HANDLE fenceEvent_ = nullptr;
-	UINT64 globalFenceValue_ = 0; // シグナル時に増やす値
-	std::vector<UINT64> fenceValues_; // フレームごとの「このフレームの最後にシグナルした値」
+	UINT64 globalFenceValue_ = 0;
+	std::vector<UINT64> fenceValues_;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 	UINT frameCount_ = 2;
 	UINT currentFrameIndex_ = 0;
 
-	// キャッシュ用ステート
+	// cached raster state
 	bool viewportSet_ = false;
 	Viewport currentViewport_{};
 	bool scissorSet_ = false;
 	Scissor currentScissor_{};
 
-	// コマンドリストの状態管理 (Open/Closed)
+	// command list open/closed
 	bool isListOpen_ = false;
 
-	D3D12_COMMAND_LIST_TYPE listType_;
-
-	HeapId boundSrvHeapId_ = kInvalidHeapId;
+	D3D12_COMMAND_LIST_TYPE listType_ = D3D12_COMMAND_LIST_TYPE_DIRECT;
 };
 
 }

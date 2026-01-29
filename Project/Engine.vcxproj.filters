@@ -203,19 +203,22 @@
     <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\Desc\PersistentDescriptorHeap.cpp">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\DX12\Desc\TransientDescriptorHeap.cpp">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\DX12\PerFrame\FrameUploadAllocator.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DX12\PerFrame\FrameBindingContext.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\DX12\Desc\DescriptorCopier.cpp">
+    <ClCompile Include="Engine\DX12\Desc\DescriptorHeap.cpp">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\Desc\PersistentDescAllocator.cpp">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\Desc\DescriptorTableBuilder.cpp">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\DX12\Desc\TransientDescAllocator.cpp">
       <Filter>Engine\DX12\Desc</Filter>
     </ClCompile>
   </ItemGroup>
@@ -778,22 +781,25 @@
     <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\Desc\PersistentDescriptorHeap.h">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\DX12\Desc\TransientDescriptorHeap.h">
-      <Filter>Engine\DX12\Desc</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\PerFrame\FrameUploadAllocator.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DX12\PerFrame\FrameBindingContext.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\Desc\DescriptorHandles.h">
+    <ClInclude Include="Engine\DX12\Desc\DescriptorHeap.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\DX12\Desc\DescriptorCopier.h">
+    <ClInclude Include="Engine\DX12\Desc\PersistentDescAllocator.h">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\Desc\DescriptorTableBuilder.h">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\Desc\TransientDescAllocator.h">
+      <Filter>Engine\DX12\Desc</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\DX12\Desc\DescriptorUtils.h">
       <Filter>Engine\DX12\Desc</Filter>
     </ClInclude>
   </ItemGroup>

@@ -341,25 +341,12 @@ void CommandContext::SetFullScissorFromFramebuffer()
 	SetScissor(sc);
 }
 
-void CommandContext::SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps, HeapId srvHeapId)
+void CommandContext::SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps)
 {
-	assert(list_);
-	assert(count == 1 && "TsumiEngine rule: bind exactly 1 transient shader-visible heap in RenderFrame.");
-	assert(heaps && heaps[0]);
-
-	list_->SetDescriptorHeaps(count, heaps);
-	boundSrvHeapId_ = srvHeapId;
 }
 
-void CommandContext::SetGraphicsRootDescriptorTable(uint32_t rootIndex, const GpuTableHandle& table)
+void CommandContext::SetGraphicsRootDescriptorTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table)
 {
-	assert(list_);
-	assert(listType_ == D3D12_COMMAND_LIST_TYPE_DIRECT && "Graphics root table requires DIRECT command list.");
-	assert(table.IsValid());
-	assert(boundSrvHeapId_ != kInvalidHeapId);
-	assert(table.heapId == boundSrvHeapId_ && "Descriptor table heap mismatch!");
-
-	list_->SetGraphicsRootDescriptorTable(rootIndex, table.gpu);
 }
 
 HRESULT CommandContext::CreateQueue()

@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include "Cmd/CommandContext.h"
+#include "Desc/Global/GlobalDescriptorHeap.h"
 #include "Device/DX12Device.h"
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
@@ -37,11 +38,11 @@ public:
 	HRESULT EndFrame();
 
 	// ---- render passes ----
-	void BeginGBufferPass(CommandContext& cmd);
-	void ClearGBuffer(CommandContext& cmd);
+	void BeginGBufferPass();
+	void ClearGBuffer();
 
-	void BeginBackBufferPass(CommandContext& cmd);
-	void ClearBackBuffer(CommandContext& cmd);
+	void BeginBackBufferPass();
+	void ClearBackBuffer();
 
 	// ---- view state ----
 	D3D12_VIEWPORT GetMainViewport() const;
@@ -66,13 +67,19 @@ public:
 	Framebuffer* GetFramebuffer() const {
 		return framebuffer_.get();
 	}
+	FrameSync* GetFrameSync() const {
+		return frameSync_.get();
+	}
+	ID3D12DescriptorHeap* GetGlobalCbvSrvUavHeap() const {
+		return GDescHeap_.GetHeap();
+	}
 #pragma endregion
 
 private:
 	std::unique_ptr<DX12Device> dx12Device_;
 	std::unique_ptr<CommandContext> graphicsCtx_;
 	std::unique_ptr<CommandContext> uploadCtx_;
-
+	GlobalDescriptorHeap GDescHeap_;
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuffer_;
 	std::unique_ptr<FrameSync> frameSync_;
