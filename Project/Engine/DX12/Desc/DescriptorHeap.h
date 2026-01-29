@@ -1,5 +1,53 @@
 #pragma once
-class DescriptorHeap
-{
+
+#include <d3d12.h>
+#include <wrl.h>
+#include <cstdint>
+#include "DescriptorUtils.h"
+
+
+namespace Tsumi::DX12 {
+
+class DescriptorHeap {
+
+public:
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	DescriptorHeap() = default;
+
+	/// <summary>
+	/// デストラクタ
+	/// </summary>
+	~DescriptorHeap() = default;
+
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	void Init(ID3D12Device* device, uint32_t numDescriptors);
+
+	/// <summary>
+	/// 解放処理
+	/// </summary>
+	void Finalize();
+
+#pragma region Accessor
+	ID3D12DescriptorHeap* GetHeap() const { return heap_.Get(); }
+	uint32_t GetDescriptorSize() const { return inc_; }
+	uint32_t GetCapacity() const { return capacity_; }
+	// index -> CPU/GPU handle
+	DescriptorHandlePair At(uint32_t index) const;
+	// CPU handle only (for Create*View dest)
+	D3D12_CPU_DESCRIPTOR_HANDLE CpuAt(uint32_t index) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GpuAt(uint32_t index) const;
+#pragma endregion
+
+private:
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap_;
+	uint32_t inc_ = 0;
+	uint32_t capacity_ = 0;
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuBase_{ 0 };
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuBase_{ 0 };
 };
 
+}
