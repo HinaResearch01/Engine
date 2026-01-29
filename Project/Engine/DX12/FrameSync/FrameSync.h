@@ -24,7 +24,7 @@ public:
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
-	~FrameSync() = default;
+	~FrameSync();
 
 	/// <summary>
 	/// 初期化処理
@@ -39,20 +39,25 @@ public:
 	/// <summary>
 	/// フレーム終了時処理
 	/// </summary>
-	void EndFrame();
+	uint64_t  EndFrame();
+
+	/// <summary>
+	/// 明示待ち
+	/// </summary>
+	void Wait(uint64_t fenceValue);
 
 #pragma region Accessor
 	uint32_t GetFrameIndex() const { return frameIndex_; }
 #pragma endregion 
 
 public:
-	static constexpr uint32_t kFrameCount = 3; // triple buffering
+	static constexpr uint32_t kFrameCount = 3;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	HANDLE fenceEvent_ = nullptr;
 
-	std::array<uint64_t, kFrameCount> fenceValues_ = {};
+	std::array<uint64_t, kFrameCount> fenceValues_{};
 	uint32_t frameIndex_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;

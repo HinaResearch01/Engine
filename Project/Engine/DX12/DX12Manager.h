@@ -12,7 +12,6 @@
 #include "Framebuf/Framebuffer.h"
 #include "FrameSync/FrameSync.h"
 #include "PerFrame/FrameContext.h"
-#include "PerFrame/PerFrameResource.h"
 
 namespace Tsumi::DX12 {
 
@@ -51,6 +50,9 @@ public:
 	D3D12_RECT     GetMainScissor() const;
 
 private:
+
+	void InitDescriptors_();
+	void InitFrames_();
 	
 	// ---- helpers ----
 	void PrepareBackBuffer(UINT index);
@@ -61,7 +63,7 @@ public:
 
 #pragma region Accessors
 	ID3D12Device* GetDevice() const {
-		return dx12Device_ ? dx12Device_->GetDevice() : nullptr;
+		return device_ ? device_->GetDevice() : nullptr;
 	}
 	CommandContext* GetCommandContext() const {
 		return graphicsCtx_.get();
@@ -72,21 +74,34 @@ public:
 	FrameSync* GetFrameSync() const {
 		return frameSync_.get();
 	}
+	ID3D12DescriptorHeap* GetSrvHeap() const {
+		return descHeap_.GetHeap();
+	}
+	PersistentDescAllocator& GetPersistentDesc() { return perDescAlloc_; }
 #pragma endregion
 
 private:
-	std::unique_ptr<DX12Device> dx12Device_;
+	std::unique_ptr<DX12Device> device_;
 	std::unique_ptr<CommandContext> graphicsCtx_;
 	std::unique_ptr<CommandContext> uploadCtx_;
+
 	DescriptorHeap descHeap_;
 	PersistentDescAllocator perDescAlloc_;
+
 	std::unique_ptr<SwapChain> swapChain_;
 	std::unique_ptr<Framebuffer> framebuffer_;
 	std::unique_ptr<FrameSync> frameSync_;
 
-	std::vector<std::unique_ptr<PerFrameResource>> frameResources_;
+	std::vector<FrameContext> frames_;
 
-	UINT bufferCount_ = 3;
+	// parameters
+	uint32_t bufferCount_ = 3;
+	uint32_t frameIndex_ = 0;
+
+	uint32_t totalDescriptors_ = 65536;
+	uint32_t persistentCap_ = 32768;
+	uint32_t transientCapPerFrame_ = 8192;
+	uint32_t uploadBytesPerFrame_ = 16 * 1024;
 };
 
 } 

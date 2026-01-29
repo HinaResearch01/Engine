@@ -82,23 +82,17 @@ public:
 	HRESULT Create();
 
 	/// <summary>
-	/// コマンドリストを実行して GPU の完了を待つ（ユーティリティ）
+	/// list を Reset
 	/// </summary>
-	HRESULT ExecuteAndWait();
+	HRESULT ResetForFrame(UINT frameIndex);
 
 	/// <summary>
-	/// コマンドリストを実行してフェンスにシグナル（非同期）
-	/// シグナル後は MoveToNextFrame() を呼んでフレームを進める
+	/// Close して Execute
 	/// </summary>
-	HRESULT ExecuteAndSignal();
+	HRESULT Execute();
 
 	/// <summary>
-	/// フレームを進める。次のフレームの allocator を再利用する前に必ず呼ぶ
-	/// </summary>
-	HRESULT MoveToNextFrame();
-
-	/// <summary>
-	/// 現在のキューでフェンスが到達するまで待つ
+	/// queue flush
 	/// </summary>
 	HRESULT WaitForGpu();
 
@@ -120,7 +114,7 @@ public:
 	void SetFullScissorFromFramebuffer();
 
 	/// <summary>
-	/// descriptor heap binding
+	/// descriptor heap
 	/// </summary>
 	void SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps);
 
@@ -129,40 +123,31 @@ public:
 	/// </summary>
 	void SetGraphicsRootDescriptorTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table);
 
+	/// <summary>
+	/// CBV/Constants
+	/// </summary>
+	void SetGraphicsRootConstantBufferView(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va);
+
 private:
-	/// <summary>
-	/// Queueの生成
-	/// </summary>
 	HRESULT CreateQueue();
-
-	/// <summary>
-	/// Allocatorの生成
-	/// </summary>
 	HRESULT CreateAllocators(UINT frameCount);
-
-	/// <summary>
-	/// Listの生成
-	/// </summary>
 	HRESULT CreateList();
 
-	/// <summary>
-	/// フェンスの生成
-	/// </summary>
-	HRESULT CreateFence();
+	// flush fence
+	HRESULT CreateFlushFence_();
+	HRESULT SignalFlush_();
+	HRESULT WaitFlush_(uint64_t value);
 
-	/// <summary>
-	/// viewportとscissorのリセット
-	/// </summary>
 	void ResetCachedRasterState();
 
 public:
 
 #pragma region Accessor
 	ID3D12CommandQueue* GetQueue() const { return queue_.Get(); }
-	ID3D12CommandAllocator* GetCurrentAllocator() const {
-		return (currentFrameIndex_ < allocators_.size()) ? allocators_[currentFrameIndex_].Get() : nullptr;
-	}
 	ID3D12GraphicsCommandList* GetList() const { return list_.Get(); }
+	ID3D12CommandAllocator* GetAllocator(UINT frameIndex) const {
+		return (frameIndex < allocators_.size()) ? allocators_[frameIndex].Get() : nullptr;
+	}
 	D3D12_COMMAND_LIST_TYPE GetListType() const { return listType_; }
 #pragma endregion
 
@@ -171,14 +156,13 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> allocators_;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list_;
 
-	// fence sync
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
-	HANDLE fenceEvent_ = nullptr;
-	UINT64 globalFenceValue_ = 0;
-	std::vector<UINT64> fenceValues_;
+	// flush fence
+	Microsoft::WRL::ComPtr<ID3D12Fence> flushFence_;
+	HANDLE flushEvent_ = nullptr;
+	uint64_t flushValue_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
-	UINT frameCount_ = 2;
+	UINT frameCount_ = 1;
 	UINT currentFrameIndex_ = 0;
 
 	// cached raster state
@@ -187,9 +171,7 @@ private:
 	bool scissorSet_ = false;
 	Scissor currentScissor_{};
 
-	// command list open/closed
 	bool isListOpen_ = false;
-
 	D3D12_COMMAND_LIST_TYPE listType_ = D3D12_COMMAND_LIST_TYPE_DIRECT;
 };
 

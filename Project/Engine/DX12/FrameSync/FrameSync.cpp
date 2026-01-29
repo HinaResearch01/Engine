@@ -4,62 +4,64 @@
 using namespace Tsumi::DX12;
 using namespace Microsoft::WRL;
 
-FrameSync::FrameSync(DX12Manager* ptr)
+FrameSync::FrameSync(DX12Manager* ptr) : dx12Mgr_(ptr) {}
+
+FrameSync::~FrameSync()
 {
-    dx12Mgr_ = ptr;
+	if (fenceEvent_) {
+		CloseHandle(fenceEvent_);
+		fenceEvent_ = nullptr;
+	}
+	fence_.Reset();
 }
 
 HRESULT FrameSync::Init()
 {
-    assert(dx12Mgr_);
-    ID3D12Device* device = dx12Mgr_->GetDevice();
-    if (!device) {
-        return E_FAIL;
-    }
+	assert(dx12Mgr_);
+	ID3D12Device* device = dx12Mgr_->GetDevice();
+	if (!device) return E_FAIL;
 
-    // Fence作成
-    HRESULT hr = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
-    if (FAILED(hr)) {
-        return hr;
-    }
+	HRESULT hr = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+	if (FAILED(hr)) return hr;
 
-    // イベント作成
-    fenceEvent_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    if (fenceEvent_ == nullptr) {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
+	fenceEvent_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	if (!fenceEvent_) return HRESULT_FROM_WIN32(GetLastError());
 
-    fenceValues_.fill(0);
-    frameIndex_ = 0;
-
-    return S_OK;
+	fenceValues_.fill(0);
+	frameIndex_ = 0;
+	return S_OK;
 }
 
 void FrameSync::BeginFrame()
 {
-    assert(dx12Mgr_->GetCommandContext()->GetQueue());
-
-    // 現フレームのFence値がGPUにより完了済みかを確認
-    const uint64_t completed = fence_->GetCompletedValue();
-    if (completed < fenceValues_[frameIndex_])
-    {
-        // GPUがまだ処理中なら待機
-        fence_->SetEventOnCompletion(fenceValues_[frameIndex_], fenceEvent_);
-        WaitForSingleObject(fenceEvent_, INFINITE);
-    }
+	Wait(fenceValues_[frameIndex_]);
 }
 
-void FrameSync::EndFrame()
+uint64_t  FrameSync::EndFrame()
 {
-    assert(dx12Mgr_->GetCommandContext()->GetQueue());
+	auto* ctx = dx12Mgr_->GetCommandContext();
+	assert(ctx && ctx->GetQueue());
 
-    // 次に期待するFence値を設定
-    const uint64_t nextValue = fenceValues_[frameIndex_] + 1;
-    fenceValues_[frameIndex_] = nextValue;
+	// signal value を進める（frameIndexごとの期待値を増やす）
+	const uint64_t nextValue = fenceValues_[frameIndex_] + 1;
+	fenceValues_[frameIndex_] = nextValue;
 
-    // GPUにSignalを発行
-    dx12Mgr_->GetCommandContext()->GetQueue()->Signal(fence_.Get(), nextValue);
+	ctx->GetQueue()->Signal(fence_.Get(), nextValue);
 
-    // フレーム番号をローテーション
-    frameIndex_ = (frameIndex_ + 1) % kFrameCount;
+	// 次フレームへ
+	frameIndex_ = (frameIndex_ + 1) % kFrameCount;
+
+	return nextValue;
+}
+
+void FrameSync::Wait(uint64_t fenceValue)
+{
+	if (!fence_ || !fenceEvent_) return;
+	if (fenceValue == 0) return;
+
+	const uint64_t completed = fence_->GetCompletedValue();
+	if (completed >= fenceValue) return;
+
+	fence_->SetEventOnCompletion(fenceValue, fenceEvent_);
+	WaitForSingleObject(fenceEvent_, INFINITE);
 }
