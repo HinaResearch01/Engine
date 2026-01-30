@@ -53,7 +53,7 @@ void Application::Run()
         // ------------------ ループ開始フェーズ ------------------
         window_->ProcessMessages();
         dx12_->BeginFrame();
-		resourceMgr_->BeginFrame(dx12_->GetFrameSync()->GetFrameIndex());
+		resourceMgr_->BeginFrame(dx12_->GetFrameIndex());
         imgui_->BeginFrame();
 
 		// ------------------ 初期化フェーズ ------------------

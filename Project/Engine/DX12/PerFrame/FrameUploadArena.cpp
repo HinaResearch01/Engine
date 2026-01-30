@@ -45,7 +45,7 @@ void FrameUploadArena::Finalize()
 	offset_ = 0;
 }
 
-void FrameUploadArena::Reset()
+void FrameUploadArena::BeginFrame()
 {
 	offset_ = 0;
 }

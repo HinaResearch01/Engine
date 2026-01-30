@@ -77,8 +77,6 @@ private:
 	// Resource sync
 	// ---------------------------------------------------------
 	void SyncShadowResources();     // ShadowDepthMap / DSV / SRV
-	void RegisterShadowSRV();       // GpuViewManager へ登録
-	void CreateShadowDSV();         // DSV heap & handle
 
 	// ---------------------------------------------------------
 	// Binding helpers

@@ -213,8 +213,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp" />
     <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp" />
     <ClCompile Include="Engine\Math\MathUtil\MathUtil.cpp" />
-    <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp" />
-    <ClCompile Include="Engine\Resource\GView\GpuViewManager.cpp" />
     <ClCompile Include="Engine\Resource\Mesh\MeshManager.cpp" />
     <ClCompile Include="Engine\Resource\ResourceSystem.cpp" />
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp" />
@@ -408,9 +406,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\TMath.h" />
     <ClInclude Include="Engine\Math\Type\MathType.h" />
     <ClInclude Include="Engine\Math\Vector\Vector.h" />
-    <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h" />
-    <ClInclude Include="Engine\Resource\CB\FrameCBManager.h" />
-    <ClInclude Include="Engine\Resource\GView\GpuViewManager.h" />
     <ClInclude Include="Engine\Resource\Mesh\MeshManager.h" />
     <ClInclude Include="Engine\Resource\ResourceSystem.h" />
     <ClInclude Include="Engine\Resource\Tex\TextureManager.h" />

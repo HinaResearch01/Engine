@@ -8,8 +8,6 @@
 #include "DX12/DX12Manager.h"
 #include "DX12/Cmd/CommandContext.h"
 #include "Resource/ResourceSystem.h"
-#include "Resource/CB/FrameCBManager.h"
-#include "Resource/GView/GpuViewManager.h"
 #include "Resource/Mesh/MeshManager.h"
 #include "Resource/Tex/TextureManager.h"
 #include "Graphic/PSO/PSOLibrary.h"
@@ -106,13 +104,11 @@ void RenderSystem::DrawShadowPass(DX12::CommandContext* cmd)
 	list->RSSetScissorRects(1, &rc);
 
 	// DSV only
-	list->OMSetRenderTargets(0, nullptr, FALSE, &shadowDsv_);
-	list->ClearDepthStencilView(shadowDsv_, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	const auto& dsv = shadowDMap_->GetDSV();
+	list->OMSetRenderTargets(0, nullptr, FALSE, &dsv.cpu);
+	list->ClearDepthStencilView(dsv.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// PSO/RS (ShadowCaster)
-	// NOTE: これらは作っておくこと
-	// - RootSignature: "ShadowCaster" (例：b0=ShadowCasterCB, b1=ObjectCB)
-	// - PSO: "ShadowCaster" (Depth only)
 	list->SetGraphicsRootSignature(rsLib_->Get("ShadowCaster"));
 	list->SetPipelineState(psoLib_->Get("ShadowCaster"));
 
@@ -209,83 +205,21 @@ void RenderSystem::SyncShadowResources()
 	assert(shSys);
 
 	const ShadowContext& sh = shSys->GetContext();
-	if (!sh.enabled)
-		return;
+	if (!sh.enabled) return;
 
 	const uint32_t wantSize = sh.shadowMapSize;
-	if (!shadowDMap_)
-	{
+
+	if (!shadowDMap_) {
 		shadowDMap_ = std::make_unique<Graphic::ShadowDepthMap>();
 		shadowDMap_->Init(wantSize);
 		cachedShadowSize_ = wantSize;
-
-		CreateShadowDSV();
-
-		// SRV登録（persistent）
-		RegisterShadowSRV();
 		return;
 	}
 
-	if (cachedShadowSize_ != wantSize)
-	{
+	if (cachedShadowSize_ != wantSize) {
 		shadowDMap_->Resize(wantSize);
 		cachedShadowSize_ = wantSize;
-
-		CreateShadowDSV();
-
-		// NOTE:
-		// ここで "ShadowMap" のSRVを作り直す必要がある。
-		// 今の GpuViewManager に Unregister が無いなら Clear → 再登録運用。
-		// Clear すると GBuffer の登録も消えるので、
-		// 「GpuViewManager に Unregister(name) を追加」するのが最終的に正解。
-		//
-		// ここでは最小で Clear→再登録にしておく。
-		resourceSys_->GetGpuViewManager()->Clear();
-		RegisterShadowSRV();
-		// + 必要なら GBuffer などもここで登録し直す（Framebufが自前でSRV table持つなら不要）
 	}
-}
-
-void RenderSystem::RegisterShadowSRV()
-{
-	assert(shadowDMap_);
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
-	srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-	// Depth D32 -> SRV R32
-	srv.Format = Graphic::ShadowDepthMap::kSRVFormat; // R32_FLOAT
-	srv.Texture2D.MipLevels = 1;
-	srv.Texture2D.MostDetailedMip = 0;
-	srv.Texture2D.ResourceMinLODClamp = 0.0f;
-
-	resourceSys_->GetGpuViewManager()->
-		RegisterTextureSRV("ShadowMap", shadowDMap_->GetResource(), srv);
-}
-
-void RenderSystem::CreateShadowDSV()
-{
-	auto* device = dx12Mgr_->GetDevice();
-	assert(device && shadowDMap_);
-
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
-	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	heapDesc.NumDescriptors = 1;
-	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-	shadowDsvHeap_.Reset();
-	HRESULT hr = device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&shadowDsvHeap_));
-	assert(SUCCEEDED(hr) && shadowDsvHeap_);
-
-	shadowDsv_ = shadowDsvHeap_->GetCPUDescriptorHandleForHeapStart();
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsv{};
-	dsv.Format = Graphic::ShadowDepthMap::kDSVFormat; // D32
-	dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	dsv.Flags = D3D12_DSV_FLAG_NONE;
-
-	device->CreateDepthStencilView(shadowDMap_->GetResource(), &dsv, shadowDsv_);
 }
 
 void RenderSystem::BindGBufferCommon(DX12::CommandContext* cmd)

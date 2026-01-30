@@ -1,8 +1,11 @@
 #include "Framebuffer.h"
 #include "DX12/DX12Manager.h"
+#include "DX12/Desc/DescriptorHeap.h"
+#include "DX12/Desc/PersistentDescAllocator.h"
 #include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
 #include <algorithm>
+#undef max
 
 using namespace Tsumi::DX12;
 using namespace Microsoft::WRL;
@@ -20,28 +23,27 @@ inline bool HRFailed(HRESULT hr, const char* where)
 
 Framebuffer::Framebuffer(DX12Manager* ptr)
 	: dx12Mgr_(ptr)
-{
-}
+{}
 
-Framebuffer::~Framebuffer()
-{
-	Destroy();
-}
+Framebuffer::~Framebuffer() { Destroy(); }
 
 HRESULT Framebuffer::Init()
 {
 	if (!dx12Mgr_) return E_POINTER;
 
-	ID3D12Device* device = dx12Mgr_->GetDevice();
-	IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
-	if (!device || !swapChain) {
-		Utils::Logger::Error("Framebuffer::Init - device or swapChain is null\n");
-		return E_POINTER;
-	}
+	auto* device = dx12Mgr_->GetDevice();
+	if (!device) return E_POINTER;
 
 	Win32::Win32Desc desc = Win32::Win32Window::GetInstance()->GetDesc();
 	width_ = desc.windowWidth;
 	height_ = desc.windowHeight;
+
+	if (!gbufferSrvBase_.valid()) {
+		auto* per = dx12Mgr_->GetPersistentDescAllocator();
+		if (!per) return E_POINTER;
+		gbufferSrvBase_ = per->Allocate(GBUFFER_COUNT + 1);
+		if (!gbufferSrvBase_.valid()) return E_FAIL;
+	}
 
 	return CreateHeapsAndViews(width_, height_);
 }
@@ -49,25 +51,37 @@ HRESULT Framebuffer::Init()
 void Framebuffer::Destroy()
 {
 	ReleaseViews();
+
+	if (dx12Mgr_ && gbufferSrvBase_.valid()) {
+		if (auto* per = dx12Mgr_->GetPersistentDescAllocator()) {
+			per->Free(gbufferSrvBase_, GBUFFER_COUNT + 1);
+		}
+		gbufferSrvBase_ = {};
+	}
 }
 
 HRESULT Framebuffer::Resize(UINT width, UINT height)
 {
 	if (!dx12Mgr_) return E_POINTER;
+
+	// GPU完了待ち
+	dx12Mgr_->WaitForGpu();
+
 	IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
 	if (!swapChain) return E_POINTER;
 
 	ReleaseViews();
 
-	UINT bufCount = std::max<UINT>(2, dx12Mgr_->GetBufferCount());
+	// バッファ数
+	const UINT bufCount = std::max<UINT>(2, dx12Mgr_->GetBufferCount());
 
 	HRESULT hr = swapChain->ResizeBuffers(bufCount, width, height, backBufferFormat_, 0);
-	if (HRFailed(hr, "Framebuffer::Resize - ResizeBuffers failed")) return hr;
+	if (FAILED(hr)) return hr;
 
 	width_ = width;
 	height_ = height;
 
-	hr = CreateHeapsAndViews(width, height);
+	hr = CreateHeapsAndViews(width_, height_);
 	if (FAILED(hr)) return hr;
 
 	backBufferStates_.assign(backBuffers_.size(), D3D12_RESOURCE_STATE_PRESENT);
@@ -135,13 +149,70 @@ void Framebuffer::SetBackBufferState(UINT index, D3D12_RESOURCE_STATES state)
 	backBufferStates_[index] = state;
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetGBufferRtv(UINT index) const
+{
+	if (!gbufferRtvHeap_) return {};
+	if (index >= GBUFFER_COUNT) return {};
+	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		gbufferRtvHeap_->GetCPUDescriptorHandleForHeapStart(),
+		index, gbufferRtvDescriptorSize_);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetGBufferDsv() const
+{
+	if (!gbufferDsvHeap_) return {};
+	return gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart();
+}
+
+const FLOAT* Framebuffer::GetGBufferClearColor(GBufferType type)
+{
+	switch (type) {
+		case GBufferType::Albedo: {
+			static const FLOAT c[4] = { 0,0,0,1 };
+			return c;
+		}
+		case GBufferType::Normal: {
+			static const FLOAT c[4] = { 0,0,1,1 };
+			return c;
+		}
+		case GBufferType::Material: {
+			static const FLOAT c[4] = { 1,0,1,1 };
+			return c;
+		}
+		default: {
+			static const FLOAT c[4] = { 0,0,0,1 };
+			return c;
+		}
+	}
+}
+
+void Framebuffer::ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const
+{
+	if (!cmdList) return;
+
+	// RT
+	for (UINT i = 0; i < GBUFFER_COUNT; ++i) {
+		auto rtv = GetGBufferRtv(i);
+		if (rtv.ptr == 0) continue;
+		cmdList->ClearRenderTargetView(rtv, GetGBufferClearColor((GBufferType)i), 0, nullptr);
+	}
+
+	// Depth
+	auto dsv = GetGBufferDsv();
+	if (dsv.ptr != 0) {
+		cmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
+}
+
 HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 {
 	if (!dx12Mgr_) return E_POINTER;
 
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	IDXGISwapChain4* swapChain = dx12Mgr_->GetIDXGISwapChain4();
+	auto* swapChain = dx12Mgr_->GetIDXGISwapChain4();
 	if (!device || !swapChain) return E_POINTER;
+
+	if (!gbufferSrvBase_.valid()) return E_FAIL;
 
 	ReleaseViews();
 
@@ -229,21 +300,14 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 	}
 
 	// =========================================================
-	// GBuffer SRV Heap (ShaderVisible)
+	// GBuffer SRV (Persistent, GlobalDescriptorHeap 上)
 	//   [0..2] RT SRV
 	//   [3]    Depth SRV
 	// =========================================================
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC desc{};
-		desc.NumDescriptors = GBUFFER_COUNT + 1;
-		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	assert(gbufferSrvBase_.valid());
 
-		HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&gbufferSrvHeap_));
-		if (HRFailed(hr, "CreateHeapsAndViews - Create GBuffer SRV heap")) return hr;
-
-		gbufferSrvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	}
+	// Global heap の increment size（CBV/SRV/UAV）
+	const UINT inc = dx12Mgr_->GetGlobalDescriptorStride();
 
 	// =========================================================
 	// GBuffer RT Resources + RTV/SRV
@@ -278,8 +342,7 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 			D3D12_RESOURCE_STATE_RENDER_TARGET,
 			&clear,
 			IID_PPV_ARGS(&gbufferRTs_[i]));
-
-		if (FAILED(hr)) return hr;
+		if (HRFailed(hr, "CreateHeapsAndViews - Create GBuffer RT")) return hr;
 
 		device->CreateRenderTargetView(gbufferRTs_[i].Get(), nullptr, GetGBufferRtv(i));
 
@@ -290,8 +353,8 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 		srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srv.Texture2D.MipLevels = 1;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE srvCpu = gbufferSrvHeap_->GetCPUDescriptorHandleForHeapStart();
-		srvCpu.ptr += SIZE_T(i) * SIZE_T(gbufferSrvDescriptorSize_);
+		D3D12_CPU_DESCRIPTOR_HANDLE srvCpu = gbufferSrvBase_.cpu;
+		srvCpu.ptr += SIZE_T(i) * SIZE_T(inc);
 
 		device->CreateShaderResourceView(gbufferRTs_[i].Get(), &srv, srvCpu);
 	}
@@ -341,8 +404,8 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 		depthSrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		depthSrv.Texture2D.MipLevels = 1;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE depthSrvCpu = gbufferSrvHeap_->GetCPUDescriptorHandleForHeapStart();
-		depthSrvCpu.ptr += SIZE_T(GBUFFER_COUNT) * SIZE_T(gbufferSrvDescriptorSize_);
+		D3D12_CPU_DESCRIPTOR_HANDLE depthSrvCpu = gbufferSrvBase_.cpu;
+		depthSrvCpu.ptr += SIZE_T(GBUFFER_COUNT) * SIZE_T(inc);
 
 		device->CreateShaderResourceView(gbufferDepth_.Get(), &depthSrv, depthSrvCpu);
 	}
@@ -372,10 +435,7 @@ void Framebuffer::ReleaseViews()
 	gbufferDepth_.Reset();
 
 	gbufferRtvHeap_.Reset();
-	gbufferSrvHeap_.Reset();
 	gbufferDsvHeap_.Reset();
 
 	gbufferRtvDescriptorSize_ = 0;
-	gbufferSrvDescriptorSize_ = 0;
-	gbufferDsvDescriptorSize_ = 0;
 }

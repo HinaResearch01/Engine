@@ -201,12 +201,12 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 HRESULT TextureManager::CreateTextureSRV(const DirectX::TexMetadata& meta, TextureAsset& asset)
 {
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	auto* allocator = dx12Mgr_->GetPersistentDescAllocator(); 
+	auto* allocator = dx12Mgr_->GetPersistentDescAllocator();
 	if (!device || !allocator)
 		return E_FAIL;
 
-	asset.srv = allocator->AllocateHandle(1);
-	if (asset.srv.cpu.ptr == 0) // handle が空なら失敗扱い
+	asset.srv = allocator->Allocate(1);
+	if (!asset.srv.valid())
 		return E_FAIL;
 
 	bool isArray = meta.arraySize > 1;

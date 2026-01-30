@@ -128,9 +128,6 @@
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp">
       <Filter>Engine\Framework\Actor</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Resource\CB\DynamicCBAllocator.cpp">
-      <Filter>Engine\Resource\CB</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClCompile>
@@ -193,9 +190,6 @@
     </ClCompile>
     <ClCompile Include="Engine\Graphic\PSO\PSODesc.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Resource\GView\GpuViewManager.cpp">
-      <Filter>Engine\Resource\GView</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
@@ -610,12 +604,6 @@
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h">
       <Filter>Engine\Utils\DXAlign</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Resource\CB\DynamicCBAllocator.h">
-      <Filter>Engine\Resource\CB</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Resource\CB\FrameCBManager.h">
-      <Filter>Engine\Resource\CB</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\DX12\FrameSync\FrameSync.h">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClInclude>
@@ -771,9 +759,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\PSO\PSODesc.h">
       <Filter>Engine\Graphics\PSO</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Resource\GView\GpuViewManager.h">
-      <Filter>Engine\Resource\GView</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
@@ -963,9 +948,6 @@
     <Filter Include="Engine\Utils\DXAlign">
       <UniqueIdentifier>{682953a4-c199-44fb-9458-3ce0e319945c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Resource\CB">
-      <UniqueIdentifier>{25ba113c-347a-4357-9d40-41dda8ff08b2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\DX12\FrameSync">
       <UniqueIdentifier>{c61abb51-d0b4-4b68-b4d1-841c4bf773d1}</UniqueIdentifier>
     </Filter>
@@ -1068,9 +1050,6 @@
     <Filter Include="Engine\Framework\System\Light">
       <UniqueIdentifier>{7859dc7d-ecf9-40ab-a65e-0b73078ce578}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Framework\Context">
-      <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Framework\System\Shadow">
       <UniqueIdentifier>{233216cf-2eb6-4b4f-a9ba-03b271360743}</UniqueIdentifier>
     </Filter>
@@ -1083,11 +1062,11 @@
     <Filter Include="Resources\Shaders\Deferred">
       <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Resource\GView">
-      <UniqueIdentifier>{6f6f5649-8b75-4918-b7a6-ad943153a550}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Graphics\ShadowDMap">
       <UniqueIdentifier>{cabe9303-bab5-4239-a66e-ff31867ecaa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Context">
+      <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

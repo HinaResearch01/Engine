@@ -48,7 +48,7 @@ HRESULT SwapChain::Create()
     desc.Flags = 0;
 
     // DXGIファクトリを取得して SwapChain を作成する準備
-    IDXGIFactory4* factory4 = dx12Mgr_->GetFactory();
+	IDXGIFactory4* factory4 = dx12Mgr_->GetFactory();
     if (!factory4) {
         Utils::Logger::Error("Error: IDXGIFactory4 is null in SwapChain::Create()\n");
         return E_POINTER;
@@ -56,7 +56,7 @@ HRESULT SwapChain::Create()
 
     ComPtr<IDXGISwapChain1> swapChain1;
     HRESULT hr = factory4->CreateSwapChainForHwnd(
-        dx12Mgr_->GetCmdQueue(), // コマンドキューを関連付ける
+        dx12Mgr_->GetCommandContext()->GetQueue(), // コマンドキューを関連付ける
         hwnd,                    // 対象のウィンドウハンドル
         &desc,                   // スワップチェーンの設定
         nullptr,                 // フルスクリーン用の設定（今回は未使用）

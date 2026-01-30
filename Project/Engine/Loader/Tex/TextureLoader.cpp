@@ -1,7 +1,6 @@
 #include "TextureLoader.h"
-#include "Resource/ResourceSystem.h" // 追加
+#include "Resource/ResourceSystem.h"
 #include "DX12/DX12Manager.h"
-#include "DX12/Desc/DescriptorAllocator.h"
 #include "Utils/Logger/Logger.h"
 #include "Utils/Func/UtilFunc.h"
 #include <assimp/scene.h>

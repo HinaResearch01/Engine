@@ -30,10 +30,8 @@ public:
 	HRESULT Create();
 
 #pragma region Accessor
-
 	ID3D12Device* GetDevice() const { return device_.Get(); }
 	IDXGIFactory7* GetFactory() const { return factory_.Get(); }
-
 #pragma endregion
 
 private:

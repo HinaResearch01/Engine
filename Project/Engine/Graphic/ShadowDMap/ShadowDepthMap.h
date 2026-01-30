@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <cstdint>
+#include "DX12/Desc/DescriptorUtils.h"
 
 // 前方宣言
 namespace Tsumi::DX12{ class DX12Manager; }
@@ -34,8 +35,10 @@ public:
 	void Resize(uint32_t size);
 
 #pragma region Accessor 
+	ID3D12Resource* GetResource() const { return depth_.Get(); }
 	uint32_t GetSize() const { return size_; }
-	ID3D12Resource* GetResource() const { return tex_.Get(); }
+	const DX12::DescriptorHandle& GetSRV() const { return srv_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE   GetDSV() const { return dsvCpu_; }
 #pragma endregion
 
 	// DSV / SRV 用フォーマット規約
@@ -47,12 +50,15 @@ private:
 	/// 生成
 	/// </summary>
 	void Create(uint32_t size);
+	void CreateViews();
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> tex_;
 	uint32_t size_ = 0;
 
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depth_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCpu_{ 0 };
+	DX12::DescriptorHandle srv_{};
 };
 
 }

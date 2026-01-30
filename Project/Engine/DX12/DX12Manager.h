@@ -65,9 +65,12 @@ private:
 public:
 
 #pragma region Accessors
-	// Device / Command
+	// Device / Factory / Command
 	ID3D12Device* GetDevice() const {
 		return device_ ? device_->GetDevice() : nullptr;
+	}
+	IDXGIFactory7* GetFactory() const {
+		return device_ ? device_->GetFactory() : nullptr;
 	}
 	CommandContext* GetCommandContext() const {
 		return graphicsCtx_.get();
@@ -85,6 +88,12 @@ public:
 	SwapChain* GetSwapChain() const {
 		return swapChain_.get();
 	}
+	IDXGISwapChain4* GetIDXGISwapChain4() const {
+		return swapChain_ ? swapChain_->GetSwapChain4() : nullptr;
+	}
+	UINT GetCurrentBackBufferIndex() const {
+		return swapChain_ ? swapChain_->GetCurrentBackBufferIndex() : 0;
+	}
 	uint32_t GetBufferCount() const {
 		return bufferCount_;
 	}
@@ -100,11 +109,14 @@ public:
 	ID3D12DescriptorHeap* GetGlobalDescriptorHeap() const {
 		return descHeap_.GetHeap();
 	}
+	UINT GetGlobalDescriptorStride() const {
+		return descHeap_.GetDescriptorSize();
+	}
 	PersistentDescAllocator* GetPersistentDescAllocator() {
 		return &perDescAlloc_;
 	}
 	TransientDescAllocator* GetTransientDescAllocator() {
-		return &frames_[GetFrameIndex()].transDescAlloc_;
+		return &frames_[GetFrameIndex()].transDescAlloc;
 	}
 	// Per-frame upload
 	FrameUploadArena* GetFrameUploadArena() {
@@ -113,6 +125,10 @@ public:
 	// Framebuffer
 	Framebuffer* GetFramebuffer() const {
 		return framebuffer_.get();
+	}
+	// Frame Sync
+	FrameSync* GetFrameSync() const {
+		return frameSync_.get();
 	}
 #pragma endregion
 

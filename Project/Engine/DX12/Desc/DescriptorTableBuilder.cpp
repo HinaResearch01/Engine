@@ -47,20 +47,20 @@ DescriptorTable DescriptorTableBuilder::Build()
 	assert(device_);
 	assert(!entries_.empty());
 
-	// 必要数を計算
+	// 必要数
 	uint32_t total = 0;
 	for (const auto& e : entries_) total += e.count;
 	assert(total > 0);
 
-	// 連続領域確保
-	const uint32_t baseIndex = alloc_.Allocate(total);
-	const DescriptorHandle base = alloc_.At(baseIndex);
+	// 連続領域確保（1回だけ）
+	const DescriptorHandle base = alloc_.Allocate(total);
+	assert(base.valid());
+	const uint32_t inc = alloc_.GetHeap()->GetDescriptorSize();
 
 	uint32_t write = 0;
 
 	for (const auto& e : entries_) {
-		const uint32_t dstIndex = baseIndex + write;
-		const DescriptorHandle dst = alloc_.At(dstIndex);
+		DescriptorHandle dst = Tsumi::DX12::OffsetHandle(base, write, inc);
 
 		switch (e.type) {
 			case EntryType::Copy:
@@ -71,7 +71,7 @@ DescriptorTable DescriptorTableBuilder::Build()
 			case EntryType::CBV: {
 				D3D12_CONSTANT_BUFFER_VIEW_DESC cbv{};
 				cbv.BufferLocation = e.cbvVA;
-				cbv.SizeInBytes = e.cbvSize;
+				cbv.SizeInBytes = e.cbvSize; // 256アライン済み前提
 				device_->CreateConstantBufferView(&cbv, dst.cpu);
 				write += 1;
 				break;
@@ -87,7 +87,7 @@ DescriptorTable DescriptorTableBuilder::Build()
 	DescriptorTable t{};
 	t.base = base;
 	t.gpu = base.gpu;
-	t.baseIndex = baseIndex;
+	t.baseIndex = base.index;
 	t.count = total;
 	return t;
 }

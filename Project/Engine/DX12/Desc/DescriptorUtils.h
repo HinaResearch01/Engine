@@ -3,12 +3,26 @@
 #include <d3d12.h>
 #include <cstdint>
 
+#include <d3d12.h>
+#include <cstdint>
+#include <limits>
+#undef min
+#undef max
+
 namespace Tsumi::DX12 {
 
+static constexpr uint32_t kInvalidDescIndex = std::numeric_limits<uint32_t>::max();
+
 struct DescriptorHandle {
-	D3D12_CPU_DESCRIPTOR_HANDLE cpu{};
-	D3D12_GPU_DESCRIPTOR_HANDLE gpu{};
+	uint32_t index = kInvalidDescIndex;
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu{ 0 };
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu{ 0 };
+
+	bool valid() const { return cpu.ptr != 0 && index != kInvalidDescIndex; }
 };
+
+inline uint32_t AlignUp(uint32_t v, uint32_t a) { return (v + a - 1) & ~(a - 1); }
+
 
 inline DescriptorHandle OffsetHandle(const DescriptorHandle& base, uint32_t index, uint32_t inc)
 {

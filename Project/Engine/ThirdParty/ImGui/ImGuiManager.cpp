@@ -24,7 +24,6 @@ void ImGuiManager::Init()
 
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-	// font
 	io.Fonts->AddFontFromFileTTF(
 		"Resources/font/komorebi.ttf",
 		17.0f,
@@ -33,8 +32,9 @@ void ImGuiManager::Init()
 	);
 
 	// ---- descriptor allocation (Persistent) ----
-	auto persistent = dx12Mgr_->GetPersistentDescAllocator();
-	fontSrv_ = persistent->AllocateHandle(1);
+	auto* persistent = dx12Mgr_->GetPersistentDescAllocator();
+	fontSrv_ = persistent->Allocate(1);
+	assert(fontSrv_.valid());
 
 	// ---- backend init ----
 	ImGui_ImplWin32_Init(win_->GetHWND());
@@ -42,15 +42,14 @@ void ImGuiManager::Init()
 	ImGui_ImplDX12_Init(
 		dx12Mgr_->GetDevice(),
 		static_cast<int>(dx12Mgr_->GetBufferCount()),
-		dx12Mgr_->GetSwapChain()->GetDesc().Format,
+		dx12Mgr_->GetBackBufferFormat(),          // ★ accessor用意してある前提
 		dx12Mgr_->GetGlobalDescriptorHeap(),
 		fontSrv_.cpu,
 		fontSrv_.gpu
 	);
 
-	// フォントテクスチャ生成
-	unsigned char* pixels;
-	int w, h;
+	unsigned char* pixels = nullptr;
+	int w = 0, h = 0;
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &w, &h);
 
 	StyleSetup();

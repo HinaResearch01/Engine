@@ -52,8 +52,8 @@ void DX12Manager::Finalize()
 
 	frames_.clear();
 
-	// descHeap_ は ComPtr が勝手に解放
-	perDescAlloc_ = {};
+	perDescAlloc_.Shutdown();
+	descHeap_.Finalize();
 
 	framebuffer_.reset();
 	swapChain_.reset();
@@ -65,28 +65,32 @@ void DX12Manager::Finalize()
 
 HRESULT DX12Manager::BeginFrame()
 {
-	if (!graphicsCtx_ || !framebuffer_ || !swapChain_ || !frameSync_) {
+	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
 		Utils::Logger::Error("DX12Manager::BeginFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 
-	// ---- FrameSync ----
+	// ---- CPU frame sync ----
 	frameSync_->BeginFrame();
 	frameIndex_ = frameSync_->GetFrameIndex();
 
-	// ---- per-frame resources reset ----
+	// ---- descriptor deferred 回収 ----
+	perDescAlloc_.ReleaseDeferred(frameIndex_);
+
+	// ---- per-frame alloc reset ----
 	FrameContext& frame = frames_[frameIndex_];
-	frame.Begin();
+	frame.upload.BeginFrame();
+	frame.transDescAlloc.BeginFrame();
 
 	// ---- command list reset ----
 	HRESULT hr = graphicsCtx_->ResetForFrame(frameIndex_);
 	if (FAILED(hr)) return hr;
 
-	// ---- descriptor heap bind ----
+	// ---- global heap bind ----
 	ID3D12DescriptorHeap* heaps[] = { descHeap_.GetHeap() };
 	graphicsCtx_->SetDescriptorHeaps(1, heaps);
 
-	// ---- backbuffer を RT 状態へ ----
+	// ---- backbuffer to RT ----
 	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	PrepareBackBuffer(bbIndex);
 
@@ -103,18 +107,16 @@ HRESULT DX12Manager::EndFrame()
 	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	TransitionToPresent(bbIndex);
 
-	// Execute
+	// ---- submit ----
 	HRESULT hr = graphicsCtx_->Execute();
 	if (FAILED(hr)) return hr;
 
-	// Signal fence + advance frameIndex
-	const uint64_t signaled = frameSync_->EndFrame();
-	frames_[frameIndex_].fenceValue = signaled;
-
-	// Present
+	// ---- present ----
 	hr = swapChain_->Present(1, 0);
 	if (FAILED(hr)) return hr;
 
+	// ---- advance cpu frame ----
+	frameSync_->EndFrame();
 	return S_OK;
 }
 
@@ -175,13 +177,14 @@ void DX12Manager::ClearBackBuffer()
 
 void DX12Manager::WaitForGpu()
 {
-	if (!graphicsCtx_ || !frameSync_) {
-		return;
+	if (graphicsCtx_) {
+		graphicsCtx_->Execute();
+		graphicsCtx_->WaitForGpu(); 
 	}
-
-	// 今のフレームまでの GPU 完了を待つ
-	graphicsCtx_->Execute();   // もし open な list があれば実行
-	frameSync_->BeginFrame(); // 現フレーム fence 完了待ち
+	if (uploadCtx_) {
+		uploadCtx_->Execute();
+		uploadCtx_->WaitForGpu();
+	}
 }
 
 D3D12_VIEWPORT DX12Manager::GetMainViewport() const
@@ -211,15 +214,24 @@ void DX12Manager::InitDescriptors_()
 	// 物理ヒープ：CBV/SRV/UAV
 	descHeap_.Init(GetDevice(), totalDescriptors_, true);
 	// 永続 allocator
-	perDescAlloc_.Init(&descHeap_, persistentCap_);
+	perDescAlloc_.Init(&descHeap_, 0, persistentCap_, bufferCount_);
 }
 
 void DX12Manager::InitFrames_()
 {
 	frames_.resize(bufferCount_);
+
+	const uint32_t transientBase = persistentCap_;
+
 	for (uint32_t i = 0; i < bufferCount_; ++i) {
 		frames_[i].upload.Init(GetDevice(), uploadBytesPerFrame_);
-		frames_[i].transDescAlloc_.Init(&descHeap_, transientCapPerFrame_);
+
+		frames_[i].transDescAlloc.Init(
+			&descHeap_,
+			transientBase + i * transientCapPerFrame_,
+			transientCapPerFrame_
+		);
+
 		frames_[i].fenceValue = 0;
 	}
 }

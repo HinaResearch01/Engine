@@ -25,14 +25,14 @@ public:
 	/// フレーム開始時処理
 	/// </summary>
 	void Begin() {
-		upload.Reset();
-		transDescAlloc_.Reset();
+		upload.BeginFrame();
+		transDescAlloc.BeginFrame();
 		bind.Reset();
 	}
 
 public:
 	FrameUploadArena upload;
-	TransientDescAllocator transDescAlloc_;
+	TransientDescAllocator transDescAlloc;
 	FrameBindState bind;
 
 	uint64_t fenceValue = 0;

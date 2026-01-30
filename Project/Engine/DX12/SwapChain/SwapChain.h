@@ -53,10 +53,8 @@ public:
 	HRESULT Resize(UINT width, UINT height);
 
 #pragma region Accessor
-
-	IDXGISwapChain4* const GetSwapChain() { return swapChain_.Get(); }
+	IDXGISwapChain4* const GetSwapChain4() { return swapChain_.Get(); }
 	const DXGI_SWAP_CHAIN_DESC1& GetDesc() const { return desc_; }
-
 #pragma endregion 
 
 

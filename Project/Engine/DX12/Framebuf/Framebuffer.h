@@ -81,82 +81,20 @@ public:
 	void SetBackBufferState(UINT index, D3D12_RESOURCE_STATES state);
 
 	/// <summary>
-	/// GBuffer RTV
+	/// GBuffer RTV / DSV
 	/// </summary>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferRtv(UINT index) const {
-		if (!gbufferRtvHeap_) return {};
-		if (index >= GBUFFER_COUNT) return {};
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			gbufferRtvHeap_->GetCPUDescriptorHandleForHeapStart(),
-			index, gbufferRtvDescriptorSize_);
-	}
-
-	/// <summary>
-	/// GBuffer DSV
-	/// </summary>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDsv() const {
-		if (!gbufferDsvHeap_) return {};
-		return gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart();
-	}
-
-	/// <summary>
-	/// GBuffer SRV (連続テーブル先頭)
-	/// </summary>
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGBufferSrvTable() const {
-		if (!gbufferSrvHeap_) return {};
-		return gbufferSrvHeap_->GetGPUDescriptorHandleForHeapStart();
-	}
+	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferRtv(UINT index) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDsv() const;
 
 	/// <summary>
 	/// CreateCommittedResource の ClearValue と完全一致する値でクリアする
 	/// </summary>
-	static const FLOAT* GetGBufferClearColor(GBufferType type) {
-		switch (type) {
-			case GBufferType::Albedo: {
-				static const FLOAT c[4] = { 0,0,0,1 };
-				return c;
-			}
-			case GBufferType::Normal: {
-				static const FLOAT c[4] = { 0,0,1,1 }; // A=1 推奨
-				return c;
-			}
-			case GBufferType::Material: {
-				static const FLOAT c[4] = { 1,0,1,1 };
-				return c;
-			}
-			default: {
-				static const FLOAT c[4] = { 0,0,0,1 };
-				return c;
-			}
-		}
-	}
+	static const FLOAT* GetGBufferClearColor(GBufferType type);
 
 	/// <summary>
 	/// Clear
 	/// </summary>
-	void ClearGBufferRT(ID3D12GraphicsCommandList* cmdList, UINT index, const FLOAT clearColor[4]) const {
-		if (!cmdList) return;
-		if (!gbufferRtvHeap_) return;
-		if (gbufferRtvDescriptorSize_ == 0) return;
-		if (index >= GBUFFER_COUNT) return;
-
-		auto rtv = GetGBufferRtv(index);
-		if (rtv.ptr == 0) return;
-
-		cmdList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-	}
-	void ClearGBufferDepth(ID3D12GraphicsCommandList* cmdList) const {
-		if (!cmdList) return;
-		auto dsv = GetGBufferDsv();
-		if (dsv.ptr == 0) return;
-		cmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	}
-	void ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const {
-		ClearGBufferRT(cmdList, 0, GetGBufferClearColor(GBufferType::Albedo));
-		ClearGBufferRT(cmdList, 1, GetGBufferClearColor(GBufferType::Normal));
-		ClearGBufferRT(cmdList, 2, GetGBufferClearColor(GBufferType::Material));
-		ClearGBufferDepth(cmdList);
-	}
+	void ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const;
 
 #pragma region Accessor
 	UINT GetWidth() const { return width_; }
@@ -177,45 +115,41 @@ private:
 	void ReleaseViews();
 
 private:
-	// Heaps
+	// SwapChain RTV / Main DSV
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
 	UINT rtvDescriptorSize_ = 0;
 	UINT dsvDescriptorSize_ = 0;
 
-	// Back buffers and depth
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 	std::vector<D3D12_RESOURCE_STATES> backBufferStates_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencil_;
 
-	// Formats / size
-	DXGI_FORMAT backBufferFormat_ = DXGI_FORMAT_R8G8B8A8_UNORM;
-	DXGI_FORMAT depthStencilFormat_ = DXGI_FORMAT_D32_FLOAT;
-	UINT width_ = 0;
-	UINT height_ = 0;
-
-	// Resources
+	// GBuffer resources
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> gbufferRTs_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> gbufferDepth_;
 
-	// Formats
+	// GBuffer RTV / DSV heaps
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferRtvHeap_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferDsvHeap_;
+	UINT gbufferRtvDescriptorSize_ = 0;
+
+	// Persistent SRV table
+	DescriptorHandle gbufferSrvBase_{};
+
+	// formats / size
+	DXGI_FORMAT backBufferFormat_ = DXGI_FORMAT_R8G8B8A8_UNORM;
+	DXGI_FORMAT depthStencilFormat_ = DXGI_FORMAT_D32_FLOAT;
 	DXGI_FORMAT gbufferFormats_[GBUFFER_COUNT] = {
-		DXGI_FORMAT_R8G8B8A8_UNORM,      // Albedo
-		DXGI_FORMAT_R16G16B16A16_FLOAT, // Normal
-		DXGI_FORMAT_R8G8B8A8_UNORM       // Material
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_R16G16B16A16_FLOAT,
+		DXGI_FORMAT_R8G8B8A8_UNORM
 	};
 
-	// Descriptor Heaps (RTV / SRV / DSV)
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferRtvHeap_;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferSrvHeap_;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferDsvHeap_;
-
-	UINT gbufferRtvDescriptorSize_ = 0;
-	UINT gbufferSrvDescriptorSize_ = 0;
-	UINT gbufferDsvDescriptorSize_ = 0;
+	UINT width_ = 0;
+	UINT height_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }
-
