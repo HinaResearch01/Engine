@@ -45,6 +45,9 @@ public:
 	void BeginBackBufferPass();
 	void ClearBackBuffer();
 
+	// ---- Wait For GPU ----
+	void WaitForGpu();
+
 	// ---- view state ----
 	D3D12_VIEWPORT GetMainViewport() const;
 	D3D12_RECT     GetMainScissor() const;
@@ -62,22 +65,55 @@ private:
 public:
 
 #pragma region Accessors
+	// Device / Command
 	ID3D12Device* GetDevice() const {
 		return device_ ? device_->GetDevice() : nullptr;
 	}
 	CommandContext* GetCommandContext() const {
 		return graphicsCtx_.get();
 	}
+	ID3D12GraphicsCommandList* GetCmdList() const {
+		return graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
+	}
+	ID3D12CommandQueue* GetGraphicsQueue() const {
+		return graphicsCtx_ ? graphicsCtx_->GetQueue() : nullptr;
+	}
+	CommandContext* GetUploadCmdContext() const {
+		return uploadCtx_.get();
+	}
+	// SwapChain / Frame
+	SwapChain* GetSwapChain() const {
+		return swapChain_.get();
+	}
+	uint32_t GetBufferCount() const {
+		return bufferCount_;
+	}
+	uint32_t GetFrameIndex() const {
+		return frameSync_ ? frameSync_->GetFrameIndex() : 0;
+	}
+	DXGI_FORMAT GetBackBufferFormat() const {
+		return swapChain_
+			? swapChain_->GetDesc().Format
+			: DXGI_FORMAT_UNKNOWN;
+	}
+	// Descriptor
+	ID3D12DescriptorHeap* GetGlobalDescriptorHeap() const {
+		return descHeap_.GetHeap();
+	}
+	PersistentDescAllocator* GetPersistentDescAllocator() {
+		return &perDescAlloc_;
+	}
+	TransientDescAllocator* GetTransientDescAllocator() {
+		return &frames_[GetFrameIndex()].transDescAlloc_;
+	}
+	// Per-frame upload
+	FrameUploadArena* GetFrameUploadArena() {
+		return &frames_[GetFrameIndex()].upload;
+	}
+	// Framebuffer
 	Framebuffer* GetFramebuffer() const {
 		return framebuffer_.get();
 	}
-	FrameSync* GetFrameSync() const {
-		return frameSync_.get();
-	}
-	ID3D12DescriptorHeap* GetSrvHeap() const {
-		return descHeap_.GetHeap();
-	}
-	PersistentDescAllocator& GetPersistentDesc() { return perDescAlloc_; }
 #pragma endregion
 
 private:

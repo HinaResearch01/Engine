@@ -33,9 +33,9 @@ void DescriptorHeap::Finalize()
 	gpuBase_.ptr = 0;
 }
 
-DescriptorHandlePair DescriptorHeap::At(uint32_t index) const
+DescriptorHandle DescriptorHeap::At(uint32_t index) const
 {
-	DescriptorHandlePair h{};
+	DescriptorHandle h{};
 	h.cpu.ptr = cpuBase_.ptr + static_cast<unsigned long long>(index) * inc_;
 	h.gpu.ptr = gpuBase_.ptr + static_cast<unsigned long long>(index) * inc_;
 	return h;

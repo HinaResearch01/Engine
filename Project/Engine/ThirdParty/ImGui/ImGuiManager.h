@@ -1,6 +1,8 @@
 #pragma once
 
-#include "DX12/Desc/DescriptorAllocator.h"
+#include <wrl.h>
+#include <d3d12.h>
+#include "DX12/Desc/DescriptorUtils.h"
 
 // 前方宣言
 namespace Tsumi::Win32 {
@@ -63,7 +65,7 @@ private:
 
 	Win32::Win32Window* win_ = nullptr;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
-	Tsumi::DX12::DescAlloc guiDescAlloc_{};
+	Tsumi::DX12::DescriptorHandle fontSrv_{};
 };
 
 }

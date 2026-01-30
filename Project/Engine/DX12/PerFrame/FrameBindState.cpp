@@ -11,34 +11,38 @@ void FrameBindState::Begin(CommandContext& cmd)
 
 void FrameBindState::Reset()
 {
-	cbv_.clear();
-	table_.clear();
+	tables_.clear();
+	cbvs_.clear();
 }
 
 void FrameBindState::SetCBV(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va)
 {
-	if (cbv_.size() <= rootIndex) {
-		cbv_.resize(static_cast<std::vector<D3D12_GPU_VIRTUAL_ADDRESS, 
-					std::allocator<D3D12_GPU_VIRTUAL_ADDRESS>>::size_type>
-					(rootIndex) + 1, 0);
+	if (!cmd_) return;
+
+	if (cbvs_.size() <= rootIndex) {
+		cbvs_.resize(rootIndex + 1, 0);
 	}
-	if (cbv_[rootIndex] == va) {
-		return; // 変更なし
+
+	if (cbvs_[rootIndex] == va) {
+		return; // 重複回避
 	}
-	cbv_[rootIndex] = va;
-	cmd_->GetList()->SetGraphicsRootConstantBufferView(rootIndex, va);
+
+	cbvs_[rootIndex] = va;
+	cmd_->SetGraphicsRootConstantBufferView(rootIndex, va);
 }
 
 void FrameBindState::SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table)
 {
-	if (table_.size() <= rootIndex) {
-		table_.resize(static_cast<std::vector<D3D12_GPU_DESCRIPTOR_HANDLE, 
-					  std::allocator<D3D12_GPU_DESCRIPTOR_HANDLE>>::size_type>
-					  (rootIndex) + 1, { 0 });
+	if (!cmd_) return;
+
+	if (tables_.size() <= rootIndex) {
+		tables_.resize(rootIndex + 1, D3D12_GPU_DESCRIPTOR_HANDLE{ 0 });
 	}
-	if (table_[rootIndex].ptr == table.ptr) {
-		return; // 変更なし
+
+	if (tables_[rootIndex].ptr == table.ptr) {
+		return; // 重複回避
 	}
-	table_[rootIndex] = table;
-	cmd_->GetList()->SetGraphicsRootDescriptorTable(rootIndex, table);
+
+	tables_[rootIndex] = table;
+	cmd_->SetGraphicsRootDescriptorTable(rootIndex, table);
 }

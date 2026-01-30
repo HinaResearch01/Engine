@@ -9,7 +9,7 @@ namespace Tsumi::DX12 {
 // 前方宣言
 class CommandContext;
 
-/*  */
+/*「このフレーム中の bind 状態」をキャッシュして重複 Set を防ぐ  */
 class FrameBindState {
 	
 public:
@@ -43,8 +43,8 @@ public:
 	void SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table);
 
 private:
-	std::vector<D3D12_GPU_VIRTUAL_ADDRESS> cbv_;
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> table_;
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> tables_;
+	std::vector<D3D12_GPU_VIRTUAL_ADDRESS> cbvs_;
 
 	CommandContext* cmd_ = nullptr;
 };

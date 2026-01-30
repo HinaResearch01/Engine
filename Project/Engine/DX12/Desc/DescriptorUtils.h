@@ -5,29 +5,24 @@
 
 namespace Tsumi::DX12 {
 
-/// CPU/GPU handle のペア
-struct DescriptorHandlePair {
+struct DescriptorHandle {
 	D3D12_CPU_DESCRIPTOR_HANDLE cpu{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpu{};
 };
 
-/// ハンドルをオフセットする
-inline DescriptorHandlePair OffsetHandle(
-	const DescriptorHandlePair& base,
-	uint32_t index,
-	uint32_t increment)
+inline DescriptorHandle OffsetHandle(const DescriptorHandle& base, uint32_t index, uint32_t inc)
 {
-	DescriptorHandlePair h;
-	h.cpu.ptr = base.cpu.ptr + index * increment;
-	h.gpu.ptr = base.gpu.ptr + index * increment;
+	DescriptorHandle h{};
+	h.cpu.ptr = base.cpu.ptr + static_cast<SIZE_T>(index) * inc;
+	h.gpu.ptr = base.gpu.ptr + static_cast<UINT64>(index) * inc;
 	return h;
 }
 
-/// Descriptor をコピー（主に Persistent → Transient）
+// CBV/SRV/UAV heap の descriptor を Copy
 inline void CopyDescriptor(
 	ID3D12Device* device,
-	const DescriptorHandlePair& dst,
-	const DescriptorHandlePair& src,
+	const DescriptorHandle& dst,
+	const DescriptorHandle& src,
 	UINT count = 1)
 {
 	device->CopyDescriptorsSimple(

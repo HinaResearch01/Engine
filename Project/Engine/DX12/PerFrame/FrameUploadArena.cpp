@@ -5,6 +5,7 @@ using namespace Tsumi::DX12;
 
 void FrameUploadArena::Init(ID3D12Device* device, uint32_t sizeInBytes)
 {
+	assert(device);
 	capacity_ = sizeInBytes;
 	offset_ = 0;
 
@@ -20,16 +21,28 @@ void FrameUploadArena::Init(ID3D12Device* device, uint32_t sizeInBytes)
 	desc.SampleDesc.Count = 1;
 	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-	device->CreateCommittedResource(
+	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&buffer_)
-	);
+		IID_PPV_ARGS(&buffer_));
+	assert(SUCCEEDED(hr));
 
-	buffer_->Map(0, nullptr, reinterpret_cast<void**>(&mapped_));
+	hr = buffer_->Map(0, nullptr, reinterpret_cast<void**>(&mapped_));
+	assert(SUCCEEDED(hr));
+}
+
+void FrameUploadArena::Finalize()
+{
+	if (buffer_) {
+		buffer_->Unmap(0, nullptr);
+		buffer_.Reset();
+	}
+	mapped_ = nullptr;
+	capacity_ = 0;
+	offset_ = 0;
 }
 
 void FrameUploadArena::Reset()
@@ -39,14 +52,16 @@ void FrameUploadArena::Reset()
 
 D3D12_GPU_VIRTUAL_ADDRESS FrameUploadArena::Upload(const void* data, uint32_t size, uint32_t alignment)
 {
+	assert(buffer_);
+	assert(mapped_);
+	assert(alignment != 0);
+
 	const uint32_t aligned = AlignUp(size, alignment);
 	assert(offset_ + aligned <= capacity_);
 
 	std::memcpy(mapped_ + offset_, data, size);
 
-	D3D12_GPU_VIRTUAL_ADDRESS gpuVA =
-		buffer_->GetGPUVirtualAddress() + offset_;
-
+	D3D12_GPU_VIRTUAL_ADDRESS va = buffer_->GetGPUVirtualAddress() + offset_;
 	offset_ += aligned;
-	return gpuVA;
+	return va;
 }

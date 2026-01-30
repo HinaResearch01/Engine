@@ -173,6 +173,17 @@ void DX12Manager::ClearBackBuffer()
 	framebuffer_->ClearDepthStencil(list);
 }
 
+void DX12Manager::WaitForGpu()
+{
+	if (!graphicsCtx_ || !frameSync_) {
+		return;
+	}
+
+	// 今のフレームまでの GPU 完了を待つ
+	graphicsCtx_->Execute();   // もし open な list があれば実行
+	frameSync_->BeginFrame(); // 現フレーム fence 完了待ち
+}
+
 D3D12_VIEWPORT DX12Manager::GetMainViewport() const
 {
 	D3D12_VIEWPORT vp{};

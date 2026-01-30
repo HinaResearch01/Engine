@@ -12,16 +12,17 @@
 #include <mutex>
 #include <stb_image.h>
 #include <DirectXTex.h>
-#include "DX12/Desc/DescriptorAllocator.h"
-
-namespace Tsumi::DX12 {
-class DX12Manager;
-}
+#include "DX12/Desc/DescriptorUtils.h"
 
 namespace TexFileExt {
 const std::pair<std::string, uint32_t> PNG = { ".png", 0 };
 const std::pair<std::string, uint32_t> JPEG = { ".jpeg", 1 };
 const std::pair<std::string, uint32_t> DDS = { ".dds", 2 };
+}
+
+// 前方宣言
+namespace Tsumi::DX12 {
+class DX12Manager;
 }
 
 namespace Tsumi::Resource {
@@ -30,7 +31,7 @@ struct TextureAsset {
 	std::string key; // 実キー（正規化パス）
 	// gpuリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	Tsumi::DX12::DescAlloc srvDesc;
+	Tsumi::DX12::DescriptorHandle srv{};
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	uint32_t width = 0;
 	uint32_t height = 0;

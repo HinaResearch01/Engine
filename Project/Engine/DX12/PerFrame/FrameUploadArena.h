@@ -4,6 +4,7 @@
 #include <wrl.h>
 #include <cstdint>
 #include <cassert>
+#include <type_traits>
 
 namespace Tsumi::DX12 {
 
@@ -25,6 +26,11 @@ public:
 	/// 初期化処理
 	/// </summary>
 	void Init(ID3D12Device* device, uint32_t sizeInBytes);
+
+	/// <summary>
+	/// 解放処理
+	/// </summary>
+	void Finalize();
 
 	/// <summary>
 	/// リセット
@@ -50,6 +56,12 @@ private:
 	static uint32_t AlignUp(uint32_t v, uint32_t align) {
 		return (v + (align - 1)) & ~(align - 1);
 	}
+
+public:
+#pragma region Accessor
+	uint32_t Capacity() const { return capacity_; }
+	uint32_t Used() const { return offset_; }
+#pragma endregion
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> buffer_;

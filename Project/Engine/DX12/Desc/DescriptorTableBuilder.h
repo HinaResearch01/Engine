@@ -10,12 +10,12 @@
 namespace Tsumi::DX12 {
 
 struct DescriptorTable {
-	DescriptorHandlePair base{};          // base CPU/GPU handle pair
-	D3D12_GPU_DESCRIPTOR_HANDLE gpu{};    // base.gpu と同じ（Root に渡す）
+	DescriptorHandle base{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu{}; // base.gpu
 	uint32_t baseIndex = 0;
 	uint32_t count = 0;
 
-	bool valid() const { return count != 0 && gpu.ptr != 0; }
+	bool Valid() const { return count > 0 && gpu.ptr != 0; }
 };
 
 class DescriptorTableBuilder {
@@ -39,12 +39,17 @@ public:
 	/// <summary>
 	/// 既存 descriptor をコピー
 	/// </summary>
-	DescriptorTableBuilder& AddCopy(DescriptorHandlePair src, uint32_t count = 1);
+	DescriptorTableBuilder& AddCopy(DescriptorHandle src, uint32_t count = 1);
 
 	/// <summary>
 	/// CBV をこの table に作る
 	/// </summary>
 	DescriptorTableBuilder& AddCBV(D3D12_GPU_VIRTUAL_ADDRESS gpuVA, uint32_t sizeInBytes);
+
+	/// <summary>
+	/// SRV をこの table に作る
+	/// </summary>
+	DescriptorTableBuilder& AddSRV(ID3D12Resource* res, const D3D12_SHADER_RESOURCE_VIEW_DESC& desc);
 
 	/// <summary>
 	/// Table を構築
@@ -60,17 +65,21 @@ private:
 
 	enum class EntryType : uint8_t {
 		Copy,
-		CBV
+		CBV,
+		SRV
 	};
 
 	struct Entry {
 		EntryType type{};
 		uint32_t count = 1;
 		// Copy
-		DescriptorHandlePair src{};
+		DescriptorHandle src{};
 		// CBV
 		D3D12_GPU_VIRTUAL_ADDRESS cbvVA = 0;
 		uint32_t cbvSize = 0;
+		// SRV
+		ID3D12Resource* srvRes = nullptr;
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	};
 
 	ID3D12Device* device_ = nullptr;

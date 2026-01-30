@@ -36,7 +36,7 @@ public:
 	uint32_t GetDescriptorSize() const { return inc_; }
 	uint32_t GetCapacity() const { return capacity_; }
 	// index -> CPU/GPU handle
-	DescriptorHandlePair At(uint32_t index) const;
+	DescriptorHandle At(uint32_t index) const;
 	// CPU handle only (for Create*View dest)
 	D3D12_CPU_DESCRIPTOR_HANDLE CpuAt(uint32_t index) const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GpuAt(uint32_t index) const;

@@ -27,6 +27,8 @@ public:
 		heap_ = heap;
 		capacity_ = capacity;
 		offset_ = 0;
+		assert(heap_);
+		assert(capacity_ <= heap_->GetCapacity());
 	}
 
 	/// <summary>
@@ -35,7 +37,7 @@ public:
 	uint32_t Allocate(uint32_t count = 1) {
 		assert(heap_);
 		assert(offset_ + count <= capacity_);
-		uint32_t base = offset_;
+		const uint32_t base = offset_;
 		offset_ += count;
 		return base;
 	}
@@ -43,21 +45,22 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
-	DescriptorHandlePair At(uint32_t index) const {
+	DescriptorHandle At(uint32_t index) const {
+		assert(heap_);
 		return heap_->At(index);
 	}
 
 	/// <summary>
 	/// 
 	/// </summary>
-	DescriptorHandlePair AllocateAndGet(uint32_t count = 1) {
-		uint32_t index = Allocate(count);
-		return heap_->At(index);
+	DescriptorHandle AllocateHandle(uint32_t count = 1) {
+		return At(Allocate(count));
 	}
 
 #pragma region Accessor
 	uint32_t Used() const { return offset_; }
 	uint32_t Capacity() const { return capacity_; }
+	uint32_t Increment() const { return heap_ ? heap_->GetDescriptorSize() : 0; }
 #pragma endregion
 
 private:

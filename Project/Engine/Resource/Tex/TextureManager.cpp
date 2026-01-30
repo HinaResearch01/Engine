@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 #include "DX12/DX12Manager.h"
-#include "DX12/Desc/DescriptorAllocator.h"
+#include "DX12/Cmd/CommandContext.h"
+#include "DX12/Desc/PersistentDescAllocator.h"
 #include "Utils/Logger/Logger.h"
 #include "Utils/Func/UtilFunc.h"
 #include <filesystem>
@@ -110,45 +111,17 @@ void TextureManager::RegisterAlias(const std::string& alias, const std::string& 
 
 void TextureManager::UnloadAll()
 {
-	// 永続ディスクリプタ用アロケータを取得
-	auto* allocator = dx12Mgr_->GetPersistentDescAlloc();
-
-	// 現在のフレームインデックス（遅延解放用）
-	uint32_t frameIndex = 0;
-	if (dx12Mgr_->GetFrameSync())
-		frameIndex = dx12Mgr_->GetFrameSync()->GetFrameIndex();
-
-	// GPU がテクスチャを使用中でないことを保証
-	if (dx12Mgr_ && dx12Mgr_->GetUploadCmdContext())
-		dx12Mgr_->GetUploadCmdContext()->WaitForGpu();
-
-	{
-		// テクスチャ実体・alias 管理テーブルをまとめて操作するためロック
-		std::lock_guard lock(mutex_);
-
-		if (allocator) {
-			// 各テクスチャが保持している SRV ディスクリプタを遅延解放キューへ
-			// → GPU がまだ参照中でも安全に解放できる
-			for (auto& [name, tex] : textures_) {
-				if (tex && tex->srvDesc.valid()) {
-					allocator->DeferFree(tex->srvDesc, frameIndex);
-				}
-			}
-		}
-
-		// テクスチャ実体をすべて破棄
-		textures_.clear();
-
-		// alias → key の対応もすべて破棄
-		// → Scene 切り替え時などにゴースト参照が残らないようにする
-		aliasToKey_.clear();
+	if (dx12Mgr_) {
+		dx12Mgr_->WaitForGpu();
 	}
+
+	std::lock_guard lock(mutex_);
+	textures_.clear();
+	aliasToKey_.clear();
 }
 
 HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat, TextureAsset& outAsset)
 {
-	using namespace DirectX;
-
 	if (mipChain.GetImageCount() == 0)
 		return E_INVALIDARG;
 
@@ -160,15 +133,12 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 	const TexMetadata& meta = mipChain.GetMetadata();
 	UINT mipCount = meta.mipLevels ? static_cast<UINT>(meta.mipLevels) : 1;
 
-	// sRGB 対応（Resource と View を分ける）
 	bool isSRGB =
 		viewFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
 		viewFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
-	DXGI_FORMAT resourceFormat =
-		isSRGB ? MakeTypelessIfNeeded(meta.format) : meta.format;
+	DXGI_FORMAT resourceFormat = isSRGB ? MakeTypelessIfNeeded(meta.format) : meta.format;
 
-	// Resource desc
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Width = meta.width;
@@ -189,19 +159,13 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&texture));
-
 	if (FAILED(hr)) return hr;
 
-	// Upload
+	// subresources
 	std::vector<D3D12_SUBRESOURCE_DATA> subres;
-	PrepareUpload(device,
-				  mipChain.GetImages(),
-				  mipChain.GetImageCount(),
-				  meta,
-				  subres);
+	PrepareUpload(device, mipChain.GetImages(), mipChain.GetImageCount(), meta, subres);
 
-	UINT64 uploadBytes =
-		GetRequiredIntermediateSize(texture.Get(), 0, (UINT)subres.size());
+	UINT64 uploadBytes = GetRequiredIntermediateSize(texture.Get(), 0, (UINT)subres.size());
 
 	ComPtr<ID3D12Resource> upload;
 	CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
@@ -214,7 +178,6 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&upload));
-
 	if (FAILED(hr)) return hr;
 
 	UpdateSubresources(
@@ -225,11 +188,6 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		(UINT)subres.size(),
 		subres.data());
 
-	// Execute upload
-	hr = ctx->ExecuteAndWait();
-	if (FAILED(hr)) return hr;
-
-	// out
 	outAsset.resource = texture;
 	outAsset.width = (uint32_t)meta.width;
 	outAsset.height = (uint32_t)meta.height;
@@ -243,46 +201,39 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 HRESULT TextureManager::CreateTextureSRV(const DirectX::TexMetadata& meta, TextureAsset& asset)
 {
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	DescriptorAllocator* allocator = dx12Mgr_->GetPersistentDescAlloc();
+	auto* allocator = dx12Mgr_->GetPersistentDescAllocator(); 
 	if (!device || !allocator)
 		return E_FAIL;
 
-	asset.srvDesc = allocator->Allocate(1);
-	if (!asset.srvDesc.valid())
+	asset.srv = allocator->AllocateHandle(1);
+	if (asset.srv.cpu.ptr == 0) // handle が空なら失敗扱い
 		return E_FAIL;
 
 	bool isArray = meta.arraySize > 1;
 	bool isCube = (meta.miscFlags & TEX_MISC_TEXTURECUBE) != 0;
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
-	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	bool srgb =
 		asset.format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
 		asset.format == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
+	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srv.Format = ChooseViewFormat(meta.format, srgb);
 
-	if (isArray)
-	{
+	if (isArray) {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
 		srv.Texture2DArray.MipLevels = asset.mipLevels;
 		srv.Texture2DArray.ArraySize = (UINT)meta.arraySize;
 	}
-	else if (isCube)
-	{
+	else if (isCube) {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 		srv.TextureCube.MipLevels = asset.mipLevels;
 	}
-	else
-	{
+	else {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srv.Texture2D.MipLevels = asset.mipLevels;
 	}
 
-	device->CreateShaderResourceView(
-		asset.resource.Get(),
-		&srv,
-		asset.srvDesc.cpuHandle);
-
+	device->CreateShaderResourceView(asset.resource.Get(), &srv, asset.srv.cpu);
 	return S_OK;
 }

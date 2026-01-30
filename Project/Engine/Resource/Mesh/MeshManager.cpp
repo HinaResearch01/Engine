@@ -62,17 +62,6 @@ HRESULT MeshManager::RegisterMesh(
 	hr = CreateIndexBuffer(list, indices, asset, ibUpload);
 	if (FAILED(hr)) return hr;
 
-	// ここで一回だけ実行＆待機
-	hr = ctx->ExecuteAndWait();
-	if (FAILED(hr)) return hr;
-	{
-		std::lock_guard lock(mutex_);
-		meshes_.emplace(
-			key,
-			std::make_unique<MeshAsset>(std::move(asset))
-		);
-	}
-
 	return S_OK;
 }
 

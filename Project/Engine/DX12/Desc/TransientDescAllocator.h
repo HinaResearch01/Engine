@@ -50,17 +50,24 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
-	DescriptorHandlePair At(uint32_t index) const {
+	DescriptorHandle At(uint32_t index) const {
+		assert(heap_);
 		return heap_->At(index);
 	}
 
 	/// <summary>
 	/// 
 	/// </summary>
-	DescriptorHandlePair AllocateAndGet(uint32_t count = 1) {
-		uint32_t index = Allocate(count);
-		return heap_->At(index);
+	/// <param name="count"></param>
+	DescriptorHandle AllocateHandle(uint32_t count = 1) {
+		return At(Allocate(count));
 	}
+
+#pragma region Accessor
+	uint32_t Used() const { return offset_; }
+	uint32_t Capacity() const { return capacity_; }
+	uint32_t Increment() const { return heap_ ? heap_->GetDescriptorSize() : 0; }
+#pragma endregion
 
 private:
 	DescriptorHeap* heap_ = nullptr;

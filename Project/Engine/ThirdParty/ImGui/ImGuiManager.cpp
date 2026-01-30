@@ -5,6 +5,7 @@
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/SwapChain/SwapChain.h"
+#include "DX12/Desc/PersistentDescAllocator.h"
 #include "Utils/Logger/Logger.h"
 
 using namespace Tsumi::GUI;
@@ -21,58 +22,49 @@ void ImGuiManager::Init()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
-	// Docking 有効化
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // マルチウィンドウも使いたければ
 
-	// フォント読み込み
-	std::string fontPath = "Resources/font/komorebi.ttf";
-	io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 17.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	// font
+	io.Fonts->AddFontFromFileTTF(
+		"Resources/font/komorebi.ttf",
+		17.0f,
+		nullptr,
+		io.Fonts->GetGlyphRangesJapanese()
+	);
 
-	// ImGui 用 SRV ヒープの用意
-	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	desc.NumDescriptors = 1;
-	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	HRESULT hr = dx12Mgr_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&imguiHeap_));
+	// ---- descriptor allocation (Persistent) ----
+	auto persistent = dx12Mgr_->GetPersistentDescAllocator();
+	fontSrv_ = persistent->AllocateHandle(1);
 
-	if (FAILED(hr)) {
-		Utils::Logger::Error("[ImGui] DescriptorHeap 作成失敗\n");
-		return;
-	}
-
-	// Win32 + DX12 backend 初期化
+	// ---- backend init ----
 	ImGui_ImplWin32_Init(win_->GetHWND());
 
 	ImGui_ImplDX12_Init(
 		dx12Mgr_->GetDevice(),
 		static_cast<int>(dx12Mgr_->GetBufferCount()),
 		dx12Mgr_->GetSwapChain()->GetDesc().Format,
-		imguiHeap_.Get(),
-		imguiHeap_->GetCPUDescriptorHandleForHeapStart(),
-		imguiHeap_->GetGPUDescriptorHandleForHeapStart()
+		dx12Mgr_->GetGlobalDescriptorHeap(),
+		fontSrv_.cpu,
+		fontSrv_.gpu
 	);
 
-	// フォントのテクスチャを強制的に作成
-	unsigned char* pixels = nullptr;
-	int width, height;
-	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+	// フォントテクスチャ生成
+	unsigned char* pixels;
+	int w, h;
+	io.Fonts->GetTexDataAsRGBA32(&pixels, &w, &h);
 
-	// スタイル適用
 	StyleSetup();
 }
 
 void ImGuiManager::Finalize()
 {
-	if (dx12Mgr_ && dx12Mgr_->GetCommandContext()) {
-		dx12Mgr_->GetCommandContext()->WaitForGpu();
+	if (dx12Mgr_) {
+		dx12Mgr_->WaitForGpu();
 	}
 
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-	imguiHeap_.Reset();
 }
 
 void ImGuiManager::BeginFrame()
@@ -85,12 +77,17 @@ void ImGuiManager::BeginFrame()
 void ImGuiManager::Render()
 {
 	ImGui::Render();
-	ID3D12GraphicsCommandList* cmdList = dx12Mgr_->GetCmdList();
 
-	ID3D12DescriptorHeap* heaps[] = { imguiHeap_.Get() };
-	cmdList->SetDescriptorHeaps(1, heaps);
+	auto* ctx = dx12Mgr_->GetCommandContext();
+	auto* list = ctx->GetList();
 
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
+	// Global heap を bind
+	ID3D12DescriptorHeap* heaps[] = {
+		dx12Mgr_->GetGlobalDescriptorHeap()
+	};
+	ctx->SetDescriptorHeaps(1, heaps);
+
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), list);
 }
 
 void ImGuiManager::StyleSetup()
