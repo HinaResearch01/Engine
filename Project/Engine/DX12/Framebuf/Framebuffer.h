@@ -5,6 +5,8 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <vector>
+#include "DX12/Desc/DescriptorUtils.h"
+#include "DX12/Desc/DescriptorHeap.h"
 
 namespace Tsumi::DX12 {
 

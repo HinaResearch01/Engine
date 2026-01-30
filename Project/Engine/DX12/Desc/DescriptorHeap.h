@@ -36,7 +36,6 @@ public:
 	D3D12_DESCRIPTOR_HEAP_TYPE GetType() const { return type_; }
 	uint32_t GetDescriptorSize() const { return inc_; }
 	uint32_t GetCapacity() const { return capacity_; }
-	UINT GetDescriptorSize() const { return descriptorSize_; }
 	// index -> CPU/GPU handle
 	DescriptorHandle At(uint32_t index) const;
 	// CPU handle only (for Create*View dest)
@@ -50,7 +49,6 @@ private:
 	uint32_t inc_ = 0;
 	uint32_t capacity_ = 0;
 	bool shaderVisible_ = false;
-	UINT descriptorSize_ = 0;
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuBase_{ 0 };
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuBase_{ 0 };
 };

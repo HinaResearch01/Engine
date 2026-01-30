@@ -22,9 +22,6 @@ void DescriptorHeap::Init(ID3D12Device* device, uint32_t numDescriptors, bool sh
 	HRESULT hr = device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap_));
 	assert(SUCCEEDED(hr));
 
-	descriptorSize_ =
-		device->GetDescriptorHandleIncrementSize(type_);
-
 	inc_ = device->GetDescriptorHandleIncrementSize(type_);
 	cpuBase_ = heap_->GetCPUDescriptorHandleForHeapStart();
 	gpuBase_ = shaderVisible ? heap_->GetGPUDescriptorHandleForHeapStart()
@@ -34,7 +31,6 @@ void DescriptorHeap::Init(ID3D12Device* device, uint32_t numDescriptors, bool sh
 void DescriptorHeap::Finalize()
 {
 	heap_.Reset();
-	descriptorSize_ = 0;
 	inc_ = 0;
 	capacity_ = 0;
 	shaderVisible_ = false;
