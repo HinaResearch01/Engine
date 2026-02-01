@@ -39,6 +39,7 @@ void RenderSystem::RenderModel(DX12::CommandContext& cmd)
 	DX12::FrameContext& frame = dx12Mgr_->GetCurrentFrameContext();
 	// World から RenderPrepareSystem を取得
 	auto* prep = world_.GetSystem<RenderPrepareSystem>();
+	assert(prep);
 
 	// =========================================================
 	// Render flow
