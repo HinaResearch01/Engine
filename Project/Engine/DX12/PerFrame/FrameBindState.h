@@ -25,7 +25,7 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void Begin(CommandContext& cmd);
+	void Begin(DX12::CommandContext& cmd);
 
 	/// <summary>
 	/// リセット

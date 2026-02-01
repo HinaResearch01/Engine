@@ -126,9 +126,17 @@ public:
 	Framebuffer* GetFramebuffer() const {
 		return framebuffer_.get();
 	}
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGBufferSrvTable() const { 
+		return framebuffer_->GetGBufferSrvBase().gpu;
+	}
 	// Frame Sync
 	FrameSync* GetFrameSync() const {
 		return frameSync_.get();
+	}
+	// FrameContext
+	FrameContext& GetCurrentFrameContext() {
+		assert(frameIndex_ < frames_.size());
+		return frames_[frameIndex_];
 	}
 #pragma endregion
 

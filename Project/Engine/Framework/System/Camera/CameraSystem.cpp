@@ -65,14 +65,6 @@ void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
 	float aspect = (height > 0.0f) ? (width / height) : (1280.0f / 720.0f);
 
 	// ----------------------------
-	// Camera params
-	// ----------------------------
-	out.fovY = Math::Func::NUM::ToRadians(cam->fovY);
-	out.aspectRatio = aspect;
-	out.nearPlane = cam->nearZ;
-	out.farPlane = cam->farZ;
-
-	// ----------------------------
 	// World transform
 	// ----------------------------
 	const Math::Vec3f scale{ 1,1,1 };
@@ -83,27 +75,29 @@ void CameraSystem::BuildFromActor(IActor* actor, CameraContext& out)
 		Math::Func::MAT4x4::AffineMatrix(scale, rotate, translate);
 
 	// ----------------------------
+	// Camera params
+	// ----------------------------
+	out.fovY = Math::Func::NUM::ToRadians(cam->fovY);
+	out.aspectRatio = aspect;
+	out.nearPlane = cam->nearZ;
+	out.farPlane = cam->farZ;
+	out.position = translate;
+	out.forward = camWorld.TransformVector(Math::Vec3f{ 0,0,1 }).Normalized();
+
+	// ----------------------------
 	// View / Projection
 	// ----------------------------
 	out.view = camWorld.Inverse();
-
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
 		out.fovY,
 		out.aspectRatio,
 		out.nearPlane,
 		out.farPlane
 	);
-
 	out.viewProj = out.view * out.proj;
-
-	// ----------------------------
-	// Derived vectors
-	// ----------------------------
-	out.position = translate;
-
-	// +Z forward
-	out.forward = 
-		camWorld.TransformVector(Math::Vec3f{ 0,0,1 }).Normalized();
+	out.invView = out.view.Inverse();
+	out.invProj = out.proj.Inverse();
+	out.invViewProj = out.viewProj.Inverse();
 
 	out.valid = true;
 }
@@ -128,23 +122,22 @@ void CameraSystem::BuildDefault(CameraContext& out)
 	out.nearPlane = defNear;
 	out.farPlane = defFar;
 	out.position = translate;
+	out.forward = Math::Vec3f{ 0,0,1 };
 
 	Math::Mat4x4 camWorld =
 		Math::Func::MAT4x4::AffineMatrix(scale, rotate, translate);
 
 	out.view = camWorld.Inverse();
-
 	out.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(
 		out.fovY,
 		out.aspectRatio,
 		out.nearPlane,
 		out.farPlane
 	);
-
 	out.viewProj = out.view * out.proj;
-
-	// forward（+Z）
-	out.forward = Math::Vec3f{ 0,0,1 };
+	out.invView = out.view.Inverse();
+	out.invProj = out.proj.Inverse();
+	out.invViewProj = out.viewProj.Inverse();
 
 	out.valid = true;
 }

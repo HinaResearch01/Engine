@@ -36,7 +36,7 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void BeginFrame() {
+	void Begin() {
 		cursor_ = 0;
 	}
 

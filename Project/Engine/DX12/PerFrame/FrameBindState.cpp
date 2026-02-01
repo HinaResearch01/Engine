@@ -3,14 +3,16 @@
 
 using namespace Tsumi::DX12;
 
-void FrameBindState::Begin(CommandContext& cmd)
+void FrameBindState::Begin(DX12::CommandContext& cmd)
 {
 	cmd_ = &cmd;
-	Reset();
+	tables_.clear();
+	cbvs_.clear();
 }
 
 void FrameBindState::Reset()
 {
+	cmd_ = nullptr;
 	tables_.clear();
 	cbvs_.clear();
 }

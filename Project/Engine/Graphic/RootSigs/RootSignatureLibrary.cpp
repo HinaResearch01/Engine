@@ -1,5 +1,6 @@
 #include "RootSignatureLibrary.h"
 #include "DX12/DX12Manager.h"
+#include "RootSignatureIndex.h"
 #include "Utils/Func/UtilFunc.h"
 #include <d3dx12.h>
 #include <stdexcept>
@@ -117,21 +118,15 @@ void RootSignatureLibrary::CreateObject3D()
 {
 	RootSignatureDesc rs;
 
-	// -------------------------
 	// VS
-	// -------------------------
 	rs.AddCBV(0, D3D12_SHADER_VISIBILITY_VERTEX); // Camera (b0)
 	rs.AddCBV(1, D3D12_SHADER_VISIBILITY_VERTEX); // Transform (b1)
 
-	// -------------------------
 	// PS
-	// -------------------------
 	rs.AddCBV(2, D3D12_SHADER_VISIBILITY_PIXEL); // Material (b2)
 	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL); // Texture Albedo (t0) 1個
 
-	// -------------------------
 	// Sampler
-	// -------------------------
 	// s0 : Linear Wrap (PS)
 	rs.AddStaticSampler(
 		0,
@@ -158,21 +153,14 @@ void RootSignatureLibrary::CreateGBuffer()
 {
 	RootSignatureDesc rs;
 
-	// -------------------------
 	// VS
-	// -------------------------
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0 CameraCB
-	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b1 ObjectCB
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // CameraCB
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // ObjectCB
 
-	// -------------------------
 	// PS
-	// -------------------------
-	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b2 MaterialCB
-	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // t0 AlbedoTex
+	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // MaterialCB
+	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // AlbedoSRV
 
-	// -------------------------
-	// Sampler
-	// -------------------------
 	rs.AddStaticSampler(
 		0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
@@ -182,7 +170,6 @@ void RootSignatureLibrary::CreateGBuffer()
 	);
 
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
 	Register("GBuffer", rs);
 }
 
@@ -190,16 +177,12 @@ void RootSignatureLibrary::CreateLightingDirectional()
 {
 	RootSignatureDesc rs;
 
-	// -------------------------
 	// PS
-	// -------------------------
 	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
 	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
 	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13 GBuffer
 
-	// -------------------------
 	// Sampler
-	// -------------------------
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
@@ -217,17 +200,13 @@ void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
 {
 	RootSignatureDesc rs;
 
-	// -------------------------
 	// PS
-	// -------------------------
 	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
 	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
 	rs.AddCBVRange(4, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b4 DebugCB
 	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13
 
-	// -------------------------
 	// Sampler
-	// -------------------------
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,

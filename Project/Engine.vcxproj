@@ -367,6 +367,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Context\CameraContext.h" />
     <ClInclude Include="Engine\Framework\Context\LightContext.h" />
     <ClInclude Include="Engine\Framework\Context\ShadowContext.h" />
+    <ClInclude Include="Engine\Framework\Str\CameraGpuStructure.h" />
+    <ClInclude Include="Engine\Framework\Str\CameraPacket.h" />
     <ClInclude Include="Engine\Framework\Str\LightGpuStructure.h" />
     <ClInclude Include="Engine\Framework\Str\LightPacket.h" />
     <ClInclude Include="Engine\Framework\Str\LightType.h" />
@@ -391,6 +393,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\PSO\PSODesc.h" />
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h" />
     <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureDesc.h" />
+    <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureIndex.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />

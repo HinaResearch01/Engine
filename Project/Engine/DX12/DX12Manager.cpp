@@ -79,8 +79,7 @@ HRESULT DX12Manager::BeginFrame()
 
 	// ---- per-frame alloc reset ----
 	FrameContext& frame = frames_[frameIndex_];
-	frame.upload.BeginFrame();
-	frame.transDescAlloc.BeginFrame();
+	frame.Begin(*graphicsCtx_);
 
 	// ---- command list reset ----
 	HRESULT hr = graphicsCtx_->ResetForFrame(frameIndex_);
@@ -114,6 +113,10 @@ HRESULT DX12Manager::EndFrame()
 	// ---- present ----
 	hr = swapChain_->Present(1, 0);
 	if (FAILED(hr)) return hr;
+
+	// ---- per-frame alloc reset ----
+	FrameContext& frame = frames_[frameIndex_];
+	frame.Reset();
 
 	// ---- advance cpu frame ----
 	frameSync_->EndFrame();

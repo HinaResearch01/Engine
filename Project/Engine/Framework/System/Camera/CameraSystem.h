@@ -61,8 +61,6 @@ private:
 	/// </summary>
 	void BuildDefault(CameraContext& out);
 
-
-
 private:
 	CameraContext activeCtx_;
 

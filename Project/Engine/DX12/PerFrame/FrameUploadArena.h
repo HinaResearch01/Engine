@@ -35,7 +35,7 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void BeginFrame();
+	void Begin();
 
 	/// <summary>
 	/// 任意データを書き込む（GPU VA を返す）

@@ -787,6 +787,15 @@
     <ClInclude Include="Engine\DX12\PerFrame\FrameBindState.h">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\CameraGpuStructure.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Str\CameraPacket.h">
+      <Filter>Engine\Framework\Str</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureIndex.h">
+      <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

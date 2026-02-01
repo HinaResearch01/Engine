@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "DX12/Cmd/CommandContext.h"
 #include "FrameBindState.h"
 #include "FrameUploadArena.h"
 #include "DX12/Desc/TransientDescAllocator.h"
@@ -24,9 +25,16 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void Begin() {
-		upload.BeginFrame();
-		transDescAlloc.BeginFrame();
+	void Begin(DX12::CommandContext& cmd) {
+		upload.Begin();
+		transDescAlloc.Begin();
+		bind.Begin(cmd);
+	}
+
+	/// <summary>
+	/// リセット処理
+	/// </summary>
+	void Reset() {
 		bind.Reset();
 	}
 

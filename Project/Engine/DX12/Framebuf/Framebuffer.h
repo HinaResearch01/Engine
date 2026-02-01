@@ -102,6 +102,7 @@ public:
 	UINT GetWidth() const { return width_; }
 	UINT GetHeight() const { return height_; }
 	UINT GetBackBufferCount() const { return static_cast<UINT>(backBuffers_.size()); }
+	DescriptorHandle GetGBufferSrvBase() const { return gbufferSrvBase_; }
 #pragma endregion
 
 private:

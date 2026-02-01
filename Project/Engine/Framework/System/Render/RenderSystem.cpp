@@ -7,11 +7,13 @@
 #include "Framework/Component/Transform/TransformComponent.h"
 #include "DX12/DX12Manager.h"
 #include "DX12/Cmd/CommandContext.h"
+#include "DX12/Framebuf/Framebuffer.h"
 #include "Resource/ResourceSystem.h"
 #include "Resource/Mesh/MeshManager.h"
 #include "Resource/Tex/TextureManager.h"
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Graphic/RootSigs/RootSignatureLibrary.h"
+#include "Graphic/RootSigs/RootSignatureIndex.h"
 
 using namespace Tsumi::Framework;
 
@@ -19,392 +21,147 @@ RenderSystem::RenderSystem(World& world)
 	: world_(world)
 {
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
-	resourceSys_ = Resource::ResourceSystem::GetInstance();
 	psoLib_ = Graphic::PSOLibrary::GetInstance();
 	rsLib_ = Graphic::RootSignatureLibrary::GetInstance();
 }
 
 void RenderSystem::Update(float)
 {
-
 }
 
-void RenderSystem::RenderBackSprite(DX12::CommandContext&) {}
-
-void RenderSystem::RenderModel(DX12::CommandContext&)
+void RenderSystem::RenderBackSprite(DX12::CommandContext&)
 {
-	auto* cmd = dx12Mgr_->GetCommandContext();
-	assert(cmd);
-
-	// =========================================================
-	// 1) Shadow pass
-	// =========================================================
-	DrawShadowPass(cmd);
-
-	// =========================================================
-	// 2) GBuffer pass
-	// =========================================================
-	DrawGBufferPass(cmd);
-
-	// =========================================================
-	// 3) Lighting pass
-	// =========================================================
-	DrawLightingPass(cmd);
-
-	// =========================================================
-	// 4) Debug pass (optional)
-	// =========================================================
-	if (debugMode_ != 0)
-		DrawDebugPass(cmd);
 }
 
-void RenderSystem::RenderFrontSprite(DX12::CommandContext&) {}
+void RenderSystem::RenderModel(DX12::CommandContext& cmd)
+{
+	// DX12Manager から frame context を取得
+	DX12::FrameContext& frame = dx12Mgr_->GetCurrentFrameContext();
+	// World から RenderPrepareSystem を取得
+	auto* prep = world_.GetSystem<RenderPrepareSystem>();
+
+	// =========================================================
+	// Render flow
+	// =========================================================
+	// 1. Shadow
+	DrawShadowPass(cmd, frame);
+
+	// 2. GBuffer
+	DrawGBufferPass(cmd, frame, *prep);
+
+	// 3. Lighting
+	DrawLightingPass(cmd, frame);
+
+	// 4. Debug (optional)
+	if (debugMode_ != 0) {
+		DrawDebugPass(cmd, frame);
+	}
+}
+
+void RenderSystem::RenderFrontSprite(DX12::CommandContext&)
+{
+}
 
 void RenderSystem::OnResize(uint32_t w, uint32_t h)
 {
-	w, h;
-	// Framebuffer のリサイズが走った後に呼ばれる想定
-	// Shadow は ShadowMapSize で管理
-	// GBuffer SRV は Framebuffer 側が作っているなら何もしなくてよい
 }
 
-void RenderSystem::DrawShadowPass(DX12::CommandContext* cmd)
+void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* shSys = world_.GetSystem<ShadowSystem>();
-	assert(shSys);
-
-	const ShadowContext& sh = shSys->GetContext();
-	if (!sh.enabled)
-		return;
-
-	// ensure ShadowDepthMap / SRV / DSV
 	SyncShadowResources();
 
-	auto* list = cmd->GetList();
-	assert(list);
 
-	// Viewport/Scissor to shadow size
-	const float sz = (float)shadowDMap_->GetSize();
-
-	D3D12_VIEWPORT vp{};
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	vp.Width = sz;
-	vp.Height = sz;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-
-	D3D12_RECT rc{};
-	rc.left = 0;
-	rc.top = 0;
-	rc.right = (LONG)shadowDMap_->GetSize();
-	rc.bottom = (LONG)shadowDMap_->GetSize();
-
-	list->RSSetViewports(1, &vp);
-	list->RSSetScissorRects(1, &rc);
-
-	// DSV only
-	const auto& dsv = shadowDMap_->GetDSV();
-	list->OMSetRenderTargets(0, nullptr, FALSE, &dsv.cpu);
-	list->ClearDepthStencilView(dsv.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-	// PSO/RS (ShadowCaster)
-	list->SetGraphicsRootSignature(rsLib_->Get("ShadowCaster"));
-	list->SetPipelineState(psoLib_->Get("ShadowCaster"));
-
-	// cascade 0 をまず描く（CSM array化は次ステップ）
-	{
-		GpuShadowCasterCB shadowCB{};
-		shadowCB.lightViewProj = sh.cascades[0].viewProj;
-
-		// b0 を descriptor table で受ける設計なら UploadCBAndCreateView
-		auto cbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(shadowCB);
-
-		// RootParam index は RootSignature の定義順に合わせる
-		// 例: [0]=b0 ShadowCasterCB, [1]=b1 ObjectCB
-		list->SetGraphicsRootDescriptorTable(0, cbv.gpuHandle);
-	}
-
-	DrawShadowCasters(cmd);
 }
 
-void RenderSystem::DrawGBufferPass(DX12::CommandContext* cmd)
+void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
 {
-	auto* list = cmd->GetList();
-	assert(list);
+	auto* list = cmd.GetList();
+	if (!list) return;
 
-	// Framebuffer へ GBuffer RT セット + Clear
-	dx12Mgr_->SetGBufferRenderTargets(cmd);
+	// RT bind + clear は DX12Manager に寄せる
+	dx12Mgr_->BeginGBufferPass();
 	dx12Mgr_->ClearGBuffer();
 
-	// viewport/scissor = main
-	auto vp = dx12Mgr_->GetMainViewport();
-	auto sc = dx12Mgr_->GetMainScissor();
-	list->RSSetViewports(1, &vp);
-	list->RSSetScissorRects(1, &sc);
-
-	// PSO/RS
+	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("GBuffer"));
 	list->SetPipelineState(psoLib_->Get("GBuffer"));
 
-	BindGBufferCommon(cmd);
-	DrawGBufferObjects(cmd);
+	// CameraCB bind（b0）
+	BindGBufferCamera(frame, prep);
+
+	// Object draw
+	BindGBufferObjects(cmd, frame, prep);
 }
 
-void RenderSystem::DrawLightingPass(DX12::CommandContext* cmd)
+void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// BackBuffer RT
-	dx12Mgr_->SetBackBufferAsRenderTarget();
-	dx12Mgr_->ClearBackBuffer();
-
-	// viewport/scissor main
-	auto vp = dx12Mgr_->GetMainViewport();
-	auto sc = dx12Mgr_->GetMainScissor();
-	list->RSSetViewports(1, &vp);
-	list->RSSetScissorRects(1, &sc);
-
-	// PSO/RS
-	list->SetGraphicsRootSignature(rsLib_->Get("LightingDirectional"));
-	list->SetPipelineState(psoLib_->Get("LightingDirectional"));
-
-	BindLightingCommon(cmd);
-
-	// Fullscreen triangle
-	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	list->DrawInstanced(3, 1, 0, 0);
 }
 
-void RenderSystem::DrawDebugPass(DX12::CommandContext* cmd)
+void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// BackBuffer 上に上書きする想定
-	dx12Mgr_->SetBackBufferAsRenderTarget();
-
-	auto vp = dx12Mgr_->GetMainViewport();
-	auto sc = dx12Mgr_->GetMainScissor();
-	list->RSSetViewports(1, &vp);
-	list->RSSetScissorRects(1, &sc);
-
-	list->SetGraphicsRootSignature(rsLib_->Get("DebugFullScreen"));
-	list->SetPipelineState(psoLib_->Get("DebugFullScreen"));
-
-	BindDebugCommon(cmd);
-
-	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	list->DrawInstanced(3, 1, 0, 0);
 }
 
 void RenderSystem::SyncShadowResources()
 {
-	auto* shSys = world_.GetSystem<ShadowSystem>();
-	assert(shSys);
+}
 
-	const ShadowContext& sh = shSys->GetContext();
-	if (!sh.enabled) return;
+void RenderSystem::BindGBufferCamera(DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+{
+	using namespace Tsumi::Graphic::RootIndex;
 
-	const uint32_t wantSize = sh.shadowMapSize;
+	const auto& camPkt = prep.GetCameraPacket();
+	const D3D12_GPU_VIRTUAL_ADDRESS camVA = frame.upload.UploadCB(camPkt.camMatCB);
 
-	if (!shadowDMap_) {
-		shadowDMap_ = std::make_unique<Graphic::ShadowDepthMap>();
-		shadowDMap_->Init(wantSize);
-		cachedShadowSize_ = wantSize;
-		return;
-	}
+	frame.bind.SetCBV(ToRoot(Root_GBuffer::CameraCB), camVA);
+}
 
-	if (cachedShadowSize_ != wantSize) {
-		shadowDMap_->Resize(wantSize);
-		cachedShadowSize_ = wantSize;
+void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+{
+	using namespace Tsumi::Graphic::RootIndex;
+
+	auto* list = cmd.GetList();
+	if (!list) return;
+
+	const auto& all = prep.GetRenderPackets();
+
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (const auto& bucket : all)
+	{
+		for (const auto& pkt : bucket)
+		{
+			if (!pkt.mesh || !pkt.material) continue;
+			if (!pkt.material->albedo) continue; 
+
+			// IA
+			list->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
+			list->IASetIndexBuffer(&pkt.mesh->ibView);
+
+			// ObjectCB (b1)
+			const D3D12_GPU_VIRTUAL_ADDRESS objVA = frame.upload.UploadCB(pkt.xform);
+			frame.bind.SetCBV(ToRoot(Root_GBuffer::ObjectCB), objVA);
+
+			// MaterialCB (b2)
+			const D3D12_GPU_VIRTUAL_ADDRESS matVA = frame.upload.UploadCB(pkt.material->cb);
+			frame.bind.SetCBV(ToRoot(Root_GBuffer::MaterialCB), matVA);
+
+			// Albedo SRV table (t0)
+			frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.material->albedo->srv.gpu);
+
+			// Draw
+			list->DrawIndexedInstanced(pkt.mesh->indexCount, 1, 0, 0, 0);
+		}
 	}
 }
 
-void RenderSystem::BindGBufferCommon(DX12::CommandContext* cmd)
+void RenderSystem::BindLightingCommon(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// CameraContext → CameraCB(b0)
-	auto camSys = world_.GetSystem<CameraSystem>();
-	const CameraContext& cam = camSys->GetContext();
-	assert(cam.valid);
-
-	GpuCameraCB camCB{};
-	camCB.view = cam.view;
-	camCB.proj = cam.proj;
-	camCB.viewProj = cam.viewProj;
-	camCB.invView = cam.view.Inverse();
-	camCB.invProj = cam.proj.Inverse();
-	camCB.invViewProj = cam.viewProj.Inverse();
-	auto camCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(camCB);
-
-	// RootSignature "GBuffer" の定義順に合わせる
-	// 例: [0]=b0 CameraCB(VS), [1]=b1 ObjectCB(VS), [2]=b2 MaterialCB(PS), [3]=t0 AlbedoTex(PS)
-	list->SetGraphicsRootDescriptorTable(0, camCbv.gpuHandle);
-
-	// t0 (AlbedoTex) は「TextureManager が持つ SRV」をここで bind する
-	// ※ objectごとに material/texture が違うので DrawGBufferObjects でやる
 }
 
-void RenderSystem::BindLightingCommon(DX12::CommandContext* cmd)
+void RenderSystem::BindDebugCommon(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// CameraCB(b0) : PS
-	auto camSys = world_.GetSystem<CameraSystem>();
-	const CameraContext& cam = camSys->GetContext();
-	assert(cam.valid);
-
-	GpuCameraCB camCB{};
-	camCB.view = cam.view;
-	camCB.proj = cam.proj;
-	camCB.viewProj = cam.viewProj;
-	camCB.invView = cam.view.Inverse();
-	camCB.invProj = cam.proj.Inverse();
-	camCB.invViewProj = cam.viewProj.Inverse();
-	auto camCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(camCB);
-
-	// DirectionalLightCB(b3) : PS
-	auto lightSys = world_.GetSystem<LightSystem>();
-	const LightContext& lc = lightSys->GetContext();
-
-	GpuDirectionalLightCB dir{};
-	if (lc.directional.enabled) {
-		dir.enabled = 1;
-		dir.directionWS = lc.directional.dirWS;
-		dir.radiance = lc.directional.radiance;
-	}
-	else {
-		dir.enabled = 0;
-		dir.directionWS = { 0,-1,0 };
-		dir.radiance = { 0,0,0 };
-	}
-	auto dirCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(dir);
-
-	// GBuffer SRV table (t10..t13)
-	// 君の DX12Manager が GPU handle table を返すのでそれを使う
-	D3D12_GPU_DESCRIPTOR_HANDLE gbufferTable = dx12Mgr_->GetGBufferSRVTable();
-
-	// RootSignature "LightingDirectional" の定義順に合わせる
-	// 例: [0]=b0 CameraCB, [1]=b3 DirectionalLightCB, [2]=t10..t13 table
-	list->SetGraphicsRootDescriptorTable(0, camCbv.gpuHandle);
-	list->SetGraphicsRootDescriptorTable(1, dirCbv.gpuHandle);
-	list->SetGraphicsRootDescriptorTable(2, gbufferTable);
-
-	// ShadowMap をここで使うなら RootSignature を拡張して t30 を追加して bind する
-	// まだ "LightingDirectional" の RS に影が無いなら次ステップ
 }
 
-void RenderSystem::BindDebugCommon(DX12::CommandContext* cmd)
+void RenderSystem::DrawShadowCasters(DX12::CommandContext& cmd, DX12::FrameContext& frame)
 {
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// CameraCB(b0)
-	auto camSys = world_.GetSystem<CameraSystem>();
-	const CameraContext& cam = camSys->GetContext();
-	assert(cam.valid);
-
-	GpuCameraCB camCB{};
-	camCB.view = cam.view;
-	camCB.proj = cam.proj;
-	camCB.viewProj = cam.viewProj;
-	camCB.invView = cam.view.Inverse();
-	camCB.invProj = cam.proj.Inverse();
-	camCB.invViewProj = cam.viewProj.Inverse();
-	auto camCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(camCB);
-
-	// DirectionalLightCB(b3)（Debugで使わないなら0でもOK）
-	auto lightSys = world_.GetSystem<LightSystem>();
-	const LightContext& lc = lightSys->GetContext();
-
-	GpuDirectionalLightCB dir{};
-	if (lc.directional.enabled) {
-		dir.enabled = 1;
-		dir.directionWS = lc.directional.dirWS;
-		dir.radiance = lc.directional.radiance;
-	}
-	auto dirCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(dir);
-
-	// DebugCB(b4) ※ RootSig で b4 を DebugCB に割り当てた想定
-	GpuDebugCB dbg{};
-	dbg.mode = debugMode_;
-	auto dbgCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(dbg);
-
-	// SRV table t10..t13 (GBuffer)
-	D3D12_GPU_DESCRIPTOR_HANDLE gbufferTable = dx12Mgr_->GetGBufferSRVTable();
-
-	// Shadow SRV t30 を使うなら RootSig に追加して bind
-	// 例: list->SetGraphicsRootDescriptorTable(?, gpuViewMgr_.GetSRV("ShadowMap"));
-	// 今は DebugFullScreen の RootSig 仕様次第なのでコメントに留める
-
-	// RootSignature "DebugFullScreen" の定義順に合わせる
-	// 例: [0]=b0 Camera, [1]=b3 DirLight, [2]=b4 Debug, [3]=t10..t13 table
-	list->SetGraphicsRootDescriptorTable(0, camCbv.gpuHandle);
-	list->SetGraphicsRootDescriptorTable(1, dirCbv.gpuHandle);
-	list->SetGraphicsRootDescriptorTable(2, dbgCbv.gpuHandle);
-	list->SetGraphicsRootDescriptorTable(3, gbufferTable);
-}
-
-void RenderSystem::DrawShadowCasters(DX12::CommandContext* cmd)
-{
-	// ---------------------------------------------------------
-	// ここは君の既存 RenderSystem の「Objectを回す」ロジックに置換する
-	// - RenderComponent (mesh/material)
-	// - TransformComponent
-	// - MeshManager から VB/IB
-	// - IA Set
-	// - ObjectCB (world) を b1 に bind
-	// ---------------------------------------------------------
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// 例：疑似コード
-	// for (auto [tr, render] : world_.View<TransformComponent, RenderComponent>()) {
-	//    GpuObjectCB obj{}; obj.gWorld = tr.world;
-	//    auto objCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(obj);
-	//    list->SetGraphicsRootDescriptorTable(1, objCbv.gpuHandle);
-	//
-	//    BindMeshIA(render.mesh);
-	//    list->DrawIndexedInstanced(...);
-	// }
-
-	// 今は「実体は君の既存コードに差し替え」前提
-}
-
-void RenderSystem::DrawGBufferObjects(DX12::CommandContext* cmd)
-{
-	// ---------------------------------------------------------
-	// ここも君の既存 RenderSystem の DrawPacket/ソートを流用する
-	// 典型：
-	// - ObjectCB(b1) : world
-	// - MaterialCB(b2)
-	// - SRV(t0) : Albedo (TextureManager)
-	// ---------------------------------------------------------
-	auto* list = cmd->GetList();
-	assert(list);
-
-	// 疑似コード
-	// for (auto [tr, render, mat] : world_.View<TransformComponent, RenderComponent, MaterialComponent>()) {
-	//    GpuObjectCB obj{}; obj.gWorld = tr.world;
-	//    auto objCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(obj);
-	//    list->SetGraphicsRootDescriptorTable(1, objCbv.gpuHandle);
-	//
-	//    GpuMaterialCB mcb{};
-	//    mcb.gBaseColor = mat.baseColor; ...
-	//    auto matCbv = resourceSys_->GetFrameCBManager()->UploadCBAndCreateView(mcb);
-	//    list->SetGraphicsRootDescriptorTable(2, matCbv.gpuHandle);
-	//
-	//    auto albedoSrv = textureMgr->GetSRV(mat.albedoKey); // TextureManager管轄
-	//    list->SetGraphicsRootDescriptorTable(3, albedoSrv);
-	//
-	//    BindMeshIA(render.mesh);
-	//    list->DrawIndexedInstanced(...);
-	// }
-
-	// 今は差し替えポイントとして固定
 }

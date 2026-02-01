@@ -9,6 +9,7 @@
 #include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
+#include "Framework/Str/CameraPacket.h"
 #include "Framework/Str/LightPacket.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/RenderSurfaceType.h"
@@ -22,8 +23,6 @@ struct MeshAsset;
 namespace Tsumi::Framework {
 
 class World;
-class CameraSystem;
-class MaterialSystem;
 
 /* RenderContexを構築するクラス */
 class RenderPrepareSystem : public IUpdatable {
@@ -51,9 +50,10 @@ public:
 	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepareSys; }
 
 #pragma region Accessor
-	const auto& GetRenderPackets() const { return renderPackets_; }
+	const CameraPacket& GetCameraPacket() const { return cameraPacke_; }
 	const LightPacket& GetLightPacket() const { return lightPacket_; }
 	const ShadowPacket& GetShadowPacket() const { return shadowPacket_; }
+	const auto& GetRenderPackets() const { return renderPackets_; }
 #pragma endregion
 
 private:
@@ -63,19 +63,12 @@ private:
 	void Clear();
 
 	/// <summary>
-	/// Packetの構築
-	/// </summary>
-	void BuildRenderPackets();
-
-	/// <summary>
 	/// 
 	/// </summary>
+	void BuildCameraPacket();
 	void BuildLightPacket();
-
-	/// <summary>
-	/// 
-	/// </summary>
 	void BuildShadowPacket();
+	void BuildRenderPackets();
 
 	/// <summary>
 	/// RenderPacketsのソート
@@ -88,9 +81,10 @@ private:
 	void FillTransformPacket(RenderPacket& pkt, const TransformComponent& tc);
 
 private:
-	std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)> renderPackets_;
+	CameraPacket cameraPacke_{};
 	LightPacket lightPacket_{};
 	ShadowPacket shadowPacket_{};
+	std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)> renderPackets_;
 
 	World& world_;
 	Resource::ResourceSystem* resourceSys_ = nullptr;

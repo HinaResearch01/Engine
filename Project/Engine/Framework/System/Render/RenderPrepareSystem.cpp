@@ -1,5 +1,6 @@
 #include "RenderPrepareSystem.h"
 #include "Framework/World/World.h"
+#include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
 #include "Framework/Str/RenderPassTable.h"
@@ -28,63 +29,49 @@ RenderPrepareSystem::RenderPrepareSystem(World& world)
 void RenderPrepareSystem::Update(float)
 {
 	Clear();
-	BuildRenderPackets();
+	BuildCameraPacket();
 	BuildLightPacket();
+	BuildRenderPackets();
 }
 
 void RenderPrepareSystem::Clear()
 {
-	for (auto& l : renderPackets_) l.clear();
+	cameraPacke_ = {};
 	lightPacket_ = {};
+	lightPacket_.pointCB.clear();
+	lightPacket_.spotCB.clear();
+	shadowPacket_ = {};
+	for (auto& l : renderPackets_) l.clear();
 }
 
-void RenderPrepareSystem::BuildRenderPackets()
+void RenderPrepareSystem::BuildCameraPacket()
 {
-	auto materialSys = world_.GetSystem<MaterialSystem>();
+	auto cameraSys = world_.GetSystem<CameraSystem>();
+	const CameraContext& ctx = cameraSys->GetContext();
 
-	for (auto [rc, mc, tc] :
-		 world_.View<RenderComponent, MaterialComponent, TransformComponent>())
+	// ----- Matrices -----
 	{
-		if (!rc.visible || !mc.visible) continue;
-		if (rc.mesh.empty()) continue;
-
-		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
-		if (!mesh) continue;
-
-		auto* mat = materialSys->GetPacket(mc);
-		if (!mat) continue;
-
-		RenderPacket pkt{};
-		pkt.surface = mc.surface;
-		pkt.mesh = mesh;
-		pkt.material = mat;
-
-		// フォールバックテクスチャ
-		if (!pkt.material->albedo && !mesh->defaultTextureKey.empty()) {
-			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
-			if (tex) {
-				const_cast<MaterialPacket*>(pkt.material)->albedo = tex;
-			}
-		}
-
-		FillTransformPacket(pkt, tc);
-
-		const auto& pass = RenderPassTable::Get(pkt.surface);
-		pkt.sortKey = MakeSortKey(pkt, pass.transparent);
-
-		renderPackets_[static_cast<size_t>(pkt.surface)].push_back(pkt);
+		cameraPacke_.camMatCB.view = ctx.view;
+		cameraPacke_.camMatCB.proj = ctx.proj;
+		cameraPacke_.camMatCB.viewProj = ctx.viewProj;
+		cameraPacke_.camMatCB.invView = ctx.invView;
+		cameraPacke_.camMatCB.invProj = ctx.invProj;
+		cameraPacke_.camMatCB.invViewProj = ctx.invViewProj;
 	}
 
-	// ソートする
-	SortRenderPackets();
+	// ----- Parameter -----
+	{
+		cameraPacke_.camParamCB.position = ctx.position;
+		cameraPacke_.camParamCB.forward = ctx.forward;
+		cameraPacke_.camParamCB.fovY = ctx.fovY;
+		cameraPacke_.camParamCB.aspectRatio = ctx.aspectRatio;
+		cameraPacke_.camParamCB.nearPlane = ctx.nearPlane;
+		cameraPacke_.camParamCB.farPlane = ctx.farPlane;
+	}
 }
 
 void RenderPrepareSystem::BuildLightPacket()
 {
-	lightPacket_ = {};
-	lightPacket_.pointCB.clear();
-	lightPacket_.spotCB.clear();
-
 	// LightSystem から Context を取る
 	auto lightSys = world_.GetSystem<LightSystem>();
 	const LightContext& ctx = lightSys->GetContext();
@@ -138,8 +125,6 @@ void RenderPrepareSystem::BuildLightPacket()
 
 void RenderPrepareSystem::BuildShadowPacket()
 {
-	shadowPacket_ = {};
-
 	auto shadowSys = world_.GetSystem<ShadowSystem>();
 	const ShadowContext& ctx = shadowSys->GetContext();
 
@@ -160,6 +145,47 @@ void RenderPrepareSystem::BuildShadowPacket()
 		else
 			cb.shadowViewProj[i] = Math::Mat4x4{}; // 0行列 or 単位行列
 	}
+}
+
+void RenderPrepareSystem::BuildRenderPackets()
+{
+	auto materialSys = world_.GetSystem<MaterialSystem>();
+
+	for (auto [rc, mc, tc] :
+		 world_.View<RenderComponent, MaterialComponent, TransformComponent>())
+	{
+		if (!rc.visible || !mc.visible) continue;
+		if (rc.mesh.empty()) continue;
+
+		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
+		if (!mesh) continue;
+
+		auto* mat = materialSys->GetPacket(mc);
+		if (!mat) continue;
+
+		RenderPacket pkt{};
+		pkt.surface = mc.surface;
+		pkt.mesh = mesh;
+		pkt.material = mat;
+
+		// フォールバックテクスチャ
+		if (!pkt.material->albedo && !mesh->defaultTextureKey.empty()) {
+			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
+			if (tex) {
+				const_cast<MaterialPacket*>(pkt.material)->albedo = tex;
+			}
+		}
+
+		FillTransformPacket(pkt, tc);
+
+		const auto& pass = RenderPassTable::Get(pkt.surface);
+		pkt.sortKey = MakeSortKey(pkt, pass.transparent);
+
+		renderPackets_[static_cast<size_t>(pkt.surface)].push_back(pkt);
+	}
+
+	// ソートする
+	SortRenderPackets();
 }
 
 void RenderPrepareSystem::SortRenderPackets()
