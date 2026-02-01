@@ -31,9 +31,9 @@ enum class Root_GBuffer : uint32_t {
 /// ============================
 /// Lighting (Directional)
 /// ============================
-enum class Root_LightingDirectional : uint32_t {
+enum class Root_DirectionalLight : uint32_t {
 	CameraCB = 0, // b0 PS
-	DirectionalCB = 1, // b3 PS
+	DirLightCB = 1, // b3 PS
 	GBufferTable = 2, // t10..t13
 };
 
@@ -42,7 +42,7 @@ enum class Root_LightingDirectional : uint32_t {
 /// ============================
 enum class Root_DebugFullScreen : uint32_t {
 	CameraCB = 0, // b0
-	DirectionalCB = 1, // b3
+	DirLightCB = 1, // b3
 	DebugCB = 2, // b4
 	GBufferTable = 3, // t10..t13
 };

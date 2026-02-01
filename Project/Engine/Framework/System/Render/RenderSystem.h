@@ -72,7 +72,8 @@ private:
 	// =========================================================
 	void DrawShadowPass(
 		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameContext& frame,
+		const RenderPrepareSystem& prep);
 
 	void DrawGBufferPass(
 		DX12::CommandContext& cmd,
@@ -81,11 +82,13 @@ private:
 
 	void DrawLightingPass(
 		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameContext& frame,
+		const RenderPrepareSystem& prep);
 
 	void DrawDebugPass(
 		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameContext& frame,
+		const RenderPrepareSystem& prep);
 
 	// =========================================================
 	// Resource sync
@@ -105,12 +108,12 @@ private:
 		const RenderPrepareSystem& prep);
 
 	void BindLightingCommon(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameContext& frame,
+		const RenderPrepareSystem& prep);
 
 	void BindDebugCommon(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameContext& frame,
+		const RenderPrepareSystem& prep);
 
 	// =========================================================
 	// Draw helpers
