@@ -29,58 +29,15 @@ void RenderSystem::Update(float)
 {
 }
 
-void RenderSystem::RenderBackSprite(DX12::CommandContext&)
-{
-}
-
-void RenderSystem::RenderModel(DX12::CommandContext& cmd)
-{
-	// DX12Manager から frame context を取得
-	DX12::FrameContext& frame = dx12Mgr_->GetCurrentFrameContext();
-	// World から RenderPrepareSystem を取得
-	auto* prep = world_.GetSystem<RenderPrepareSystem>();
-	assert(prep);
-
-	// =========================================================
-	// Render flow
-	// =========================================================
-	// 1. Shadow
-	DrawShadowPass(cmd, frame, *prep);
-
-	// 2. GBuffer
-	DrawGBufferPass(cmd, frame, *prep);
-
-	// 3. Lighting
-	DrawLightingPass(cmd, frame, *prep);
-
-	// 4. Debug (optional)
-	if (debugMode_ != 0) {
-		DrawDebugPass(cmd, frame, *prep);
-	}
-}
-
-void RenderSystem::RenderFrontSprite(DX12::CommandContext&)
-{
-}
-
-void RenderSystem::OnResize(uint32_t w, uint32_t h)
-{
-	w, h;
-}
-
-void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	cmd, frame, prep;
 }
 
-void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	auto* list = cmd.GetList();
 	if (!list) return;
-
-	// RT bind + clear は DX12Manager に寄せる
-	dx12Mgr_->BeginGBufferPass();
-	dx12Mgr_->ClearGBuffer();
 
 	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("GBuffer"));
@@ -93,14 +50,10 @@ void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameContext
 	BindGBufferObjects(cmd, frame, prep);
 }
 
-void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	auto* list = cmd.GetList();
 	if (!list) return;
-
-	// RT bind + clear は DX12Manager に寄せる
-	dx12Mgr_->BeginBackBufferPass();
-	dx12Mgr_->ClearBackBuffer();
 
 	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("LightingDirectional"));
@@ -114,13 +67,10 @@ void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameContex
 	list->DrawInstanced(3, 1, 0, 0);
 }
 
-void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	auto* list = cmd.GetList();
 	if (!list) return;
-
-	// RT bind は DX12Manager に寄せる
-	dx12Mgr_->BeginBackBufferPass(); // 上書き
 
 	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("DebugFullScreen"));
@@ -134,21 +84,26 @@ void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameContext& 
 	list->DrawInstanced(3, 1, 0, 0);
 }
 
+void RenderSystem::OnResize(uint32_t w, uint32_t h)
+{
+	w, h;
+}
+
 void RenderSystem::SyncShadowResources()
 {
 }
 
-void RenderSystem::BindGBufferCamera(DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::BindGBufferCamera(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 
-	const auto& camPkt = prep.GetCameraPacket();
-	const D3D12_GPU_VIRTUAL_ADDRESS camVA = frame.upload.UploadCB(camPkt.camMatCB);
+	const CameraPacket& campck = prep.GetCameraPacket();
 
-	frame.bind.SetCBV(ToRoot(Root_GBuffer::CameraCB), camVA);
+	auto handle = frame.UploadToTableCB(campck.camMatCB);
+	frame.bind.SetTable(ToRoot(Root_GBuffer::CameraCB), handle);
 }
 
-void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 
@@ -171,12 +126,12 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameCont
 		list->IASetIndexBuffer(&pkt.mesh->ibView);
 
 		// ObjectCB (b1)
-		const D3D12_GPU_VIRTUAL_ADDRESS objVA = frame.upload.UploadCB(pkt.xform);
-		frame.bind.SetCBV(ToRoot(Root_GBuffer::ObjectCB), objVA);
+		auto objHandle = frame.UploadToTableCB(pkt.xform);
+		frame.bind.SetTable(ToRoot(Root_GBuffer::ObjectCB), objHandle);
 
 		// MaterialCB (b2)
-		const D3D12_GPU_VIRTUAL_ADDRESS matVA = frame.upload.UploadCB(pkt.material->cb);
-		frame.bind.SetCBV(ToRoot(Root_GBuffer::MaterialCB), matVA);
+		auto matHandle = frame.UploadToTableCB(pkt.material->cb);
+		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialCB), matHandle);
 
 		// Albedo SRV table (t0)
 		frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.material->albedo->srv.gpu);
@@ -186,51 +141,49 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameCont
 	}
 }
 
-void RenderSystem::BindLightingCommon(DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::BindLightingCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 
 	// CameraCB (b0)
 	const auto& camPkt = prep.GetCameraPacket();
-	const D3D12_GPU_VIRTUAL_ADDRESS camVA = frame.upload.UploadCB(camPkt.camMatCB);
-	frame.bind.SetCBV(ToRoot(Root_DirectionalLight::CameraCB), camVA);
+	auto camHandle = frame.UploadToTableCB(camPkt.camMatCB);
+	frame.bind.SetTable(ToRoot(Root_DirectionalLight::CameraCB), camHandle);
 
 	// DirLightCB (b3)
 	const auto& lightPkt = prep.GetLightPacket();
-	const D3D12_GPU_VIRTUAL_ADDRESS lightVA = frame.upload.UploadCB(lightPkt.dirCB);
-	frame.bind.SetCBV(ToRoot(Root_DirectionalLight::DirLightCB), lightVA);
+	auto lightHandle = frame.UploadToTableCB(lightPkt.dirCB);
+	frame.bind.SetTable(ToRoot(Root_DirectionalLight::DirLightCB), lightHandle);
 
-	// GBuffer table (t10..t13) : Global heap 上の連続 SRV
+	// GBuffer table (t10..t13)
 	frame.bind.SetTable(ToRoot(Root_DirectionalLight::GBufferTable), dx12Mgr_->GetGBufferSrvTable());
-
 }
 
-void RenderSystem::BindDebugCommon(DX12::FrameContext& frame, const RenderPrepareSystem& prep)
+void RenderSystem::BindDebugCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 
-	// CameraCB
+	// CameraCB 
 	const auto& camPkt = prep.GetCameraPacket();
-	const D3D12_GPU_VIRTUAL_ADDRESS camVA = frame.upload.UploadCB(camPkt.camMatCB);
-	frame.bind.SetCBV(ToRoot(Root_DebugFullScreen::CameraCB), camVA);
+	auto camHandle = frame.UploadToTableCB(camPkt.camMatCB);
+	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::CameraCB), camHandle);
 
-	// DirLightCB
+	// DirLightCB 
 	const auto& lightPkt = prep.GetLightPacket();
-	const D3D12_GPU_VIRTUAL_ADDRESS lightVA = frame.upload.UploadCB(lightPkt.dirCB);
-	frame.bind.SetCBV(ToRoot(Root_DebugFullScreen::DirLightCB), lightVA);
+	auto lightHandle = frame.UploadToTableCB(lightPkt.dirCB);
+	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::DirLightCB), lightHandle);
 
-	// DebugCB
+	// DebugCB 
 	struct GpuDebugCB { int mode; float pad[3]; };
-	GpuDebugCB dbg{}; dbg.mode = debugMode_;
-	const D3D12_GPU_VIRTUAL_ADDRESS dbgVA = frame.upload.UploadCB(dbg);
-	frame.bind.SetCBV(ToRoot(Root_DebugFullScreen::DebugCB), dbgVA);
+	GpuDebugCB dbg{}; dbg.mode = debugMode_; 
+	auto dbgHandle = frame.UploadToTableCB(dbg);
+	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::DebugCB), dbgHandle);
 
 	// GBuffer table
 	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::GBufferTable), dx12Mgr_->GetGBufferSrvTable());
-
 }
 
-void RenderSystem::DrawShadowCasters(DX12::CommandContext& cmd, DX12::FrameContext& frame)
+void RenderSystem::DrawShadowCasters(DX12::CommandContext& cmd, DX12::FrameResources& frame)
 {
 	cmd, frame;
 }

@@ -73,42 +73,50 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 {
 	if (!currentScene_) return;
 
-	// DX12Managerの取得
+	// DX12から CommandContext と FrameContextを取得
 	auto* dx12 = DX12::DX12Manager::GetInstance();
+	auto* cmd = dx12->GetCommandContext();
+	auto& frame = dx12->GetCurrentFrameResource();
 
-	// 現在のシーンからRenderSystemを取得
-	auto* renderSys = currentScene_->GetSystem<RenderSystem>();
+	// WorldからSystemを取得
+	auto* renderSys = currentScene_->GetSystem<Framework::RenderSystem>();
+	auto* prepSys = currentScene_->GetSystem<Framework::RenderPrepareSystem>();
+	if (!renderSys || !prepSys) return;
 
-	// コマンドコンテキスト取得
-	auto* cmdContext = dx12->GetCommandContext();
+	// ----------------------------
+	// 1. GBuffer Pass (書き込み)
+	// ----------------------------
+	dx12->TransitionGBufferToWrite();
 
-	// -------------------------------------------------
-	// 1. Primary Effect Pass (3D描画)
-	// -------------------------------------------------
 	dx12->BeginGBufferPass();
-
-	if (renderSys) {
-		renderSys->RenderBackSprite(*cmdContext); // 背景
-		renderSys->RenderModel(*cmdContext);      // モデル
-	}
-
 	dx12->ClearGBuffer();
 
-	// -------------------------------------------------
-	// 2. SwapChain Pass (UI / Final)
-	// -------------------------------------------------
+	renderSys->DrawGBufferPass(*cmd, frame, *prepSys);
+
+	// ----------------------------
+	// 2. Lighting Pass (読み込み)
+	// ----------------------------
+	dx12->TransitionGBufferToRead();
+
 	dx12->BeginBackBufferPass();
+	dx12->ClearBackBuffer();
 
-	if (renderSys) {
-		renderSys->RenderFrontSprite(*cmdContext); // 前景
-	}
+	renderSys->DrawLightingPass(*cmd, frame, *prepSys);
 
-	// ImGui描画 
+	// ----------------------------
+	// 3. Debug Overlay
+	// ----------------------------
+	dx12->BeginBackBufferPass(); // Clearなし
+#ifdef _DEBUG
+	renderSys->DrawDebugPass(*cmd, frame, *prepSys);
+#endif // DEBUG
+
+	// ----------------------------
+	// 4. UI
+	// ----------------------------
 	if (uiRenderCallBack) {
 		uiRenderCallBack();
 	}
-
-	dx12->ClearBackBuffer();
 }
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }
 

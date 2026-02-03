@@ -28,14 +28,14 @@ void DX12Manager::Init()
 		Utils::Exception::DX_CALL(graphicsCtx_->Create());
 		Utils::Exception::DX_CALL(uploadCtx_->Create());
 
+		// ---- descriptors + frames ----
+		InitDescriptors();
+		InitFrames();
+
 		// ---- swapchain / framebuffer / sync ----
 		Utils::Exception::DX_CALL(swapChain_->Create());
 		Utils::Exception::DX_CALL(framebuffer_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
-
-		// ---- descriptors + frames ----
-		InitDescriptors_();
-		InitFrames_();
 	}
 	catch (const Utils::Exception::DxException& e) {
 		OutputDebugStringA(e.what());
@@ -78,7 +78,7 @@ HRESULT DX12Manager::BeginFrame()
 	perDescAlloc_.ReleaseDeferred(frameIndex_);
 
 	// ---- per-frame alloc reset ----
-	FrameContext& frame = frames_[frameIndex_];
+	FrameResources& frame = frames_[frameIndex_];
 	frame.Begin(*graphicsCtx_);
 
 	// ---- command list reset ----
@@ -99,27 +99,34 @@ HRESULT DX12Manager::BeginFrame()
 HRESULT DX12Manager::EndFrame()
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
-		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing\n");
+		Utils::Logger::Error("DX12Manager::BeginFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 
-	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
-	TransitionToPresent(bbIndex);
+	// ---- CPU frame sync ----
+	frameSync_->BeginFrame();
+	frameIndex_ = frameSync_->GetFrameIndex();
 
-	// ---- submit ----
-	HRESULT hr = graphicsCtx_->Execute();
-	if (FAILED(hr)) return hr;
+	//  ---- descriptor deferred 回収 ----
+	perDescAlloc_.ReleaseDeferred(frameIndex_);
 
-	// ---- present ----
-	hr = swapChain_->Present(1, 0);
+	// ---- command list reset ----
+	// これを行うことで CommandList が "Recording" 状態になります
+	HRESULT hr = graphicsCtx_->ResetForFrame(frameIndex_);
 	if (FAILED(hr)) return hr;
 
 	// ---- per-frame alloc reset ----
-	FrameContext& frame = frames_[frameIndex_];
-	frame.Reset();
+	FrameResources& frame = frames_[frameIndex_];
+	frame.Begin(*graphicsCtx_);
 
-	// ---- advance cpu frame ----
-	frameSync_->EndFrame();
+	// ---- global heap bind ----
+	ID3D12DescriptorHeap* heaps[] = { descHeap_.GetHeap() };
+	graphicsCtx_->SetDescriptorHeaps(1, heaps);
+
+	// ---- backbuffer to RT ----
+	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+	PrepareBackBuffer(bbIndex);
+
 	return S_OK;
 }
 
@@ -192,11 +199,18 @@ void DX12Manager::WaitForGpu()
 
 D3D12_VIEWPORT DX12Manager::GetMainViewport() const
 {
+	float w = static_cast<float>(framebuffer_ ? framebuffer_->GetWidth() : 0);
+	float h = static_cast<float>(framebuffer_ ? framebuffer_->GetHeight() : 0);
+
+	if (w <= 0.0f || h <= 0.0f) {
+		Tsumi::Utils::Logger::Warn("Viewport Size is INVALID! ({}, {})\n", w, h);
+	}
+
 	D3D12_VIEWPORT vp{};
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	vp.Width = static_cast<float>(framebuffer_ ? framebuffer_->GetWidth() : 0);
-	vp.Height = static_cast<float>(framebuffer_ ? framebuffer_->GetHeight() : 0);
+	vp.Width = w;
+	vp.Height = h;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	return vp;
@@ -212,7 +226,21 @@ D3D12_RECT DX12Manager::GetMainScissor() const
 	return rc;
 }
 
-void DX12Manager::InitDescriptors_()
+void DX12Manager::TransitionGBufferToWrite()
+{
+	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
+	if (!list || !framebuffer_) return;
+	framebuffer_->TransitionGBufferToWrite(list);
+}
+
+void DX12Manager::TransitionGBufferToRead()
+{
+	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
+	if (!list || !framebuffer_) return;
+	framebuffer_->TransitionGBufferToRead(list);
+}
+
+void DX12Manager::InitDescriptors()
 {
 	// 物理ヒープ：CBV/SRV/UAV
 	descHeap_.Init(GetDevice(), totalDescriptors_, true);
@@ -220,19 +248,19 @@ void DX12Manager::InitDescriptors_()
 	perDescAlloc_.Init(&descHeap_, 0, persistentCap_, bufferCount_);
 }
 
-void DX12Manager::InitFrames_()
+void DX12Manager::InitFrames()
 {
 	frames_.resize(bufferCount_);
 
 	const uint32_t transientBase = persistentCap_;
 
 	for (uint32_t i = 0; i < bufferCount_; ++i) {
-		frames_[i].upload.Init(GetDevice(), uploadBytesPerFrame_);
-
-		frames_[i].transDescAlloc.Init(
-			&descHeap_,
-			transientBase + i * transientCapPerFrame_,
-			transientCapPerFrame_
+		frames_[i].Init(
+			GetDevice(),                               // ID3D12Device*
+			uploadBytesPerFrame_,                      // uploadSize
+			&descHeap_,                                // DescriptorHeap*
+			transientBase + i * transientCapPerFrame_, // transBase
+			transientCapPerFrame_                      // transCount
 		);
 
 		frames_[i].fenceValue = 0;

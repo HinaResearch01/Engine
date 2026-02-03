@@ -14,7 +14,7 @@ namespace Tsumi {
 namespace DX12 {
 class DX12Manager;
 class CommandContext;
-struct FrameContext;
+class FrameResources;
 }
 
 namespace Graphic {
@@ -26,9 +26,10 @@ class ShadowDepthMap;
 namespace Framework {
 
 class World;
-class ShadowSystem;
 class CameraSystem;
 class LightSystem;
+class ShadowSystem;
+class RenderPrepareSystem;
 
 /* 描画管理クラス */
 class RenderSystem : public IUpdatable {
@@ -55,11 +56,24 @@ public:
 	UpdatePhase Phase() const override { return UpdatePhase::RenderSys; }
 
 	/// <summary>
-	/// 描画エントリ
+	/// 描画パスエントリ
 	/// </summary>
-	void RenderBackSprite(DX12::CommandContext& cmd);
-	void RenderModel(DX12::CommandContext& cmd);
-	void RenderFrontSprite(DX12::CommandContext& cmd);
+	void DrawShadowPass(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawGBufferPass(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawLightingPass(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawDebugPass(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
 
 	/// <summary>
 	/// リサイズ通知
@@ -67,29 +81,6 @@ public:
 	void OnResize(uint32_t w, uint32_t h);
 
 private:
-	// =========================================================
-	// High-level render flow
-	// =========================================================
-	void DrawShadowPass(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame,
-		const RenderPrepareSystem& prep);
-
-	void DrawGBufferPass(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame,
-		const RenderPrepareSystem& prep);
-
-	void DrawLightingPass(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame,
-		const RenderPrepareSystem& prep);
-
-	void DrawDebugPass(
-		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame,
-		const RenderPrepareSystem& prep);
-
 	// =========================================================
 	// Resource sync
 	// =========================================================
@@ -99,20 +90,20 @@ private:
 	// Binding helpers（FrameContext 前提）
 	// =========================================================
 	void BindGBufferCamera(
-		DX12::FrameContext& frame,
+		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
 
 	void BindGBufferObjects(
 		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame,
+		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
 
 	void BindLightingCommon(
-		DX12::FrameContext& frame,
+		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
 
 	void BindDebugCommon(
-		DX12::FrameContext& frame,
+		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
 
 	// =========================================================
@@ -120,7 +111,7 @@ private:
 	// =========================================================
 	void DrawShadowCasters(
 		DX12::CommandContext& cmd,
-		DX12::FrameContext& frame);
+		DX12::FrameResources& frame);
 
 private:
 	// Shadow

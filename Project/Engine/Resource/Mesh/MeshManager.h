@@ -88,6 +88,14 @@ public:
 	/// </summary>
 	void UnloadAll();
 
+	/// <summary>
+	/// 保持しているアップロードバッファを解放する
+	/// </summary>
+	void ReleaseUploadBuffers() {
+		std::lock_guard lock(mutex_);
+		pendingUploads_.clear();
+	}
+
 #pragma region Accessor
 	MeshAsset* GetMesh(const std::string& name) {
 		std::lock_guard lock(mutex_);
@@ -138,6 +146,9 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<MeshAsset>> meshes_;
 	// 論理名：alias → key
 	std::unordered_map<std::string, std::string> aliasToKey_;
+
+	// アップロードバッファ保持用
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> pendingUploads_;
 
 	mutable std::mutex mutex_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;

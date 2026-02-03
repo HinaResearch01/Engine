@@ -46,21 +46,28 @@ HRESULT MeshManager::RegisterMesh(
 		return E_FAIL;
 
 	// 登録するメッシュ実体を構築
-	MeshAsset asset{};
-	asset.key = key;
-	asset.defaultTextureKey = textureKey; // 保存
-	asset.vertexCount = static_cast<uint32_t>(vertices.size());
-	asset.indexCount = static_cast<uint32_t>(indices.size());
-	asset.stride = sizeof(Vertex);
+	auto asset = std::make_unique<MeshAsset>();
+	asset->key = key;
+	asset->defaultTextureKey = textureKey;
+	asset->vertexCount = static_cast<uint32_t>(vertices.size());
+	asset->indexCount = static_cast<uint32_t>(indices.size());
+	asset->stride = sizeof(Vertex);
 
 	// 頂点バッファ・インデックスバッファの作成
 	ComPtr<ID3D12Resource> vbUpload;
 	ComPtr<ID3D12Resource> ibUpload;
 
-	HRESULT hr = CreateVertexBuffer(list, vertices, asset, vbUpload);
+	// asset (pointer) を渡すように修正
+	HRESULT hr = CreateVertexBuffer(list, vertices, *asset, vbUpload);
 	if (FAILED(hr)) return hr;
-	hr = CreateIndexBuffer(list, indices, asset, ibUpload);
+	hr = CreateIndexBuffer(list, indices, *asset, ibUpload);
 	if (FAILED(hr)) return hr;
+
+	// meshes_ マップへの登録（これがないと管理されません）
+	{
+		std::lock_guard lock(mutex_);
+		meshes_[key] = std::move(asset);
+	}
 
 	return S_OK;
 }
@@ -95,6 +102,7 @@ void MeshManager::UnloadAll()
 	std::lock_guard lock(mutex_);
 	meshes_.clear();
 	aliasToKey_.clear();
+	pendingUploads_.clear();
 }
 
 HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const std::vector<Vertex>& vertices, 
@@ -182,6 +190,12 @@ HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const
 	sub.SlicePitch = dataSize;
 
 	UpdateSubresources(list, outDefault.Get(), outUpload.Get(), 0, 0, 1, &sub);
+
+	// アップロードバッファを延命させる
+	{
+		std::lock_guard lock(mutex_);
+		pendingUploads_.push_back(outUpload);
+	}
 
 	return S_OK;
 }

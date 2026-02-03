@@ -11,7 +11,7 @@
 #include "SwapChain/SwapChain.h"
 #include "Framebuf/Framebuffer.h"
 #include "FrameSync/FrameSync.h"
-#include "PerFrame/FrameContext.h"
+#include "PerFrame/FrameResources.h"
 
 namespace Tsumi::DX12 {
 
@@ -52,10 +52,14 @@ public:
 	D3D12_VIEWPORT GetMainViewport() const;
 	D3D12_RECT     GetMainScissor() const;
 
+	// ---- Transition GBuffer ----
+	void TransitionGBufferToWrite();
+	void TransitionGBufferToRead();
+
 private:
 
-	void InitDescriptors_();
-	void InitFrames_();
+	void InitDescriptors();
+	void InitFrames();
 	
 	// ---- helpers ----
 	void PrepareBackBuffer(UINT index);
@@ -115,13 +119,6 @@ public:
 	PersistentDescAllocator* GetPersistentDescAllocator() {
 		return &perDescAlloc_;
 	}
-	TransientDescAllocator* GetTransientDescAllocator() {
-		return &frames_[GetFrameIndex()].transDescAlloc;
-	}
-	// Per-frame upload
-	FrameUploadArena* GetFrameUploadArena() {
-		return &frames_[GetFrameIndex()].upload;
-	}
 	// Framebuffer
 	Framebuffer* GetFramebuffer() const {
 		return framebuffer_.get();
@@ -134,7 +131,7 @@ public:
 		return frameSync_.get();
 	}
 	// FrameContext
-	FrameContext& GetCurrentFrameContext() {
+	FrameResources& GetCurrentFrameResource() {
 		assert(frameIndex_ < frames_.size());
 		return frames_[frameIndex_];
 	}
@@ -152,7 +149,7 @@ private:
 	std::unique_ptr<Framebuffer> framebuffer_;
 	std::unique_ptr<FrameSync> frameSync_;
 
-	std::vector<FrameContext> frames_;
+	std::vector<FrameResources> frames_;
 
 	// parameters
 	uint32_t bufferCount_ = 3;

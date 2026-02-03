@@ -12,7 +12,7 @@ void Win32Window::CreateMainWindow(const Win32Desc& desc)
 	wc.hInstance = desc_.hInstance;
 	wc.lpszClassName = L"EngineWindowClass";
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wc.hbrBackground = (HBRUSH)(BLACK_BRUSH);
 
 	if (!RegisterClass(&wc)) {
 		throw std::runtime_error("Failed to register window class.");

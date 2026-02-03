@@ -26,6 +26,7 @@ Application::Application()
 
 Application::~Application()
 {
+	dx12_->GetCommandContext()->WaitForGpu();
 	gameCtx_->Finalize();
     imgui_->Finalize();
 	resourceMgr_->Finalize();
@@ -75,6 +76,6 @@ void Application::Run()
     }
 
     // ------------------ 終了処理フェーズ ------------------
-    dx12_->GetCommandContext()->WaitForGpu(); // GPU完了待ち
+    dx12_->WaitForGpu(); // GPU完了待ち
     gameCtx_->Finalize();
 }

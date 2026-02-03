@@ -37,6 +37,11 @@ HRESULT Framebuffer::Init()
 	width_ = desc.windowWidth;
 	height_ = desc.windowHeight;
 
+	if (width_ == 0 || height_ == 0) {
+		Tsumi::Utils::Logger::Warn("Framebuffer::Init skipped (size=0).");
+		return S_FALSE;
+	}
+
 	if (!gbufferSrvBase_.valid()) {
 		auto* per = dx12Mgr_->GetPersistentDescAllocator();
 		if (!per) return E_POINTER;
@@ -128,9 +133,18 @@ void Framebuffer::ClearDepthStencil(ID3D12GraphicsCommandList* cmdList, FLOAT de
 	if (!cmdList) return;
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetDsvHandle();
 	if (dsvHandle.ptr == 0) return;
+
+	// stencil 付きかどうかで切り替え
+	D3D12_CLEAR_FLAGS flags = D3D12_CLEAR_FLAG_DEPTH;
+	if (depthStencilFormat_ == DXGI_FORMAT_D24_UNORM_S8_UINT ||
+		depthStencilFormat_ == DXGI_FORMAT_D32_FLOAT_S8X24_UINT)
+	{
+		flags |= D3D12_CLEAR_FLAG_STENCIL;
+	}
+
 	cmdList->ClearDepthStencilView(
 		dsvHandle,
-		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		flags,
 		depth, stencil,
 		0, nullptr
 	);
@@ -200,6 +214,84 @@ void Framebuffer::ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const
 	auto dsv = GetGBufferDsv();
 	if (dsv.ptr != 0) {
 		cmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
+}
+
+void Framebuffer::TransitionGBufferToWrite(ID3D12GraphicsCommandList* list)
+{
+	if (!list) return;
+
+	std::vector<D3D12_RESOURCE_BARRIER> bs;
+	bs.reserve(GBUFFER_COUNT + 1);
+
+	// RTs: PS SRV -> RT
+	for (UINT i = 0; i < (UINT)gbufferRTs_.size(); ++i) {
+		auto* res = gbufferRTs_[i].Get();
+		if (!res) continue;
+
+		const D3D12_RESOURCE_STATES before = (i < gbufferRTStates_.size())
+			? gbufferRTStates_[i]
+			: D3D12_RESOURCE_STATE_COMMON;
+
+		const D3D12_RESOURCE_STATES after = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		if (before != after) {
+			bs.push_back(CD3DX12_RESOURCE_BARRIER::Transition(res, before, after));
+			if (i < gbufferRTStates_.size()) gbufferRTStates_[i] = after;
+		}
+	}
+
+	// Depth: PS SRV -> DepthWrite
+	if (gbufferDepth_) {
+		const D3D12_RESOURCE_STATES before = gbufferDepthState_;
+		const D3D12_RESOURCE_STATES after = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		if (before != after) {
+			bs.push_back(CD3DX12_RESOURCE_BARRIER::Transition(gbufferDepth_.Get(), before, after));
+			gbufferDepthState_ = after;
+		}
+	}
+
+	if (!bs.empty()) {
+		list->ResourceBarrier((UINT)bs.size(), bs.data());
+	}
+}
+
+void Framebuffer::TransitionGBufferToRead(ID3D12GraphicsCommandList* list)
+{
+	if (!list) return;
+
+	std::vector<D3D12_RESOURCE_BARRIER> bs;
+	bs.reserve(GBUFFER_COUNT + 1);
+
+	// RTs: RT -> PS SRV
+	for (UINT i = 0; i < (UINT)gbufferRTs_.size(); ++i) {
+		auto* res = gbufferRTs_[i].Get();
+		if (!res) continue;
+
+		const D3D12_RESOURCE_STATES before = (i < gbufferRTStates_.size())
+			? gbufferRTStates_[i]
+			: D3D12_RESOURCE_STATE_COMMON;
+
+		const D3D12_RESOURCE_STATES after = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+		if (before != after) {
+			bs.push_back(CD3DX12_RESOURCE_BARRIER::Transition(res, before, after));
+			if (i < gbufferRTStates_.size()) gbufferRTStates_[i] = after;
+		}
+	}
+	
+	// Depth: DepthWrite -> PS SRV
+	if (gbufferDepth_) {
+		const D3D12_RESOURCE_STATES before = gbufferDepthState_;
+		const D3D12_RESOURCE_STATES after = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		if (before != after) {
+			bs.push_back(CD3DX12_RESOURCE_BARRIER::Transition(gbufferDepth_.Get(), before, after));
+			gbufferDepthState_ = after;
+		}
+	}
+
+	if (!bs.empty()) {
+		list->ResourceBarrier((UINT)bs.size(), bs.data());
 	}
 }
 
@@ -358,18 +450,22 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 		device->CreateShaderResourceView(gbufferRTs_[i].Get(), &srv, srvCpu);
 	}
 
+	// state 配列を初期化。
+	gbufferRTStates_.assign(GBUFFER_COUNT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
 	// =========================================================
 	// GBuffer Depth (resource + DSV + Depth SRV)
 	// =========================================================
 	{
 		CD3DX12_RESOURCE_DESC depthDesc =
 			CD3DX12_RESOURCE_DESC::Tex2D(
-			DXGI_FORMAT_D32_FLOAT,
+			DXGI_FORMAT_R32_TYPELESS,
 			width, height,
 			1, 1,
 			1, 0,
 			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
+		// ClearValue は DSV フォーマットと一致させる
 		D3D12_CLEAR_VALUE depthClear{};
 		depthClear.Format = DXGI_FORMAT_D32_FLOAT;
 		depthClear.DepthStencil.Depth = 1.0f;
@@ -386,6 +482,7 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 			IID_PPV_ARGS(&gbufferDepth_));
 		if (HRFailed(hr, "CreateHeapsAndViews - Create GBuffer Depth")) return hr;
 
+		// DSV heap
 		D3D12_DESCRIPTOR_HEAP_DESC dsvDesc{};
 		dsvDesc.NumDescriptors = 1;
 		dsvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -394,9 +491,18 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 		hr = device->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&gbufferDsvHeap_));
 		if (HRFailed(hr, "CreateHeapsAndViews - Create GBuffer DSV heap")) return hr;
 
-		device->CreateDepthStencilView(gbufferDepth_.Get(), nullptr, gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart());
+		// DSV は D32_FLOAT を明示
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsv{};
+		dsv.Format = DXGI_FORMAT_D32_FLOAT;
+		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsv.Flags = D3D12_DSV_FLAG_NONE;
 
-		// Depth SRV（D32_FLOAT は R32_FLOAT で読む）
+		device->CreateDepthStencilView(
+			gbufferDepth_.Get(),
+			&dsv,
+			gbufferDsvHeap_->GetCPUDescriptorHandleForHeapStart());
+
+		// Depth SRV（R32_FLOAT で読む）
 		D3D12_SHADER_RESOURCE_VIEW_DESC depthSrv{};
 		depthSrv.Format = DXGI_FORMAT_R32_FLOAT;
 		depthSrv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -407,6 +513,9 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 		depthSrvCpu.ptr += SIZE_T(GBUFFER_COUNT) * SIZE_T(inc);
 
 		device->CreateShaderResourceView(gbufferDepth_.Get(), &depthSrv, depthSrvCpu);
+
+		// state tracking
+		gbufferDepthState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	}
 
 	return S_OK;
@@ -437,4 +546,7 @@ void Framebuffer::ReleaseViews()
 	gbufferDsvHeap_.Reset();
 
 	gbufferRtvDescriptorSize_ = 0;
+
+	gbufferRTStates_.clear();
+	gbufferDepthState_ = D3D12_RESOURCE_STATE_COMMON;
 }

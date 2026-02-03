@@ -98,6 +98,12 @@ public:
 	/// </summary>
 	void ClearGBuffer(ID3D12GraphicsCommandList* cmdList) const;
 
+	/// <summary>
+	/// GBuffer transitions
+	/// </summary>
+	void TransitionGBufferToWrite(ID3D12GraphicsCommandList* list);
+	void TransitionGBufferToRead(ID3D12GraphicsCommandList* list);
+
 #pragma region Accessor
 	UINT GetWidth() const { return width_; }
 	UINT GetHeight() const { return height_; }
@@ -131,6 +137,10 @@ private:
 	// GBuffer resources
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> gbufferRTs_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> gbufferDepth_;
+
+	// GBuffer state tracking
+	std::vector<D3D12_RESOURCE_STATES> gbufferRTStates_;
+	D3D12_RESOURCE_STATES gbufferDepthState_ = D3D12_RESOURCE_STATE_COMMON;
 
 	// GBuffer RTV / DSV heaps
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> gbufferRtvHeap_;

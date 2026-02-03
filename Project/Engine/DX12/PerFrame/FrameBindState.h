@@ -25,7 +25,7 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void Begin(DX12::CommandContext& cmd);
+	void Begin(ID3D12GraphicsCommandList* cmdList);
 
 	/// <summary>
 	/// リセット
@@ -33,20 +33,17 @@ public:
 	void Reset();
 
 	/// <summary>
-	/// 
+	/// Root Parameter 設定
 	/// </summary>
 	void SetCBV(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	void SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table);
+	void SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE handle);
 
 private:
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> tables_;
-	std::vector<D3D12_GPU_VIRTUAL_ADDRESS> cbvs_;
+	// 状態キャッシュ (RootIndexごとの現在の値)
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> cachedTables_;
+	std::vector<D3D12_GPU_VIRTUAL_ADDRESS> cachedCBVs_;
 
-	CommandContext* cmd_ = nullptr;
+	ID3D12GraphicsCommandList* cmdList_ = nullptr;
 };
 
 }

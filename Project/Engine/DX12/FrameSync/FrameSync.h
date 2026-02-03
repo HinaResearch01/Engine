@@ -57,7 +57,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	HANDLE fenceEvent_ = nullptr;
 
+	// 各フレームバッファが完了すべきフェンス値
 	std::array<uint64_t, kFrameCount> fenceValues_{};
+
+	// 次にシグナルする値（単調増加）
+	uint64_t nextFenceValue_ = 1;
+
 	uint32_t frameIndex_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;

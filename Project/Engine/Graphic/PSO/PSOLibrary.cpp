@@ -158,7 +158,7 @@ void PSOLibrary::CreateLightingDirectional()
 	// BackBuffer へ 1RT
 	DXGI_FORMAT rtv = DXGI_FORMAT_R8G8B8A8_UNORM;
 	pso.SetRTVFormats(1, &rtv);
-	pso.SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
 
 	// Depth off
 	pso.EnableDepth(false);
@@ -189,7 +189,7 @@ void PSOLibrary::CreateDebugFullScreen()
 	// BackBuffer へ 1RT
 	DXGI_FORMAT rtv = DXGI_FORMAT_R8G8B8A8_UNORM;
 	pso.SetRTVFormats(1, &rtv);
-	pso.SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
 
 	// Depth off
 	pso.EnableDepth(false);

@@ -3,48 +3,47 @@
 
 using namespace Tsumi::DX12;
 
-void FrameBindState::Begin(DX12::CommandContext& cmd)
+void FrameBindState::Begin(ID3D12GraphicsCommandList* cmdList)
 {
-	cmd_ = &cmd;
-	tables_.clear();
-	cbvs_.clear();
+	cmdList_ = cmdList;
+	cachedTables_.clear();
+	cachedCBVs_.clear();
 }
 
 void FrameBindState::Reset()
 {
-	cmd_ = nullptr;
-	tables_.clear();
-	cbvs_.clear();
+	cmdList_ = nullptr;
+	cachedTables_.clear();
+	cachedCBVs_.clear();
 }
 
 void FrameBindState::SetCBV(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va)
 {
-	if (!cmd_) return;
+	if (!cmdList_) return;
 
-	if (cbvs_.size() <= rootIndex) {
-		cbvs_.resize(rootIndex + 1, 0);
+	// 配列拡張
+	if (rootIndex >= cachedCBVs_.size()) {
+		cachedCBVs_.resize(rootIndex + 1, 0);
 	}
 
-	if (cbvs_[rootIndex] == va) {
-		return; // 重複回避
-	}
+	// 重複チェック
+	if (cachedCBVs_[rootIndex] == va) return;
 
-	cbvs_[rootIndex] = va;
-	cmd_->SetGraphicsRootConstantBufferView(rootIndex, va);
+	// コマンド発行 & 更新
+	cmdList_->SetGraphicsRootConstantBufferView(rootIndex, va);
+	cachedCBVs_[rootIndex] = va;
 }
 
-void FrameBindState::SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table)
+void FrameBindState::SetTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE handle)
 {
-	if (!cmd_) return;
+	if (!cmdList_) return;
 
-	if (tables_.size() <= rootIndex) {
-		tables_.resize(rootIndex + 1, D3D12_GPU_DESCRIPTOR_HANDLE{ 0 });
+	if (rootIndex >= cachedTables_.size()) {
+		cachedTables_.resize(rootIndex + 1, { 0 });
 	}
 
-	if (tables_[rootIndex].ptr == table.ptr) {
-		return; // 重複回避
-	}
+	if (cachedTables_[rootIndex].ptr == handle.ptr) return;
 
-	tables_[rootIndex] = table;
-	cmd_->SetGraphicsRootDescriptorTable(rootIndex, table);
+	cmdList_->SetGraphicsRootDescriptorTable(rootIndex, handle);
+	cachedTables_[rootIndex] = handle;
 }

@@ -166,7 +166,6 @@ public:
 #pragma region Accessor
 	GameContext* GetGameContext() const { return gameContext_; }
 	void SetGameContext(GameContext* context) { gameContext_ = context; }
-
 	ComponentView<CameraComponent>& GetCamerasCompView() { return cameraCompView_; }
 	ComponentView<DirectionalLightComponent>& GetDirectionalLightCompView() { return dirLightCompView_; }
 	ComponentView<PointLightComponent>& GetPointLightCompView() { return pointLightCompView_; }
@@ -174,7 +173,6 @@ public:
 	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialCompView_; }
 	ComponentView<RenderComponent>& GetRenderCompView() { return renderCompView_; }
 	ComponentView<TransformComponent>& GetTransformsCompView() { return transformCompView_; }
-
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
 #pragma endregion
 

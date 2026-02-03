@@ -112,12 +112,15 @@ void TextureManager::RegisterAlias(const std::string& alias, const std::string& 
 void TextureManager::UnloadAll()
 {
 	if (dx12Mgr_) {
-		dx12Mgr_->WaitForGpu();
+		dx12Mgr_->WaitForGpu(); // GPU完了待ち
 	}
 
 	std::lock_guard lock(mutex_);
 	textures_.clear();
 	aliasToKey_.clear();
+
+	// 完了したのでアップロードバッファも解放
+	pendingUploads_.clear();
 }
 
 HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipChain, DXGI_FORMAT viewFormat, TextureAsset& outAsset)
@@ -187,6 +190,12 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		0, 0,
 		(UINT)subres.size(),
 		subres.data());
+
+	// ここで作成した upload リソースをメンバ変数に保存
+	{
+		std::lock_guard lock(mutex_);
+		pendingUploads_.push_back(upload);
+	}
 
 	outAsset.resource = texture;
 	outAsset.width = (uint32_t)meta.width;
