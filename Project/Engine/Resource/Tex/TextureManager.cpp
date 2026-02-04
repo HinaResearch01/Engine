@@ -62,28 +62,56 @@ HRESULT TextureManager::RegisterTexture(const std::string& key, const ScratchIma
 	if (HasKey(key))
 		return S_OK;
 
-	// 登録するテクスチャ実体を構築
+	if (!dx12Mgr_) return E_POINTER;
+
 	TextureAsset asset{};
 	asset.key = key;
 
-	// ScratchImage（CPU側データ）から GPU リソースを作成・アップロード
+	// Default heap texture resource を作る（COMMON）
 	HRESULT hr = CreateTextureResource(image, viewFormat, asset);
-	if (FAILED(hr))
-		return hr;
+	if (FAILED(hr)) return hr;
 
-	// GPU リソースに対応する SRV（ディスクリプタ）を作成
+	// subresources を作る
+	std::vector<D3D12_SUBRESOURCE_DATA> subres;
+	hr = BuildSubresources(image, subres);
+	if (FAILED(hr)) return hr;
+
+	// upload buffer を作る
+	const UINT64 uploadBytes = GetRequiredIntermediateSize(asset.resource.Get(), 0, (UINT)subres.size());
+
+	ComPtr<ID3D12Resource> upload;
+	hr = CreateUploadBuffer(uploadBytes, upload);
+	if (FAILED(hr)) return hr;
+
+	// Upload(COPY) を記録して submit
+	{
+		CommandContext* uploadCtx = dx12Mgr_->GetUploadCmdContext();
+		if (!uploadCtx) return E_POINTER;
+
+		hr = RecordUpload(uploadCtx,
+						   asset.resource.Get(),
+						   upload.Get(),
+						   subres,
+						   asset.currentState);
+		if (FAILED(hr)) return hr;
+	}
+
+	// SRVを作る
 	hr = CreateTextureSRV(image.GetMetadata(), asset);
-	if (FAILED(hr))
-		return hr;
+	if (FAILED(hr)) return hr;
 
-	// 作成がすべて成功した時点でマネージャに登録
-	// ※ GPU リソース生成中に失敗した場合、ここには到達しない
+	// SRV用 state に遷移（DIRECT）
+	hr = TransitionTextureToSRV(asset);
+	if (FAILED(hr)) return hr;
+
+	// マネージャに登録
 	{
 		std::lock_guard lock(mutex_);
+		pendingUploads_.push_back(upload);
+
 		textures_.emplace(
 			key,
-			std::make_unique<TextureAsset>(std::move(asset))
-		);
+			std::make_unique<TextureAsset>(std::move(asset)));
 	}
 
 	return S_OK;
@@ -128,33 +156,35 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 	if (mipChain.GetImageCount() == 0)
 		return E_INVALIDARG;
 
-	ID3D12Device* device = dx12Mgr_->GetDevice();
-	CommandContext* ctx = dx12Mgr_->GetUploadCmdContext();
-	if (!device || !ctx)
-		return E_FAIL;
+	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
+	if (!device) return E_FAIL;
 
 	const TexMetadata& meta = mipChain.GetMetadata();
-	UINT mipCount = meta.mipLevels ? static_cast<UINT>(meta.mipLevels) : 1;
+	const UINT mipCount = meta.mipLevels ? (UINT)meta.mipLevels : 1;
 
-	bool isSRGB =
+	const bool isSRGB =
 		viewFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
 		viewFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
-	DXGI_FORMAT resourceFormat = isSRGB ? MakeTypelessIfNeeded(meta.format) : meta.format;
+	// SRGB の場合、resource は typeless にして SRV だけ srgb/unorm を切り替える
+	const DXGI_FORMAT resourceFormat = isSRGB ? MakeTypelessIfNeeded(meta.format) : meta.format;
 
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Width = meta.width;
-	desc.Height = static_cast<UINT>(meta.height);
-	desc.DepthOrArraySize = static_cast<UINT16>(meta.arraySize);
-	desc.MipLevels = static_cast<UINT16>(mipCount);
+	desc.Height = (UINT)meta.height;
+	desc.DepthOrArraySize = (UINT16)meta.arraySize;
+	desc.MipLevels = (UINT16)mipCount;
 	desc.Format = resourceFormat;
 	desc.SampleDesc.Count = 1;
 	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	ComPtr<ID3D12Resource> texture;
 	CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
 
+	ComPtr<ID3D12Resource> texture;
+
+	// initial state は COMMON 固定
 	HRESULT hr = device->CreateCommittedResource(
 		&heap,
 		D3D12_HEAP_FLAG_NONE,
@@ -163,39 +193,6 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 		nullptr,
 		IID_PPV_ARGS(&texture));
 	if (FAILED(hr)) return hr;
-
-	// subresources
-	std::vector<D3D12_SUBRESOURCE_DATA> subres;
-	PrepareUpload(device, mipChain.GetImages(), mipChain.GetImageCount(), meta, subres);
-
-	UINT64 uploadBytes = GetRequiredIntermediateSize(texture.Get(), 0, (UINT)subres.size());
-
-	ComPtr<ID3D12Resource> upload;
-	CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
-	auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
-
-	hr = device->CreateCommittedResource(
-		&upHeap,
-		D3D12_HEAP_FLAG_NONE,
-		&upDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&upload));
-	if (FAILED(hr)) return hr;
-
-	UpdateSubresources(
-		ctx->GetList(),
-		texture.Get(),
-		upload.Get(),
-		0, 0,
-		(UINT)subres.size(),
-		subres.data());
-
-	// ここで作成した upload リソースをメンバ変数に保存
-	{
-		std::lock_guard lock(mutex_);
-		pendingUploads_.push_back(upload);
-	}
 
 	outAsset.resource = texture;
 	outAsset.width = (uint32_t)meta.width;
@@ -207,21 +204,84 @@ HRESULT TextureManager::CreateTextureResource(const DirectX::ScratchImage& mipCh
 	return S_OK;
 }
 
+HRESULT TextureManager::CreateUploadBuffer(UINT64 uploadBytes, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
+{
+	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
+	if (!device) return E_POINTER;
+
+	CD3DX12_HEAP_PROPERTIES upHeap(D3D12_HEAP_TYPE_UPLOAD);
+	auto upDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBytes);
+
+	return device->CreateCommittedResource(
+		&upHeap,
+		D3D12_HEAP_FLAG_NONE,
+		&upDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&outUpload));
+}
+
+HRESULT TextureManager::BuildSubresources(const DirectX::ScratchImage& mipChain, std::vector<D3D12_SUBRESOURCE_DATA>& outSubres)
+{
+	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
+	if (!device) return E_POINTER;
+
+	const auto& meta = mipChain.GetMetadata();
+
+	outSubres.clear();
+	outSubres.reserve(mipChain.GetImageCount());
+
+	// DirectXTex helper
+	PrepareUpload(device, mipChain.GetImages(), mipChain.GetImageCount(), meta, outSubres);
+
+	if (outSubres.empty())
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT TextureManager::RecordUpload(Tsumi::DX12::CommandContext* uploadCtx, ID3D12Resource* dstTexture, ID3D12Resource* uploadBuffer, const std::vector<D3D12_SUBRESOURCE_DATA>& subres, D3D12_RESOURCE_STATES& inOutState)
+{
+	if (!uploadCtx || !dstTexture || !uploadBuffer) return E_POINTER;
+
+	// UploadCtx を必ず open 化
+	HRESULT hr = uploadCtx->BeginOneShot();
+	if (FAILED(hr)) return hr;
+
+	ID3D12GraphicsCommandList* list = uploadCtx->GetList();
+	if (!list) return E_FAIL;
+
+	UpdateSubresources(
+		list,
+		dstTexture,
+		uploadBuffer,
+		0, 0,
+		(UINT)subres.size(),
+		subres.data());
+
+	// Submit & Wait
+	hr = uploadCtx->EndOneShotAndWait();
+	if (FAILED(hr)) return hr;
+
+	// 暗黙 decay により、完了後の dst は COMMON
+	inOutState = D3D12_RESOURCE_STATE_COMMON;
+	return S_OK;
+}
+
 HRESULT TextureManager::CreateTextureSRV(const DirectX::TexMetadata& meta, TextureAsset& asset)
 {
-	ID3D12Device* device = dx12Mgr_->GetDevice();
-	auto* allocator = dx12Mgr_->GetPersistentDescAllocator();
-	if (!device || !allocator)
-		return E_FAIL;
+	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
+	auto* allocator = dx12Mgr_ ? dx12Mgr_->GetPersistentDescAllocator() : nullptr;
+	if (!device || !allocator) return E_FAIL;
+	if (!asset.resource) return E_FAIL;
 
 	asset.srv = allocator->Allocate(1);
-	if (!asset.srv.valid())
-		return E_FAIL;
+	if (!asset.srv.valid()) return E_FAIL;
 
-	bool isArray = meta.arraySize > 1;
-	bool isCube = (meta.miscFlags & TEX_MISC_TEXTURECUBE) != 0;
+	const bool isArray = meta.arraySize > 1;
+	const bool isCube = (meta.miscFlags & TEX_MISC_TEXTURECUBE) != 0;
 
-	bool srgb =
+	const bool srgb =
 		asset.format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
 		asset.format == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
@@ -229,20 +289,67 @@ HRESULT TextureManager::CreateTextureSRV(const DirectX::TexMetadata& meta, Textu
 	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srv.Format = ChooseViewFormat(meta.format, srgb);
 
+	const UINT mipCount = asset.mipLevels ? asset.mipLevels : 1;
+
 	if (isArray) {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-		srv.Texture2DArray.MipLevels = asset.mipLevels;
+		srv.Texture2DArray.MipLevels = mipCount;
 		srv.Texture2DArray.ArraySize = (UINT)meta.arraySize;
+		srv.Texture2DArray.MostDetailedMip = 0;
+		srv.Texture2DArray.FirstArraySlice = 0;
+		srv.Texture2DArray.ResourceMinLODClamp = 0.0f;
 	}
 	else if (isCube) {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-		srv.TextureCube.MipLevels = asset.mipLevels;
+		srv.TextureCube.MipLevels = mipCount;
+		srv.TextureCube.MostDetailedMip = 0;
+		srv.TextureCube.ResourceMinLODClamp = 0.0f;
 	}
 	else {
 		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srv.Texture2D.MipLevels = asset.mipLevels;
+		srv.Texture2D.MipLevels = mipCount;
+		srv.Texture2D.MostDetailedMip = 0;
+		srv.Texture2D.ResourceMinLODClamp = 0.0f;
 	}
 
 	device->CreateShaderResourceView(asset.resource.Get(), &srv, asset.srv.cpu);
 	return S_OK;
+}
+
+HRESULT TextureManager::TransitionTextureToSRV(TextureAsset& asset)
+{
+	if (!dx12Mgr_ || !asset.resource) return E_POINTER;
+
+	auto* ctx = dx12Mgr_->GetResourceCmdContext();
+	if (!ctx) return E_POINTER;
+
+	const D3D12_RESOURCE_STATES before = asset.currentState;
+	const D3D12_RESOURCE_STATES after = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+	// 既に SRV 状態なら何もしない
+	if (before == after) return S_OK;
+
+	HRESULT hr = TransitionResource(ctx, asset.resource.Get(), before, after);
+	if (FAILED(hr)) return hr;
+
+	// state更新は TextureManager 内だけで行う
+	asset.currentState = after;
+	return S_OK;
+}
+
+HRESULT TextureManager::TransitionResource(Tsumi::DX12::CommandContext* ctx, ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
+{
+	if (!ctx || !res) return E_POINTER;
+
+	HRESULT hr = ctx->BeginOneShot();
+	if (FAILED(hr)) return hr;
+
+	auto* list = ctx->GetList();
+	if (!list) return E_FAIL;
+
+	// ※ Transition は DIRECT キュー（resourceCtx）で行うこと。
+	D3D12_RESOURCE_BARRIER b = CD3DX12_RESOURCE_BARRIER::Transition(res, before, after);
+	list->ResourceBarrier(1, &b);
+
+	return ctx->EndOneShotAndWait();
 }

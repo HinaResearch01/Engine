@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <array>
 #include <cassert>
+#include <vector>
 
 namespace Tsumi::DX12 {
 
@@ -34,12 +35,12 @@ public:
 	/// <summary>
 	/// フレーム開始時処理
 	/// </summary>
-	void BeginFrame();
+	void BeginFrame(uint32_t frameIndex);
 
 	/// <summary>
 	/// フレーム終了時処理
 	/// </summary>
-	uint64_t  EndFrame();
+	void  EndFrame(uint32_t frameIndex);
 
 	/// <summary>
 	/// 明示待ち
@@ -57,13 +58,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	HANDLE fenceEvent_ = nullptr;
 
-	// 各フレームバッファが完了すべきフェンス値
-	std::array<uint64_t, kFrameCount> fenceValues_{};
-
-	// 次にシグナルする値（単調増加）
-	uint64_t nextFenceValue_ = 1;
-
+	uint32_t bufferCount_ = 0;
 	uint32_t frameIndex_ = 0;
+
+	std::vector<uint64_t> fenceValues_;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };

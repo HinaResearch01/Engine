@@ -23,6 +23,7 @@ const std::pair<std::string, uint32_t> DDS = { ".dds", 2 };
 // 前方宣言
 namespace Tsumi::DX12 {
 class DX12Manager;
+class CommandContext;
 }
 
 namespace Tsumi::Resource {
@@ -65,7 +66,7 @@ public:
 	void RegisterAlias(const std::string& alias, const std::string& key);
 
 	/// <summary>
-	/// 既にロード済みか
+	/// 既読か
 	/// </summary>
 	bool HasKey(const std::string& key) const {
 		std::lock_guard lock(mutex_);
@@ -111,15 +112,60 @@ public:
 
 private:
 	/// <summary>
-	/// GPU リソース作成とアップロード
+	/// GPU リソース作成（Default heap）
+	///  - initial state は COMMON 固定
 	/// </summary>
-	HRESULT CreateTextureResource(const DirectX::ScratchImage& mipChain, 
-								  DXGI_FORMAT viewFormat, TextureAsset& outAsset);
+	HRESULT CreateTextureResource(
+		const DirectX::ScratchImage& mipChain,
+		DXGI_FORMAT viewFormat,
+		TextureAsset& outAsset);
 
 	/// <summary>
-	/// SRVの作成
+	/// Upload用の中間バッファを作る
 	/// </summary>
-	HRESULT CreateTextureSRV(const DirectX::TexMetadata& meta, TextureAsset& asset);
+	HRESULT CreateUploadBuffer(
+		UINT64 uploadBytes,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload);
+
+	/// <summary>
+	/// サブリソース情報を生成
+	/// </summary>
+	HRESULT BuildSubresources(
+		const DirectX::ScratchImage& mipChain,
+		std::vector<D3D12_SUBRESOURCE_DATA>& outSubres);
+
+	/// <summary>
+	/// Upload(COPY) でデータ転送を積む
+	///  - COMMON -> COPY_DEST を COPY側で確実に行ってから UpdateSubresources
+	/// </summary>
+	HRESULT RecordUpload(
+		Tsumi::DX12::CommandContext* uploadCtx,
+		ID3D12Resource* dstTexture,
+		ID3D12Resource* uploadBuffer,
+		const std::vector<D3D12_SUBRESOURCE_DATA>& subres,
+		D3D12_RESOURCE_STATES& inOutState);
+
+	/// <summary>
+	/// SRVの作成（Persistent allocator）
+	/// </summary>
+	HRESULT CreateTextureSRV(
+		const DirectX::TexMetadata& meta,
+		TextureAsset& asset);
+
+	/// <summary>
+	/// SRV 用 state へ遷移する（DIRECT）
+	/// </summary>
+	HRESULT TransitionTextureToSRV(TextureAsset& asset);
+
+	/// <summary>
+	/// state遷移
+	/// </summary>
+	HRESULT TransitionResource(
+		Tsumi::DX12::CommandContext* ctx,
+		ID3D12Resource* res,
+		D3D12_RESOURCE_STATES before,
+		D3D12_RESOURCE_STATES after);
+
 
 private:
 	// 実体：key（正規化パス） → Texture

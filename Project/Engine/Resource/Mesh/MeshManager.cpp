@@ -28,48 +28,43 @@ HRESULT MeshManager::RegisterMesh(
 	const std::vector<uint32_t>& indices,
 	const std::string& textureKey)
 {
-	// すでに同じ実キーで登録済みの場合は何もしない
-	// → 二重ロード防止（同一メッシュの多重GPU生成を防ぐ）
+	// すでに同じ実キー（正規化パス）で登録済みの場合は何もしない
+	// → 二重ロード防止（同一テクスチャの多重GPU生成を防ぐ）
 	if (HasKey(key))
 		return S_OK;
 
-	// 頂点・インデックスデータの空チェック
 	if (vertices.empty() || indices.empty())
 		return E_INVALIDARG;
 
-	// ListとContextの取得と空チェック
-	CommandContext* ctx = dx12Mgr_->GetUploadCmdContext();
-	if (!ctx)
-		return E_POINTER;
-	ID3D12GraphicsCommandList* list = ctx->GetList();
-	if (!list)
-		return E_FAIL;
-
-	// 登録するメッシュ実体を構築
 	auto asset = std::make_unique<MeshAsset>();
 	asset->key = key;
 	asset->defaultTextureKey = textureKey;
-	asset->vertexCount = static_cast<uint32_t>(vertices.size());
-	asset->indexCount = static_cast<uint32_t>(indices.size());
-	asset->stride = sizeof(Vertex);
+	asset->vertexCount = (UINT)vertices.size();
+	asset->indexCount = (UINT)indices.size();
 
-	// 頂点バッファ・インデックスバッファの作成
 	ComPtr<ID3D12Resource> vbUpload;
 	ComPtr<ID3D12Resource> ibUpload;
 
-	// asset (pointer) を渡すように修正
-	HRESULT hr = CreateVertexBuffer(list, vertices, *asset, vbUpload);
-	if (FAILED(hr)) return hr;
-	hr = CreateIndexBuffer(list, indices, *asset, ibUpload);
+	// ---- Create + Upload ----
+	HRESULT hr = CreateVertexBuffer(vertices, *asset, vbUpload);
 	if (FAILED(hr)) return hr;
 
-	// meshes_ マップへの登録（これがないと管理されません）
+	hr = CreateIndexBuffer(indices, *asset, ibUpload);
+	if (FAILED(hr)) return hr;
+
+	// ---- Transition to draw ----
+	hr = TransitionToDrawState(*asset);
+	if (FAILED(hr)) return hr;
+
 	{
 		std::lock_guard lock(mutex_);
+		pendingUploads_.push_back(vbUpload);
+		pendingUploads_.push_back(ibUpload);
 		meshes_[key] = std::move(asset);
 	}
 
 	return S_OK;
+
 }
 
 void MeshManager::RegisterAlias(const std::string& alias, const std::string& key)
@@ -92,7 +87,6 @@ void MeshManager::RegisterAlias(const std::string& alias, const std::string& key
 	aliasToKey_.emplace(alias, key);
 }
 
-
 void MeshManager::UnloadAll()
 {
 	// GPU がメッシュを使用中でないことを保証
@@ -105,97 +99,144 @@ void MeshManager::UnloadAll()
 	pendingUploads_.clear();
 }
 
-HRESULT MeshManager::CreateVertexBuffer(ID3D12GraphicsCommandList* list, const std::vector<Vertex>& vertices, 
-										MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadVB)
+HRESULT MeshManager::CreateVertexBuffer(const std::vector<Vertex>& vertices, MeshAsset& asset, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
 {
-	if (!list) return E_FAIL;
-
 	const size_t size = vertices.size() * sizeof(Vertex);
 
-	HRESULT hr = CreateBufferFromData(
-		list,
+	HRESULT hr = CreateDefaultBuffer(size, asset.vertexBuffer);
+	if (FAILED(hr)) return hr;
+
+	hr = CreateUploadBuffer(size, outUpload);
+	if (FAILED(hr)) return hr;
+
+	hr = UploadBuffer(
+		asset.vertexBuffer.Get(),
+		outUpload.Get(),
 		vertices.data(),
 		size,
-		out.vertexBuffer,
-		outUploadVB);
+		asset.currentVBState);
 	if (FAILED(hr)) return hr;
 
-	out.vbView.BufferLocation = out.vertexBuffer->GetGPUVirtualAddress();
-	out.vbView.SizeInBytes = static_cast<UINT>(size);
-	out.vbView.StrideInBytes = (UINT)sizeof(Vertex);
+	asset.vbView.BufferLocation = asset.vertexBuffer->GetGPUVirtualAddress();
+	asset.vbView.SizeInBytes = (UINT)size;
+	asset.vbView.StrideInBytes = sizeof(Vertex);
 
 	return S_OK;
 }
 
-HRESULT MeshManager::CreateIndexBuffer(ID3D12GraphicsCommandList* list, const std::vector<uint32_t>& indices, 
-									   MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadIB)
+HRESULT MeshManager::CreateIndexBuffer(const std::vector<uint32_t>& indices, MeshAsset& asset, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
 {
-	if (!list) return E_FAIL;
-
 	const size_t size = indices.size() * sizeof(uint32_t);
 
-	HRESULT hr = CreateBufferFromData(
-		list,
-		indices.data(),
-		size,
-		out.indexBuffer,
-		outUploadIB);
+	HRESULT hr = CreateDefaultBuffer(size, asset.indexBuffer);
 	if (FAILED(hr)) return hr;
 
-	out.ibView.BufferLocation = out.indexBuffer->GetGPUVirtualAddress();
-	out.ibView.SizeInBytes = static_cast<UINT>(size);
-	out.ibView.Format = DXGI_FORMAT_R32_UINT;
+	hr = CreateUploadBuffer(size, outUpload);
+	if (FAILED(hr)) return hr;
+
+	hr = UploadBuffer(
+		asset.indexBuffer.Get(),
+		outUpload.Get(),
+		indices.data(),
+		size,
+		asset.currentIBState);
+	if (FAILED(hr)) return hr;
+
+	asset.ibView.BufferLocation = asset.indexBuffer->GetGPUVirtualAddress();
+	asset.ibView.SizeInBytes = (UINT)size;
+	asset.ibView.Format = DXGI_FORMAT_R32_UINT;
 
 	return S_OK;
 }
 
-HRESULT MeshManager::CreateBufferFromData(ID3D12GraphicsCommandList* list, const void* data, size_t dataSize, 
-										  Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
+HRESULT MeshManager::CreateDefaultBuffer(size_t size, Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault)
 {
-	if (!dx12Mgr_) return E_POINTER;
-
 	ID3D12Device* device = dx12Mgr_->GetDevice();
-	if (!device || !list) return E_POINTER;
+	if (!device) return E_POINTER;
 
-	// Default heap（GPU側）
-	CD3DX12_HEAP_PROPERTIES defaultHeap(D3D12_HEAP_TYPE_DEFAULT);
-	auto desc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+	CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_DEFAULT);
+	auto desc = CD3DX12_RESOURCE_DESC::Buffer(size);
 
-	HRESULT hr = device->CreateCommittedResource(
-		&defaultHeap,
+	// initial state は COMMON
+	return device->CreateCommittedResource(
+		&heap,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&outDefault));
-	if (FAILED(hr)) return hr;
+}
 
-	// Upload heap（CPU→GPU転送用）
-	CD3DX12_HEAP_PROPERTIES uploadHeap(D3D12_HEAP_TYPE_UPLOAD);
-	auto uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+HRESULT MeshManager::CreateUploadBuffer(size_t size, Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload)
+{
+	ID3D12Device* device = dx12Mgr_->GetDevice();
+	if (!device) return E_POINTER;
 
-	hr = device->CreateCommittedResource(
-		&uploadHeap,
+	CD3DX12_HEAP_PROPERTIES heap(D3D12_HEAP_TYPE_UPLOAD);
+	auto desc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+	return device->CreateCommittedResource(
+		&heap,
 		D3D12_HEAP_FLAG_NONE,
-		&uploadDesc,
+		&desc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&outUpload));
+}
+
+HRESULT MeshManager::UploadBuffer(ID3D12Resource* dst, ID3D12Resource* upload, const void* data, size_t size, D3D12_RESOURCE_STATES& inOutState)
+{
+	auto* ctx = dx12Mgr_->GetUploadCmdContext();
+	if (!ctx) return E_POINTER;
+
+	HRESULT hr = ctx->BeginOneShot();
 	if (FAILED(hr)) return hr;
 
-	// CPU -> Upload -> Default のコピーコマンドを積む
-	D3D12_SUBRESOURCE_DATA sub{};
-	sub.pData = data;
-	sub.RowPitch = dataSize;
-	sub.SlicePitch = dataSize;
+	auto* list = ctx->GetList();
 
-	UpdateSubresources(list, outDefault.Get(), outUpload.Get(), 0, 0, 1, &sub);
-
-	// アップロードバッファを延命させる
-	{
-		std::lock_guard lock(mutex_);
-		pendingUploads_.push_back(outUpload);
+	// COMMON → COPY_DEST
+	if (inOutState != D3D12_RESOURCE_STATE_COPY_DEST) {
+		auto b = CD3DX12_RESOURCE_BARRIER::Transition(
+			dst, inOutState, D3D12_RESOURCE_STATE_COPY_DEST);
+		list->ResourceBarrier(1, &b);
+		inOutState = D3D12_RESOURCE_STATE_COPY_DEST;
 	}
 
-	return S_OK;
+	D3D12_SUBRESOURCE_DATA sub{};
+	sub.pData = data;
+	sub.RowPitch = size;
+	sub.SlicePitch = size;
+
+	UpdateSubresources(list, dst, upload, 0, 0, 1, &sub);
+
+	return ctx->EndOneShotAndWait();
+}
+
+HRESULT MeshManager::TransitionToDrawState(MeshAsset& asset)
+{
+	auto* ctx = dx12Mgr_->GetResourceCmdContext();
+	if (!ctx) return E_POINTER;
+
+	HRESULT hr = ctx->BeginOneShot();
+	if (FAILED(hr)) return hr;
+
+	auto* list = ctx->GetList();
+
+	D3D12_RESOURCE_BARRIER bs[2] = {
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			asset.vertexBuffer.Get(),
+			asset.currentVBState,
+			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER),
+		CD3DX12_RESOURCE_BARRIER::Transition(
+			asset.indexBuffer.Get(),
+			asset.currentIBState,
+			D3D12_RESOURCE_STATE_INDEX_BUFFER),
+	};
+
+	list->ResourceBarrier(2, bs);
+
+	asset.currentVBState = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	asset.currentIBState = D3D12_RESOURCE_STATE_INDEX_BUFFER;
+
+	return ctx->EndOneShotAndWait();
 }

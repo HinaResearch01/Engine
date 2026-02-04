@@ -88,6 +88,9 @@ public:
 	CommandContext* GetUploadCmdContext() const {
 		return uploadCtx_.get();
 	}
+	CommandContext* GetResourceCmdContext() const {
+		return resourceCtx_.get();
+	}
 	// SwapChain / Frame
 	SwapChain* GetSwapChain() const {
 		return swapChain_.get();
@@ -98,9 +101,8 @@ public:
 	UINT GetCurrentBackBufferIndex() const {
 		return swapChain_ ? swapChain_->GetCurrentBackBufferIndex() : 0;
 	}
-	uint32_t GetBufferCount() const {
-		return bufferCount_;
-	}
+	uint32_t GetDesiredBufferCount() const { return desiredBufferCount_; }
+	uint32_t GetBufferCount() const { return bufferCount_; }
 	uint32_t GetFrameIndex() const {
 		return frameSync_ ? frameSync_->GetFrameIndex() : 0;
 	}
@@ -141,6 +143,7 @@ private:
 	std::unique_ptr<DX12Device> device_;
 	std::unique_ptr<CommandContext> graphicsCtx_;
 	std::unique_ptr<CommandContext> uploadCtx_;
+	std::unique_ptr<CommandContext> resourceCtx_;
 
 	DescriptorHeap descHeap_;
 	PersistentDescAllocator perDescAlloc_;
@@ -152,8 +155,10 @@ private:
 	std::vector<FrameResources> frames_;
 
 	// parameters
+	uint32_t desiredBufferCount_ = 3;
 	uint32_t bufferCount_ = 3;
 	uint32_t frameIndex_ = 0;
+	uint32_t cpuFrameIndex_ = 0;
 
 	uint32_t totalDescriptors_ = 65536;
 	uint32_t persistentCap_ = 32768;

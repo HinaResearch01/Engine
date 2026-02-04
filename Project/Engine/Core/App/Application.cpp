@@ -53,7 +53,11 @@ void Application::Run()
 
         // ------------------ ループ開始フェーズ ------------------
         window_->ProcessMessages();
-        dx12_->BeginFrame();
+		HRESULT hr = dx12_->BeginFrame();
+		if (FAILED(hr)) {
+			dx12_->WaitForGpu();
+			break;
+		}
 		resourceMgr_->BeginFrame(dx12_->GetFrameIndex());
         imgui_->BeginFrame();
 
@@ -70,7 +74,11 @@ void Application::Run()
 		});
 
         // ------------------ ループ終了フェーズ ------------------
-        dx12_->EndFrame();
+		hr = dx12_->EndFrame();
+		if (FAILED(hr)) {
+			dx12_->WaitForGpu();
+			break; 
+		}
         // CPU側で少しスリープ（100%使用防止）
         ::Sleep(0);
     }

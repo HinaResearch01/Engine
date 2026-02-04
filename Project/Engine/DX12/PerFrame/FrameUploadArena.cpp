@@ -1,7 +1,7 @@
 #include "FrameUploadArena.h"
 #include <cstring>
 #include <stdexcept>
-#include <DirectXTexD3D12.cpp>
+#include <d3dx12.h>
 
 using namespace Tsumi::DX12;
 

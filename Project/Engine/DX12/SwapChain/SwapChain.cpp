@@ -12,79 +12,44 @@ SwapChain::SwapChain(DX12Manager* ptr)
 {
 }
 
-HRESULT SwapChain::Create()
+HRESULT SwapChain::Create(UINT desiredBufferCount)
 {
-    if (!dx12Mgr_) return E_POINTER;
+	if (!dx12Mgr_) return E_POINTER;
 
-    HWND hwnd = Win32::Win32Window::GetInstance()->GetHWND();
-    Win32::Win32Desc winDesc = Win32::Win32Window::GetInstance()->GetDesc();
+	HWND hwnd = Win32::Win32Window::GetInstance()->GetHWND();
+	auto winDesc = Win32::Win32Window::GetInstance()->GetDesc();
 
-    DXGI_SWAP_CHAIN_DESC1 desc = {};
-    desc.Width = winDesc.windowWidth;
-    desc.Height = winDesc.windowHeight;
-    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    desc.SampleDesc = { 1, 0 };
-    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	DXGI_SWAP_CHAIN_DESC1 desc{};
+	desc.Width = winDesc.windowWidth;
+	desc.Height = winDesc.windowHeight;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc = { 1, 0 };
+	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
-    // DX12Manager 側の bufferCount を尊重する（最小 2）
-    UINT bufCount = 2;
-    if (dx12Mgr_) bufCount = dx12Mgr_->GetBufferCount();
-    if (bufCount < 2) bufCount = 2;
-    desc.BufferCount = bufCount;
+	UINT count = desiredBufferCount;
+	if (count < 2) count = 2;
+	if (count > 3) count = 3; 
+	desc.BufferCount = count;
 
-    // もし「ティアリング（画面のズレ）」を許可したい場合は
-    // DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING フラグを追加することを検討。
-    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	desc.Scaling = DXGI_SCALING_STRETCH;
+	desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+	desc.Flags = 0;
 
-    // ウィンドウリサイズ時のスケーリング設定
-    // DXGI_SCALING_STRETCH：ウィンドウサイズに合わせて引き伸ばす
-    // DXGI_SCALING_NONE：ピクセル等倍で表示する
-    desc.Scaling = DXGI_SCALING_STRETCH;
-
-    // アルファ値（透明度）の扱い設定
-    // 通常のウィンドウでは透明処理を行わないため IGNORE でOK
-    desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-
-    desc.Flags = 0;
-
-    // DXGIファクトリを取得して SwapChain を作成する準備
 	IDXGIFactory4* factory4 = dx12Mgr_->GetFactory();
-    if (!factory4) {
-        Utils::Logger::Error("Error: IDXGIFactory4 is null in SwapChain::Create()\n");
-        return E_POINTER;
-    }
+	if (!factory4) return E_POINTER;
 
-    ComPtr<IDXGISwapChain1> swapChain1;
-    HRESULT hr = factory4->CreateSwapChainForHwnd(
-        dx12Mgr_->GetCommandContext()->GetQueue(), // コマンドキューを関連付ける
-        hwnd,                    // 対象のウィンドウハンドル
-        &desc,                   // スワップチェーンの設定
-        nullptr,                 // フルスクリーン用の設定（今回は未使用）
-        nullptr,                 // 出力先モニタ指定（未使用）
-        &swapChain1);            // 作成されたスワップチェーンを受け取る
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> sc1;
+	HRESULT hr = factory4->CreateSwapChainForHwnd(
+		dx12Mgr_->GetGraphicsQueue(), hwnd, &desc, nullptr, nullptr, &sc1);
+	if (FAILED(hr)) return hr;
 
-    if (FAILED(hr)) {
-        Utils::Logger::Error(
-			"Error: CreateSwapChainForHwnd failed (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
-        return hr;
-    }
+	hr = sc1.As(&swapChain_);
+	if (FAILED(hr) || !swapChain_) return FAILED(hr) ? hr : E_FAIL;
 
-    // IDXGISwapChain1 → IDXGISwapChain4 にキャスト
-    hr = swapChain1.As(&swapChain_);
-    if (FAILED(hr) || !swapChain_) {
-        Utils::Logger::Error(
-			"Error: swapChain1.As -> IDXGISwapChain4 failed (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
-        return hr;
-    }
-
-    desc_ = desc;
-
-    // Alt+Enterによる全画面切り替えを無効化
-    factory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
-
-    return S_OK;
+	desc_ = desc;
+	factory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
+	return S_OK;
 }
 
 HRESULT Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)
@@ -123,25 +88,15 @@ HRESULT SwapChain::GetBuffer(UINT index, ID3D12Resource** outResource) const
 
 HRESULT SwapChain::Resize(UINT width, UINT height)
 {
-    if (!swapChain_) return E_POINTER;
+	if (!swapChain_) return E_POINTER;
 
-    for (UINT i = 0; i < _countof(backBuffers_); ++i) backBuffers_[i].Reset();
+	for (auto& bb : backBuffers_) bb.Reset();
 
-    // Use DX12Manager's authoritative buffer count via dx12Mgr_->GetBufferCount()
-    UINT bufCount = 2;
-    if (dx12Mgr_) bufCount = dx12Mgr_->GetBufferCount();
-    if (bufCount < 2) bufCount = 2;
+	const UINT count = desc_.BufferCount;
+	HRESULT hr = swapChain_->ResizeBuffers(count, width, height, desc_.Format, desc_.Flags);
+	if (FAILED(hr)) return hr;
 
-    HRESULT hr = swapChain_->ResizeBuffers(bufCount, width, height, desc_.Format, 0);
-    if (FAILED(hr)) {
-        Utils::Logger::Error(
-			"SwapChain::Resize - ResizeBuffers failed (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
-        return hr;
-    }
-
-    desc_.Width = width;
-    desc_.Height = height;
-    Utils::Logger::Info("SwapChain resized: {}x{}\n", width, height);
-    return S_OK;
+	desc_.Width = width;
+	desc_.Height = height;
+	return S_OK;
 }

@@ -15,8 +15,9 @@ CommandContext::CommandContext(DX12Manager* ptr, D3D12_COMMAND_LIST_TYPE type)
 
 CommandContext::~CommandContext()
 {
-	// flush（安全）
-	WaitForGpu();
+	if (queue_ && flushFence_ && flushEvent_) {
+		WaitForGpu();
+	}
 
 	if (flushEvent_) {
 		CloseHandle(flushEvent_);
@@ -30,11 +31,11 @@ CommandContext::~CommandContext()
 	flushFence_.Reset();
 }
 
-HRESULT CommandContext::Create()
+HRESULT CommandContext::Create(UINT frameCount)
 {
-	HRESULT hr = S_OK;
+	frameCount_ = frameCount;
 
-	hr = CreateQueue();
+	HRESULT hr = CreateQueue();
 	if (FAILED(hr)) return hr;
 
 	hr = CreateAllocators(frameCount_);
@@ -43,7 +44,7 @@ HRESULT CommandContext::Create()
 	hr = CreateList();
 	if (FAILED(hr)) return hr;
 
-	hr = CreateFlushFence_();
+	hr = CreateFlushFence();
 	if (FAILED(hr)) return hr;
 
 	return S_OK;
@@ -56,21 +57,28 @@ HRESULT CommandContext::ResetForFrame(UINT frameIndex)
 
 	currentFrameIndex_ = frameIndex;
 
-	// list が open のままなら close
+	// 「Open/Closeの状態」は isListOpen_ で一元管理
 	if (isListOpen_) {
-		list_->Close();
+		HRESULT hrClose = list_->Close();
+		if (FAILED(hrClose)) {
+			Utils::Logger::Error("CommandContext::ResetForFrame - Close failed (hr=0x{:08X})\n",
+								 (unsigned)hrClose);
+			return hrClose;
+		}
 		isListOpen_ = false;
 	}
 
 	HRESULT hr = allocators_[frameIndex]->Reset();
 	if (FAILED(hr)) {
-		Utils::Logger::Warn("allocator->Reset failed (hr=0x{:08X})", (unsigned)hr);
+		Utils::Logger::Error("CommandContext::ResetForFrame - allocator Reset failed (hr=0x{:08X})\n",
+							 (unsigned)hr);
 		return hr;
 	}
 
 	hr = list_->Reset(allocators_[frameIndex].Get(), nullptr);
 	if (FAILED(hr)) {
-		Utils::Logger::Warn("list->Reset failed (hr=0x{:08X})", (unsigned)hr);
+		Utils::Logger::Error("CommandContext::ResetForFrame - list Reset failed (hr=0x{:08X})\n",
+							 (unsigned)hr);
 		return hr;
 	}
 
@@ -83,10 +91,12 @@ HRESULT CommandContext::Execute()
 {
 	if (!queue_ || !list_) return E_POINTER;
 
+	// Closeはここだけ
 	if (isListOpen_) {
 		HRESULT hr = list_->Close();
 		if (FAILED(hr)) {
-			Utils::Logger::Warn("list->Close failed (hr=0x{:08X})", (unsigned)hr);
+			Utils::Logger::Error("CommandContext::Execute - Close failed (hr=0x{:08X})\n",
+								 (unsigned)hr);
 			return hr;
 		}
 		isListOpen_ = false;
@@ -101,15 +111,16 @@ HRESULT CommandContext::WaitForGpu()
 {
 	if (!queue_ || !flushFence_ || !flushEvent_) return E_POINTER;
 
-	HRESULT hr = SignalFlush_();
+	HRESULT hr = SignalFlush();
 	if (FAILED(hr)) return hr;
 
-	return WaitFlush_(flushValue_);
+	return WaitFlush(flushValue_);
 }
 
 void CommandContext::SetViewport(const Viewport& vp)
 {
 	if (!list_) return;
+	if (!isListOpen_) return;
 	if (!viewportSet_ || currentViewport_ != vp) {
 		D3D12_VIEWPORT d3dvp = vp.ToD3D();
 		list_->RSSetViewports(1, &d3dvp);
@@ -121,6 +132,7 @@ void CommandContext::SetViewport(const Viewport& vp)
 void CommandContext::SetScissor(const Scissor& sc)
 {
 	if (!list_) return;
+	if (!isListOpen_) return;
 	if (!scissorSet_ || currentScissor_ != sc) {
 		D3D12_RECT rect = sc.ToD3D();
 		list_->RSSetScissorRects(1, &rect);
@@ -132,11 +144,11 @@ void CommandContext::SetScissor(const Scissor& sc)
 void CommandContext::SetFullViewportFromFramebuffer()
 {
 	if (!dx12Mgr_) return;
-	Framebuffer* fb = dx12Mgr_->GetFramebuffer();
+	auto* fb = dx12Mgr_->GetFramebuffer();
 	if (!fb) return;
 
-	UINT w = static_cast<UINT>(fb->GetWidth());
-	UINT h = static_cast<UINT>(fb->GetHeight());
+	const UINT w = (UINT)fb->GetWidth();
+	const UINT h = (UINT)fb->GetHeight();
 	if (w == 0 || h == 0) return;
 
 	Viewport vp{};
@@ -149,11 +161,11 @@ void CommandContext::SetFullViewportFromFramebuffer()
 void CommandContext::SetFullScissorFromFramebuffer()
 {
 	if (!dx12Mgr_) return;
-	Framebuffer* fb = dx12Mgr_->GetFramebuffer();
+	auto* fb = dx12Mgr_->GetFramebuffer();
 	if (!fb) return;
 
-	UINT w = static_cast<UINT>(fb->GetWidth());
-	UINT h = static_cast<UINT>(fb->GetHeight());
+	const UINT w = (UINT)fb->GetWidth();
+	const UINT h = (UINT)fb->GetHeight();
 	if (w == 0 || h == 0) return;
 
 	Scissor sc{};
@@ -162,27 +174,63 @@ void CommandContext::SetFullScissorFromFramebuffer()
 	SetScissor(sc);
 }
 
+HRESULT CommandContext::BeginOneShot()
+{
+	if (oneShotFenceValue_ != 0) {
+		HRESULT hr = WaitFlush(oneShotFenceValue_);
+		if (FAILED(hr)) return hr;
+	}
+	return ResetForFrame(0);
+}
+
+HRESULT CommandContext::EndOneShot()
+{
+	HRESULT hr = Execute();
+	if (FAILED(hr)) return hr;
+
+	hr = SignalFlush();
+	if (FAILED(hr)) return hr;
+
+	oneShotFenceValue_ = flushValue_;
+	return S_OK;
+}
+
+HRESULT CommandContext::EndOneShotAndWait()
+{
+	HRESULT hr = Execute();
+	if (FAILED(hr)) return hr;
+
+	hr = SignalFlush();
+	if (FAILED(hr)) return hr;
+
+	oneShotFenceValue_ = flushValue_;
+	return WaitFlush(oneShotFenceValue_);
+}
+
 void CommandContext::SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps)
 {
-	assert(list_);
+	if (!list_) return;
+	assert(isListOpen_ && "SetDescriptorHeaps on CLOSED list");
 	list_->SetDescriptorHeaps(count, heaps);
 }
 
 void CommandContext::SetGraphicsRootDescriptorTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table)
 {
-	assert(list_);
+	if (!list_) return;
+	assert(isListOpen_ && "SetGraphicsRootDescriptorTable on CLOSED list");
 	list_->SetGraphicsRootDescriptorTable(rootIndex, table);
 }
 
 void CommandContext::SetGraphicsRootConstantBufferView(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va)
 {
-	assert(list_);
+	if (!list_) return;
+	assert(isListOpen_ && "SetGraphicsRootConstantBufferView on CLOSED list");
 	list_->SetGraphicsRootConstantBufferView(rootIndex, va);
 }
 
 HRESULT CommandContext::CreateQueue()
 {
-	ID3D12Device* device = dx12Mgr_->GetDevice();
+	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
 	if (!device) return E_POINTER;
 
 	D3D12_COMMAND_QUEUE_DESC desc{};
@@ -198,10 +246,10 @@ HRESULT CommandContext::CreateAllocators(UINT frameCount)
 	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
 	if (!device) return E_POINTER;
 
-	allocators_.resize(frameCount);
-	frameCount_ = frameCount;
+	frameCount_ = (frameCount == 0) ? 1 : frameCount;
+	allocators_.resize(frameCount_);
 
-	for (UINT i = 0; i < frameCount; ++i) {
+	for (uint32_t i = 0; i < frameCount_; ++i) {
 		HRESULT hr = device->CreateCommandAllocator(listType_, IID_PPV_ARGS(&allocators_[i]));
 		if (FAILED(hr)) return hr;
 	}
@@ -212,8 +260,9 @@ HRESULT CommandContext::CreateList()
 {
 	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
 	if (!device) return E_POINTER;
+	if (allocators_.empty()) return E_FAIL;
 
-	// 最初は frame 0 の allocator で作って open 状態にする
+	// CreateCommandList は「open状態」で返る
 	HRESULT hr = device->CreateCommandList(
 		0, listType_, allocators_[0].Get(), nullptr, IID_PPV_ARGS(&list_));
 	if (FAILED(hr)) return hr;
@@ -221,10 +270,17 @@ HRESULT CommandContext::CreateList()
 	isListOpen_ = true;
 	currentFrameIndex_ = 0;
 	ResetCachedRasterState();
+
+	// ★最初のフレーム開始で ResetForFrame を必ず呼ぶ設計なので、
+	// ここで一旦 close して closed にしておくと状態が一貫する（おすすめ）
+	hr = list_->Close();
+	if (FAILED(hr)) return hr;
+	isListOpen_ = false;
+
 	return S_OK;
 }
 
-HRESULT CommandContext::CreateFlushFence_()
+HRESULT CommandContext::CreateFlushFence()
 {
 	ID3D12Device* device = dx12Mgr_ ? dx12Mgr_->GetDevice() : nullptr;
 	if (!device) return E_POINTER;
@@ -239,13 +295,13 @@ HRESULT CommandContext::CreateFlushFence_()
 	return S_OK;
 }
 
-HRESULT CommandContext::SignalFlush_()
+HRESULT CommandContext::SignalFlush()
 {
 	++flushValue_;
 	return queue_->Signal(flushFence_.Get(), flushValue_);
 }
 
-HRESULT CommandContext::WaitFlush_(uint64_t value)
+HRESULT CommandContext::WaitFlush(uint64_t value)
 {
 	if (flushFence_->GetCompletedValue() >= value) return S_OK;
 

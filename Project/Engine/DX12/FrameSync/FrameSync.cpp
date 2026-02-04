@@ -17,47 +17,40 @@ FrameSync::~FrameSync()
 
 HRESULT FrameSync::Init()
 {
-	assert(dx12Mgr_);
-	ID3D12Device* device = dx12Mgr_->GetDevice();
-	if (!device) return E_FAIL;
+	if (!dx12Mgr_ || !dx12Mgr_->GetDevice()) return E_POINTER;
 
-	HRESULT hr = device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+	bufferCount_ = dx12Mgr_->GetBufferCount();
+	fenceValues_.assign(bufferCount_, 0);
+
+	HRESULT hr = dx12Mgr_->GetDevice()->CreateFence(
+		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
 	if (FAILED(hr)) return hr;
 
-	fenceEvent_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	fenceEvent_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	if (!fenceEvent_) return HRESULT_FROM_WIN32(GetLastError());
 
-	fenceValues_.fill(0);
-	nextFenceValue_ = 1;
-	frameIndex_ = 0;
 	return S_OK;
 }
 
-void FrameSync::BeginFrame()
+void FrameSync::BeginFrame(uint32_t frameIndex)
 {
-	// このフレームインデックスの前回の実行が完了しているか待つ
-	Wait(fenceValues_[frameIndex_]);
+	frameIndex_ = frameIndex;
+
+	const uint64_t fv = fenceValues_[frameIndex_];
+	if (fv == 0) return;
+
+	if (fence_->GetCompletedValue() < fv) {
+		fence_->SetEventOnCompletion(fv, fenceEvent_);
+		::WaitForSingleObject(fenceEvent_, INFINITE);
+	}
 }
 
-uint64_t  FrameSync::EndFrame()
+void FrameSync::EndFrame(uint32_t frameIndex)
 {
-	auto* ctx = dx12Mgr_->GetCommandContext();
-	assert(ctx && ctx->GetQueue());
-
-	// グローバルカウンタを使って値を決める
-	const uint64_t signalValue = nextFenceValue_;
-	nextFenceValue_++;
-
-	// コマンドキューにシグナル発行
-	ctx->GetQueue()->Signal(fence_.Get(), signalValue);
-
-	// 現在のフレームインデックスが完了すべき値を保存
-	fenceValues_[frameIndex_] = signalValue;
-
-	// 次フレームへ
-	frameIndex_ = (frameIndex_ + 1) % kFrameCount;
-
-	return signalValue;
+	auto* queue = dx12Mgr_->GetGraphicsQueue();
+	const uint64_t next = fenceValues_[frameIndex] + 1;
+	fenceValues_[frameIndex] = next;
+	queue->Signal(fence_.Get(), next);
 }
 
 void FrameSync::Wait(uint64_t fenceValue)

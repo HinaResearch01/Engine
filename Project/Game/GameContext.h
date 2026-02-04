@@ -106,7 +106,7 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 	// ----------------------------
 	// 3. Debug Overlay
 	// ----------------------------
-	dx12->BeginBackBufferPass(); // Clearなし
+	dx12->BeginBackBufferPass();
 #ifdef _DEBUG
 	renderSys->DrawDebugPass(*cmd, frame, *prepSys);
 #endif // DEBUG

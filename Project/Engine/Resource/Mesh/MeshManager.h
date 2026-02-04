@@ -44,7 +44,8 @@ struct MeshAsset {
 	std::string defaultTextureKey; 
 
 	// State Tracking
-	D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON;
+	D3D12_RESOURCE_STATES currentVBState = D3D12_RESOURCE_STATE_COMMON;
+	D3D12_RESOURCE_STATES currentIBState = D3D12_RESOURCE_STATE_COMMON;
 };
 
 /* メッシュ管理 */
@@ -88,14 +89,6 @@ public:
 	/// </summary>
 	void UnloadAll();
 
-	/// <summary>
-	/// 保持しているアップロードバッファを解放する
-	/// </summary>
-	void ReleaseUploadBuffers() {
-		std::lock_guard lock(mutex_);
-		pendingUploads_.clear();
-	}
-
 #pragma region Accessor
 	MeshAsset* GetMesh(const std::string& name) {
 		std::lock_guard lock(mutex_);
@@ -118,29 +111,39 @@ public:
 #pragma endregion
 
 private:
-	/// <summary>
-	/// 
-	/// </summary>
+	// -----------------------------
+	// Creation
+	// -----------------------------
 	HRESULT CreateVertexBuffer(
-		ID3D12GraphicsCommandList* list, const std::vector<Vertex>& vertices,
-		MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadVB);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	HRESULT CreateIndexBuffer(
-		ID3D12GraphicsCommandList* list, const std::vector<uint32_t>& indices,
-		MeshAsset& out, Microsoft::WRL::ComPtr<ID3D12Resource>& outUploadIB);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	HRESULT CreateBufferFromData(
-		ID3D12GraphicsCommandList* list,
-		const void* data, size_t dataSize,
-		Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault,
+		const std::vector<Vertex>& vertices,
+		MeshAsset& asset,
 		Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload);
-	
+
+	HRESULT CreateIndexBuffer(
+		const std::vector<uint32_t>& indices,
+		MeshAsset& asset,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload);
+
+	HRESULT CreateDefaultBuffer(
+		size_t size,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault);
+
+	HRESULT CreateUploadBuffer(
+		size_t size,
+		Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload);
+
+	// -----------------------------
+	// Upload / Transition
+	// -----------------------------
+	HRESULT UploadBuffer(
+		ID3D12Resource* dst,
+		ID3D12Resource* upload,
+		const void* data,
+		size_t size,
+		D3D12_RESOURCE_STATES& inOutState);
+
+	HRESULT TransitionToDrawState(MeshAsset& asset);
+
 private:
 	// 実体：key（正規化パス） → Mesh
 	std::unordered_map<std::string, std::unique_ptr<MeshAsset>> meshes_;

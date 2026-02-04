@@ -72,14 +72,9 @@ public:
 	~CommandContext();
 
 	/// <summary>
-	/// 明示的にフレーム数を設定する（Create の前に呼ぶ）
-	/// </summary>
-	void SetFrameCount(UINT frameCount) { frameCount_ = (frameCount >= 2) ? frameCount : 2; }
-
-	/// <summary>
 	/// 生成
 	/// </summary>
-	HRESULT Create();
+	HRESULT Create(UINT frameCount);
 
 	/// <summary>
 	/// list を Reset
@@ -97,13 +92,9 @@ public:
 	HRESULT WaitForGpu();
 
 	/// <summary>
-	/// ビューポート設定
+	/// ビューポート / シザー設定
 	/// </summary>
 	void SetViewport(const Viewport& vp);
-
-	/// <summary>
-	/// シザー矩形設定
-	/// </summary>
 	void SetScissor(const Scissor& sc);
 
 	/// <summary>
@@ -114,18 +105,18 @@ public:
 	void SetFullScissorFromFramebuffer();
 
 	/// <summary>
-	/// descriptor heap
+	/// 
+	/// </summary>
+	HRESULT BeginOneShot();          // ResetForFrame(0)
+	HRESULT EndOneShot();            // Close + Execute（Waitしない）
+	HRESULT EndOneShotAndWait();     // Close + Execute + WaitForGpu
+
+
+	/// <summary>
+	/// thin wrappers
 	/// </summary>
 	void SetDescriptorHeaps(uint32_t count, ID3D12DescriptorHeap* const* heaps);
-
-	/// <summary>
-	/// Root descriptor table
-	/// </summary>
 	void SetGraphicsRootDescriptorTable(uint32_t rootIndex, D3D12_GPU_DESCRIPTOR_HANDLE table);
-
-	/// <summary>
-	/// CBV/Constants
-	/// </summary>
 	void SetGraphicsRootConstantBufferView(uint32_t rootIndex, D3D12_GPU_VIRTUAL_ADDRESS va);
 
 private:
@@ -134,9 +125,9 @@ private:
 	HRESULT CreateList();
 
 	// flush fence
-	HRESULT CreateFlushFence_();
-	HRESULT SignalFlush_();
-	HRESULT WaitFlush_(uint64_t value);
+	HRESULT CreateFlushFence();
+	HRESULT SignalFlush();
+	HRESULT WaitFlush(uint64_t value);
 
 	void ResetCachedRasterState();
 
@@ -149,6 +140,7 @@ public:
 		return (frameIndex < allocators_.size()) ? allocators_[frameIndex].Get() : nullptr;
 	}
 	D3D12_COMMAND_LIST_TYPE GetListType() const { return listType_; }
+	bool IsOpen() const { return isListOpen_; }
 #pragma endregion
 
 private:
@@ -156,23 +148,26 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> allocators_;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list_;
 
-	// flush fence
+	uint32_t frameCount_ = 1;
+	uint32_t currentFrameIndex_ = 0;
+
+	bool isListOpen_ = false;
+
+	// cached viewport/scissor
+	bool viewportSet_ = false;
+	bool scissorSet_ = false;
+	Viewport currentViewport_{};
+	Scissor currentScissor_{};
+
+	// flush fence (WaitForGpu 用)
 	Microsoft::WRL::ComPtr<ID3D12Fence> flushFence_;
 	HANDLE flushEvent_ = nullptr;
 	uint64_t flushValue_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
-	UINT frameCount_ = 1;
-	UINT currentFrameIndex_ = 0;
+	D3D12_COMMAND_LIST_TYPE listType_{};
 
-	// cached raster state
-	bool viewportSet_ = false;
-	Viewport currentViewport_{};
-	bool scissorSet_ = false;
-	Scissor currentScissor_{};
-
-	bool isListOpen_ = false;
-	D3D12_COMMAND_LIST_TYPE listType_ = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	uint64_t oneShotFenceValue_ = 0;
 };
 
 }

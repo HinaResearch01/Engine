@@ -58,7 +58,7 @@ private:
 private:
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController_;
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory_;
-	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_;
+	Microsoft::WRL::ComPtr<IDXGIAdapter1> useAdapter_;
 	Microsoft::WRL::ComPtr<ID3D12Device> device_;
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue_;
 	D3D12_INFO_QUEUE_FILTER filter_{};

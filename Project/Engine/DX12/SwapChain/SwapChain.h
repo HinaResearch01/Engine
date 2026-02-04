@@ -30,7 +30,7 @@ public:
 	/// <summary>
 	/// 生成
 	/// </summary>
-	HRESULT Create();
+	HRESULT Create(UINT desiredBufferCount);
 
 	/// <summary>
 	/// Present
@@ -55,6 +55,7 @@ public:
 #pragma region Accessor
 	IDXGISwapChain4* const GetSwapChain4() { return swapChain_.Get(); }
 	const DXGI_SWAP_CHAIN_DESC1& GetDesc() const { return desc_; }
+	UINT GetBufferCount() const { return desc_.BufferCount; }
 #pragma endregion 
 
 

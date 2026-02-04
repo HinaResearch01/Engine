@@ -10,6 +10,7 @@ DX12Manager::DX12Manager()
 {
 	graphicsCtx_ = std::make_unique<CommandContext>(this, D3D12_COMMAND_LIST_TYPE_DIRECT);
 	uploadCtx_ = std::make_unique<CommandContext>(this, D3D12_COMMAND_LIST_TYPE_COPY);
+	resourceCtx_ = std::make_unique<CommandContext>(this, D3D12_COMMAND_LIST_TYPE_DIRECT);
 	device_ = std::make_unique<DX12Device>();
 	swapChain_ = std::make_unique<SwapChain>(this);
 	framebuffer_ = std::make_unique<Framebuffer>(this);
@@ -23,17 +24,20 @@ void DX12Manager::Init()
 		Utils::Exception::DX_CALL(device_->Create());
 
 		// ---- contexts ----
-		if (graphicsCtx_) graphicsCtx_->SetFrameCount(bufferCount_);
-		if (uploadCtx_)   uploadCtx_->SetFrameCount(1);
-		Utils::Exception::DX_CALL(graphicsCtx_->Create());
-		Utils::Exception::DX_CALL(uploadCtx_->Create());
+		Utils::Exception::DX_CALL(graphicsCtx_->Create(bufferCount_));
+		Utils::Exception::DX_CALL(uploadCtx_->Create(bufferCount_));
+		Utils::Exception::DX_CALL(resourceCtx_->Create(1));
+
+		// ---- swapchain first ----
+		Utils::Exception::DX_CALL(swapChain_->Create(desiredBufferCount_));
+		bufferCount_ = swapChain_->GetBufferCount();
+		Utils::Logger::Info("SwapChain BufferCount = {}\n", bufferCount_);
 
 		// ---- descriptors + frames ----
 		InitDescriptors();
 		InitFrames();
 
-		// ---- swapchain / framebuffer / sync ----
-		Utils::Exception::DX_CALL(swapChain_->Create());
+		// ---- framebuffer / sync ----
 		Utils::Exception::DX_CALL(framebuffer_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
 	}
@@ -57,8 +61,11 @@ void DX12Manager::Finalize()
 
 	framebuffer_.reset();
 	swapChain_.reset();
+	
 	uploadCtx_.reset();
 	graphicsCtx_.reset();
+	resourceCtx_.reset();
+
 	frameSync_.reset();
 	device_.reset();
 }
@@ -71,27 +78,23 @@ HRESULT DX12Manager::BeginFrame()
 	}
 
 	// ---- CPU frame sync ----
-	frameSync_->BeginFrame();
-	frameIndex_ = frameSync_->GetFrameIndex();
+	cpuFrameIndex_ = (cpuFrameIndex_ + 1) % bufferCount_;
+	frameSync_->BeginFrame(cpuFrameIndex_);
+
+	// ---- Reset command list ----
+	frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
+	HRESULT hr = graphicsCtx_->ResetForFrame(cpuFrameIndex_);
+	if (FAILED(hr)) return hr;
 
 	// ---- descriptor deferred 回収 ----
-	perDescAlloc_.ReleaseDeferred(frameIndex_);
+	perDescAlloc_.ReleaseDeferred(cpuFrameIndex_);
 
 	// ---- per-frame alloc reset ----
-	FrameResources& frame = frames_[frameIndex_];
-	frame.Begin(*graphicsCtx_);
-
-	// ---- command list reset ----
-	HRESULT hr = graphicsCtx_->ResetForFrame(frameIndex_);
-	if (FAILED(hr)) return hr;
+	frames_[cpuFrameIndex_].Begin(*graphicsCtx_);
 
 	// ---- global heap bind ----
 	ID3D12DescriptorHeap* heaps[] = { descHeap_.GetHeap() };
 	graphicsCtx_->SetDescriptorHeaps(1, heaps);
-
-	// ---- backbuffer to RT ----
-	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
-	PrepareBackBuffer(bbIndex);
 
 	return S_OK;
 }
@@ -99,33 +102,23 @@ HRESULT DX12Manager::BeginFrame()
 HRESULT DX12Manager::EndFrame()
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
-		Utils::Logger::Error("DX12Manager::BeginFrame - subsystem missing\n");
+		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 
-	// ---- CPU frame sync ----
-	frameSync_->BeginFrame();
-	frameIndex_ = frameSync_->GetFrameIndex();
+	// ---- backbuffer → PRESENT ----
+	TransitionToPresent(frameIndex_);
 
-	//  ---- descriptor deferred 回収 ----
-	perDescAlloc_.ReleaseDeferred(frameIndex_);
-
-	// ---- command list reset ----
-	// これを行うことで CommandList が "Recording" 状態になります
-	HRESULT hr = graphicsCtx_->ResetForFrame(frameIndex_);
+	// ---- execute ----
+	HRESULT hr = graphicsCtx_->Execute();
 	if (FAILED(hr)) return hr;
 
-	// ---- per-frame alloc reset ----
-	FrameResources& frame = frames_[frameIndex_];
-	frame.Begin(*graphicsCtx_);
+	// ---- present ----
+	hr = swapChain_->Present(1, 0);
+	if (FAILED(hr)) return hr;
 
-	// ---- global heap bind ----
-	ID3D12DescriptorHeap* heaps[] = { descHeap_.GetHeap() };
-	graphicsCtx_->SetDescriptorHeaps(1, heaps);
-
-	// ---- backbuffer to RT ----
-	const UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
-	PrepareBackBuffer(bbIndex);
+	// ---- frame sync ----
+	frameSync_->EndFrame(cpuFrameIndex_);
 
 	return S_OK;
 }
@@ -159,18 +152,19 @@ void DX12Manager::ClearGBuffer()
 
 void DX12Manager::BeginBackBufferPass()
 {
-	if (!swapChain_) return;
-	const UINT index = swapChain_->GetCurrentBackBufferIndex();
-	PrepareBackBuffer(index);
-	BindBackBuffer(index);
+	if (!graphicsCtx_ || !framebuffer_ || !swapChain_) return;
+
+	// ---- RT へ遷移 ----
+	PrepareBackBuffer(frameIndex_);
+
+	// ---- バインド ----
+	BindBackBuffer(frameIndex_);
 }
 
 void DX12Manager::ClearBackBuffer()
 {
 	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
 	if (!list || !framebuffer_ || !swapChain_) return;
-
-	const UINT index = swapChain_->GetCurrentBackBufferIndex();
 
 	static auto start = std::chrono::high_resolution_clock::now();
 	float t = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
@@ -181,18 +175,16 @@ void DX12Manager::ClearBackBuffer()
 		0.4f, 1.0f
 	};
 
-	framebuffer_->ClearRenderTarget(list, index, color);
+	framebuffer_->ClearRenderTarget(list, frameIndex_, color);
 	framebuffer_->ClearDepthStencil(list);
 }
 
 void DX12Manager::WaitForGpu()
 {
 	if (graphicsCtx_) {
-		graphicsCtx_->Execute();
 		graphicsCtx_->WaitForGpu(); 
 	}
 	if (uploadCtx_) {
-		uploadCtx_->Execute();
 		uploadCtx_->WaitForGpu();
 	}
 }
@@ -250,19 +242,17 @@ void DX12Manager::InitDescriptors()
 
 void DX12Manager::InitFrames()
 {
+	assert(bufferCount_ >= 2);
 	frames_.resize(bufferCount_);
 
 	const uint32_t transientBase = persistentCap_;
-
 	for (uint32_t i = 0; i < bufferCount_; ++i) {
 		frames_[i].Init(
-			GetDevice(),                               // ID3D12Device*
-			uploadBytesPerFrame_,                      // uploadSize
-			&descHeap_,                                // DescriptorHeap*
-			transientBase + i * transientCapPerFrame_, // transBase
-			transientCapPerFrame_                      // transCount
-		);
-
+			GetDevice(), 
+			uploadBytesPerFrame_, 
+			&descHeap_,
+			transientBase + i * transientCapPerFrame_,
+			transientCapPerFrame_);
 		frames_[i].fenceValue = 0;
 	}
 }
