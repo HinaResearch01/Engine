@@ -73,50 +73,60 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 {
 	if (!currentScene_) return;
 
-	// DX12から CommandContext と FrameContextを取得
+	// ----------------------------
+	// DX12 BeginFrame
+	// ----------------------------
 	auto* dx12 = DX12::DX12Manager::GetInstance();
-	auto* cmd = dx12->GetCommandContext();
-	auto& frame = dx12->GetCurrentFrameResource();
+	const DX12::FrameIndices idx = dx12->BeginFrame();
 
-	// WorldからSystemを取得
+	auto* cmd = dx12->GetCommandContext();
+	auto& frame = dx12->GetFrameResource(idx.cpu);
+
+	// World から System を取得
 	auto* renderSys = currentScene_->GetSystem<Framework::RenderSystem>();
 	auto* prepSys = currentScene_->GetSystem<Framework::RenderPrepareSystem>();
-	if (!renderSys || !prepSys) return;
+	if (!renderSys || !prepSys) {
+		dx12->EndFrame(idx);
+		return;
+	}
 
-	// ----------------------------
-	// 1. GBuffer Pass (書き込み)
-	// ----------------------------
+	// ============================================================
+	// 1. GBuffer Pass（書き込み）
+	// ============================================================
 	dx12->TransitionGBufferToWrite();
-
 	dx12->BeginGBufferPass();
 	dx12->ClearGBuffer();
 
 	renderSys->DrawGBufferPass(*cmd, frame, *prepSys);
 
-	// ----------------------------
-	// 2. Lighting Pass (読み込み)
-	// ----------------------------
+	// ============================================================
+	// 2. Lighting Pass（GBuffer 読み込み → BackBuffer）
+	// ============================================================
 	dx12->TransitionGBufferToRead();
-
-	dx12->BeginBackBufferPass();
-	dx12->ClearBackBuffer();
+	dx12->BeginBackBufferPass(idx.backBuffer);
+	dx12->ClearBackBuffer(idx.backBuffer);
 
 	renderSys->DrawLightingPass(*cmd, frame, *prepSys);
 
-	// ----------------------------
+	// ============================================================
 	// 3. Debug Overlay
-	// ----------------------------
-	dx12->BeginBackBufferPass();
+	// ============================================================
 #ifdef _DEBUG
+	dx12->BeginBackBufferPass(idx.backBuffer);
 	renderSys->DrawDebugPass(*cmd, frame, *prepSys);
-#endif // DEBUG
+#endif
 
-	// ----------------------------
+	// ============================================================
 	// 4. UI
-	// ----------------------------
+	// ============================================================
 	if (uiRenderCallBack) {
 		uiRenderCallBack();
 	}
+
+	// ----------------------------
+	// DX12 EndFrame
+	// ----------------------------
+	dx12->EndFrame(idx);
 }
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }
 

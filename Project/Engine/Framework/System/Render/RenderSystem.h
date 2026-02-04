@@ -53,7 +53,7 @@ public:
 	/// <summary>
 	/// Phase
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::RenderSys; }
+	UpdatePhase Phase() const override { return UpdatePhase::RenderExecute; }
 
 	/// <summary>
 	/// 描画パスエントリ

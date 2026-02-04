@@ -38,7 +38,7 @@ public:
 	/// Phaseの取得
 	/// </summary>
 	UpdatePhase Phase() const override {
-		return UpdatePhase::CameraSys;
+		return UpdatePhase::SceneContext;
 	}
 
 #pragma region Accessor

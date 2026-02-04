@@ -28,10 +28,9 @@ void DX12Manager::Init()
 		Utils::Exception::DX_CALL(uploadCtx_->Create(bufferCount_));
 		Utils::Exception::DX_CALL(resourceCtx_->Create(1));
 
-		// ---- swapchain first ----
+		// ---- swapchain ----
 		Utils::Exception::DX_CALL(swapChain_->Create(desiredBufferCount_));
 		bufferCount_ = swapChain_->GetBufferCount();
-		Utils::Logger::Info("SwapChain BufferCount = {}\n", bufferCount_);
 
 		// ---- descriptors + frames ----
 		InitDescriptors();
@@ -40,6 +39,9 @@ void DX12Manager::Init()
 		// ---- framebuffer / sync ----
 		Utils::Exception::DX_CALL(framebuffer_->Init());
 		Utils::Exception::DX_CALL(frameSync_->Init());
+
+		// ---- backbuffer's color black ----
+		framebuffer_->ClearAllBackBuffers(*graphicsCtx_);
 	}
 	catch (const Utils::Exception::DxException& e) {
 		OutputDebugStringA(e.what());
@@ -70,21 +72,27 @@ void DX12Manager::Finalize()
 	device_.reset();
 }
 
-HRESULT DX12Manager::BeginFrame()
+FrameIndices DX12Manager::BeginFrame()
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
 		Utils::Logger::Error("DX12Manager::BeginFrame - subsystem missing\n");
-		return E_POINTER;
+		return {}; // cpu=0, backBuffer=0
 	}
 
 	// ---- CPU frame sync ----
 	cpuFrameIndex_ = (cpuFrameIndex_ + 1) % bufferCount_;
 	frameSync_->BeginFrame(cpuFrameIndex_);
 
-	// ---- Reset command list ----
-	frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
+	// ---- back buffer index ----
+	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
+
+	// ---- Reset command list / allocator ----
 	HRESULT hr = graphicsCtx_->ResetForFrame(cpuFrameIndex_);
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) {
+		Utils::Logger::Error("DX12Manager::BeginFrame - ResetForFrame failed (hr=0x{:08X})\n",
+							 (unsigned)hr);
+		return {};
+	}
 
 	// ---- descriptor deferred 回収 ----
 	perDescAlloc_.ReleaseDeferred(cpuFrameIndex_);
@@ -96,18 +104,18 @@ HRESULT DX12Manager::BeginFrame()
 	ID3D12DescriptorHeap* heaps[] = { descHeap_.GetHeap() };
 	graphicsCtx_->SetDescriptorHeaps(1, heaps);
 
-	return S_OK;
+	return { cpuFrameIndex_, backBufferIndex_ };
 }
 
-HRESULT DX12Manager::EndFrame()
+HRESULT DX12Manager::EndFrame(const FrameIndices& idx)
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
 		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing\n");
 		return E_POINTER;
 	}
 
-	// ---- backbuffer → PRESENT ----
-	TransitionToPresent(frameIndex_);
+	// ---- backbuffer → PRESENT  ----
+	TransitionToPresent(idx.backBuffer);
 
 	// ---- execute ----
 	HRESULT hr = graphicsCtx_->Execute();
@@ -117,8 +125,8 @@ HRESULT DX12Manager::EndFrame()
 	hr = swapChain_->Present(1, 0);
 	if (FAILED(hr)) return hr;
 
-	// ---- frame sync ----
-	frameSync_->EndFrame(cpuFrameIndex_);
+	// ---- frame sync (CPUフレーム基準) ----
+	frameSync_->EndFrame(idx.cpu);
 
 	return S_OK;
 }
@@ -150,43 +158,29 @@ void DX12Manager::ClearGBuffer()
 	framebuffer_->ClearGBuffer(list);
 }
 
-void DX12Manager::BeginBackBufferPass()
+void DX12Manager::BeginBackBufferPass(uint32_t backBufferIndex)
 {
 	if (!graphicsCtx_ || !framebuffer_ || !swapChain_) return;
 
-	// ---- RT へ遷移 ----
-	PrepareBackBuffer(frameIndex_);
-
-	// ---- バインド ----
-	BindBackBuffer(frameIndex_);
+	PrepareBackBuffer(backBufferIndex);
+	BindBackBuffer(backBufferIndex);
 }
 
-void DX12Manager::ClearBackBuffer()
+void DX12Manager::ClearBackBuffer(uint32_t backBufferIndex)
 {
 	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
-	if (!list || !framebuffer_ || !swapChain_) return;
+	if (!list || !framebuffer_) return;
 
-	static auto start = std::chrono::high_resolution_clock::now();
-	float t = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
+	static const FLOAT black[4] = { 0.f, 0.f, 0.f, 1.f };
 
-	FLOAT color[4] = {
-		0.2f + 0.3f * std::sinf(t),
-		0.3f + 0.2f * std::cosf(t * 0.7f),
-		0.4f, 1.0f
-	};
-
-	framebuffer_->ClearRenderTarget(list, frameIndex_, color);
+	framebuffer_->ClearRenderTarget(list, backBufferIndex, black);
 	framebuffer_->ClearDepthStencil(list);
 }
 
 void DX12Manager::WaitForGpu()
 {
-	if (graphicsCtx_) {
-		graphicsCtx_->WaitForGpu(); 
-	}
-	if (uploadCtx_) {
-		uploadCtx_->WaitForGpu();
-	}
+	if (graphicsCtx_) graphicsCtx_->WaitForGpu();
+	if (uploadCtx_)   uploadCtx_->WaitForGpu();
 }
 
 D3D12_VIEWPORT DX12Manager::GetMainViewport() const
@@ -248,8 +242,8 @@ void DX12Manager::InitFrames()
 	const uint32_t transientBase = persistentCap_;
 	for (uint32_t i = 0; i < bufferCount_; ++i) {
 		frames_[i].Init(
-			GetDevice(), 
-			uploadBytesPerFrame_, 
+			GetDevice(),
+			uploadBytesPerFrame_,
 			&descHeap_,
 			transientBase + i * transientCapPerFrame_,
 			transientCapPerFrame_);

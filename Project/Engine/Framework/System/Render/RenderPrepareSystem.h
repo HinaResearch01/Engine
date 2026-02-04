@@ -47,7 +47,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepareSys; }
+	UpdatePhase Phase() const override { return UpdatePhase::RenderPrepare; }
 
 #pragma region Accessor
 	const CameraPacket& GetCameraPacket() const { return cameraPacke_; }

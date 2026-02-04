@@ -55,6 +55,11 @@ public:
 	HRESULT Resize(UINT width, UINT height);
 
 	/// <summary>
+	/// 全 BackBuffer を黒で初期化し、PRESENT 状態に戻す。
+	/// </summary>
+	void ClearAllBackBuffers(class CommandContext& cmd);
+
+	/// <summary>
 	/// RTV/DSV ハンドル取得
 	/// </summary>
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandle(UINT index) const;

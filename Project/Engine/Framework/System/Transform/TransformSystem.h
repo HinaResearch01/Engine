@@ -32,7 +32,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::TransformSys; }
+	UpdatePhase Phase() const override { return UpdatePhase::Transform; }
 
 private:
 	/// <summary>

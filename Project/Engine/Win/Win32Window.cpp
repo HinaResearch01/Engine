@@ -12,7 +12,8 @@ void Win32Window::CreateMainWindow(const Win32Desc& desc)
 	wc.hInstance = desc_.hInstance;
 	wc.lpszClassName = L"EngineWindowClass";
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(BLACK_BRUSH);
+
+	wc.hbrBackground = nullptr;
 
 	if (!RegisterClass(&wc)) {
 		throw std::runtime_error("Failed to register window class.");
@@ -89,12 +90,14 @@ LRESULT Win32Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
+		case WM_ERASEBKGND:
+		return 1;
+
 		case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 
 		case WM_SIZE:
-		// 必要に応じてここでDX12のリソース（SwapChain）再作成フラグを立てる
 		return 0;
 
 		case WM_SIZING: {
@@ -110,7 +113,9 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			int targetH = prc->bottom - prc->top - borderH;
 
 			// 比率維持ロジック
-			if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT) {
+			if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT ||
+				wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT ||
+				wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT) {
 				targetH = static_cast<int>(targetW / targetAspectRatio_);
 			}
 			else {
@@ -121,15 +126,20 @@ LRESULT Win32Window::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 			int finalW = targetW + borderW;
 			int finalH = targetH + borderH;
 
-			if (wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT) prc->top = prc->bottom - finalH;
-			else prc->bottom = prc->top + finalH;
+			if (wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT)
+				prc->top = prc->bottom - finalH;
+			else
+				prc->bottom = prc->top + finalH;
 
-			if (wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT) prc->left = prc->right - finalW;
-			else prc->right = prc->left + finalW;
+			if (wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT)
+				prc->left = prc->right - finalW;
+			else
+				prc->right = prc->left + finalW;
 
 			return TRUE;
 		}
 	}
+
 	return DefWindowProc(hwnd_, msg, wParam, lParam);
 }
 

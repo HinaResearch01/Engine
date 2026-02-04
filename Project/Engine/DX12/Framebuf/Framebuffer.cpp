@@ -1,5 +1,6 @@
 #include "Framebuffer.h"
 #include "DX12/DX12Manager.h"
+#include "DX12/Cmd/CommandContext.h"
 #include "DX12/Desc/PersistentDescAllocator.h"
 #include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
@@ -90,6 +91,56 @@ HRESULT Framebuffer::Resize(UINT width, UINT height)
 
 	backBufferStates_.assign(backBuffers_.size(), D3D12_RESOURCE_STATE_PRESENT);
 	return S_OK;
+}
+
+void Framebuffer::ClearAllBackBuffers(CommandContext& cmd)
+{
+	static const FLOAT black[4] = { 0.f, 0.f, 0.f, 1.f };
+
+	const UINT count = GetBackBufferCount();
+
+	auto* swapChain = dx12Mgr_->GetSwapChain();
+	if (!swapChain) return;
+
+	for (UINT n = 0; n < count; ++n) {
+
+		const UINT index = swapChain->GetCurrentBackBufferIndex();
+
+		cmd.ResetForFrame(0);
+
+		// ----- PRESENT → RENDER_TARGET -----
+		if (backBufferStates_[index] != D3D12_RESOURCE_STATE_RENDER_TARGET) {
+			D3D12_RESOURCE_BARRIER b{};
+			b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			b.Transition.pResource = backBuffers_[index].Get();
+			b.Transition.StateBefore = backBufferStates_[index];
+			b.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			b.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			cmd.GetList()->ResourceBarrier(1, &b);
+			backBufferStates_[index] = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		}
+
+		// ----- Clear -----
+		ClearRenderTarget(cmd.GetList(), index, black);
+		ClearDepthStencil(cmd.GetList());
+
+		// ----- RENDER_TARGET → PRESENT -----
+		{
+			D3D12_RESOURCE_BARRIER b{};
+			b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			b.Transition.pResource = backBuffers_[index].Get();
+			b.Transition.StateBefore = backBufferStates_[index];
+			b.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			b.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			cmd.GetList()->ResourceBarrier(1, &b);
+			backBufferStates_[index] = D3D12_RESOURCE_STATE_PRESENT;
+		}
+
+		cmd.Execute();
+		cmd.WaitForGpu();
+
+		swapChain->Present(0, 0);
+	}
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Framebuffer::GetRtvHandle(UINT index) const

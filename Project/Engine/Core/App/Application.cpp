@@ -48,42 +48,42 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
 
 void Application::Run()
 {
-    // メインループ
-    while (!window_->ShouldClose()) {
+	// メインループ
+	while (!window_->ShouldClose()) {
 
-        // ------------------ ループ開始フェーズ ------------------
-        window_->ProcessMessages();
-		HRESULT hr = dx12_->BeginFrame();
-		if (FAILED(hr)) {
-			dx12_->WaitForGpu();
-			break;
-		}
-		resourceMgr_->BeginFrame(dx12_->GetFrameIndex());
-        imgui_->BeginFrame();
+		// =====================================================
+		// ループ開始フェーズ
+		// =====================================================
+		window_->ProcessMessages();
 
-		// ------------------ 初期化フェーズ ------------------
-		if(gameCtx_->GetPedingInit())
+		// ------------------
+		// 初期化フェーズ
+		// ------------------
+		if (gameCtx_->GetPedingInit()) {
 			gameCtx_->Init();
+		}
 
-        // ------------------ 更新フェーズ ------------------
-        gameCtx_->Update();
+		// ------------------
+		// 更新フェーズ
+		// ------------------
+		gameCtx_->Update();
 
-        // ------------------ 描画フェーズ ------------------
+		// =====================================================
+		// 描画フェーズ
+		// =====================================================
+		imgui_->BeginFrame();
+
 		gameCtx_->Render([this]() {
-			this->imgui_->Render();
+			imgui_->Render();
 		});
 
-        // ------------------ ループ終了フェーズ ------------------
-		hr = dx12_->EndFrame();
-		if (FAILED(hr)) {
-			dx12_->WaitForGpu();
-			break; 
-		}
-        // CPU側で少しスリープ（100%使用防止）
-        ::Sleep(0);
-    }
+		// CPU側で少しスリープ（100%使用防止）
+		::Sleep(0);
+	}
 
-    // ------------------ 終了処理フェーズ ------------------
-    dx12_->WaitForGpu(); // GPU完了待ち
-    gameCtx_->Finalize();
+	// =====================================================
+	// 終了処理フェーズ
+	// =====================================================
+	dx12_->WaitForGpu(); // GPU完了待ち
+	gameCtx_->Finalize();
 }
