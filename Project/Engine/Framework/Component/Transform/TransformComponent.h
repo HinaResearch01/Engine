@@ -26,37 +26,32 @@ public:
 	// デストラクタ
 	~TransformComponent() = default;
 
-	// 自身のSRTが変更されたか
-	bool IsSelfDirty() const {
-		return std::memcmp(&srt, &prevLocal, sizeof(SRT)) != 0;
-	}
-
-	// 現在のSRTを前回のSRTに同期
-	void SyncPrev() {
-		prevLocal = srt;
-	}
-
-	// ワールド位置の取得
 	Math::Vec3f GetWorldPos() const {
 		return { world.m[3][0], world.m[3][1], world.m[3][2] };
 	}
 
-public:
-	// ===== 入力 =====
-	SRT srt{};
-	SRT prevLocal{};
+	void MarkDirty() {
+		selfDirty = true;
+		worldDirty = true;
+	}
 
-	// ===== 派生（TransformSystem が更新）=====
+public:
+	// 入力
+	SRT srt{};
+
+	// dirty flags
+	bool selfDirty = true;
+	bool worldDirty = true;
+
+	// 派生
 	Math::Mat4x4 world{};
 	Math::Mat4x4 worldInvTranspose{};
+	Math::Vec3f right{ 1,0,0 };
+	Math::Vec3f up{ 0,1,0 };
+	Math::Vec3f forward{ 0,0,1 };
 
-	Math::Vec3f right{ 1.0f, 0.0f, 0.0f };
-	Math::Vec3f up{ 0.0f, 1.0f, 0.0f };
-	Math::Vec3f forward{ 0.0f, 0.0f, 1.0f };
-
-	// ===== 階層 =====
-	std::weak_ptr<TransformComponent> parent;
-	bool parentDirty = true;
+	// 階層
+	TransformComponent* parent = nullptr;
 };
 
 }

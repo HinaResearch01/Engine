@@ -12,86 +12,88 @@ void TransformSystem::Update(float)
 	auto& view = world_.GetTransformsCompView();
 	const auto& actors = view.GetActors();
 
-	// ルート（親なし）から更新
+	// ルート（parent==nullptr）からDFS
+	std::unordered_set<TransformComponent*> visited;
+	visited.reserve(actors.size() * 2);
+
 	for (IActor* a : actors) {
 		auto* tr = a->GetComponent<TransformComponent>();
 		if (!tr) continue;
-		if (!tr->parent.expired()) continue;
-
-		UpdateComponent(*tr);
+		if (tr->parent != nullptr) continue;
+		UpdateRecursive(*tr, visited);
 	}
 
-	// 子（親あり）を更新
-	// 深い階層がある場合でも、親が先に更新されていればOK
+	// ルートに辿れないノード
 	for (IActor* a : actors) {
 		auto* tr = a->GetComponent<TransformComponent>();
 		if (!tr) continue;
-		if (tr->parent.expired()) continue;
+		if (visited.contains(tr)) continue;
+		UpdateRecursive(*tr, visited);
+	}
+}
 
-		UpdateComponent(*tr);
+void TransformSystem::UpdateRecursive(TransformComponent& tr, std::unordered_set<TransformComponent*>& visited)
+{
+	if (visited.contains(&tr)) return;
+	visited.insert(&tr);
+
+	// 親がいるなら親を先に更新
+	if (tr.parent) {
+		UpdateRecursive(*tr.parent, visited);
+	}
+
+	// 自分を更新
+	UpdateComponent(tr);
+
+	// 子を走査
+	auto& view = world_.GetTransformsCompView();
+	for (IActor* a : view.GetActors()) {
+		auto* child = a->GetComponent<TransformComponent>();
+		if (!child) continue;
+		if (child->parent == &tr) {
+			UpdateRecursive(*child, visited);
+		}
 	}
 }
 
 void TransformSystem::UpdateComponent(TransformComponent& tr)
 {
-	const bool selfDirty = tr.IsSelfDirty();
-	if (!selfDirty && !tr.parentDirty) {
-		return; // 完全に静的
+	// 親のdirtyを伝播
+	if (tr.parent && tr.parent->worldDirty) {
+		tr.worldDirty = true;
 	}
+	if (!tr.worldDirty) return;
 
-	// ==================================
-	// 1. ローカル行列生成
-	// ==================================
-	const Math::Mat4x4 localMat = Math::Func::MAT4x4::AffineMatrix(
-		tr.srt.scale, Math::Func::VEC3::ToRadians(tr.srt.rotate), tr.srt.translate);
+	// 1) local
+	const Math::Mat4x4 localMat =
+		Math::Func::MAT4x4::AffineMatrix(
+		tr.srt.scale,
+		Math::Func::VEC3::ToRadians(tr.srt.rotate),
+		tr.srt.translate
+		);
 
-	// ==================================
-	// 2. ワールド行列
-	// ==================================
-	if (auto p = tr.parent.lock()) {
-		tr.world = p->world * localMat;
-		tr.worldInvTranspose = tr.world.Inverse().Transpose();
-		tr.parentDirty = p->IsSelfDirty() || p->parentDirty;
+	// 2) world
+	if (tr.parent) {
+		tr.world = tr.parent->world * localMat;
 	}
 	else {
 		tr.world = localMat;
-		tr.worldInvTranspose = tr.world.Inverse().Transpose();
-		tr.parentDirty = false;
 	}
+	tr.worldInvTranspose = tr.world.Inverse().Transpose();
 
-	// ==================================
-	// 3. right / up / forward 更新
-	// ==================================
-	// 行列の回転部分（スケール込み）を抽出
-	Math::Vec3f r{
-		tr.world.m[0][0],
-		tr.world.m[0][1],
-		tr.world.m[0][2]
-	};
+	// 3) basis（正規直交化）
+	Math::Vec3f r{ tr.world.m[0][0], tr.world.m[0][1], tr.world.m[0][2] };
+	Math::Vec3f u{ tr.world.m[1][0], tr.world.m[1][1], tr.world.m[1][2] };
 
-	Math::Vec3f u{
-		tr.world.m[1][0],
-		tr.world.m[1][1],
-		tr.world.m[1][2]
-	};
-
-	Math::Vec3f f{
-		tr.world.m[2][0],
-		tr.world.m[2][1],
-		tr.world.m[2][2]
-	};
-
-	// 非一様スケール対策：正規直交化
 	r = r.Normalized();
 	u = (u - r * Math::Func::VEC3::Dot(u, r)).Normalized();
-	f = Math::Func::VEC3::Cross(r, u).Normalized();
+	Math::Vec3f f = Math::Func::VEC3::Cross(r, u).Normalized();
 
 	tr.right = r;
 	tr.up = u;
 	tr.forward = f;
 
-	// ==================================
-	// 4. prev 同期
-	// ==================================
-	tr.SyncPrev();
+	// 4) clear dirty
+	tr.selfDirty = false;
+	tr.worldDirty = false;
 }

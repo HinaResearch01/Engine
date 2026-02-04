@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_set>
 #include "Math/TMath.h"
 #include "../ISystem.h"
 #include "Framework/Component/Transform/TransformComponent.h"
@@ -35,6 +36,11 @@ public:
 	UpdatePhase Phase() const override { return UpdatePhase::Transform; }
 
 private:
+	/// <summary>
+	/// 
+	/// </summary>
+	void UpdateRecursive(TransformComponent& tr, std::unordered_set<TransformComponent*>& visited);
+
 	/// <summary>
 	/// ノード更新
 	/// </summary>
