@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include "Math/TMath.h"
+#include "Framework/Str/RenderGpuStructure.h"
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
@@ -29,28 +30,20 @@ struct MaterialKeyHash {
 };
 
 struct MaterialResolved {
-	SurfaceType surface{};
-
-	// CPUで確定できる値
-	Math::Vec4f color{ 1,1,1,1 };
-	Math::Mat3x3 uvMat{};
-
-	// テクスチャ
+	GpuMaterialCB cb{};
 	Tsumi::Resource::TextureAsset* albedo = nullptr;
-
-	bool visible = true;
 };
 
-// マテリアル情報
 struct MaterialContext {
 	std::unordered_map<MaterialKey, MaterialResolved, MaterialKeyHash> cache;
 
 	void Clear() { cache.clear(); }
 
-	const MaterialResolved* Find(const MaterialKey& k) const {
-		auto it = cache.find(k);
+	const MaterialResolved* Find(const MaterialKey& key) const {
+		auto it = cache.find(key);
 		return (it != cache.end()) ? &it->second : nullptr;
 	}
 };
+
 
 }

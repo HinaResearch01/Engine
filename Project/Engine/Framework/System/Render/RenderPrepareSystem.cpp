@@ -2,6 +2,7 @@
 #include "Framework/World/World.h"
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/System/Light/LightSystem.h"
+#include "Framework/System/Shadow/ShadowSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
 #include "Framework/Str/RenderPassTable.h"
 #include "Resource/ResourceSystem.h"
@@ -31,6 +32,7 @@ void RenderPrepareSystem::Update(float)
 	Clear();
 	BuildCameraPacket();
 	BuildLightPacket();
+	BuildShadowPacket();
 	BuildRenderPackets();
 }
 
@@ -133,23 +135,23 @@ void RenderPrepareSystem::BuildShadowPacket()
 	cb.enabled = ctx.enabled ? 1 : 0;
 	cb.cascadeCount = static_cast<int>(ctx.cascadeCount);
 	cb.shadowMapSize = static_cast<float>(ctx.shadowMapSize);
-	cb.invShadowMapSize = (ctx.shadowMapSize > 0) ? (1.0f / cb.shadowMapSize) : 0.0f;
+	cb.invShadowMapSize =
+		(ctx.shadowMapSize > 0) ? (1.0f / ctx.shadowMapSize) : 0.0f;
 
-	for (int i = 0; i < 4; ++i) cb.splitFar[i] = 0.0f; 
-
-	// cascades viewProj
 	for (uint32_t i = 0; i < 4; ++i)
 	{
-		if (ctx.enabled && i < ctx.cascadeCount)
-			cb.shadowViewProj[i] = ctx.cascades[i].viewProj;
-		else
-			cb.shadowViewProj[i] = Math::Mat4x4{}; // 0行列 or 単位行列
+		cb.splitFar[i] = ctx.splitFar[i];
+		cb.shadowViewProj[i] =
+			(ctx.enabled && i < ctx.cascadeCount)
+			? ctx.cascades[i].viewProj
+			: Math::Mat4x4{};
 	}
 }
 
 void RenderPrepareSystem::BuildRenderPackets()
 {
-	auto materialSys = world_.GetSystem<MaterialSystem>();
+	auto* materialSys = world_.GetSystem<MaterialSystem>();
+	const MaterialContext& mctx = materialSys->GetContext();
 
 	for (auto [rc, mc, tc] :
 		 world_.View<RenderComponent, MaterialComponent, TransformComponent>())
@@ -160,20 +162,22 @@ void RenderPrepareSystem::BuildRenderPackets()
 		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
 		if (!mesh) continue;
 
-		auto* mat = materialSys->GetPacket(mc);
+		MaterialKey key{ mc.surface, mc.albedo };
+		const MaterialResolved* mat = mctx.Find(key);
 		if (!mat) continue;
 
 		RenderPacket pkt{};
 		pkt.surface = mc.surface;
 		pkt.mesh = mesh;
-		pkt.material = mat;
 
-		// フォールバックテクスチャ
-		if (!pkt.material->albedo && !mesh->defaultTextureKey.empty()) {
-			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
-			if (tex) {
-				const_cast<MaterialPacket*>(pkt.material)->albedo = tex;
-			}
+		// Material を直接コピー
+		pkt.materialCB = mat->cb;
+		pkt.albedo = mat->albedo;
+
+		// フォールバック
+		if (!pkt.albedo && !mesh->defaultTextureKey.empty()) {
+			pkt.albedo =
+				resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
 		}
 
 		FillTransformPacket(pkt, tc);
@@ -184,7 +188,6 @@ void RenderPrepareSystem::BuildRenderPackets()
 		renderPackets_[static_cast<size_t>(pkt.surface)].push_back(pkt);
 	}
 
-	// ソートする
 	SortRenderPackets();
 }
 

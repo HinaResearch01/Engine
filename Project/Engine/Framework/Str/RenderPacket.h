@@ -8,26 +8,21 @@
 
 namespace Tsumi::Framework {
 
-struct MaterialPacket
-{
-	// GPUに送る定数
-	GpuMaterialCB cb{};
-
-	// GPUリソース
-	Tsumi::Resource::TextureAsset* albedo = nullptr;
-};
-
 struct RenderPacket
 {
 	SurfaceType surface{};
 
-	// GPU参照
+	// Geometry
 	Tsumi::Resource::MeshAsset* mesh = nullptr;
-	const MaterialPacket* material = nullptr;
 
+	// Material
+	GpuMaterialCB materialCB{};
+	Tsumi::Resource::TextureAsset* albedo = nullptr;
+
+	// Transform
 	GpuTransformCB xform{};
 
-	// ソート用キー
+	// Sort
 	uint64_t sortKey = 0;
 };
 

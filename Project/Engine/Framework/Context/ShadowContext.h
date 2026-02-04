@@ -15,6 +15,7 @@ struct ShadowContext {
 	bool enabled = false;
 	uint32_t cascadeCount = 0;
 	uint32_t shadowMapSize = 0;
+	std::array<float, 4> splitFar{};
 	std::array<ShadowCascade, 4> cascades{};
 };
 

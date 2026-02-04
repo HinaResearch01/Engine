@@ -131,11 +131,14 @@ void ShadowSystem::BuildShadowContext()
 		const float uniSplit = n + (f - n) * p;
 		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
 	}
+	for (uint32_t i = 0; i < cascadeCount; ++i)
+	{
+		context_.splitFar[i] = splits[i + 1];
+	}
 
 	// =====================================================
 	// 3) Light dir / up
 	// =====================================================
-	// ★ LightSystem と規約一致：-forward が照射方向
 	const Math::Vec3f lightDirWS = NormalizeSafe(-chosenTR->forward, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };

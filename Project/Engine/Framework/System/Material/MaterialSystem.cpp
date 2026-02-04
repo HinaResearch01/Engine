@@ -14,6 +14,10 @@ void MaterialSystem::Update(float)
 {
 	ctx_.Clear();
 
+	ctx_.cache.reserve(world_.GetMaterialsCompView().GetActors().size());
+
+	auto* texMgr = resourceSys_->GetTextureManager();
+
 	for (auto [mc] : world_.View<MaterialComponent>())
 	{
 		if (!mc.visible) continue;
@@ -23,14 +27,13 @@ void MaterialSystem::Update(float)
 			mc.albedo,
 		};
 
-		auto& resolved = ctx_.cache[key];
-		resolved.surface = mc.surface;
-		resolved.color = mc.color;
-		resolved.uvMat = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
-		resolved.visible = mc.visible;
+		auto& r = ctx_.cache[key]; // なければ作る／あれば上書き
 
-		resolved.albedo = mc.albedo.empty()
+		r.cb.color = mc.color;
+		r.cb.uvTransform = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
+
+		r.albedo = mc.albedo.empty()
 			? nullptr
-			: resourceSys_->GetTextureManager()->GetTexture(mc.albedo);
+			: texMgr->GetTexture(mc.albedo);
 	}
 }
