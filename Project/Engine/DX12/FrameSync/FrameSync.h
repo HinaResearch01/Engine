@@ -61,7 +61,8 @@ private:
 	uint32_t bufferCount_ = 0;
 	uint32_t frameIndex_ = 0;
 
-	std::vector<uint64_t> fenceValues_;
+	std::vector<uint64_t> frameFenceValues_;
+	uint64_t nextFenceValue_ = 0;
 
 	DX12Manager* dx12Mgr_ = nullptr;
 };
