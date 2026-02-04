@@ -62,11 +62,12 @@ private:
 	void BuildDefault(CameraContext& out);
 
 private:
-	CameraContext activeCtx_;
+	Math::Mat4x4 MakeViewProj(const Math::Mat4x4& view, const Math::Mat4x4& proj);
+
+private:
+	CameraContext activeCtx_{};
 
 	World& world_;
-
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }
