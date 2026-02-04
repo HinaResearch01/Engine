@@ -12,39 +12,25 @@ MaterialSystem::MaterialSystem(World& world)
 
 void MaterialSystem::Update(float)
 {
-	cache_.clear();
+	ctx_.Clear();
 
-	// MaterialComponent を持つ Actor を View で列挙
 	for (auto [mc] : world_.View<MaterialComponent>())
 	{
-		if (!mc.visible)
-			continue;
+		if (!mc.visible) continue;
 
 		MaterialKey key{
 			mc.surface,
 			mc.albedo,
 		};
 
-		auto& pkt = cache_[key];
+		auto& resolved = ctx_.cache[key];
+		resolved.surface = mc.surface;
+		resolved.color = mc.color;
+		resolved.uvMat = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
+		resolved.visible = mc.visible;
 
-		// GPU material CB
-		pkt.cb.color = mc.color;
-		pkt.cb.uvTransform = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
-
-		// TextureManager から GPU リソースを取得
-		pkt.albedo = mc.albedo.empty()
+		resolved.albedo = mc.albedo.empty()
 			? nullptr
 			: resourceSys_->GetTextureManager()->GetTexture(mc.albedo);
 	}
-}
-
-const MaterialPacket* MaterialSystem::GetPacket(const MaterialComponent& mc) const
-{
-	MaterialKey key{
-		mc.surface,
-		mc.albedo,
-	};
-
-	auto it = cache_.find(key);
-	return (it != cache_.end()) ? &it->second : nullptr;
 }

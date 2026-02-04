@@ -802,6 +802,9 @@
     <ClInclude Include="Engine\Framework\System\ISystem.h">
       <Filter>Engine\Framework\System</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\Context\MaterialContext.h">
+      <Filter>Engine\Framework\Context</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

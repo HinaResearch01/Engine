@@ -367,6 +367,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Component\Transform\TransformComponent.h" />
     <ClInclude Include="Engine\Framework\Context\CameraContext.h" />
     <ClInclude Include="Engine\Framework\Context\LightContext.h" />
+    <ClInclude Include="Engine\Framework\Context\MaterialContext.h" />
     <ClInclude Include="Engine\Framework\Context\ShadowContext.h" />
     <ClInclude Include="Engine\Framework\Str\CameraGpuStructure.h" />
     <ClInclude Include="Engine\Framework\Str\CameraPacket.h" />
