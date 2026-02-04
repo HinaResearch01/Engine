@@ -92,7 +92,7 @@ void LightSystem::BuildLightContext()
 				continue;
 
 			Math::Vec3f pos = tr.GetWorldPos();
-			Math::Vec3f dir = NormalizeSafe(tr.forward, { 0,-1,0 });
+			Math::Vec3f dir = NormalizeSafe(-tr.forward, { 0,-1,0 });
 
 			Math::Vec3f radiance{
 				sl.color.x * sl.intensity,
@@ -103,17 +103,14 @@ void LightSystem::BuildLightContext()
 			float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
 			float outerRad = Math::Func::NUM::ToRadians(sl.outerAngle);
 
-			float innerCos = std::cos(innerRad * 0.5f);
-			float outerCos = std::cos(outerRad * 0.5f);
-
-			// Resolved
 			SpotLightResolved r{};
 			r.positionWS = pos;
 			r.range = sl.range;
 			r.directionWS = dir;
-			r.innerCos = innerCos;
-			r.outerCos = outerCos;
+			r.innerCos = std::cos(innerRad * 0.5f);
+			r.outerCos = std::cos(outerRad * 0.5f);
 			r.radiance = radiance;
+
 			ctx.spots.push_back(r);
 		}
 	}

@@ -82,16 +82,14 @@ void ShadowSystem::BuildShadowContext()
 	context_ = {};
 	context_.enabled = false;
 	context_.cascadeCount = 0;
+	context_.shadowMapSize = 0;
 
 	// =====================================================
-	// 0) カメラ情報
+	// 0) カメラ
 	// =====================================================
-	// ※ API は君の CameraSystem に合わせて差し替え
 	auto camSys = world_.GetSystem<CameraSystem>();
 	const CameraContext& cam = camSys->GetContext();
-
-	if (!cam.valid)
-		return;
+	if (!cam.valid) return;
 
 	// =====================================================
 	// 1) DirectionalLight を 1つ選ぶ
@@ -103,98 +101,83 @@ void ShadowSystem::BuildShadowContext()
 	{
 		if (!dl.shadow.castShadow) continue;
 		if (dl.intensity <= 0.0f) continue;
+		if (dl.shadow.shadowMapSize == 0) continue;
 
 		chosenDL = &dl;
 		chosenTR = &tr;
 		break;
 	}
+	if (!chosenDL || !chosenTR) return;
 
-	if (!chosenDL || !chosenTR)
-		return;
-
-	// ShadowContext の共通項目を埋める
 	context_.enabled = true;
 	context_.shadowMapSize = chosenDL->shadow.shadowMapSize;
 
 	// =====================================================
-	// 2) CSM Split 設定
+	// 2) Split（4固定）
 	// =====================================================
 	const uint32_t cascadeCount = 4;
 	context_.cascadeCount = cascadeCount;
 
-	// Split の比率
 	const float lambda = 0.7f;
-
 	const float n = cam.nearPlane;
 	const float f = cam.farPlane;
 
-	float splits[5]{}; // 0..4
+	float splits[5]{};
 	splits[0] = n;
 	for (int i = 1; i <= 4; ++i)
 	{
-		float p = (float)i / 4.0f;
-		float logSplit = n * std::pow(f / n, p);
-		float uniSplit = n + (f - n) * p;
+		const float p = (float)i / 4.0f;
+		const float logSplit = n * std::pow(f / n, p);
+		const float uniSplit = n + (f - n) * p;
 		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
 	}
 
 	// =====================================================
-	// 3) Light View
+	// 3) Light dir / up
 	// =====================================================
-	Math::Vec3f lightDirWS = NormalizeSafe(chosenTR->forward, { 0,-1,0 });
+	// ★ LightSystem と規約一致：-forward が照射方向
+	const Math::Vec3f lightDirWS = NormalizeSafe(-chosenTR->forward, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };
-	// up と平行すぎると LookAt が不安定になるので回避
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
 	// =====================================================
-	// 4) 各カスケードで Ortho を組む
+	// 4) Cascades
 	// =====================================================
-	// invViewProj を使って frustum corner を world に戻す
-	const Math::Mat4x4 invViewProj = cam.viewProj.Inverse();
-
 	for (uint32_t ci = 0; ci < cascadeCount; ++ci)
 	{
 		const float cn = splits[ci];
 		const float cf = splits[ci + 1];
 
-		// ---- カスケード用プロジェクションを作り直す ----
-		Math::Mat4x4 cascadeProj = Math::Func::MAT4x4::PerspectiveFovMatrix(
-			cam.fovY, cam.aspectRatio, cn, cf
-		);
+		const Math::Mat4x4 cascadeProj =
+			Math::Func::MAT4x4::PerspectiveFovMatrix(cam.fovY, cam.aspectRatio, cn, cf);
 
-		Math::Mat4x4 cascadeViewProj = cam.view * cascadeProj;
-		Math::Mat4x4 invCascadeVP = cascadeViewProj.Inverse();
+		// あなたの規約：view * proj
+		const Math::Mat4x4 cascadeVP = cam.view * cascadeProj;
+		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
 
-		// frustum corners in WS
 		Math::Vec3f cornersWS[8]{};
 		GetFrustumCornersWS(invCascadeVP, 0.0f, 1.0f, cornersWS);
 
-		// カスケード中心
-		Math::Vec3f centerWS = Average8(cornersWS);
+		const Math::Vec3f centerWS = Average8(cornersWS);
 
-		// 仮想ライト位置（中心を照らす）
 		const float dist = (cf - cn) + chosenDL->shadow.orthoHalfSize;
-		Math::Vec3f lightPosWS = {
+		const Math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
 			centerWS.y - lightDirWS.y * dist,
 			centerWS.z - lightDirWS.z * dist
 		};
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(
-			lightPosWS,
-			centerWS,
-			up
-		);
+		const Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
 
-		// corners を light space へ
+		// corners → light space AABB
 		Math::Vec3f minLS{ +1e30f, +1e30f, +1e30f };
 		Math::Vec3f maxLS{ -1e30f, -1e30f, -1e30f };
 
 		for (int i = 0; i < 8; ++i)
 		{
-			Math::Vec3f pLS = lightView.TransformPoint(cornersWS[i]);
+			const Math::Vec3f pLS = lightView.TransformPoint(cornersWS[i]);
 			minLS.x = std::min(minLS.x, pLS.x);
 			minLS.y = std::min(minLS.y, pLS.y);
 			minLS.z = std::min(minLS.z, pLS.z);
@@ -203,7 +186,7 @@ void ShadowSystem::BuildShadowContext()
 			maxLS.z = std::max(maxLS.z, pLS.z);
 		}
 
-		// 余白（シャドウの泳ぎ・クリップ回避）
+		// pad
 		const float padXY = 5.0f;
 		const float padZ = 20.0f;
 		minLS.x -= padXY; minLS.y -= padXY;
@@ -211,15 +194,39 @@ void ShadowSystem::BuildShadowContext()
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+		// Texel Snapping
+		SnapOrthoAABBToTexel(minLS, maxLS, context_.shadowMapSize);
+
+		const Math::Mat4x4 lightProj =
+			Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, maxLS.x,
 			minLS.y, maxLS.y,
 			minLS.z, maxLS.z
-		);
+			);
 
 		ShadowCascade& c = context_.cascades[ci];
 		c.view = lightView;
 		c.proj = lightProj;
-		c.viewProj = lightView * lightProj;
+		c.viewProj = lightView * lightProj; // 規約統一
 	}
+}
+
+void ShadowSystem::SnapOrthoAABBToTexel(Math::Vec3f& minLS, Math::Vec3f& maxLS, uint32_t shadowMapSize)
+{
+	if (shadowMapSize == 0) return;
+
+	const float width = maxLS.x - minLS.x;
+	const float height = maxLS.y - minLS.y;
+	if (width <= 1e-6f || height <= 1e-6f) return;
+
+	const float texelX = width / static_cast<float>(shadowMapSize);
+	const float texelY = height / static_cast<float>(shadowMapSize);
+
+	// min を texel 境界に寄せる
+	minLS.x = std::floor(minLS.x / texelX) * texelX;
+	minLS.y = std::floor(minLS.y / texelY) * texelY;
+
+	// max を “ちょうど shadowMapSize 分” になるように揃える
+	maxLS.x = minLS.x + texelX * static_cast<float>(shadowMapSize);
+	maxLS.y = minLS.y + texelY * static_cast<float>(shadowMapSize);
 }
