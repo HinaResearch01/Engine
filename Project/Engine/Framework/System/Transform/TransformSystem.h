@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Component/Transform/TransformComponent.h"
 
 namespace Tsumi::Framework {
@@ -10,7 +10,7 @@ namespace Tsumi::Framework {
 class World;
 
 /* Transform管理クラス */
-class TransformSystem : public IUpdatable {
+class TransformSystem : public ISystem {
 
 public:
 	/// <summary>

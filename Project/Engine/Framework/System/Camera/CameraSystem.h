@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Context/CameraContext.h"
 #include "Framework/World/CompView/ComponentView.h"
 
@@ -15,7 +15,7 @@ class IActor;
 class CameraComponent;
 
 /* カメラシステム */
-class CameraSystem : public IUpdatable {
+class CameraSystem : public ISystem {
 
 public:
 	/// <summary>

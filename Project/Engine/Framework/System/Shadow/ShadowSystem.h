@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Context/ShadowContext.h"
 #include "Framework/Component/Light/DirectionalLightComponent.h"
 
@@ -11,7 +11,7 @@ namespace Tsumi::Framework {
 class World;
 
 /* Shadow管理クラス */
-class ShadowSystem : public IUpdatable {
+class ShadowSystem : public ISystem {
 
 public:
 	/// <summary>

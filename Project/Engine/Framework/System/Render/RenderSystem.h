@@ -4,8 +4,8 @@
 #include <array>
 #include <vector>
 #include "Math/TMath.h"
+#include "../ISystem.h"
 #include "Graphic/ShadowDMap/ShadowDepthMap.h"
-#include "Framework/Update/IUpdatable.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/LightPacket.h"
 
@@ -32,7 +32,7 @@ class ShadowSystem;
 class RenderPrepareSystem;
 
 /* 描画管理クラス */
-class RenderSystem : public IUpdatable {
+class RenderSystem : public ISystem {
 
 public:
 	/// <summary>

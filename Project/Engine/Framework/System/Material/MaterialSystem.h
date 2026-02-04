@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/RenderSurfaceType.h"
@@ -41,7 +41,7 @@ struct MaterialKeyHash
 	}
 };
 
-class MaterialSystem : public IUpdatable {
+class MaterialSystem : public ISystem {
 
 public:
 	/// <summary>
@@ -63,7 +63,7 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::MaterialSys; }
+	UpdatePhase Phase() const override { return UpdatePhase::SceneContext; }
 
 	/// <summary>
 	/// Packetの取得

@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 #include "Math/TMath.h"
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Component/Camera/CameraComponent.h"
 #include "Framework/Component/Material/MaterialComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
@@ -25,7 +25,7 @@ namespace Tsumi::Framework {
 class World;
 
 /* RenderContexを構築するクラス */
-class RenderPrepareSystem : public IUpdatable {
+class RenderPrepareSystem : public ISystem {
 
 public:
 	/// <summary>

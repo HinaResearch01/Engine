@@ -21,6 +21,7 @@
 #include "Framework/Component/Transform/TransformComponent.h"
 #include "Framework/Update/IUpdatable.h"
 #include "Framework/Update/UpdateManager.h"
+#include "Framework/System/ISystem.h"
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
@@ -39,18 +40,10 @@ class World {
 
 public:
 	World()
-		: cameraSystem_(*this), lightSystem_(*this), materialSystem_(*this), 
-		renderPrepareSystem_(*this), renderSystem_(*this), shadowSystem_(*this),
-		transformSystem_(*this)
 	{
 		//  System系をUpdateManagerに登録
-		updateMgr_.Register(&cameraSystem_);
-		updateMgr_.Register(&lightSystem_);
-		updateMgr_.Register(&materialSystem_);
-		updateMgr_.Register(&renderPrepareSystem_);
-		updateMgr_.Register(&renderSystem_);
-		updateMgr_.Register(&shadowSystem_);
-		updateMgr_.Register(&transformSystem_);
+		AddSystem<TransformSystem>();
+		AddSystem<CameraSystem>();
 
 		// Viewの登録
 		RegisterDefaultViews();
@@ -75,30 +68,21 @@ public:
 
 	template<class T>
 	T* GetSystem() {
-		if constexpr (std::is_same_v<T, CameraSystem>) {
-			return &cameraSystem_;
-		}
-		else if constexpr (std::is_same_v<T, LightSystem>) {
-			return &lightSystem_;
-		}
-		else if constexpr (std::is_same_v<T, MaterialSystem>) {
-			return &materialSystem_;
-		}
-		else if constexpr (std::is_same_v<T, RenderPrepareSystem>) {
-			return &renderPrepareSystem_;
-		}
-		else if constexpr (std::is_same_v<T, RenderSystem>) {
-			return &renderSystem_;
-		}
-		else if constexpr (std::is_same_v<T, ShadowSystem>) {
-			return &shadowSystem_;
-		}
-		else if constexpr (std::is_same_v<T, TransformSystem>) {
-			return &transformSystem_;
-		}
-		else {
-			return nullptr;
-		}
+		const std::type_index ti = typeid(T);
+		auto it = systems_.find(ti);
+		if (it == systems_.end()) return nullptr;
+		return static_cast<T*>(it->second);
+	}
+
+	template<class T, class... Args>
+	T* AddSystem(Args&&... args) {
+		static_assert(std::is_base_of_v<ISystem, T>, "T must derive from ISystem");
+		auto sys = std::make_unique<T>(*this, std::forward<Args>(args)...);
+		T* ptr = sys.get();
+		ownedSystems_.push_back(std::move(sys));
+		systems_[typeid(T)] = ptr;
+		updateMgr_.Register(ptr);
+		return ptr;
 	}
 
 	// ===============================================
@@ -162,6 +146,8 @@ public:
 		assert(base);
 		return ViewRange<Cs...>(*this, *base);
 	}
+
+	float GetAspectRatio() const;
 
 #pragma region Accessor
 	GameContext* GetGameContext() const { return gameContext_; }
@@ -278,15 +264,10 @@ protected:
 	std::vector<std::unique_ptr<IActor>> actors_;
 	IActor::ActorID nextActorId_ = 1;
 
-	// ===== 各種システム =====
+	// =====  System registry =====
 	UpdateManager updateMgr_;
-	CameraSystem cameraSystem_;
-	LightSystem lightSystem_;
-	MaterialSystem materialSystem_;
-	RenderPrepareSystem renderPrepareSystem_;
-	RenderSystem renderSystem_;
-	ShadowSystem shadowSystem_;
-	TransformSystem transformSystem_;
+	std::vector<std::unique_ptr<ISystem>> ownedSystems_;
+	std::unordered_map<std::type_index, ISystem*> systems_;
 
 	// ===== ComponentView =====
 	std::unordered_map<std::type_index, IComponentViewBase*> views_;

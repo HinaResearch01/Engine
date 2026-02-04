@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/TMath.h"
-#include "Framework/Update/IUpdatable.h"
+#include "../ISystem.h"
 #include "Framework/Context/LightContext.h"
 
 namespace Tsumi::Framework {
@@ -10,7 +10,7 @@ namespace Tsumi::Framework {
 class World;
 
 /* Light管理クラス */
-class LightSystem : public IUpdatable {
+class LightSystem : public ISystem {
 
 public:
 	/// <summary>

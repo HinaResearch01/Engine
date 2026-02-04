@@ -215,6 +215,9 @@
     <ClCompile Include="Engine\DX12\PerFrame\FrameBindState.cpp">
       <Filter>Engine\DX12\PerFrame</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\World\World.cpp">
+      <Filter>Engine\Framework\World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -795,6 +798,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureIndex.h">
       <Filter>Engine\Graphics\RootSigs</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\ISystem.h">
+      <Filter>Engine\Framework\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
