@@ -9,7 +9,6 @@
 #include <mutex>
 #include <optional>
 #include <bitset>
-
 #include "ActorTag.h"
 #include "Math/TMath.h"
 #include "../Component/IComponent.h"
@@ -35,119 +34,78 @@ public:
 
 public:
 	explicit IActor();
-	virtual ~IActor();
+	virtual ~IActor() = default;
 
 	// ===============================================
 	// LifeCycle（Actor自身の責務のみ）
 	// ===============================================
 	virtual void Init() = 0;
-	virtual void Finalize();
+	virtual void Finalize() {};
 
 	// ===============================================
 	// Component Management
 	// ===============================================
-
-	/// <summary>
-	/// コンポーネント追加（型で1つまで）
-	/// </summary>
-	template<typename T>
-	T* AddComp() {
+	template<typename T, typename... Args>
+	T* AddComp(Args&&... args) {
 		static_assert(std::is_base_of_v<IComponent, T>);
 
-		std::lock_guard<std::mutex> lock(mutex_);
-
-		// Transform は必須＆1つのみ
+		// Transformは必須＆1つ
 		if constexpr (std::is_same_v<T, TransformComponent>) {
-			auto it = comps_.find(typeid(TransformComponent));
-			return it != comps_.end()
-				? static_cast<T*>(it->second.get())
-				: nullptr;
+			return GetComponent<TransformComponent>();
 		}
 
-		auto key = std::type_index(typeid(T));
+		const std::type_index key = typeid(T);
 		if (comps_.contains(key)) {
 			return static_cast<T*>(comps_[key].get());
 		}
 
-		auto comp = std::make_shared<T>();
+		auto comp = std::make_unique<T>(std::forward<Args>(args)...);
 		comp->SetOwner(this);
 		comp->Init();
 
-		comps_[key] = comp;
-		return comp.get();
+		T* ptr = comp.get();
+		comps_[key] = std::move(comp);
+
+		NotifyComponentAdded(ptr);
+		return ptr;
 	}
 
-	/// <summary>
-	/// コンポーネント削除
-	/// </summary>
 	template<typename T>
 	bool RemoveComp() {
-		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<IComponent, T>);
 
 		if constexpr (std::is_same_v<T, TransformComponent>) {
-			return false; // Transformは削除不可
+			return false;
 		}
 
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto it = comps_.find(typeid(T));
+		const std::type_index key = typeid(T);
+		auto it = comps_.find(key);
 		if (it == comps_.end()) return false;
+
+		IComponent* removed = it->second.get();
+		NotifyComponentRemoved(removed);
 
 		comps_.erase(it);
 		return true;
 	}
 
-	// ===============================================
-	// Component Access
-	// ===============================================
-
 	template<typename T>
 	bool HasComp() const {
-		// 1. 完全一致
 		if (comps_.contains(typeid(T))) return true;
 
-		// 2. 継承関係チェック
-		for (const auto& [_, comp] : comps_) {
-			if (dynamic_cast<T*>(comp.get())) {
-				return true;
-			}
+		for (auto& [_, comp] : comps_) {
+			if (dynamic_cast<T*>(comp.get())) return true;
 		}
 		return false;
 	}
 
 	template<typename T>
 	T* GetComponent() {
-		std::lock_guard<std::mutex> lock(mutex_);
-
-		// 1. 完全一致
 		auto it = comps_.find(typeid(T));
-		if (it != comps_.end()) {
-			return dynamic_cast<T*>(it->second.get());
-		}
+		if (it != comps_.end()) return dynamic_cast<T*>(it->second.get());
 
-		// 2. 継承関係チェック
 		for (auto& [_, comp] : comps_) {
-			if (auto* ptr = dynamic_cast<T*>(comp.get())) {
-				return ptr;
-			}
-		}
-		return nullptr;
-	}
-
-	template<typename T>
-	std::shared_ptr<T> GetComponentShared() {
-		std::lock_guard<std::mutex> lock(mutex_);
-
-		// 1. 完全一致
-		auto it = comps_.find(typeid(T));
-		if (it != comps_.end()) {
-			return std::dynamic_pointer_cast<T>(it->second);
-		}
-
-		// 2. 継承関係チェック
-		for (auto& [key, comp] : comps_) {
-			if (auto ptr = std::dynamic_pointer_cast<T>(comp)) {
-				return ptr;
-			}
+			if (auto* ptr = dynamic_cast<T*>(comp.get())) return ptr;
 		}
 		return nullptr;
 	}
@@ -173,24 +131,24 @@ public:
 
 	World* GetWorld() const { return world_; }
 	void SetWorld(World* w) { world_ = w; }
+
+	bool IsPaused() const { return state_ == State::Paused; }
 #pragma endregion
 
 private:
 	void EnsureTransform();
+	void NotifyComponentAdded(IComponent* c);
+	void NotifyComponentRemoved(IComponent* c);
 
 protected:
-	State state_ = State::None;
+	State state_ = State::Active;
 	ActorID id_ = 0;
 
-	std::string name_ = "";
-
+	std::string name_;
 	std::bitset<32> tags_{};
 
-	std::unordered_map<std::type_index, std::shared_ptr<IComponent>> comps_;
-
+	std::unordered_map<std::type_index, std::unique_ptr<IComponent>> comps_;
 	World* world_ = nullptr;
-
-	mutable std::mutex mutex_;
 };
 
 } 

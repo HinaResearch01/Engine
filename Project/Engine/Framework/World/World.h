@@ -112,6 +112,28 @@ public:
 
 	IActor::ActorID GenerateActorID() { return nextActorId_++; }
 
+	void OnComponentAdded(IActor* actor, IComponent* comp) {
+		if (!actor || !comp) return;
+
+		for (auto& [_, viewBase] : views_)
+			viewBase->Refresh(actor);
+
+		if (auto* up = dynamic_cast<IUpdatable*>(comp)) {
+			updateMgr_.Register(up);
+		}
+	}
+
+	void OnComponentRemoved(IActor* actor, IComponent* comp) {
+		if (!actor || !comp) return;
+
+		for (auto& [_, viewBase] : views_)
+			viewBase->Refresh(actor);
+
+		if (auto* up = dynamic_cast<IUpdatable*>(comp)) {
+			updateMgr_.UnRegister(up);
+		}
+	}
+
 	// ===============================================
 	// ComponentView View 
 	// ===============================================
