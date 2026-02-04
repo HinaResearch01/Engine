@@ -1,7 +1,5 @@
 #include "LightSystem.h"
 #include "Framework/World/World.h"
-#include "Framework/System/Camera/CameraSystem.h"
-#include "Framework/Context/CameraContext.h"
 #include "Framework/Component/Light/DirectionalLightComponent.h"
 #include "Framework/Component/Light/PointLightComponent.h"
 #include "Framework/Component/Light/SpotLightComponent.h"
@@ -33,8 +31,8 @@ void LightSystem::BuildLightContext()
 	// まず初期化
 	LightContext ctx{};
 	ctx.directional.enabled = false;
-	ctx.points.clear();
-	ctx.spots.clear();
+	ctx.points.reserve(world_.GetPointLightCompView().GetActors().size());
+	ctx.spots.reserve(world_.GetSpotLightCompView().GetActors().size());
 
 	// ============================================================
 	// 1) Directional Light
@@ -42,29 +40,25 @@ void LightSystem::BuildLightContext()
 	{
 		for (auto [tr, dl] : world_.View<TransformComponent, DirectionalLightComponent>())
 		{
-			if (ctx.directional.enabled)
-			{
-				// 方向：Transform の forward を「ライトが照らす方向」にする
-				Math::Vec3f dirWS = NormalizeSafe(tr.forward, { 0, -1, 0 });
+			// 最初の1個だけ使う
+			Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
 
-				// 放射輝度（線形）
-				Math::Vec3f radiance = {
-					dl.color.x * dl.intensity,
-					dl.color.y * dl.intensity,
-					dl.color.z * dl.intensity
-				};
+			Math::Vec3f radiance{
+				dl.color.x * dl.intensity,
+				dl.color.y * dl.intensity,
+				dl.color.z * dl.intensity
+			};
 
-				ctx.directional.enabled = true;
-				ctx.directional.dirWS = dirWS;
-				ctx.directional.radiance = radiance;
+			ctx.directional.enabled = true;
+			ctx.directional.dirWS = dirWS;
+			ctx.directional.radiance = radiance;
 
-				break;
-			}
+			break;
 		}
 	}
 
 	// ============================================================
-	// 2) Point Lights（全件）
+	// 2) Point Lights
 	// ============================================================
 	{
 		for (auto [tr, pl] : world_.View<TransformComponent, PointLightComponent>())
@@ -89,7 +83,7 @@ void LightSystem::BuildLightContext()
 	}
 
 	// ============================================================
-	// 3) Spot Lights（全件）
+	// 3) Spot Lights
 	// ============================================================
 	{
 		for (auto [tr, sl] : world_.View<TransformComponent, SpotLightComponent>())
@@ -106,13 +100,19 @@ void LightSystem::BuildLightContext()
 				sl.color.z * sl.intensity
 			};
 
+			float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
+			float outerRad = Math::Func::NUM::ToRadians(sl.outerAngle);
+
+			float innerCos = std::cos(innerRad * 0.5f);
+			float outerCos = std::cos(outerRad * 0.5f);
+
 			// Resolved
 			SpotLightResolved r{};
 			r.positionWS = pos;
 			r.range = sl.range;
 			r.directionWS = dir;
-			r.innerCos = sl.innerCos;
-			r.outerCos = sl.outerCos;
+			r.innerCos = innerCos;
+			r.outerCos = outerCos;
 			r.radiance = radiance;
 			ctx.spots.push_back(r);
 		}
