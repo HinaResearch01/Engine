@@ -12,46 +12,36 @@ void TransformSystem::Update(float)
 	auto& view = world_.GetTransformsCompView();
 	const auto& actors = view.GetActors();
 
-	// ルート（parent==nullptr）からDFS
-	std::unordered_set<TransformComponent*> visited;
-	visited.reserve(actors.size() * 2);
+	// 1. ルートを集める
+	std::vector<TransformComponent*> roots;
+	roots.reserve(actors.size());
 
 	for (IActor* a : actors) {
 		auto* tr = a->GetComponent<TransformComponent>();
 		if (!tr) continue;
-		if (tr->parent != nullptr) continue;
-		UpdateRecursive(*tr, visited);
+		if (tr->parent == nullptr) {
+			roots.push_back(tr);
+		}
 	}
 
-	// ルートに辿れないノード
-	for (IActor* a : actors) {
-		auto* tr = a->GetComponent<TransformComponent>();
-		if (!tr) continue;
-		if (visited.contains(tr)) continue;
-		UpdateRecursive(*tr, visited);
+	// 2. ルートから順に更新
+	for (TransformComponent* root : roots) {
+		UpdateHierarchy(*root);
 	}
 }
 
-void TransformSystem::UpdateRecursive(TransformComponent& tr, std::unordered_set<TransformComponent*>& visited)
+void TransformSystem::UpdateHierarchy(TransformComponent& tr)
 {
-	if (visited.contains(&tr)) return;
-	visited.insert(&tr);
-
-	// 親がいるなら親を先に更新
-	if (tr.parent) {
-		UpdateRecursive(*tr.parent, visited);
-	}
-
 	// 自分を更新
 	UpdateComponent(tr);
 
-	// 子を走査
+	// 子を更新
 	auto& view = world_.GetTransformsCompView();
 	for (IActor* a : view.GetActors()) {
 		auto* child = a->GetComponent<TransformComponent>();
 		if (!child) continue;
 		if (child->parent == &tr) {
-			UpdateRecursive(*child, visited);
+			UpdateHierarchy(*child);
 		}
 	}
 }

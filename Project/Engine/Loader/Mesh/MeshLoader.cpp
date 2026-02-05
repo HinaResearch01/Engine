@@ -1,99 +1,100 @@
 #include "MeshLoader.h"
-#include "Utils/Logger/Logger.h"
+
+#include "Resource/ResourceSystem.h"
+#include "Resource/Mesh/MeshManager.h"
+#include "Resource/Tex/TextureManager.h"
 #include "Utils/Func/UtilFunc.h"
-#include <assimp/Importer.hpp>
+#include "Utils/Logger/Logger.h"
+
 #include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+
 #include <filesystem>
+#include <limits>
 #include <format>
-#include <functional>
-#include <algorithm>
-#include <cfloat>
+
 #undef min
 #undef max
 
 using namespace Tsumi::Loader;
 using namespace Tsumi::Resource;
+namespace fs = std::filesystem;
+
+static std::string MakeDefaultDiffuseAlias(const std::string& baseAlias)
+{
+	return std::format("{}_diffuse", baseAlias);
+}
 
 HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 {
-	// パスの空チェック
 	if (fullPath.empty())
 		return E_INVALIDARG;
 
 	// key = 正規化パス（TextureLoader と同一ルール）
-	std::string key = Utils::Func::MakeKeyFromRoot("", fullPath);
-	
-	// 既読チェック
+	const std::string key = Utils::Func::MakeKeyFromRoot("", fullPath);
+
+	// 既読チェック（存在するなら alias を張って終わり）
 	if (TryResolveAlias(key, alias))
 		return S_OK;
 
-	// ファイル存在チェック
-	if (!std::filesystem::exists(fullPath))
+	if (!fs::exists(fullPath))
 		return E_FAIL;
 
 	Assimp::Importer importer;
-	// 読み込み時の後処理フラグ
-	// ・三角形化
-	// ・UV反転
-	// ・接線空間計算
-	// ・ノード変換を頂点にベイク (PreTransformVertices)
+
 	const unsigned int flags =
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace |
 		aiProcess_PreTransformVertices;
 
-	// aiProcess_FlipWindingOrder は不要
 	const aiScene* scene = importer.ReadFile(fullPath, flags);
-
-	// 読み込み失敗、またはメッシュが含まれていない場合は失敗
 	if (!scene || !scene->HasMeshes())
 		return E_FAIL;
 
-	// 登録処理
 	return RegisterFromScene(scene, key, alias);
 }
 
 HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
 {
-	// 読み込み失敗、またはメッシュが含まれていない場合は失敗
 	if (!scene || !scene->HasMeshes())
 		return E_FAIL;
 
-	// 既読チェック
 	if (TryResolveAlias(key, alias))
 		return S_OK;
 
-	// 登録処理
 	return RegisterFromScene(scene, key, alias);
 }
 
 HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
 {
 	auto* meshMgr = ResourceSystem::GetInstance()->GetMeshManager();
-	
+	if (!meshMgr) return E_POINTER;
+
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
-	// aiScene から Vertex / Index を生成
 	HRESULT hr = ParseScene(scene, vertices, indices);
 	if (FAILED(hr))
 		return hr;
 
-	// デフォルトテクスチャのキーを予測
-	std::string defaultTexKey = "";
-	if (scene->mNumMeshes > 0) {
-		unsigned int matIdx = scene->mMeshes[0]->mMaterialIndex;
-		defaultTexKey = alias + "_diffuse_" + std::to_string(matIdx);
+	std::string defaultTexRef = "";
+	{
+		auto* texMgr = ResourceSystem::GetInstance()->GetTextureManager();
+		if (texMgr)
+		{
+			const std::string defaultAlias = MakeDefaultDiffuseAlias(alias);
+			if (texMgr->HasAlias(defaultAlias)) {
+				defaultTexRef = defaultAlias; // alias を持つ
+			}
+		}
 	}
 
-	// GPU リソースの生成・登録は MeshManager に任せる
-	hr = meshMgr->RegisterMesh(key, vertices, indices, defaultTexKey);
+	hr = meshMgr->RegisterMesh(key, vertices, indices, defaultTexRef);
 	if (FAILED(hr))
 		return hr;
 
-	// alias → key の関連付けを登録
 	meshMgr->RegisterAlias(alias, key);
 	return S_OK;
 }
@@ -117,31 +118,23 @@ HRESULT MeshLoader::ParseScene(
 		if (!mesh || !mesh->HasPositions())
 			continue;
 
-		// -------------------------
-		// Vertex 展開
-		// -------------------------
+		// Vertex
 		for (unsigned int v = 0; v < mesh->mNumVertices; ++v)
 		{
 			const aiVector3D& p = mesh->mVertices[v];
 			Vertex dst{};
 
-			// -------------------------
-			// position
-			// -------------------------
+			// position（座標系合わせ）
 			dst.pos = { -p.x, p.y, p.z };
 
-			// -------------------------
 			// normal
-			// -------------------------
 			if (mesh->HasNormals())
 			{
 				const aiVector3D& n = mesh->mNormals[v];
 				dst.normal = { -n.x, n.y, -n.z };
 			}
 
-			// -------------------------
 			// UV
-			// -------------------------
 			if (mesh->HasTextureCoords(0))
 			{
 				const aiVector3D& uv = mesh->mTextureCoords[0][v];
@@ -151,9 +144,7 @@ HRESULT MeshLoader::ParseScene(
 			outVertices.push_back(dst);
 		}
 
-		// -------------------------
-		// Index 展開
-		// -------------------------
+		// Index
 		for (unsigned int f = 0; f < mesh->mNumFaces; ++f)
 		{
 			const aiFace& face = mesh->mFaces[f];
@@ -174,10 +165,11 @@ HRESULT MeshLoader::ParseScene(
 bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alias)
 {
 	auto* meshMgr = ResourceSystem::GetInstance()->GetMeshManager();
+	if (!meshMgr) return false;
 
 	if (meshMgr->HasKey(key)) {
 		meshMgr->RegisterAlias(alias, key);
-		return true; // すでに登録済み
+		return true;
 	}
 	return false;
 }

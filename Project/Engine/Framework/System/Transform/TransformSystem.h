@@ -39,7 +39,7 @@ private:
 	/// <summary>
 	/// 
 	/// </summary>
-	void UpdateRecursive(TransformComponent& tr, std::unordered_set<TransformComponent*>& visited);
+	void UpdateHierarchy(TransformComponent& tr);
 
 	/// <summary>
 	/// ノード更新

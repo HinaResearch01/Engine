@@ -179,9 +179,12 @@ void RenderPrepareSystem::BuildRenderPackets()
 		pkt.albedo = mr->albedo;
 
 		// フォールバックテクスチャ
-		if (!pkt.albedo && !mesh->defaultTextureKey.empty()) {
-			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
-			if (tex) pkt.albedo = tex;
+		if (!pkt.albedo) {
+			if (!mesh->defaultTextureKey.empty()) {
+				if (auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey)) {
+					pkt.albedo = tex;
+				}
+			}
 		}
 
 		pkt.castShadow = rc.castShadow;

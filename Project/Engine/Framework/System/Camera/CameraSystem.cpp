@@ -12,17 +12,17 @@ using namespace Tsumi::Framework;
 CameraSystem::CameraSystem(World& world)
 	: world_(world)
 {
-	BuildDefault(activeCtx_);
+	BuildDefault(defaultCtx_);
+	activeCtx_ = defaultCtx_;
 }
 
 void CameraSystem::Update(float)
 {
-	// 毎フレーム default を作る
-	BuildDefault(activeCtx_);
-
-	// カメラActorがあれば上書き
 	if (IActor* camActor = SelectCamera()) {
 		BuildFromActor(camActor, activeCtx_);
+	}
+	else {
+		activeCtx_ = defaultCtx_;
 	}
 }
 

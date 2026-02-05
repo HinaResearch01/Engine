@@ -1,7 +1,8 @@
 #include "ModelLoader.h"
+
 #include "Loader/Mesh/MeshLoader.h"
 #include "Loader/Tex/TextureLoader.h"
-#include "Utils/Logger/Logger.h"
+#include "Utils/Func/UtilFunc.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -9,11 +10,9 @@
 
 using namespace Tsumi::Loader;
 namespace fs = std::filesystem;
-using namespace DirectX;
 
 HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb)
 {
-	// パスチェック
 	if (fullPath.empty())
 		return E_INVALIDARG;
 
@@ -22,23 +21,16 @@ HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias,
 
 	Assimp::Importer importer;
 
-	// Assimp 後処理フラグ
-	// ・三角形化
-	// ・UV反転 (FlipUVs)
-	// ・接線空間計算
-	// ・ノード変換を頂点にベイク (PreTransformVertices)
 	const unsigned int flags =
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace |
 		aiProcess_PreTransformVertices;
 
-	// モデル読み込み（ここは 1 回だけ）
 	const aiScene* scene = importer.ReadFile(fullPath, flags);
 	if (!scene)
 		return E_FAIL;
 
-	// aiScene を各 Loader に流す
 	return LoadFromScene(scene, fullPath, alias, srgb);
 }
 
@@ -47,29 +39,23 @@ HRESULT ModelLoader::LoadFromScene(const aiScene* scene, const std::string& full
 	if (!scene)
 		return E_FAIL;
 
+	const std::string modelKey = Utils::Func::MakeKeyFromRoot("", fullPath);
+
 	HRESULT hr = S_OK;
 
-	// -------------------------
-	// Mesh 登録
-	// -------------------------
-	if (scene->HasMeshes()) {
-		hr = MeshLoader::LoadFromScene(
-			scene,
-			fullPath,
-			alias);
-		if (FAILED(hr))
+	// 1) Texture
+	if (scene->HasMaterials())
+	{
+		hr = TextureLoader::LoadFromScene(scene, fullPath, alias, srgb);
+		if (FAILED(hr)) {
 			return hr;
+		}
 	}
 
-	// -------------------------
-	// Texture 登録
-	// -------------------------
-	if (scene->HasMaterials()) {
-		hr = TextureLoader::LoadFromScene(
-			scene,
-			fullPath,
-			alias,
-			srgb);
+	// 2) Mesh
+	if (scene->HasMeshes())
+	{
+		hr = MeshLoader::LoadFromScene(scene, modelKey, alias);
 		if (FAILED(hr))
 			return hr;
 	}

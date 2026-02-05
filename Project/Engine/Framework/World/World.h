@@ -45,6 +45,7 @@ public:
 		// 基本Update順に追加(内部で順操作はある)
 		AddSystem<TransformSystem>();
 		AddSystem<CameraSystem>();
+		AddSystem<MaterialSystem>();
 		AddSystem<LightSystem>();
 		AddSystem<ShadowSystem>();
 		AddSystem<RenderPrepareSystem>();
