@@ -14,7 +14,8 @@ namespace {
 inline bool HRFailed(HRESULT hr, const char* where)
 {
 	if (FAILED(hr)) {
-		Tsumi::Utils::Logger::Error("{} (hr=0x{:08X})\n", where, static_cast<unsigned>(hr));
+		Tsumi::Utils::Logger::Error(
+			where, "hr:", static_cast<unsigned>(hr));
 		return true;
 	}
 	return false;

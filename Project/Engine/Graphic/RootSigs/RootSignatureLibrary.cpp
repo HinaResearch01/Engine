@@ -73,17 +73,22 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 
 	if (FAILED(hr)) {
 		if (errorBlob) {
-			// エラーメッセージも UTF-16 に変換
-			std::string err((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize());
+			std::string err(
+				static_cast<const char*>(errorBlob->GetBufferPointer()),
+				errorBlob->GetBufferSize());
+
 			std::wstring werr = Utils::Func::Utf8ToWstring(err);
+
 			Utils::Logger::Error(
-				"RootSignatureLibrary::Register - シリアライズエラー '{}': {}\n",
-				wname, werr);
+				"RootSignatureLibrary::Register serialize error",
+				"name:", wname,
+				"message:", werr);
 		}
 		else {
 			Utils::Logger::Error(
-				"RootSignatureLibrary::Register - シリアライズに失敗 '{}', hr=0x{:08X}\n",
-				wname, static_cast<unsigned>(hr));
+				"RootSignatureLibrary::Register serialize failed",
+				"name:", wname,
+				"hr:", static_cast<unsigned>(hr));
 		}
 		throw std::runtime_error("RootSignature serialize failed: " + name);
 	}
@@ -111,8 +116,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 	}
 
 	Utils::Logger::Info(
-		"RootSignatureLibrary::Register - 登録完了 ",
-		wname);
+		"RootSignatureLibrary::Register - 登録完了 ", 	wname);
 }
 
 void RootSignatureLibrary::CreateObject3D()

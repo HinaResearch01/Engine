@@ -25,26 +25,34 @@ HRESULT DX12Device::Create()
 #ifdef _DEBUG
 	hr = CreateDebugLayer();
 	if (FAILED(hr)) {
-		Utils::Logger::Warn("CreateDebugLayer failed (hr=0x{:08X})\n", (unsigned)hr);
+		Utils::Logger::Warn(
+			"CreateDebugLayer failed",
+			"hr:", static_cast<unsigned>(hr));
 	}
 #endif
 
 	hr = CreateFactoryAndAdapter();
 	if (FAILED(hr)) {
-		Utils::Logger::Error("CreateFactoryAndAdapter failed (hr=0x{:08X})\n", (unsigned)hr);
+		Utils::Logger::Error(
+			"CreateFactoryAndAdapter failed",
+			"hr:", static_cast<unsigned>(hr));
 		return hr;
 	}
 
 	hr = CreateDevice();
 	if (FAILED(hr)) {
-		Utils::Logger::Error("CreateDevice failed (hr=0x{:08X})", (unsigned)hr);
+		Utils::Logger::Error(
+			"CreateDevice failed",
+			"hr:", static_cast<unsigned>(hr));
 		return hr;
 	}
 
 #ifdef _DEBUG
 	hr = DebugErrorInfoQueue();
 	if (FAILED(hr)) {
-		Utils::Logger::Warn("DebugErrorInfoQueue failed (hr=0x{:08X})", (unsigned)hr);
+		Utils::Logger::Warn(
+			"DebugErrorInfoQueue failed", 
+			"hr:", (unsigned)hr);
 	}
 #endif
 
@@ -80,7 +88,9 @@ HRESULT DX12Device::CreateFactoryAndAdapter()
 	HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory_));
 #endif
 	if (FAILED(hr) || !factory_) {
-		Utils::Logger::Error("CreateDXGIFactory failed (hr=0x{:08X})\n", (unsigned)hr);
+		Utils::Logger::Error(
+			"CreateDXGIFactory failed",
+			"hr", (unsigned)hr);
 		return hr;
 	}
 
@@ -90,11 +100,12 @@ HRESULT DX12Device::CreateFactoryAndAdapter()
 		ComPtr<IDXGIAdapter1> adapter;
 		hr = factory_->EnumAdapters1(i, &adapter);
 		if (hr == DXGI_ERROR_NOT_FOUND) {
-			Utils::Logger::Error("No hardware adapter found\n");
+			Utils::Logger::Error("No hardware adapter found");
 			break;
 		}
 		if (FAILED(hr)) {
-			Utils::Logger::Warn("EnumAdapters1 failed (i={})\n", i);
+			Utils::Logger::Warn(
+				"EnumAdapters1 failed", "i:", i);
 			continue;
 		}
 
@@ -117,7 +128,7 @@ HRESULT DX12Device::CreateFactoryAndAdapter()
 HRESULT DX12Device::CreateDevice()
 {
 	if (!useAdapter_) {
-		Utils::Logger::Error("CreateDevice: adapter is null\n");
+		Utils::Logger::Error("CreateDevice: adapter is null");
 		return E_POINTER;
 	}
 
@@ -130,7 +141,8 @@ HRESULT DX12Device::CreateDevice()
 	device_.Reset();
 
 	for (auto fl : levels) {
-		Utils::Logger::Info("Try D3D12CreateDevice FL = ", (int)fl);
+		Utils::Logger::Info(
+			"Try D3D12CreateDevice", "FL:", static_cast<int>(fl));
 
 		HRESULT hr = D3D12CreateDevice(
 			useAdapter_.Get(),
@@ -139,17 +151,17 @@ HRESULT DX12Device::CreateDevice()
 		);
 
 		if (SUCCEEDED(hr) && device_) {
-			Utils::Logger::Info("D3D12Device created FL = ", (int)fl);
+			Utils::Logger::Info("D3D12Device created", "FL:", static_cast<int>(fl));
 			return S_OK;
 		}
 
 		Utils::Logger::Warn(
-			"D3D12CreateDevice failed (FL={}, hr=0x{:08X})\n",
-			(int)fl, (unsigned)hr
-		);
+			"D3D12CreateDevice failed",
+			"FL:", static_cast<int>(fl),
+			"hr:", static_cast<unsigned>(hr));
 	}
 
-	Utils::Logger::Error("All feature levels failed in D3D12CreateDevice\n");
+	Utils::Logger::Error("All feature levels failed in D3D12CreateDevice");
 	return E_FAIL;
 }
 
@@ -161,7 +173,7 @@ HRESULT DX12Device::DebugErrorInfoQueue()
 	ComPtr<ID3D12InfoQueue> q;
 	HRESULT hr = device_.As(&q);
 	if (FAILED(hr) || !q) {
-		Utils::Logger::Warn("ID3D12InfoQueue not available\n");
+		Utils::Logger::Warn("ID3D12InfoQueue not available");
 		return hr;
 	}
 

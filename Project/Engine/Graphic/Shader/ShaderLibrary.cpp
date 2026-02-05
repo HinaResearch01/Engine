@@ -143,8 +143,10 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		const std::wstring entryPoint = Tsumi::Utils::Func::Utf8ToWstring(entryUtf8);
 
 		Tsumi::Utils::Logger::Info(
-			"[ShaderLibrary] Begin CompileShader, path:{}, stage:{}, entry:{}\n",
-			filePath, static_cast<int>(stage), Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
+			"[ShaderLibrary] Begin CompileShader, path:",
+			filePath,
+			"stage:", static_cast<int>(stage),
+			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
 
 		// -------------------------------
 		// HLSL 読み込み
@@ -152,7 +154,9 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 		hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 		if (FAILED(hr) || !shaderSource) {
-			Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to load shader file: {}\n", filePath);
+			Tsumi::Utils::Logger::Error(
+				"[ShaderLibrary] Failed to load shader", 
+				"file", filePath);
 			return hr;
 		}
 
@@ -185,8 +189,10 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		);
 		if (FAILED(hr) || !shaderResult) {
 			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC Compile failed: {} stage:{} entry:{}\n",
-				filePath, static_cast<int>(stage), entryPoint);
+				"[ShaderLibrary] DXC Compile failed:",
+				"file", filePath, 
+				"stage", static_cast<int>(stage), 
+				"entry", entryPoint);
 			return hr;
 		}
 
@@ -198,10 +204,12 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 
 		if (shaderError && shaderError->GetStringLength() != 0)
 		{
-			// 既存の方針：警告も含めて出たら止める（あなたの実装に合わせる）
+			// 既存の方針：警告も含めて出たら止める
 			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC error/warning ({}):\n{}",
-				filePath, Tsumi::Utils::Func::Utf8ToWstring(shaderError->GetStringPointer()));
+				"[ShaderLibrary] DXC error/warning",
+				"file:", filePath,
+				"message:", Tsumi::Utils::Func::Utf8ToWstring(
+				shaderError->GetStringPointer()));
 			return E_FAIL;
 		}
 
@@ -212,13 +220,24 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 		if (FAILED(hr) || !shaderBlob) {
 			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC: failed to get compiled object for {}\n", filePath);
+				"[ShaderLibrary] DXC failed to get compiled object",
+				"file:", filePath,
+				"hr:", static_cast<unsigned>(hr));
 			return hr;
 		}
 
 		Tsumi::Utils::Logger::Info(
-			"[ShaderLibrary] Compile Succeeded, path:{}, profile:{}, entry:{}\n",
-			filePath, profile, entryPoint);
+			"[ShaderLibrary] Compile Succeeded, ",
+			filePath,
+			"stage:", static_cast<int>(stage),
+			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
+
+		Tsumi::Utils::Logger::Info(
+			"[ShaderLibrary] Compile succeeded",
+			"file:", filePath,
+			"profile:", profile,
+			"stage:", static_cast<int>(stage),
+			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
 
 		compiled.blob[stage] = shaderBlob;
 	}

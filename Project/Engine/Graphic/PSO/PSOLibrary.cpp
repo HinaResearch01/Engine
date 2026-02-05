@@ -52,8 +52,9 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 
 	if (FAILED(hr) || !pso) {
 		Utils::Logger::Error(
-			"PSOLibrary::RegisterFromDesc - CreateGraphicsPipelineState failed '{}', hr=0x{:08X}\n",
-			wname, static_cast<unsigned>(hr));
+			"PSOLibrary::RegisterFromDesc - CreateGraphicsPipelineState failed",
+			"name:", wname, 
+			"hr", static_cast<unsigned>(hr));
 		throw std::runtime_error("PSO create failed: " + name);
 	}
 

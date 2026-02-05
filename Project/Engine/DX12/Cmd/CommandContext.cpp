@@ -61,8 +61,9 @@ HRESULT CommandContext::ResetForFrame(UINT frameIndex)
 	if (isListOpen_) {
 		HRESULT hrClose = list_->Close();
 		if (FAILED(hrClose)) {
-			Utils::Logger::Error("CommandContext::ResetForFrame - Close failed (hr=0x{:08X})\n",
-								 (unsigned)hrClose);
+			Utils::Logger::Error(
+				"CommandContext::ResetForFrame - Close failed",
+				"hr", (unsigned)hrClose);
 			return hrClose;
 		}
 		isListOpen_ = false;
@@ -70,15 +71,17 @@ HRESULT CommandContext::ResetForFrame(UINT frameIndex)
 
 	HRESULT hr = allocators_[frameIndex]->Reset();
 	if (FAILED(hr)) {
-		Utils::Logger::Error("CommandContext::ResetForFrame - allocator Reset failed (hr=0x{:08X})\n",
-							 (unsigned)hr);
+		Utils::Logger::Error(
+			"CommandContext::ResetForFrame - allocator Reset failed",
+			"hr",(unsigned)hr);
 		return hr;
 	}
 
 	hr = list_->Reset(allocators_[frameIndex].Get(), nullptr);
 	if (FAILED(hr)) {
-		Utils::Logger::Error("CommandContext::ResetForFrame - list Reset failed (hr=0x{:08X})\n",
-							 (unsigned)hr);
+		Utils::Logger::Error(
+			"CommandContext::ResetForFrame - list Reset failed",
+			"hr", (unsigned)hr);
 		return hr;
 	}
 
@@ -95,8 +98,9 @@ HRESULT CommandContext::Execute()
 	if (isListOpen_) {
 		HRESULT hr = list_->Close();
 		if (FAILED(hr)) {
-			Utils::Logger::Error("CommandContext::Execute - Close failed (hr=0x{:08X})\n",
-								 (unsigned)hr);
+			Utils::Logger::Error(
+				"CommandContext::Execute - Close failed",
+				"hr", (unsigned)hr);
 			return hr;
 		}
 		isListOpen_ = false;

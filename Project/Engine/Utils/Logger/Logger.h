@@ -1,13 +1,14 @@
 #pragma once
 
-#if defined(_WIN32)
-#include <Windows.h>
-#endif
-
 #include <string>
 #include <string_view>
+#include <vector>
+#include <memory>
+#include <mutex>
 #include <sstream>
 #include <type_traits>
+
+#include "ILogSink.h"
 
 namespace Tsumi::Utils {
 
@@ -18,6 +19,8 @@ public:
 		Warn,
 		Error
 	};
+
+	static void AddSink(std::unique_ptr<ILogSink> sink);
 
 	template<typename... Args>
 	static void Info(std::string_view msg, Args&&... args) {
@@ -35,47 +38,19 @@ public:
 	}
 
 private:
-	// ----------------------------
-	// wchar → UTF-8
-	// ----------------------------
-	static std::string ToString(const std::wstring& ws)
-	{
-#if defined(_WIN32)
-		if (ws.empty()) return {};
-		int size = WideCharToMultiByte(
-			CP_UTF8, 0,
-			ws.data(), static_cast<int>(ws.size()),
-			nullptr, 0, nullptr, nullptr
-		);
-		std::string result(size, '\0');
-		WideCharToMultiByte(
-			CP_UTF8, 0,
-			ws.data(), static_cast<int>(ws.size()),
-			result.data(), size, nullptr, nullptr
-		);
-		return result;
-#else
-		return std::string(ws.begin(), ws.end());
-#endif
-	}
+	static std::string ToLevelString(Level level);
 
-	static std::string ToString(const wchar_t* ws)
-	{
-		return ws ? ToString(std::wstring(ws)) : std::string{};
-	}
+	// wchar → UTF-8
+	static std::string ToString(const std::wstring& ws);
+	static std::string ToString(const wchar_t* ws);
 
 	template<size_t N>
-	static std::string ToString(const wchar_t(&ws)[N])
-	{
+	static std::string ToString(const wchar_t(&ws)[N]) {
 		return ToString(std::wstring(ws));
 	}
 
-	// ----------------------------
-	// 引数をストリームに追加
-	// ----------------------------
 	template<typename T>
-	static void Append(std::ostringstream& oss, T&& v)
-	{
+	static void Append(std::ostringstream& oss, T&& v) {
 		using U = std::remove_cvref_t<T>;
 
 		if constexpr (
@@ -83,12 +58,10 @@ private:
 			std::is_same_v<U, wchar_t*> ||
 			std::is_same_v<U, const wchar_t*> ||
 			(std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, wchar_t>)
-			)
-		{
+			) {
 			oss << ToString(v);
 		}
-		else
-		{
+		else {
 			oss << std::forward<T>(v);
 		}
 	}
@@ -98,28 +71,26 @@ private:
 	{
 #if defined(_DEBUG)
 		std::ostringstream oss;
+
+		oss << "[Tsumi] " << ToLevelString(level) << " ";
 		oss << msg;
-
-		// ★ 正しいフォールド式
 		((oss << ' ', Append(oss, std::forward<Args>(args))), ...);
+		oss << '\n';
 
-		const char* levelStr =
-			(level == Level::Info) ? "[INFO] " :
-			(level == Level::Warn) ? "[WARN] " :
-			"[ERROR] ";
-
-		std::string output =
-			std::string("[Tsumi] ") + levelStr + oss.str() + "\n";
-
-#if defined(_WIN32)
-		OutputDebugStringA(output.c_str());
-#endif
+		std::lock_guard<std::mutex> lock(mutex_);
+		for (auto& sink : sinks_) {
+			sink->Write(oss.str());
+		}
 #else
 		(void)level;
 		(void)msg;
 		((void)args, ...);
 #endif
 	}
+
+private:
+	static inline std::vector<std::unique_ptr<ILogSink>> sinks_;
+	static inline std::mutex mutex_;
 };
 
-} // namespace Tsumi::Utils
+}

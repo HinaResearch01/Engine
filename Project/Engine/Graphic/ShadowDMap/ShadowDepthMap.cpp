@@ -84,7 +84,7 @@ void ShadowDepthMap::Create(uint32_t size)
 	);
 	assert(SUCCEEDED(hr));
 	if (FAILED(hr)) {
-		Utils::Logger::Error("ShadowDepthMap: CreateCommittedResource failed\n");
+		Utils::Logger::Error("ShadowDepthMap: CreateCommittedResource failed");
 		return;
 	}
 
@@ -133,7 +133,7 @@ void ShadowDepthMap::CreateViews()
 	srv_ = alloc->Allocate(1);
 	assert(srv_.valid());
 	if (!srv_.valid()) {
-		Tsumi::Utils::Logger::Error("ShadowDepthMap: SRV Allocate failed\n");
+		Tsumi::Utils::Logger::Error("ShadowDepthMap: SRV Allocate failed");
 		return;
 	}
 

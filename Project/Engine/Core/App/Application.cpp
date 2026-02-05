@@ -1,7 +1,6 @@
 #include "Application.h"
 #include <stdexcept>
 #include <memory>
-#include "Utils/Logger/Logger.h"
 #include "Win/Win32Window.h"
 #include "DX12/DX12Manager.h"
 #include "Graphic/Shader/ShaderLibrary.h"
@@ -9,11 +8,16 @@
 #include "Graphic/PSO/PSOLibrary.h"
 #include "Resource/ResourceSystem.h"
 #include "ThirdParty/ImGui/ImGuiManager.h"
+#include "Utils/Logger/Logger.h"
+#include "Utils/Logger/DebugOutputSink.h"
+#include "Utils/Logger/FileSink.h"
 
 using namespace Tsumi;
 
 Application::Application()
 {
+	Utils::Logger::AddSink(std::make_unique<Utils::DebugOutputSink>());
+	Utils::Logger::AddSink(std::make_unique<Utils::FileSink>("TsumiEngine.log"));
     window_ = Win32::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();

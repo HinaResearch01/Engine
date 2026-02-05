@@ -59,8 +59,8 @@ HRESULT Tsumi::DX12::SwapChain::Present(UINT syncInterval, UINT flags)
     HRESULT hr = swapChain_->Present(syncInterval, flags);
     if (FAILED(hr)) {
         Utils::Logger::Error(
-			"SwapChain::Present failed (hr=0x{:08X})\n", 
-			static_cast<unsigned>(hr));
+			"SwapChain::Present failed",
+			"hr", static_cast<unsigned>(hr));
     }
     return hr;
 }
@@ -80,8 +80,9 @@ HRESULT SwapChain::GetBuffer(UINT index, ID3D12Resource** outResource) const
     HRESULT hr = swapChain_->GetBuffer(index, IID_PPV_ARGS(outResource));
     if (FAILED(hr)) {
         Utils::Logger::Error(
-			"SwapChain::GetBuffer failed for index {} (hr=0x{:08X})\n", 
-			index, static_cast<unsigned>(hr));
+			"SwapChain::GetBuffer failed for index", 
+			"index", static_cast<UINT>(index), 
+			"hr", static_cast<unsigned>(hr));
     }
     return hr;
 }
