@@ -21,6 +21,7 @@ void PSOLibrary::Init()
 	CreateGBuffer();
 	CreateLightingDirectional();
 	CreateDebugFullScreen();
+	CreateShadowCaster();
 }
 
 void PSOLibrary::Register(const std::string& name, PSODesc& pso)
@@ -61,7 +62,7 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 		psos_[name] = pso;
 	}
 
-	Utils::Logger::Info("PSOLibrary::RegisterFromDesc - 登録完了 '{}'\n", wname);
+	Utils::Logger::Info("PSOLibrary::RegisterFromDesc - 登録完了", wname);
 }
 
 void PSOLibrary::CreateObject3D()
@@ -198,4 +199,44 @@ void PSOLibrary::CreateDebugFullScreen()
 	pso.SetCullMode(D3D12_CULL_MODE_NONE);
 
 	Register("DebugFullScreen", pso);
+}
+
+void PSOLibrary::CreateShadowCaster()
+{
+	PSODesc pso;
+
+	pso.SetRootSignature(rootSignsLib_->Get("ShadowCaster"));
+
+	auto vs = shaderLib_->Get("ShadowCaster", ShaderType::VS);
+	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+
+	// PS は無し（Depth Only）
+	pso.ClearPS();
+
+	// InputLayout
+	std::vector<D3D12_INPUT_ELEMENT_DESC> il = {
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	};
+	pso.SetInputLayout(il);
+
+	// RenderTargetなし
+	pso.SetRTVFormats(0, nullptr);
+	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
+
+	// Depth ON
+	pso.EnableDepth(true);
+	pso.SetDepthWrite(true);
+	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
+
+	// Rasterizer
+	pso.SetCullMode(D3D12_CULL_MODE_BACK);
+
+	// Depth bias（
+	pso.SetDepthBias(1000);
+	pso.SetSlopeScaledDepthBias(1.0f);
+	pso.SetDepthBiasClamp(0.0f);
+
+	Register("ShadowCaster", pso);
 }

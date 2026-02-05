@@ -21,6 +21,7 @@ void RootSignatureLibrary::Init()
 	CreateGBuffer();
 	CreateLightingDirectional();
 	CreateDebugFullScreen();
+	CreateShadowCaster();
 }
 
 void RootSignatureLibrary::Register(const std::string& name, RootSignatureDesc& rs)
@@ -218,4 +219,16 @@ void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);
 
 	Register("DebugFullScreen", rs);
+}
+
+void RootSignatureLibrary::CreateShadowCaster()
+{
+	RootSignatureDesc rs;
+
+	// VS only
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0 ShadowCasterCB
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b1 Object Transform
+
+	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	Register("ShadowCaster", rs);
 }

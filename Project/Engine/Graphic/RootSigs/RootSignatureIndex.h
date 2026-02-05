@@ -47,4 +47,12 @@ enum class Root_DebugFullScreen : uint32_t {
 	GBufferTable = 3, // t10..t13
 };
 
+/// ============================
+/// ShadowCaster (Depth Only)
+/// ============================
+enum class Root_ShadowCaster : uint32_t {
+	ShadowCB = 0, // b0 VS
+	ObjectCB = 1, // b1 VS
+};
+
 } 

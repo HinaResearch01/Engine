@@ -7,4 +7,9 @@ struct TransformCB
     row_major float4x4 worldInverseTranspose;
 };
 
+struct ShadowCasterTransformCB
+{
+    row_major float4x4 world; // b1
+};
+
 #endif

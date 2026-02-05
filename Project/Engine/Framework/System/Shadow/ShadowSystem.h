@@ -49,7 +49,8 @@ private:
 	///  CSM の Texel Snapping
 	/// Ortho の XY 範囲を texel グリッドにスナップして “泳ぎ” を抑える
 	/// </summary>
-	void SnapOrthoAABBToTexel(Math::Vec3f& minLS, Math::Vec3f& maxLS, uint32_t shadowMapSize);
+	void SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, 
+						  float orthoHeight, uint32_t shadowMapSize);
 
 private:
 	ShadowContext context_{};

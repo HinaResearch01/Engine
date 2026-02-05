@@ -70,6 +70,7 @@ private:
 	void CreateGBuffer();
 	void CreateLightingDirectional();
 	void CreateDebugFullScreen();
+	void CreateShadowCaster();
 
 private:
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> psos_;

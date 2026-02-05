@@ -1086,6 +1086,9 @@
     <Filter Include="Engine\Framework\Context">
       <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders\Shadow">
+      <UniqueIdentifier>{dfdf0476-2737-4e42-a59f-08fd4bbddbd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\DirectXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc">
@@ -1237,12 +1240,6 @@
     <FxCompile Include="Resources\Shaders\VS\Object3D_Static.VS.hlsl">
       <Filter>Resources\Shaders\VS</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\PS\ShadowCaster_Directional.PS.hlsl">
-      <Filter>Resources\Shaders\PS</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\VS\ShadowCaster_Directional.VS.hlsl">
-      <Filter>Resources\Shaders\VS</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
@@ -1254,6 +1251,9 @@
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.PS.hlsl">
       <Filter>Resources\Shaders\Debug</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster_Directional.VS.hlsl">
+      <Filter>Resources\Shaders\Shadow</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -92,6 +92,16 @@ void ShaderLibrary::CompileAllShader()
 		tryCompile("DebugFullscreen", m);
 	}
 
+	// -------------------------------
+	// Shadow : ShadowCaster (Depth Only)
+	// -------------------------------
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Shadow/ShadowCaster.VS.hlsl", "main" };
+		// PS は不要（Depth Only）
+		tryCompile("ShadowCaster", m);
+	}
+
 	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader - completed (errors were logged per-shader if any)");
 }
 
@@ -158,7 +168,7 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 
 		LPCWSTR arguments[] = {
 			filePath.c_str(),
-			L"-E", entryPoint.c_str(),        // ★ ここが main 固定じゃない
+			L"-E", entryPoint.c_str(),  
 			L"-T", profile,
 			L"-Zi", L"-Qembed_debug",
 			L"-Od",

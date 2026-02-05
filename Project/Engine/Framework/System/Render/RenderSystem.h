@@ -106,12 +106,18 @@ private:
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
 
+	void BindShadowCommon(
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep,
+		uint32_t cascadeIndex);
+
 	// =========================================================
 	// Draw helpers
 	// =========================================================
 	void DrawShadowCasters(
 		DX12::CommandContext& cmd,
-		DX12::FrameResources& frame);
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
 
 private:
 	// Shadow

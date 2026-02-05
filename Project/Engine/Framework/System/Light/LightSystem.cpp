@@ -37,24 +37,23 @@ void LightSystem::BuildLightContext()
 	// ============================================================
 	// 1) Directional Light
 	// ============================================================
+	auto view = world_.View<TransformComponent, DirectionalLightComponent>();
+	auto it = view.begin();
+	if (it != view.end())
 	{
-		for (auto [tr, dl] : world_.View<TransformComponent, DirectionalLightComponent>())
-		{
-			// 最初の1個だけ使う
-			Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
+		auto [tr, dl] = *it;
 
-			Math::Vec3f radiance{
-				dl.color.x * dl.intensity,
-				dl.color.y * dl.intensity,
-				dl.color.z * dl.intensity
-			};
+		Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
 
-			ctx.directional.enabled = true;
-			ctx.directional.dirWS = dirWS;
-			ctx.directional.radiance = radiance;
+		Math::Vec3f radiance{
+			dl.color.x * dl.intensity,
+			dl.color.y * dl.intensity,
+			dl.color.z * dl.intensity
+		};
 
-			break;
-		}
+		ctx.directional.enabled = true;
+		ctx.directional.dirWS = dirWS;
+		ctx.directional.radiance = radiance;
 	}
 
 	// ============================================================

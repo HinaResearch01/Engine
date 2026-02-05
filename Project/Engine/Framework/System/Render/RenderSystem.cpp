@@ -31,7 +31,47 @@ void RenderSystem::Update(float)
 
 void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
-	cmd, frame, prep;
+	auto* list = cmd.GetList();
+	if (!list) return;
+
+	const auto& shadowPkt = prep.GetShadowPacket();
+	if (!shadowPkt.csmCB.enabled || shadowPkt.csmCB.cascadeCount == 0)
+		return;
+
+	// Shadow resource sync
+	SyncShadowResources();
+
+	// PSO / RootSignature
+	list->SetGraphicsRootSignature(rsLib_->Get("ShadowCaster"));
+	list->SetPipelineState(psoLib_->Get("ShadowCaster"));
+
+	// Viewport / Scissor（正方形）
+	const float size = static_cast<float>(shadowDMap_->GetSize());
+	D3D12_VIEWPORT vp{ 0.0f, 0.0f, size, size, 0.0f, 1.0f };
+	D3D12_RECT sc{ 0, 0, (LONG)size, (LONG)size };
+	list->RSSetViewports(1, &vp);
+	list->RSSetScissorRects(1, &sc);
+
+	for (uint32_t ci = 0; ci < shadowPkt.csmCB.cascadeCount; ++ci)
+	{
+		// --- DSV bind & clear ---
+		list->OMSetRenderTargets(
+			0, nullptr, FALSE,
+			shadowDMap_->GetDSVPtr()
+		);
+
+		list->ClearDepthStencilView(
+			shadowDMap_->GetDSV(),
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f, 0, 0, nullptr
+		);
+
+		// --- Cascade 固有 CB ---
+		BindShadowCommon(frame, prep, ci);
+
+		// --- Draw casters ---
+		DrawShadowCasters(cmd, frame, prep);
+	}
 }
 
 void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
@@ -91,6 +131,23 @@ void RenderSystem::OnResize(uint32_t w, uint32_t h)
 
 void RenderSystem::SyncShadowResources()
 {
+	auto shadowSys = world_.GetSystem<ShadowSystem>();
+	const ShadowContext& ctx = shadowSys->GetContext();
+
+	if (!ctx.enabled || ctx.shadowMapSize == 0)
+		return;
+
+	if (!shadowDMap_) {
+		shadowDMap_ = std::make_unique<Graphic::ShadowDepthMap>();
+		shadowDMap_->Init(ctx.shadowMapSize);
+		cachedShadowSize_ = ctx.shadowMapSize;
+		return;
+	}
+
+	if (cachedShadowSize_ != ctx.shadowMapSize) {
+		shadowDMap_->Resize(ctx.shadowMapSize);
+		cachedShadowSize_ = ctx.shadowMapSize;
+	}
 }
 
 void RenderSystem::BindGBufferCamera(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
@@ -110,7 +167,6 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 	auto* list = cmd.GetList();
 	if (!list) return;
 
-	// Opaqueだけ抽出
 	const auto& buckets = prep.GetRenderPackets();
 	const auto& gbufferList = buckets[static_cast<size_t>(SurfaceType::Opaque)];
 
@@ -118,8 +174,8 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 
 	for (const auto& pkt : gbufferList) {
 
-		if (!pkt.mesh || !pkt.material) continue;
-		if (!pkt.material->albedo) continue;
+		if (!pkt.mesh) continue;
+		if (!pkt.albedo) continue; // フォールバック済み前提なら assert でもOK
 
 		// IA
 		list->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
@@ -130,11 +186,11 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 		frame.bind.SetTable(ToRoot(Root_GBuffer::ObjectCB), objHandle);
 
 		// MaterialCB (b2)
-		auto matHandle = frame.UploadToTableCB(pkt.material->cb);
+		auto matHandle = frame.UploadToTableCB(pkt.materialCB);
 		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialCB), matHandle);
 
-		// Albedo SRV table (t0)
-		frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.material->albedo->srv.gpu);
+		// Albedo SRV (t0)
+		frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.albedo->srv.gpu);
 
 		// Draw
 		list->DrawIndexedInstanced(pkt.mesh->indexCount, 1, 0, 0, 0);
@@ -183,7 +239,44 @@ void RenderSystem::BindDebugCommon(DX12::FrameResources& frame, const RenderPrep
 	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::GBufferTable), dx12Mgr_->GetGBufferSrvTable());
 }
 
-void RenderSystem::DrawShadowCasters(DX12::CommandContext& cmd, DX12::FrameResources& frame)
+void RenderSystem::BindShadowCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep, uint32_t cascadeIndex)
 {
-	cmd, frame;
+	using namespace Tsumi::Graphic::RootIndex;
+
+	const auto& shadowPkt = prep.GetShadowPacket();
+
+	Tsumi::Framework::GpuShadowCasterCB cb{};
+	cb.lightViewProj = shadowPkt.csmCB.shadowViewProj[cascadeIndex];
+
+	auto handle = frame.UploadToTableCB(cb);
+	frame.bind.SetTable(ToRoot(Root_ShadowCaster::ShadowCB), handle);
+}
+
+void RenderSystem::DrawShadowCasters(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+{
+	using namespace Tsumi::Graphic::RootIndex;
+
+	auto* list = cmd.GetList();
+	if (!list) return;
+
+	const auto& buckets = prep.GetRenderPackets();
+	const auto& opaques = buckets[static_cast<size_t>(SurfaceType::Opaque)];
+
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (const auto& pkt : opaques)
+	{
+		if (!pkt.castShadow) continue;
+		if (!pkt.mesh) continue;
+
+		list->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
+		list->IASetIndexBuffer(&pkt.mesh->ibView);
+
+		auto objHandle = frame.UploadToTableCB(pkt.xform);
+		frame.bind.SetTable(ToRoot(Root_ShadowCaster::ObjectCB), objHandle);
+
+		list->DrawIndexedInstanced(
+			pkt.mesh->indexCount, 1, 0, 0, 0
+		);
+	}
 }

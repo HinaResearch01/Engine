@@ -29,6 +29,7 @@ void PSODesc::SetRootSignature(ID3D12RootSignature* rs)
 
 void PSODesc::SetVS(const D3D12_SHADER_BYTECODE& vs) { vs_ = vs; }
 void PSODesc::SetPS(const D3D12_SHADER_BYTECODE& ps) { ps_ = ps; }
+void PSODesc::ClearPS() { ps_ = {}; }
 
 void PSODesc::SetRTVFormats(UINT count, const DXGI_FORMAT* fmts)
 {
@@ -112,6 +113,21 @@ void PSODesc::SetDepthWrite(bool enable)
 {
 	desc_.DepthStencilState.DepthWriteMask =
 		enable ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+}
+
+void PSODesc::SetDepthBias(int32_t bias)
+{
+	desc_.RasterizerState.DepthBias = bias;
+}
+
+void PSODesc::SetSlopeScaledDepthBias(float bias)
+{
+	desc_.RasterizerState.SlopeScaledDepthBias = bias;
+}
+
+void PSODesc::SetDepthBiasClamp(float clamp)
+{
+	desc_.RasterizerState.DepthBiasClamp = clamp;
 }
 
 void PSODesc::SetInputLayout(const std::vector<D3D12_INPUT_ELEMENT_DESC>& elems)

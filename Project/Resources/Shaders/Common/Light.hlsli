@@ -9,4 +9,9 @@ struct DirectionalLightMatricesCB
     float3 position;
 };
 
+struct ShadowCasterLightMatricesCB
+{
+    row_major float4x4 lightViewProj;
+};
+
 #endif

@@ -7,7 +7,7 @@
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
-namespace Tsumi::Resource { class TextureAsset;  }
+namespace Tsumi::Resource { struct TextureAsset;  }
 
 namespace Tsumi::Framework {
 

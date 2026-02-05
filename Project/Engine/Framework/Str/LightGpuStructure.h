@@ -46,7 +46,7 @@ struct GpuSpotLightCB {
 struct GpuShadowCSMCB
 {
 	int enabled;
-	int cascadeCount;
+	uint32_t cascadeCount;
 	float shadowMapSize;
 	float invShadowMapSize;
 

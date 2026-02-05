@@ -1,7 +1,9 @@
 #pragma once
+
 #include <vector>
 #include <d3d12.h>
 #include <d3dx12.h>
+#include <cstdint>
 
 namespace Tsumi::Graphic {
 
@@ -13,6 +15,7 @@ enum class BlendMode {
 };
 
 class PSODesc {
+
 public:
 	PSODesc();
 
@@ -22,6 +25,7 @@ public:
 	// Shader
 	void SetVS(const D3D12_SHADER_BYTECODE& vs);
 	void SetPS(const D3D12_SHADER_BYTECODE& ps);
+	void ClearPS();
 
 	// Formats
 	void SetRTVFormats(UINT count, const DXGI_FORMAT* fmts);
@@ -37,6 +41,11 @@ public:
 	void EnableDepth(bool enable);
 	void SetDepthFunc(D3D12_COMPARISON_FUNC func);
 	void SetDepthWrite(bool enable);
+
+	// depth bias
+	void SetDepthBias(int32_t bias);
+	void SetSlopeScaledDepthBias(float bias);
+	void SetDepthBiasClamp(float clamp);
 
 	// IA
 	void SetInputLayout(const std::vector<D3D12_INPUT_ELEMENT_DESC>& elems);
@@ -61,4 +70,4 @@ private:
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputElems_;
 };
 
-} // namespace Tsumi::Graphic
+}

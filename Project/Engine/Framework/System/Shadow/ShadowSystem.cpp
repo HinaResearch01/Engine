@@ -78,22 +78,15 @@ void ShadowSystem::Update(float)
 
 void ShadowSystem::BuildShadowContext()
 {
-	// 初期化
 	context_ = {};
 	context_.enabled = false;
-	context_.cascadeCount = 0;
-	context_.shadowMapSize = 0;
 
-	// =====================================================
-	// 0) カメラ
-	// =====================================================
+	// Camera
 	auto camSys = world_.GetSystem<CameraSystem>();
 	const CameraContext& cam = camSys->GetContext();
 	if (!cam.valid) return;
 
-	// =====================================================
-	// 1) DirectionalLight を 1つ選ぶ
-	// =====================================================
+	// Choose 1 directional light
 	const DirectionalLightComponent* chosenDL = nullptr;
 	const TransformComponent* chosenTR = nullptr;
 
@@ -112,10 +105,8 @@ void ShadowSystem::BuildShadowContext()
 	context_.enabled = true;
 	context_.shadowMapSize = chosenDL->shadow.shadowMapSize;
 
-	// =====================================================
-	// 2) Split（4固定）
-	// =====================================================
-	const uint32_t cascadeCount = 4;
+	// CSM splits
+	constexpr uint32_t cascadeCount = 4;
 	context_.cascadeCount = cascadeCount;
 
 	const float lambda = 0.7f;
@@ -131,23 +122,20 @@ void ShadowSystem::BuildShadowContext()
 		const float uniSplit = n + (f - n) * p;
 		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
 	}
-	for (uint32_t i = 0; i < cascadeCount; ++i)
-	{
+
+	// splitFar を context に格納
+	for (uint32_t i = 0; i < cascadeCount; ++i) {
 		context_.splitFar[i] = splits[i + 1];
 	}
 
-	// =====================================================
-	// 3) Light dir / up
-	// =====================================================
-	const Math::Vec3f lightDirWS = NormalizeSafe(-chosenTR->forward, { 0,-1,0 });
+	// Light dir
+	Math::Vec3f lightDirWS = NormalizeSafe(-chosenTR->forward, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
-	// =====================================================
-	// 4) Cascades
-	// =====================================================
+	// Each cascade build ortho
 	for (uint32_t ci = 0; ci < cascadeCount; ++ci)
 	{
 		const float cn = splits[ci];
@@ -156,7 +144,6 @@ void ShadowSystem::BuildShadowContext()
 		const Math::Mat4x4 cascadeProj =
 			Math::Func::MAT4x4::PerspectiveFovMatrix(cam.fovY, cam.aspectRatio, cn, cf);
 
-		// あなたの規約：view * proj
 		const Math::Mat4x4 cascadeVP = cam.view * cascadeProj;
 		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
 
@@ -172,9 +159,9 @@ void ShadowSystem::BuildShadowContext()
 			centerWS.z - lightDirWS.z * dist
 		};
 
-		const Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
 
-		// corners → light space AABB
+		// corners -> light space AABB
 		Math::Vec3f minLS{ +1e30f, +1e30f, +1e30f };
 		Math::Vec3f maxLS{ -1e30f, -1e30f, -1e30f };
 
@@ -197,39 +184,52 @@ void ShadowSystem::BuildShadowContext()
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-		// Texel Snapping
-		SnapOrthoAABBToTexel(minLS, maxLS, context_.shadowMapSize);
+		// texel snap
+		const float orthoW = (maxLS.x - minLS.x);
+		const float orthoH = (maxLS.y - minLS.y);
+		SnapOrthoToTexel(lightView, orthoW, orthoH, context_.shadowMapSize);
 
-		const Math::Mat4x4 lightProj =
-			Math::Func::MAT4x4::OrthographicMatrix(
+		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, maxLS.x,
 			minLS.y, maxLS.y,
 			minLS.z, maxLS.z
-			);
+		);
 
-		ShadowCascade& c = context_.cascades[ci];
+		auto& c = context_.cascades[ci];
 		c.view = lightView;
 		c.proj = lightProj;
-		c.viewProj = lightView * lightProj; // 規約統一
+		c.viewProj = lightView * lightProj;
 	}
 }
 
-void ShadowSystem::SnapOrthoAABBToTexel(Math::Vec3f& minLS, Math::Vec3f& maxLS, uint32_t shadowMapSize)
+void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)
 {
 	if (shadowMapSize == 0) return;
 
-	const float width = maxLS.x - minLS.x;
-	const float height = maxLS.y - minLS.y;
-	if (width <= 1e-6f || height <= 1e-6f) return;
+	const float texelSizeX = orthoWidth / (float)shadowMapSize;
+	const float texelSizeY = orthoHeight / (float)shadowMapSize;
+	if (texelSizeX <= 1e-6f || texelSizeY <= 1e-6f) return;
 
-	const float texelX = width / static_cast<float>(shadowMapSize);
-	const float texelY = height / static_cast<float>(shadowMapSize);
+	// light space 原点（WS origin を light space に）
+	Math::Vec3f originLS = lightView.TransformPoint({ 0,0,0 });
 
-	// min を texel 境界に寄せる
-	minLS.x = std::floor(minLS.x / texelX) * texelX;
-	minLS.y = std::floor(minLS.y / texelY) * texelY;
+	originLS.x = std::floor(originLS.x / texelSizeX) * texelSizeX;
+	originLS.y = std::floor(originLS.y / texelSizeY) * texelSizeY;
 
-	// max を “ちょうど shadowMapSize 分” になるように揃える
-	maxLS.x = minLS.x + texelX * static_cast<float>(shadowMapSize);
-	maxLS.y = minLS.y + texelY * static_cast<float>(shadowMapSize);
+	// 平行移動だけ調整（君の行列規約に合わせてる：m[3][*] が translate）
+	lightView.m[3][0] = -(
+		originLS.x * lightView.m[0][0] +
+		originLS.y * lightView.m[1][0] +
+		originLS.z * lightView.m[2][0]
+		);
+	lightView.m[3][1] = -(
+		originLS.x * lightView.m[0][1] +
+		originLS.y * lightView.m[1][1] +
+		originLS.z * lightView.m[2][1]
+		);
+	lightView.m[3][2] = -(
+		originLS.x * lightView.m[0][2] +
+		originLS.y * lightView.m[1][2] +
+		originLS.z * lightView.m[2][2]
+		);
 }

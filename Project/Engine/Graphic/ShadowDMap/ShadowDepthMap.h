@@ -39,6 +39,7 @@ public:
 	uint32_t GetSize() const { return size_; }
 	const DX12::DescriptorHandle& GetSRV() const { return srv_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE   GetDSV() const { return dsvCpu_; }
+	const D3D12_CPU_DESCRIPTOR_HANDLE* GetDSVPtr() const { return &dsvCpu_; }
 #pragma endregion
 
 	// DSV / SRV 用フォーマット規約

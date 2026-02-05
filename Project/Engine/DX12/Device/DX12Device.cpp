@@ -37,18 +37,18 @@ HRESULT DX12Device::Create()
 
 	hr = CreateDevice();
 	if (FAILED(hr)) {
-		Utils::Logger::Error("CreateDevice failed (hr=0x{:08X})\n", (unsigned)hr);
+		Utils::Logger::Error("CreateDevice failed (hr=0x{:08X})", (unsigned)hr);
 		return hr;
 	}
 
 #ifdef _DEBUG
 	hr = DebugErrorInfoQueue();
 	if (FAILED(hr)) {
-		Utils::Logger::Warn("DebugErrorInfoQueue failed (hr=0x{:08X})\n", (unsigned)hr);
+		Utils::Logger::Warn("DebugErrorInfoQueue failed (hr=0x{:08X})", (unsigned)hr);
 	}
 #endif
 
-	Utils::Logger::Info("DX12Device::Create SUCCESS\n");
+	Utils::Logger::Info("DX12Device::Create SUCCESS");
 	return S_OK;
 }
 
@@ -59,7 +59,7 @@ HRESULT DX12Device::CreateDebugLayer()
 	HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 	if (SUCCEEDED(hr) && debug) {
 		debug->EnableDebugLayer();
-		Utils::Logger::Info("D3D12 DebugLayer enabled\n");
+		Utils::Logger::Info("D3D12 DebugLayer enabled");
 		return S_OK;
 	}
 	return hr;
@@ -84,7 +84,7 @@ HRESULT DX12Device::CreateFactoryAndAdapter()
 		return hr;
 	}
 
-	Utils::Logger::Info("DXGI Factory created\n");
+	Utils::Logger::Info("DXGI Factory created");
 
 	for (UINT i = 0;; ++i) {
 		ComPtr<IDXGIAdapter1> adapter;
@@ -102,11 +102,11 @@ HRESULT DX12Device::CreateFactoryAndAdapter()
 		adapter->GetDesc1(&desc);
 
 		if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
-			Utils::Logger::Info("Skip software adapter\n");
+			Utils::Logger::Info("Skip software adapter");
 			continue;
 		}
 
-		Utils::Logger::Info("Use Adapter selected\n");
+		Utils::Logger::Info("Use Adapter selected");
 		adapter.As(&useAdapter_);
 		return S_OK;
 	}
@@ -130,7 +130,7 @@ HRESULT DX12Device::CreateDevice()
 	device_.Reset();
 
 	for (auto fl : levels) {
-		Utils::Logger::Info("Try D3D12CreateDevice (FL={})\n", (int)fl);
+		Utils::Logger::Info("Try D3D12CreateDevice FL = ", (int)fl);
 
 		HRESULT hr = D3D12CreateDevice(
 			useAdapter_.Get(),
@@ -139,7 +139,7 @@ HRESULT DX12Device::CreateDevice()
 		);
 
 		if (SUCCEEDED(hr) && device_) {
-			Utils::Logger::Info("D3D12Device created (FL={})\n", (int)fl);
+			Utils::Logger::Info("D3D12Device created FL = ", (int)fl);
 			return S_OK;
 		}
 
@@ -169,7 +169,7 @@ HRESULT DX12Device::DebugErrorInfoQueue()
 	q->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
 
 	infoQueue_ = q;
-	Utils::Logger::Info("D3D12 InfoQueue enabled\n");
+	Utils::Logger::Info("D3D12 InfoQueue enabled");
 #endif
 	return S_OK;
 }

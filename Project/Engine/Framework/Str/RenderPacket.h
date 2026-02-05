@@ -22,6 +22,8 @@ struct RenderPacket
 	// Transform
 	GpuTransformCB xform{};
 
+	bool castShadow = true;
+
 	// Sort
 	uint64_t sortKey = 0;
 };

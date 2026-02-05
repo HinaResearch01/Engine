@@ -11,13 +11,13 @@
 
 using namespace Tsumi::Framework;
 
-uint64_t MakeSortKey(const RenderPacket& p, bool transparent)
+uint64_t MakeSortKey(const RenderPacket& p, bool /*transparent*/)
 {
 	uint64_t a = static_cast<uint64_t>(p.surface) & 0xFF;
-	uint64_t b = (reinterpret_cast<uintptr_t>(p.material) >> 4) & 0xFFFFFF;
+	uint64_t b = (reinterpret_cast<uintptr_t>(p.albedo) >> 4) & 0xFFFFFF;
 	uint64_t c = (reinterpret_cast<uintptr_t>(p.mesh) >> 4) & 0xFFFFFF;
 	uint64_t d = 0; // depth (TODO)
-	transparent;
+
 	return (a << 56) | (b << 32) | (c << 8) | d;
 }
 
@@ -135,23 +135,25 @@ void RenderPrepareSystem::BuildShadowPacket()
 	cb.enabled = ctx.enabled ? 1 : 0;
 	cb.cascadeCount = static_cast<int>(ctx.cascadeCount);
 	cb.shadowMapSize = static_cast<float>(ctx.shadowMapSize);
-	cb.invShadowMapSize =
-		(ctx.shadowMapSize > 0) ? (1.0f / ctx.shadowMapSize) : 0.0f;
+	cb.invShadowMapSize = (ctx.shadowMapSize > 0) ? (1.0f / cb.shadowMapSize) : 0.0f;
+
+	for (int i = 0; i < 4; ++i) {
+		cb.splitFar[i] = ctx.splitFar[i];
+	}
 
 	for (uint32_t i = 0; i < 4; ++i)
 	{
-		cb.splitFar[i] = ctx.splitFar[i];
-		cb.shadowViewProj[i] =
-			(ctx.enabled && i < ctx.cascadeCount)
-			? ctx.cascades[i].viewProj
-			: Math::Mat4x4{};
+		if (ctx.enabled && i < ctx.cascadeCount)
+			cb.shadowViewProj[i] = ctx.cascades[i].viewProj;
+		else
+			cb.shadowViewProj[i] = Math::Mat4x4{};
 	}
 }
 
 void RenderPrepareSystem::BuildRenderPackets()
 {
 	auto* materialSys = world_.GetSystem<MaterialSystem>();
-	const MaterialContext& mctx = materialSys->GetContext();
+	const auto& matCtx = materialSys->GetContext();
 
 	for (auto [rc, mc, tc] :
 		 world_.View<RenderComponent, MaterialComponent, TransformComponent>())
@@ -162,25 +164,27 @@ void RenderPrepareSystem::BuildRenderPackets()
 		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
 		if (!mesh) continue;
 
+		// Material resolved (context)
 		MaterialKey key{ mc.surface, mc.albedo };
-		const MaterialResolved* mat = mctx.Find(key);
-		if (!mat) continue;
+		const MaterialResolved* mr = matCtx.Find(key);
+		if (!mr) continue; // MaterialSystem の Update が先に走ってる前提
 
 		RenderPacket pkt{};
 		pkt.surface = mc.surface;
 		pkt.mesh = mesh;
+		pkt.xform.world = tc.world;
+		pkt.xform.worldInvTranspose = tc.worldInvTranspose;
 
-		// Material を直接コピー
-		pkt.materialCB = mat->cb;
-		pkt.albedo = mat->albedo;
+		pkt.materialCB = mr->cb;
+		pkt.albedo = mr->albedo;
 
-		// フォールバック
+		// フォールバックテクスチャ
 		if (!pkt.albedo && !mesh->defaultTextureKey.empty()) {
-			pkt.albedo =
-				resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
+			auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey);
+			if (tex) pkt.albedo = tex;
 		}
 
-		FillTransformPacket(pkt, tc);
+		pkt.castShadow = rc.castShadow;
 
 		const auto& pass = RenderPassTable::Get(pkt.surface);
 		pkt.sortKey = MakeSortKey(pkt, pass.transparent);

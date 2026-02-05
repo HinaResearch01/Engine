@@ -69,6 +69,7 @@ private:
 	void CreateGBuffer();
 	void CreateLightingDirectional();
 	void CreateDebugFullScreen();
+	void CreateShadowCaster();
 	
 private:
 	mutable std::mutex mutex_;
