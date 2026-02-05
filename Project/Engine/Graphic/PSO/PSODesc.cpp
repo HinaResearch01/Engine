@@ -8,14 +8,20 @@ PSODesc::PSODesc()
 	std::memset(&desc_, 0, sizeof(desc_));
 
 	desc_.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	desc_.RasterizerState.FrontCounterClockwise = TRUE;
+	desc_.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+
 	desc_.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
 	desc_.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
 	desc_.SampleMask = UINT_MAX;
+
 	desc_.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	desc_.SampleDesc.Count = 1;
 	desc_.SampleDesc.Quality = 0;
+
 
 	desc_.NumRenderTargets = 0;
 	for (int i = 0; i < 8; ++i) desc_.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;

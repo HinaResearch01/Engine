@@ -4,23 +4,6 @@
 #ifndef TSUMI_DEFERRED_COMMON_HLSLI
 #define TSUMI_DEFERRED_COMMON_HLSLI
 
-// --------------------------------
-// Register Policy
-// --------------------------------
-// b0 : CameraCB
-// b1 : ObjectCB
-// b2 : MaterialCB
-// b3 : DirectionalLightCB（Lighting passのみ）
-//
-// t0 : AlbedoTex（GBuffer pass）
-// s0 : LinearWrap
-//
-// Lighting pass（GBuffer SRV）
-// t10 : GBuffer0_Albedo
-// t11 : GBuffer1_NormalWS
-// t12 : GBuffer2_Material
-// t13 : Depth (SRV)
-// s1  : PointClamp
 
 // --------------------------------
 // Common structs
@@ -54,10 +37,21 @@ struct VS_OUTPUT_FULLSCREEN
     float2 uv : TEXCOORD0;
 };
 
+// ================================
+// Register Layout Policy
+// ================================
+//
+// b0  - b9   : PerFrame / Camera 系
+// b10 - b19  : PerObject 系
+// b20 - b29  : Material 系
+// b30 - b39  : Lighting 系
+// b40 - b49  : Shadow 系
+// b50 - b59  : PostProcess / Debug 系
 // --------------------------------
 // Constant Buffers
 // --------------------------------
-cbuffer CameraCB : register(b0)
+// Camera
+cbuffer CameraMatricesCB : register(b0)
 {
     float4x4 gView;
     float4x4 gProj;
@@ -67,42 +61,56 @@ cbuffer CameraCB : register(b0)
     float4x4 gInvViewProj;
 };
 
-cbuffer ObjectCB : register(b1)
+// Object
+cbuffer ObjectCB : register(b10)
 {
     float4x4 gWorld;
 };
 
-cbuffer MaterialCB : register(b2)
+// Material
+cbuffer MaterialUVCB : register(b20)
 {
-    float3 gBaseColor; // fallback albedo
-    float gRoughness; // 0..1
-    float gMetallic; // 0..1
-    float gAO; // 0..1
-    float gUseAlbedoTex; // 0/1
+    float3x3 gUVTransform;
 };
 
-// Lighting pass only
-cbuffer DirectionalLightCB : register(b3)
+cbuffer MaterialParamsCB : register(b21)
+{
+    float3 gBaseColor;
+    float gAlpha;
+
+    float gRoughness;
+    float gMetallic;
+    float gAO;
+    float gUseAlbedoTex;
+};
+
+// Light
+cbuffer DirectionalLightCB : register(b30)
 {
     float3 gLightDirWS;
     float _pad0;
-    float3 gRadiance; // color * intensity（線形）
+    float3 gRadiance;
     float _pad1;
 };
 
 // --------------------------------
 // Textures / Samplers
 // --------------------------------
-// GBuffer pass
+// t0  - t9   : Material textures
+// t10 - t19  : GBuffer
+// t20 - t29  : Shadow
+// t30 - t39  : PostProcess
+// Material
 Texture2D gAlbedoTex : register(t0);
 SamplerState gLinearWrap : register(s0);
 
-// Lighting pass (SRV)
+// GBuffer
 Texture2D gGBuffer0_Albedo : register(t10);
 Texture2D gGBuffer1_NormalWS : register(t11);
 Texture2D gGBuffer2_Material : register(t12);
 Texture2D gDepth01 : register(t13);
 SamplerState gPointClamp : register(s1);
+
 
 // --------------------------------
 // Utilities
@@ -115,16 +123,36 @@ static float3 SafeNormalize(float3 v)
     return v * rsqrt(len2);
 }
 
-// Depth01 + invViewProj で WorldPos を復元
+// Depth01 + invViewProj で WorldPos 復元
 static float3 ReconstructWorldPosFromDepth(float2 uv, float depth01)
 {
     float ndcX = uv.x * 2.0f - 1.0f;
-    float ndcY = 1.0f - uv.y * 2.0f; // ここが合わなければ反転を外す
+    float ndcY = 1.0f - uv.y * 2.0f;
 
     float4 clip = float4(ndcX, ndcY, depth01, 1.0f);
     float4 wpos = mul(gInvViewProj, clip);
     wpos.xyz /= max(wpos.w, 1e-6f);
     return wpos.xyz;
+}
+
+// Fullscreen triangle VS（共通で使う）
+static VS_OUTPUT_FULLSCREEN FullscreenVS(uint vertexID)
+{
+    VS_OUTPUT_FULLSCREEN o;
+
+    // 3頂点で全画面を覆う（三角形）
+    // vertexID: 0,1,2
+    float2 pos = (vertexID == 0) ? float2(-1.0, -1.0) :
+                 (vertexID == 1) ? float2(-1.0, 3.0) :
+                                   float2(3.0, -1.0);
+
+    float2 uv = (vertexID == 0) ? float2(0.0, 1.0) :
+                 (vertexID == 1) ? float2(0.0, -1.0) :
+                                   float2(2.0, 1.0);
+
+    o.positionCS = float4(pos, 0.0, 1.0);
+    o.uv = uv;
+    return o;
 }
 
 #endif // TSUMI_DEFERRED_COMMON_HLSLI

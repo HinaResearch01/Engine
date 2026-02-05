@@ -131,7 +131,7 @@ HRESULT MeshLoader::ParseScene(
 			if (mesh->HasNormals())
 			{
 				const aiVector3D& n = mesh->mNormals[v];
-				dst.normal = { -n.x, n.y, -n.z };
+				dst.normal = { -n.x, n.y, n.z };
 			}
 
 			// UV
@@ -151,9 +151,9 @@ HRESULT MeshLoader::ParseScene(
 			if (face.mNumIndices != 3)
 				continue;
 
-			outIndices.push_back(vertexOffset + face.mIndices[0]);
 			outIndices.push_back(vertexOffset + face.mIndices[2]);
 			outIndices.push_back(vertexOffset + face.mIndices[1]);
+			outIndices.push_back(vertexOffset + face.mIndices[0]);
 		}
 
 		vertexOffset += mesh->mNumVertices;

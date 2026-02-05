@@ -30,7 +30,8 @@ struct MaterialKeyHash {
 };
 
 struct MaterialResolved {
-	GpuMaterialCB cb{};
+	GpuMaterialUVCB      uv;
+	GpuMaterialParamsCB  params;
 	Tsumi::Resource::TextureAsset* albedo = nullptr;
 };
 

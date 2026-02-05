@@ -172,22 +172,26 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	for (const auto& pkt : gbufferList) {
-
+	for (const auto& pkt : gbufferList)
+	{
 		if (!pkt.mesh) continue;
-		if (!pkt.albedo) continue; // フォールバック済み前提なら assert でもOK
+		if (!pkt.albedo) continue; // フォールバック前提なら assert でもOK
 
 		// IA
 		list->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
 		list->IASetIndexBuffer(&pkt.mesh->ibView);
 
-		// ObjectCB (b1)
+		// ObjectCB (b10) : world / worldInvTranspose
 		auto objHandle = frame.UploadToTableCB(pkt.xform);
 		frame.bind.SetTable(ToRoot(Root_GBuffer::ObjectCB), objHandle);
 
-		// MaterialCB (b2)
-		auto matHandle = frame.UploadToTableCB(pkt.materialCB);
-		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialCB), matHandle);
+		// MaterialUVCB (b20)
+		auto matUVHandle = frame.UploadToTableCB(pkt.materialUVCB);
+		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialUVCB), matUVHandle);
+
+		// MaterialParamsCB (b21)
+		auto matParamsHandle = frame.UploadToTableCB(pkt.materialParamsCB);
+		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialParamsCB), matParamsHandle);
 
 		// Albedo SRV (t0)
 		frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.albedo->srv.gpu);
@@ -206,7 +210,7 @@ void RenderSystem::BindLightingCommon(DX12::FrameResources& frame, const RenderP
 	auto camHandle = frame.UploadToTableCB(camPkt.camMatCB);
 	frame.bind.SetTable(ToRoot(Root_DirectionalLight::CameraCB), camHandle);
 
-	// DirLightCB (b3)
+	// DirLightCB (b30)
 	const auto& lightPkt = prep.GetLightPacket();
 	auto lightHandle = frame.UploadToTableCB(lightPkt.dirCB);
 	frame.bind.SetTable(ToRoot(Root_DirectionalLight::DirLightCB), lightHandle);
@@ -224,14 +228,9 @@ void RenderSystem::BindDebugCommon(DX12::FrameResources& frame, const RenderPrep
 	auto camHandle = frame.UploadToTableCB(camPkt.camMatCB);
 	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::CameraCB), camHandle);
 
-	// DirLightCB 
-	const auto& lightPkt = prep.GetLightPacket();
-	auto lightHandle = frame.UploadToTableCB(lightPkt.dirCB);
-	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::DirLightCB), lightHandle);
-
 	// DebugCB 
-	struct GpuDebugCB { int mode; float pad[3]; };
-	GpuDebugCB dbg{}; dbg.mode = debugMode_; 
+	struct GpuDebugCB { int mode; float scale; float pad[2]; };
+	GpuDebugCB dbg{}; dbg.mode = debugMode_; dbg.scale = 1.0f;
 	auto dbgHandle = frame.UploadToTableCB(dbg);
 	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::DebugCB), dbgHandle);
 

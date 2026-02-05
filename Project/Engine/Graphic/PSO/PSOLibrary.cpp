@@ -14,7 +14,7 @@ PSOLibrary::PSOLibrary()
 	rootSignsLib_ = RootSignatureLibrary::GetInstance();
 }
 
-void PSOLibrary::Init() 
+void PSOLibrary::Init()
 {
 	// 生成と登録
 	CreateObject3D();
@@ -53,7 +53,7 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 	if (FAILED(hr) || !pso) {
 		Utils::Logger::Error(
 			"PSOLibrary::RegisterFromDesc - CreateGraphicsPipelineState failed",
-			"name:", wname, 
+			"name:", wname,
 			"hr", static_cast<unsigned>(hr));
 		throw std::runtime_error("PSO create failed: " + name);
 	}
@@ -114,9 +114,9 @@ void PSOLibrary::CreateGBuffer()
 
 	// InputLayout
 	std::vector<D3D12_INPUT_ELEMENT_DESC> il = {
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 	};
 	pso.SetInputLayout(il);
 

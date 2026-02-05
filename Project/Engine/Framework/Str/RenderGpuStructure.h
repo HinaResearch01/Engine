@@ -11,10 +11,20 @@ struct GpuTransformCB
 	Math::Mat4x4 worldInvTranspose;
 };
 
-struct GpuMaterialCB
+struct GpuMaterialUVCB
 {
-	Math::Vec4f color;
 	Math::Mat3x3 uvTransform;
+};
+
+struct GpuMaterialParamsCB
+{
+	Math::Vec3f baseColor;
+	float alpha;
+
+	float roughness;
+	float metallic;
+	float ao;
+	float useAlbedoTex;
 };
 
 struct GpuCameraCB

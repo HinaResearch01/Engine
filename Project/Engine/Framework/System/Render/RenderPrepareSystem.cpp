@@ -164,27 +164,29 @@ void RenderPrepareSystem::BuildRenderPackets()
 		auto* mesh = resourceSys_->GetMeshManager()->GetMesh(rc.mesh);
 		if (!mesh) continue;
 
-		// Material resolved (context)
 		MaterialKey key{ mc.surface, mc.albedo };
 		const MaterialResolved* mr = matCtx.Find(key);
-		if (!mr) continue; // MaterialSystem の Update が先に走ってる前提
+		if (!mr) continue;
 
 		RenderPacket pkt{};
 		pkt.surface = mc.surface;
 		pkt.mesh = mesh;
+
+		// ===== Transform =====
 		pkt.xform.world = tc.world;
 		pkt.xform.worldInvTranspose = tc.worldInvTranspose;
 
-		pkt.materialCB = mr->cb;
+		// ===== Material =====
+		pkt.materialUVCB = mr->uv;
+		pkt.materialParamsCB = mr->params;
 		pkt.albedo = mr->albedo;
 
-		// フォールバックテクスチャ
-		if (!pkt.albedo) {
-			if (!mesh->defaultTextureKey.empty()) {
-				if (auto* tex = resourceSys_->GetTextureManager()->GetTexture(mesh->defaultTextureKey)) {
-					pkt.albedo = tex;
-				}
-			}
+		// fallback texture
+		if (!pkt.albedo && !mesh->defaultTextureKey.empty())
+		{
+			pkt.albedo =
+				resourceSys_->GetTextureManager()
+				->GetTexture(mesh->defaultTextureKey);
 		}
 
 		pkt.castShadow = rc.castShadow;
@@ -192,7 +194,8 @@ void RenderPrepareSystem::BuildRenderPackets()
 		const auto& pass = RenderPassTable::Get(pkt.surface);
 		pkt.sortKey = MakeSortKey(pkt, pass.transparent);
 
-		renderPackets_[static_cast<size_t>(pkt.surface)].push_back(pkt);
+		renderPackets_[static_cast<size_t>(pkt.surface)]
+			.push_back(pkt);
 	}
 
 	SortRenderPackets();

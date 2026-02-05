@@ -8,53 +8,42 @@
 // -------------------------------
 // Vertex Shader: FullscreenVS
 // -------------------------------
-VS_OUTPUT_FULLSCREEN FullscreenVS(uint vertexID : SV_VertexID)
+VS_OUTPUT_FULLSCREEN LightingDirVS(uint vertexID : SV_VertexID)
 {
-    VS_OUTPUT_FULLSCREEN o;
-
-    float2 pos;
-    pos.x = (vertexID == 2) ? 3.0f : -1.0f;
-    pos.y = (vertexID == 1) ? 3.0f : -1.0f;
-
-    o.positionCS = float4(pos, 0.0f, 1.0f);
-    o.uv = pos * 0.5f + 0.5f;
-
-    return o;
+    return FullscreenVS(vertexID);
 }
 
 // -------------------------------
 // Pixel Shader: LightingDirectionalPS
 // -------------------------------
-float4 LightingDirectionalPS(VS_OUTPUT_FULLSCREEN input) : SV_Target0
+float4 LightingDirPS(VS_OUTPUT_FULLSCREEN input) : SV_Target0
 {
     float2 uv = input.uv;
 
-    // GBuffer read
-    float3 albedo = gGBuffer0_Albedo.Sample(gPointClamp, uv).rgb;
-    float3 normalWS = SafeNormalize(gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz);
-    float3 mat = gGBuffer2_Material.Sample(gPointClamp, uv).rgb;
+    float4 g0 = gGBuffer0_Albedo.Sample(gPointClamp, uv);
+    float4 g1 = gGBuffer1_NormalWS.Sample(gPointClamp, uv);
+    float4 g2 = gGBuffer2_Material.Sample(gPointClamp, uv);
+    float d = gDepth01.Sample(gPointClamp, uv).r;
 
-    float roughness = mat.r; // 未使用
-    float metallic = mat.g; // 未使用
-    float ao = mat.b;
+    float3 albedo = g0.rgb;
+    float alpha = g0.a;
 
-    // Depth read
-    float depth01 = gDepth01.Sample(gPointClamp, uv).r;
+    float3 n = SafeNormalize(g1.xyz);
 
-    // 背景（何も描かれてない）を弾く：深度1付近は空とみなす
-    if (depth01 >= 0.999999f)
-        return float4(0, 0, 0, 1);
+    float rough = saturate(g2.r);
+    float metal = saturate(g2.g);
+    float ao = saturate(g2.b);
 
-    // WorldPos
-    float3 worldPos = ReconstructWorldPosFromDepth(uv, depth01);
-
-    // Directional light
+    // いったん最小構成：Lambert * AO
+    // gLightDirWS の意味が「光が進む方向」なら L = normalize(-gLightDirWS)
+    // 「ライトが向いてる方向」なら L = normalize(gLightDirWS)
     float3 L = SafeNormalize(-gLightDirWS);
-    float NdotL = saturate(dot(normalWS, L));
 
-    float3 ambient = albedo * (0.03f * ao);
-    float3 diffuse = albedo * gRadiance * NdotL * ao;
+    float ndotl = saturate(dot(n, L));
+    float3 radiance = gRadiance;
 
-    float3 color = ambient + diffuse;
-    return float4(color, 1.0f);
+    float3 diffuse = albedo * radiance * ndotl;
+    float3 color = diffuse * ao;
+
+    return float4(color, alpha);
 }

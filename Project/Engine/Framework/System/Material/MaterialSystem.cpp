@@ -13,7 +13,6 @@ MaterialSystem::MaterialSystem(World& world)
 void MaterialSystem::Update(float)
 {
 	ctx_.Clear();
-
 	ctx_.cache.reserve(world_.GetMaterialsCompView().GetActors().size());
 
 	auto* texMgr = resourceSys_->GetTextureManager();
@@ -27,11 +26,22 @@ void MaterialSystem::Update(float)
 			mc.albedo,
 		};
 
-		auto& r = ctx_.cache[key]; // なければ作る／あれば上書き
+		auto& r = ctx_.cache[key];
 
-		r.cb.color = mc.color;
-		r.cb.uvTransform = Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
+		// ===== UV =====
+		r.uv.uvTransform =
+			Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
 
+		// ===== PBR Params =====
+		r.params.baseColor = mc.baseColor;
+		r.params.alpha = mc.alpha;
+
+		r.params.roughness = mc.roughness;
+		r.params.metallic = mc.metallic;
+		r.params.ao = mc.ao;
+		r.params.useAlbedoTex = mc.useAlbedoTex;
+
+		// ===== Texture =====
 		r.albedo = mc.albedo.empty()
 			? nullptr
 			: texMgr->GetTexture(mc.albedo);

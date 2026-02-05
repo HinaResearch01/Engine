@@ -12,13 +12,14 @@ VS_OUTPUT_GBUFFER GBufferVS(VS_INPUT_GBUFFER input)
 {
     VS_OUTPUT_GBUFFER o;
 
-    float4 wpos = mul(gWorld, float4(input.position, 1.0f));
+    float4 wpos = mul(float4(input.position, 1.0f), gWorld);
+
     o.positionWS = wpos.xyz;
+    o.normalWS = SafeNormalize(mul(input.normal, (float3x3) gWorld));
+    o.positionCS = mul(wpos, gViewProj);
 
-    o.normalWS = SafeNormalize(mul((float3x3) gWorld, input.normal));
-
-    o.positionCS = mul(gViewProj, wpos);
-    o.uv = input.uv;
+    float3 uvh = mul(float3(input.uv, 1.0f), gUVTransform);
+    o.uv = uvh.xy;
 
     return o;
 }
@@ -34,16 +35,15 @@ GBUFFER_OUT GBufferPS(VS_OUTPUT_GBUFFER input)
     float3 albedo = gBaseColor;
     if (gUseAlbedoTex > 0.5f)
     {
-        // Albedo SRV を SRGB で作っているなら Sample は線形で返る
         albedo = gAlbedoTex.Sample(gLinearWrap, input.uv).rgb;
     }
-    o.albedo = float4(albedo, 1.0f);
+    o.albedo = float4(albedo, gAlpha);
 
-    // NormalWS (-1..1) をそのまま格納
+    // NormalWS
     float3 n = SafeNormalize(input.normalWS);
     o.normalWS = float4(n, 1.0f);
 
-    // Material
+    // Material params
     o.material = float4(
         saturate(gRoughness),
         saturate(gMetallic),

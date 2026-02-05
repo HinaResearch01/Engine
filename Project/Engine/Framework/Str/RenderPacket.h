@@ -16,7 +16,8 @@ struct RenderPacket
 	Tsumi::Resource::MeshAsset* mesh = nullptr;
 
 	// Material
-	GpuMaterialCB materialCB{};
+	GpuMaterialUVCB materialUVCB{};
+	GpuMaterialParamsCB materialParamsCB{};
 	Tsumi::Resource::TextureAsset* albedo = nullptr;
 
 	// Transform

@@ -9,15 +9,15 @@
 using namespace Tsumi::Graphic;
 using Microsoft::WRL::ComPtr;
 
-RootSignatureLibrary::RootSignatureLibrary() 
+RootSignatureLibrary::RootSignatureLibrary()
 {
-    dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
+	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
 }
 
 void RootSignatureLibrary::Init()
 {
 	// 生成と登録
-    CreateObject3D();
+	CreateObject3D();
 	CreateGBuffer();
 	CreateLightingDirectional();
 	CreateDebugFullScreen();
@@ -32,16 +32,16 @@ void RootSignatureLibrary::Register(const std::string& name, RootSignatureDesc& 
 
 ID3D12RootSignature* RootSignatureLibrary::Get(const std::string& name) const
 {
-    std::lock_guard<std::mutex> lk(mutex_);
-    auto it = rootSigs_.find(name);
-    if (it == rootSigs_.end()) return nullptr;
-    return it->second.Get();
+	std::lock_guard<std::mutex> lk(mutex_);
+	auto it = rootSigs_.find(name);
+	if (it == rootSigs_.end()) return nullptr;
+	return it->second.Get();
 }
 
 bool RootSignatureLibrary::Has(const std::string& name) const
 {
-    std::lock_guard<std::mutex> lk(mutex_);
-    return rootSigs_.find(name) != rootSigs_.end();
+	std::lock_guard<std::mutex> lk(mutex_);
+	return rootSigs_.find(name) != rootSigs_.end();
 }
 
 void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12_ROOT_SIGNATURE_DESC& desc, const std::vector<D3D12_STATIC_SAMPLER_DESC>& samplers)
@@ -116,7 +116,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 	}
 
 	Utils::Logger::Info(
-		"RootSignatureLibrary::Register - 登録完了 ", 	wname);
+		"RootSignatureLibrary::Register - 登録完了 ", wname);
 }
 
 void RootSignatureLibrary::CreateObject3D()
@@ -159,12 +159,15 @@ void RootSignatureLibrary::CreateGBuffer()
 	RootSignatureDesc rs;
 
 	// VS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // CameraCB
-	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // ObjectCB
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0  CameraCB
+	rs.AddCBVRange(10, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b10 ObjectCB
+
+	// Material
+	rs.AddCBVRange(20, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b20 MaterialUVCB
+	rs.AddCBVRange(21, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b21 MaterialParamsCB
 
 	// PS
-	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // MaterialCB
-	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // AlbedoSRV
+	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // t0  AlbedoSRV
 
 	rs.AddStaticSampler(
 		0,
@@ -183,11 +186,11 @@ void RootSignatureLibrary::CreateLightingDirectional()
 	RootSignatureDesc rs;
 
 	// PS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
-	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13 GBuffer
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b0  CameraCB
+	rs.AddCBVRange(30, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b30 DirectionalLightCB
+	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);  // t10..t13 GBuffer
 
-	// Sampler
+	// Sampler (s1 : PointClamp)
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
@@ -206,12 +209,11 @@ void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
 	RootSignatureDesc rs;
 
 	// PS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b0 CameraCB
-	rs.AddCBVRange(3, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b3 DirectionalLightCB
-	rs.AddCBVRange(4, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b4 DebugCB
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL); // t10..t13
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);    // [0] b0  CameraCB
+	rs.AddCBVRange(50, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // [1] b50 DebugCB
+	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);   // [2] t10..t13 GBuffer
 
-	// Sampler
+	// Sampler (s1 : PointClamp)
 	rs.AddStaticSampler(
 		1,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
