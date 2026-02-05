@@ -41,9 +41,14 @@ class World {
 public:
 	World()
 	{
-		//  System系をUpdateManagerに登録
+		// System系をUpdateManagerに登録
+		// 基本Update順に追加(内部で順操作はある)
 		AddSystem<TransformSystem>();
 		AddSystem<CameraSystem>();
+		AddSystem<LightSystem>();
+		AddSystem<ShadowSystem>();
+		AddSystem<RenderPrepareSystem>();
+		AddSystem<RenderSystem>();
 
 		// Viewの登録
 		RegisterDefaultViews();

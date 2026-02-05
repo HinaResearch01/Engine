@@ -97,7 +97,7 @@ void ShaderLibrary::CompileAllShader()
 	// -------------------------------
 	{
 		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Shadow/ShadowCaster.VS.hlsl", "main" };
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Shadow/ShadowCaster_Directional.VS.hlsl", "main" };
 		// PS は不要（Depth Only）
 		tryCompile("ShadowCaster", m);
 	}
@@ -141,12 +141,6 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		const std::wstring filePath = Tsumi::Utils::Func::Utf8ToWstring(stageDesc.file);
 		const std::string entryUtf8 = stageDesc.entry.empty() ? "main" : stageDesc.entry;
 		const std::wstring entryPoint = Tsumi::Utils::Func::Utf8ToWstring(entryUtf8);
-
-		Tsumi::Utils::Logger::Info(
-			"[ShaderLibrary] Begin CompileShader, path:",
-			filePath,
-			"stage:", static_cast<int>(stage),
-			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
 
 		// -------------------------------
 		// HLSL 読み込み
@@ -225,12 +219,6 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 				"hr:", static_cast<unsigned>(hr));
 			return hr;
 		}
-
-		Tsumi::Utils::Logger::Info(
-			"[ShaderLibrary] Compile Succeeded, ",
-			filePath,
-			"stage:", static_cast<int>(stage),
-			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
 
 		Tsumi::Utils::Logger::Info(
 			"[ShaderLibrary] Compile succeeded",
