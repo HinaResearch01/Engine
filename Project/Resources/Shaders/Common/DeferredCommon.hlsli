@@ -144,18 +144,17 @@ static VS_OUTPUT_FULLSCREEN FullscreenVS(uint vertexID)
 {
     VS_OUTPUT_FULLSCREEN o;
 
-    // 3頂点で全画面を覆う（三角形）
-    // vertexID: 0,1,2
-    float2 pos = (vertexID == 0) ? float2(-1.0, -1.0) :
-                 (vertexID == 1) ? float2(-1.0, 3.0) :
-                                   float2(3.0, -1.0);
+    float2 positions[3] =
+    {
+        float2(-1.0f, -1.0f),
+        float2(-1.0f, 3.0f),
+        float2(3.0f, -1.0f)
+    };
 
-    float2 uv = (vertexID == 0) ? float2(0.0, 1.0) :
-                 (vertexID == 1) ? float2(0.0, -1.0) :
-                                   float2(2.0, 1.0);
+    float2 pos = positions[vertexID % 3];
 
-    o.positionCS = float4(pos, 0.0, 1.0);
-    o.uv = uv;
+    o.positionCS = float4(pos, 0.0f, 1.0f);
+    o.uv = float2(0, 0); 
     return o;
 }
 

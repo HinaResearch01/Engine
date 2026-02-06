@@ -75,10 +75,10 @@ void Application::Run()
 		// =====================================================
 		// 描画フェーズ
 		// =====================================================
-		imgui_->BeginFrame();
+		//imgui_->BeginFrame();
 
 		gameCtx_->Render([this]() {
-			imgui_->Render();
+			//imgui_->Render();
 		});
 
 		// CPU側で少しスリープ（100%使用防止）

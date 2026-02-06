@@ -115,7 +115,7 @@ HRESULT DX12Manager::EndFrame(const FrameIndices& idx)
 		return E_POINTER;
 	}
 
-	// ---- backbuffer → PRESENT  ----
+	// ---- backbuffer → PRESENT ----
 	TransitionToPresent(idx.backBuffer);
 
 	// ---- execute ----
@@ -172,9 +172,9 @@ void DX12Manager::ClearBackBuffer(uint32_t backBufferIndex)
 	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
 	if (!list || !framebuffer_) return;
 
-	static const FLOAT black[4] = { 0.f, 0.f, 0.f, 1.f };
+	static const FLOAT red[4] = { 1.f, 0.f, 0.f, 1.f }; // 赤に変更
+	framebuffer_->ClearRenderTarget(list, backBufferIndex, red);
 
-	framebuffer_->ClearRenderTarget(list, backBufferIndex, black);
 	framebuffer_->ClearDepthStencil(list);
 }
 

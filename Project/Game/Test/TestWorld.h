@@ -10,5 +10,6 @@ public:
 	TestWorld() = default;
 	~TestWorld() = default;
 	void Init() override;
+	void Update(float deltaTime) override;
 };
 

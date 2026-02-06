@@ -12,3 +12,8 @@ void TestWorld::Init()
 	// TestActorの追加
 	World::SpawnActor<TestActor>();
 }
+
+void TestWorld::Update(float deltaTime)
+{
+	World::WorldUpdate(deltaTime);
+}

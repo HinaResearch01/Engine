@@ -18,5 +18,5 @@ VS_OUTPUT_FULLSCREEN LightingDirVS(uint vertexID : SV_VertexID)
 // -------------------------------
 float4 LightingDirPS(VS_OUTPUT_FULLSCREEN input) : SV_Target0
 {
-    return float4(1, 0, 1, 1);
+    return float4(1, 0, 1, 1); // マゼンタ
 }

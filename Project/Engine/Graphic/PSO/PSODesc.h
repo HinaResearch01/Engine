@@ -58,7 +58,7 @@ public:
 	// Build
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC BuildDesc() const;
 
-private:
+
 	ID3D12RootSignature* rootSig_ = nullptr;
 
 	D3D12_SHADER_BYTECODE vs_{};

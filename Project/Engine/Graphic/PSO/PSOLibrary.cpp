@@ -151,7 +151,7 @@ void PSOLibrary::CreateLightingDirectional()
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
 	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
 
-	pso.ClearInputLayout();
+	//pso.ClearInputLayout();
 	pso.SetBlend(BlendMode::Opaque);
 
 	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
