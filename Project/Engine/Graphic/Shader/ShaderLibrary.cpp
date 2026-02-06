@@ -77,9 +77,9 @@ void ShaderLibrary::CompileAllShader()
 	// -------------------------------
 	{
 		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/LightingDirectional.hlsl", "LightingDirVS" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/LightingDirectional.hlsl", "LightingDirPS" };
-		tryCompile("LightingDirectional", m);
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DirectionalLight.hlsl", "DirLightingVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DirectionalLight.hlsl", "DirLightingPS" };
+		tryCompile("DirectinalLight", m);
 	}
 
 	// -------------------------------
@@ -87,9 +87,9 @@ void ShaderLibrary::CompileAllShader()
 	// -------------------------------
 	{
 		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Debug/DebugFullscreen.VS.hlsl", "main" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/Debug/DebugFullscreen.PS.hlsl", "main" };
-		tryCompile("DebugFullscreen", m);
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Debug/DDebugFullScreen.hlsl", "DebugFullVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Debug/DDebugFullScreen.hlsl", "DebugFullPS" };
+		tryCompile("DDebugFullScreen", m);
 	}
 
 	// -------------------------------
