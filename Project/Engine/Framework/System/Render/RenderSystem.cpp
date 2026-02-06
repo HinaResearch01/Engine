@@ -177,26 +177,24 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 		if (!pkt.mesh) continue;
 		if (!pkt.albedo) continue; // フォールバック前提なら assert でもOK
 
-		// IA
+		// --- IA ---
 		list->IASetVertexBuffers(0, 1, &pkt.mesh->vbView);
 		list->IASetIndexBuffer(&pkt.mesh->ibView);
 
-		// ObjectCB (b10) : world / worldInvTranspose
+		// --- ObjectCB ---
 		auto objHandle = frame.UploadToTableCB(pkt.xform);
 		frame.bind.SetTable(ToRoot(Root_GBuffer::ObjectCB), objHandle);
 
-		// MaterialUVCB (b20)
-		auto matUVHandle = frame.UploadToTableCB(pkt.materialUVCB);
-		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialUVCB), matUVHandle);
-
-		// MaterialParamsCB (b21)
+		// --- MaterialParamsCB ---
 		auto matParamsHandle = frame.UploadToTableCB(pkt.materialParamsCB);
 		frame.bind.SetTable(ToRoot(Root_GBuffer::MaterialParamsCB), matParamsHandle);
 
-		// Albedo SRV (t0)
-		frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.albedo->srv.gpu);
+		// --- Albedo SRV ---
+		if (pkt.albedo) {
+			frame.bind.SetTable(ToRoot(Root_GBuffer::AlbedoSRV), pkt.albedo->srv.gpu);
+		}
 
-		// Draw
+		// --- Draw ---
 		list->DrawIndexedInstanced(pkt.mesh->indexCount, 1, 0, 0, 0);
 	}
 }

@@ -7,7 +7,7 @@ void TestWorld::Init()
 	// テクスチャ読み込み
 	tme::API::AssetLoader::Load<tex>("Resources/Texture/uvChecker.png", "uvChecker");
 	// モデル読み込み
-	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/Axis/Axis.obj", "Axis");
+	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/Cube/TestCube.obj", "TestCube");
 
 	// TestActorの追加
 	World::SpawnActor<TestActor>();

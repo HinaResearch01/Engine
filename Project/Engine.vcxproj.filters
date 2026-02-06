@@ -1238,6 +1238,9 @@
     <None Include="Resources\Shaders\Common\DeferredCommon.hlsli">
       <Filter>Resources\Shaders\Common</Filter>
     </None>
+    <None Include="Resources\Shaders\Debug\DebugFullScreen.hlsl">
+      <Filter>Resources\Shaders\Debug</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
@@ -1255,14 +1258,8 @@
     <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\LightingDirectional.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DirectionalLight.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.VS.hlsl">
-      <Filter>Resources\Shaders\Debug</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Debug\DebugFullscreen.PS.hlsl">
-      <Filter>Resources\Shaders\Debug</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\Shadow</Filter>

@@ -10,5 +10,5 @@ void TestActor::Init()
 	//matComp->albedo = "";
 
 	auto* rendComp = IActor::AddComp<TestRenderComponent>();
-	rendComp->mesh = "Axis";
+	rendComp->mesh = "TestCube";
 }	

@@ -23,30 +23,29 @@ enum class Root_Object3D : uint32_t {
 /// GBuffer
 /// ============================
 enum class Root_GBuffer : uint32_t {
-	CameraCB = 0, // b0 VS
-	ObjectCB = 1, // b10 VS
-	MaterialUVCB = 2, // b20
-	MaterialParamsCB = 3, // b21
-	AlbedoSRV = 4, // t0 PS
+	CameraCB = 0,         // b0 VS
+	ObjectCB = 1,         // b10 VS
+	MaterialParamsCB = 2, // b21 PS
+	AlbedoSRV = 3         // t0 PS
 };
 
 /// ============================
 /// Lighting (Directional)
 /// ============================
 enum class Root_DirectionalLight : uint32_t {
-	CameraCB = 0, // b0 PS
-	DirLightCB = 1, // b30 PS
-	GBufferTable = 2, // t10..t13
+	CameraCB = 0,     // b0 PS
+	DirLightCB = 1,   // b30 PS
+	GBufferTable = 2  // t10..t12
 };
 
 /// ============================
 /// Debug Fullscreen
 /// ============================
 enum class Root_DebugFullScreen : uint32_t {
-	CameraCB = 0, // b0
-	DebugCB = 1, // b50
-	GBufferTable = 2, // t10..t13
-	DirLightCB = 3, // b30
+	CameraCB = 0,     // b0
+	DebugCB = 1,      // b50
+	GBufferTable = 2, // t10..t12
+	DirLightCB = 3    // b30
 };
 
 /// ============================

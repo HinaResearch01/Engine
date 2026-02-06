@@ -104,7 +104,6 @@ void PSOLibrary::CreateObject3D()
 void PSOLibrary::CreateGBuffer()
 {
 	PSODesc pso;
-
 	pso.SetRootSignature(rootSignsLib_->Get("GBuffer"));
 
 	auto vs = shaderLib_->Get("GBuffer", ShaderType::VS);
@@ -120,19 +119,17 @@ void PSOLibrary::CreateGBuffer()
 	};
 	pso.SetInputLayout(il);
 
-	// BlendMode
 	pso.SetBlend(BlendMode::Opaque);
 
-	// MRT
+	// --- MRT構成の変更 ---
 	DXGI_FORMAT rtvs[3] = {
-		DXGI_FORMAT_R8G8B8A8_UNORM,          // Albedo
-		DXGI_FORMAT_R16G16B16A16_FLOAT,      // NormalWS
-		DXGI_FORMAT_R8G8B8A8_UNORM           // Material
+		DXGI_FORMAT_R8G8B8A8_UNORM,     // Target0: Albedo
+		DXGI_FORMAT_R16G16B16A16_FLOAT, // Target1: NormalWS
+		DXGI_FORMAT_R8G8B8A8_UNORM      // Target2: Reflectivity
 	};
 	pso.SetRTVFormats(3, rtvs);
 	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
 
-	// Depth on
 	pso.EnableDepth(true);
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
@@ -143,7 +140,6 @@ void PSOLibrary::CreateGBuffer()
 void PSOLibrary::CreateLightingDirectional()
 {
 	PSODesc pso;
-
 	pso.SetRootSignature(rootSignsLib_->Get("LightingDirectional"));
 
 	auto vs = shaderLib_->Get("LightingDirectional", ShaderType::VS);
@@ -151,15 +147,16 @@ void PSOLibrary::CreateLightingDirectional()
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
 	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
 
-	//pso.ClearInputLayout();
 	pso.SetBlend(BlendMode::Opaque);
 
+	// 出力先はバックバッファ（またはポストプロセス用バッファ）1枚
 	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
 	pso.SetRTVFormats(1, &rtv);
 
-	// Lighting は Depth 使わない
-	pso.EnableDepth(false);
+	// フルスクリーントライアングルなので、頂点バッファ(InputLayout)は不要
+	pso.ClearInputLayout();
 
+	pso.EnableDepth(false);
 	pso.SetCullMode(D3D12_CULL_MODE_NONE);
 
 	Register("LightingDirectional", pso);

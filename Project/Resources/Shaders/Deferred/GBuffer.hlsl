@@ -1,13 +1,8 @@
-// ================================
-// GBuffer.hlsl
-// VS Entry: GBufferVS
-// PS Entry: GBufferPS
-// ================================
 #include "../Common/DeferredCommon.hlsli"
 
-// -------------------------------
+// ================================
 // Vertex Shader: GBufferVS
-// -------------------------------
+// ================================
 VS_OUTPUT_GBUFFER GBufferVS(VS_INPUT_GBUFFER input)
 {
     VS_OUTPUT_GBUFFER o;
@@ -18,20 +13,20 @@ VS_OUTPUT_GBUFFER GBufferVS(VS_INPUT_GBUFFER input)
     o.normalWS = SafeNormalize(mul(input.normal, (float3x3) gWorld));
     o.positionCS = mul(wpos, gViewProj);
 
-    float3 uvh = mul(float3(input.uv, 1.0f), gUVTransform);
-    o.uv = uvh.xy;
+    // b20廃止に伴い、一旦ストレートに渡す
+    o.uv = input.uv;
 
     return o;
 }
 
-// -------------------------------
+// ================================
 // Pixel Shader: GBufferPS
-// -------------------------------
+// ================================
 GBUFFER_OUT GBufferPS(VS_OUTPUT_GBUFFER input)
 {
     GBUFFER_OUT o;
 
-    // Albedo
+    // 1. Albedo
     float3 albedo = gBaseColor;
     if (gUseAlbedoTex > 0.5f)
     {
@@ -39,17 +34,11 @@ GBUFFER_OUT GBufferPS(VS_OUTPUT_GBUFFER input)
     }
     o.albedo = float4(albedo, gAlpha);
 
-    // NormalWS
-    float3 n = SafeNormalize(input.normalWS);
-    o.normalWS = float4(n, 1.0f);
+    // 2. Normal
+    o.normalWS = float4(normalize(input.normalWS), 1.0f);
 
-    // Material params
-    o.material = float4(
-        saturate(gRoughness),
-        saturate(gMetallic),
-        saturate(gAO),
-        1.0f
-    );
+    // 3. Reflectivity
+    o.reflectivity = float4(gReflectivity, 0.0f, 0.0f, 1.0f);
 
     return o;
 }
