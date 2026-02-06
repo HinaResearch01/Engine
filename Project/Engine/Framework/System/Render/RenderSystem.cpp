@@ -92,32 +92,17 @@ void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameResourc
 
 void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
-	//auto* list = cmd.GetList();
-	//if (!list) return;
-
-	//// PSO / RS
-	//list->SetGraphicsRootSignature(rsLib_->Get("LightingDirectional"));
-	//list->SetPipelineState(psoLib_->Get("LightingDirectional"));
-
-	//// Bind
-	//BindLightingCommon(frame, prep);
-
-	//// Fullscreen triangle
-	//list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//list->DrawInstanced(3, 1, 0, 0);
-
-
-	frame, prep;
 	auto* list = cmd.GetList();
 	if (!list) return;
 
+	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("LightingDirectional"));
 	list->SetPipelineState(psoLib_->Get("LightingDirectional"));
 
-	// --- 追加：念のためインデックスバッファと頂点バッファを Null で上書き ---
-	list->IASetIndexBuffer(nullptr);
-	list->IASetVertexBuffers(0, 0, nullptr);
+	// Bind
+	BindLightingCommon(frame, prep);
 
+	// Fullscreen triangle
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	list->DrawInstanced(3, 1, 0, 0);
 }

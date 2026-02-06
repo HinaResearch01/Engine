@@ -93,16 +93,16 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 	// ============================================================
 	// 1. GBuffer Pass（書き込み）
 	// ============================================================
-	//dx12->TransitionGBufferToWrite();
-	//dx12->BeginGBufferPass();
-	//dx12->ClearGBuffer();
+	dx12->TransitionGBufferToWrite();
+	dx12->BeginGBufferPass();
+	dx12->ClearGBuffer();
 
-	//renderSys->DrawGBufferPass(*cmd, frame, *prepSys);
+	renderSys->DrawGBufferPass(*cmd, frame, *prepSys);
 
 	// ============================================================
 	// 2. Lighting Pass（GBuffer 読み込み → BackBuffer）
 	// ============================================================
-	//dx12->TransitionGBufferToRead();
+	dx12->TransitionGBufferToRead();
 	dx12->BeginBackBufferPass(idx.backBuffer);
 	dx12->ClearBackBuffer(idx.backBuffer);
 
