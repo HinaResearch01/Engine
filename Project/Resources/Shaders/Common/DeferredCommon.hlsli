@@ -88,9 +88,13 @@ cbuffer MaterialParamsCB : register(b21)
 cbuffer DirectionalLightCB : register(b30)
 {
     float3 gLightDirWS;
-    float _pad0;
+    int gLightEnabled; // 0 or 1
+    
     float3 gRadiance;
     float _pad1;
+
+    uint gCastShadow; // 0 or 1
+    float3 _pad2;
 };
 
 // --------------------------------

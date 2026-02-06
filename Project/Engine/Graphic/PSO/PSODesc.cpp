@@ -107,7 +107,18 @@ void PSODesc::SetCullMode(D3D12_CULL_MODE cull)
 
 void PSODesc::EnableDepth(bool enable)
 {
-	desc_.DepthStencilState.DepthEnable = enable ? TRUE : FALSE;
+	if (enable)
+	{
+		desc_.DepthStencilState.DepthEnable = TRUE;
+		desc_.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		desc_.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	}
+	else
+	{
+		desc_.DepthStencilState.DepthEnable = FALSE;
+		desc_.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		desc_.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	}
 }
 
 void PSODesc::SetDepthFunc(D3D12_COMPARISON_FUNC func)

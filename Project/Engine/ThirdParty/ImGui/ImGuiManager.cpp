@@ -80,12 +80,6 @@ void ImGuiManager::Render()
 	auto* ctx = dx12Mgr_->GetCommandContext();
 	auto* list = ctx->GetList();
 
-	// Global heap を bind
-	ID3D12DescriptorHeap* heaps[] = {
-		dx12Mgr_->GetGlobalDescriptorHeap()
-	};
-	ctx->SetDescriptorHeaps(1, heaps);
-
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), list);
 }
 

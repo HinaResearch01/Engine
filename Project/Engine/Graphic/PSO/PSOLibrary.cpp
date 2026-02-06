@@ -151,21 +151,15 @@ void PSOLibrary::CreateLightingDirectional()
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
 	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
 
-	// Fullscreen triangle：InputLayout なし
 	pso.ClearInputLayout();
-
-	// BlendMode
 	pso.SetBlend(BlendMode::Opaque);
 
-	// BackBuffer へ 1RT
-	DXGI_FORMAT rtv = DXGI_FORMAT_R8G8B8A8_UNORM;
+	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
 	pso.SetRTVFormats(1, &rtv);
-	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
 
-	// Depth off
+	// Lighting は Depth 使わない
 	pso.EnableDepth(false);
 
-	// Cull none が無難
 	pso.SetCullMode(D3D12_CULL_MODE_NONE);
 
 	Register("LightingDirectional", pso);

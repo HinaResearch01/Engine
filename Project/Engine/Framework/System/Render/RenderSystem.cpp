@@ -236,6 +236,11 @@ void RenderSystem::BindDebugCommon(DX12::FrameResources& frame, const RenderPrep
 
 	// GBuffer table
 	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::GBufferTable), dx12Mgr_->GetGBufferSrvTable());
+
+	// DirLightCB (b30) - added for Debug Lit mode
+	const auto& lightPkt = prep.GetLightPacket();
+	auto lightHandle = frame.UploadToTableCB(lightPkt.dirCB);
+	frame.bind.SetTable(ToRoot(Root_DebugFullScreen::DirLightCB), lightHandle);
 }
 
 void RenderSystem::BindShadowCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep, uint32_t cascadeIndex)

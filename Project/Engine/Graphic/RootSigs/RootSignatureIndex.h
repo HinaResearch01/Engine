@@ -46,6 +46,7 @@ enum class Root_DebugFullScreen : uint32_t {
 	CameraCB = 0, // b0
 	DebugCB = 1, // b50
 	GBufferTable = 2, // t10..t13
+	DirLightCB = 3, // b30
 };
 
 /// ============================

@@ -209,9 +209,10 @@ void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
 	RootSignatureDesc rs;
 
 	// PS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);    // [0] b0  CameraCB
-	rs.AddCBVRange(50, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // [1] b50 DebugCB
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);   // [2] t10..t13 GBuffer
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);    // b0  CameraCB
+	rs.AddCBVRange(50, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b50 DebugCB
+	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);   // t10..t13 GBuffer
+	rs.AddCBVRange(30, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b30 DirectionalLightCB
 
 	// Sampler (s1 : PointClamp)
 	rs.AddStaticSampler(
