@@ -1017,15 +1017,6 @@
     <Filter Include="Engine\Framework\Component\Render">
       <UniqueIdentifier>{42a6ecec-77b0-4238-8d82-d0e487b6b208}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Shaders\Common">
-      <UniqueIdentifier>{74aadfb9-35e8-41cb-ab43-9de04631221b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources\Shaders\VS">
-      <UniqueIdentifier>{77b47105-7fe0-4ceb-8fce-7e6e34bfe915}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources\Shaders\PS">
-      <UniqueIdentifier>{605f145a-04f5-4610-89e7-9d0c5c381bdd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game\GameObject">
       <UniqueIdentifier>{5fe58151-51d1-435c-9bf7-09b5e9921115}</UniqueIdentifier>
     </Filter>
@@ -1086,20 +1077,29 @@
     <Filter Include="Engine\Framework\Str">
       <UniqueIdentifier>{0c8019e2-546f-4639-97b5-00ac2b9d318b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resources\Shaders\Debug">
-      <UniqueIdentifier>{77aa2756-3b08-4423-a302-f913b2ee8256}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resources\Shaders\Deferred">
-      <UniqueIdentifier>{d929a3df-f0e5-4cd8-bbe3-2d6b6347a413}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Graphics\ShadowDMap">
       <UniqueIdentifier>{cabe9303-bab5-4239-a66e-ff31867ecaa4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Framework\Context">
       <UniqueIdentifier>{57f1890f-a21d-4571-a214-144b40f779d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders\Interop">
+      <UniqueIdentifier>{389c2938-8645-4340-b5c2-497a8f4d2840}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Core">
+      <UniqueIdentifier>{3f1d07a2-fa94-4b60-97e5-15e75e3b97bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Deferred">
+      <UniqueIdentifier>{5fd046a2-581b-4706-8964-c6bcdc2bc0f5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Resources\Shaders\Shadow">
-      <UniqueIdentifier>{dfdf0476-2737-4e42-a59f-08fd4bbddbd6}</UniqueIdentifier>
+      <UniqueIdentifier>{c94d650d-d364-4a2e-a304-117d7b3e8014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Debug">
+      <UniqueIdentifier>{88a1d336-8df2-4d36-8826-827ce53ac180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders\Lighting">
+      <UniqueIdentifier>{dbe4a743-cae5-412b-8aef-68dfc0e77fda}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1223,23 +1223,38 @@
     <None Include="externals\assimp\include\assimp\vector3.inl">
       <Filter>externals\assimp\include\assimp</Filter>
     </None>
-    <None Include="Resources\Shaders\Common\Transform.hlsli">
-      <Filter>Resources\Shaders\Common</Filter>
+    <None Include="Resources\Shaders\Interop\CameraInfo.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Common\Material.hlsli">
-      <Filter>Resources\Shaders\Common</Filter>
+    <None Include="Resources\Shaders\Interop\ObjectInfo.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Common\Camera.hlsli">
-      <Filter>Resources\Shaders\Common</Filter>
+    <None Include="Resources\Shaders\Interop\MaterialInfo.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Common\Light.hlsli">
-      <Filter>Resources\Shaders\Common</Filter>
+    <None Include="Resources\Shaders\Interop\LightInfo.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Common\DeferredCommon.hlsli">
-      <Filter>Resources\Shaders\Common</Filter>
+    <None Include="Resources\Shaders\Core\Math.hlsli">
+      <Filter>Resources\Shaders\Core</Filter>
     </None>
-    <None Include="Resources\Shaders\Debug\DebugFullScreen.hlsl">
-      <Filter>Resources\Shaders\Debug</Filter>
+    <None Include="Resources\Shaders\Core\Common.hlsli">
+      <Filter>Resources\Shaders\Core</Filter>
+    </None>
+    <None Include="Resources\Shaders\Core\Samplers.hlsli">
+      <Filter>Resources\Shaders\Core</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting\BRDF.hlsli">
+      <Filter>Resources\Shaders\Lighting</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting\PBR.hlsli">
+      <Filter>Resources\Shaders\Lighting</Filter>
+    </None>
+    <None Include="Resources\Shaders\Interop\Shadow.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
+    </None>
+    <None Include="Resources\Shaders\Interop\DeferredDebug.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1249,17 +1264,14 @@
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl">
       <Filter>externals\DirectXTex\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\PS\Object3D_Static.PS.hlsl">
-      <Filter>Resources\Shaders\PS</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\VS\Object3D_Static.VS.hlsl">
-      <Filter>Resources\Shaders\VS</Filter>
+    <FxCompile Include="Resources\Shaders\Deferred\DirectionalLight.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\DirectionalLight.hlsl">
-      <Filter>Resources\Shaders\Deferred</Filter>
+    <FxCompile Include="Resources\Shaders\Debug\DeferredDebugView.hlsl">
+      <Filter>Resources\Shaders\Debug</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster_Directional.VS.hlsl">
       <Filter>Resources\Shaders\Shadow</Filter>
