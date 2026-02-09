@@ -119,41 +119,6 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 		"RootSignatureLibrary::Register - 登録完了 ", wname);
 }
 
-void RootSignatureLibrary::CreateObject3D()
-{
-	RootSignatureDesc rs;
-
-	// VS
-	rs.AddCBV(0, D3D12_SHADER_VISIBILITY_VERTEX); // Camera (b0)
-	rs.AddCBV(1, D3D12_SHADER_VISIBILITY_VERTEX); // Transform (b1)
-
-	// PS
-	rs.AddCBV(2, D3D12_SHADER_VISIBILITY_PIXEL); // Material (b2)
-	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL); // Texture Albedo (t0) 1個
-
-	// Sampler
-	// s0 : Linear Wrap (PS)
-	rs.AddStaticSampler(
-		0,
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
-		0,
-		D3D12_SHADER_VISIBILITY_PIXEL
-	);
-	// s1 : Point Clamp (PS)
-	rs.AddStaticSampler(
-		1,
-		D3D12_FILTER_MIN_MAG_MIP_POINT,
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		0,
-		D3D12_SHADER_VISIBILITY_PIXEL
-	);
-
-	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	Register("Object3D", rs);
-}
-
 void RootSignatureLibrary::CreateGBuffer()
 {
 	RootSignatureDesc rs;
@@ -204,7 +169,7 @@ void RootSignatureLibrary::CreateLightingDirectional()
 	Register("LightingDirectional", rs);
 }
 
-void Tsumi::Graphic::RootSignatureLibrary::CreateDebugFullScreen()
+void RootSignatureLibrary::CreateDebugFullScreen()
 {
 	RootSignatureDesc rs;
 

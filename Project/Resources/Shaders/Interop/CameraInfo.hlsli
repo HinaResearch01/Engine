@@ -1,14 +1,20 @@
 #ifndef __CAMERA_INFO_HLSLI__
 #define __CAMERA_INFO_HLSLI__
 
+#include "Bindings.hlsli"
+
 // Camera constant buffer
-cbuffer CameraCB : register(b0)
+cbuffer CameraMatricesCB : register(BIND_CAMERA_CB)
 {
-    float4x4 gView; // View matrix
-    float4x4 gProj; // Projection matrix
-    float4x4 gViewProj; // View * Projection
-    float3 gCameraPosWS; // World-space camera position
-    float _padding0;
+    float4x4 gView;
+    float4x4 gProj;
+    float4x4 gViewProj;
+    float4x4 gInvView;
+    float4x4 gInvProj;
+    float4x4 gInvViewProj;
+    
+    float3 gCameraPosWS;
+    float _pad0;
 };
 
 #endif // __CAMERA_INFO_HLSLI__

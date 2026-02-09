@@ -2,7 +2,7 @@
 #define __MATERIAL_INFO_HLSLI__
 
 // Material constant buffer
-cbuffer MaterialParamsCB : register(b20)
+cbuffer MaterialParamsCB : register(BIND_MATERIAL_CB)
 {
 float3 gBaseColor;
 float gAlpha;

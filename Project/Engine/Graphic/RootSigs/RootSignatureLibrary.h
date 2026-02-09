@@ -65,7 +65,6 @@ private:
 	/// <summary>
 	/// ルートシグネチャの生成と登録
 	/// </summary>
-	void CreateObject3D();
 	void CreateGBuffer();
 	void CreateLightingDirectional();
 	void CreateDebugFullScreen();

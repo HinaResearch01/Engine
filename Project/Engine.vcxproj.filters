@@ -1226,7 +1226,7 @@
     <None Include="Resources\Shaders\Interop\CameraInfo.hlsli">
       <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Interop\ObjectInfo.hlsli">
+    <None Include="Resources\Shaders\Interop\TransformInfo.hlsli">
       <Filter>Resources\Shaders\Interop</Filter>
     </None>
     <None Include="Resources\Shaders\Interop\MaterialInfo.hlsli">
@@ -1250,11 +1250,29 @@
     <None Include="Resources\Shaders\Lighting\PBR.hlsli">
       <Filter>Resources\Shaders\Lighting</Filter>
     </None>
-    <None Include="Resources\Shaders\Interop\Shadow.hlsli">
+    <None Include="Resources\Shaders\Interop\ShadowInfo.hlsli">
       <Filter>Resources\Shaders\Interop</Filter>
     </None>
-    <None Include="Resources\Shaders\Interop\DeferredDebug.hlsli">
+    <None Include="Resources\Shaders\Interop\DeferredDebugInfo.hlsli">
       <Filter>Resources\Shaders\Interop</Filter>
+    </None>
+    <None Include="Resources\Shaders\Core\FullScreen.hlsli">
+      <Filter>Resources\Shaders\Core</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting\SimpleDirectional.hlsli">
+      <Filter>Resources\Shaders\Lighting</Filter>
+    </None>
+    <None Include="Resources\Shaders\Interop\Bindings.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
+    </None>
+    <None Include="Resources\Shaders\Interop\PostProcessInfo.hlsli">
+      <Filter>Resources\Shaders\Interop</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting\ShadowSampling.hlsli">
+      <Filter>Resources\Shaders\Lighting</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting\CSMShadowSampling.hlsli">
+      <Filter>Resources\Shaders\Lighting</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1264,16 +1282,19 @@
     <FxCompile Include="externals\DirectXTex\Shaders\BC7Encode.hlsl">
       <Filter>externals\DirectXTex\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\DirectionalLight.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredDirectionalLight.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredGBuffer.hlsl">
       <Filter>Resources\Shaders\Deferred</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Debug\DeferredDebugView.hlsl">
       <Filter>Resources\Shaders\Debug</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster_Directional.VS.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredComposite.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster.hlsl">
       <Filter>Resources\Shaders\Shadow</Filter>
     </FxCompile>
   </ItemGroup>

@@ -1106,16 +1106,22 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Resources\Shaders\Core\Common.hlsli" />
+    <None Include="Resources\Shaders\Core\FullScreen.hlsli" />
     <None Include="Resources\Shaders\Core\Math.hlsli" />
     <None Include="Resources\Shaders\Core\Samplers.hlsli" />
+    <None Include="Resources\Shaders\Interop\Bindings.hlsli" />
     <None Include="Resources\Shaders\Interop\CameraInfo.hlsli" />
-    <None Include="Resources\Shaders\Interop\DeferredDebug.hlsli" />
+    <None Include="Resources\Shaders\Interop\DeferredDebugInfo.hlsli" />
     <None Include="Resources\Shaders\Interop\LightInfo.hlsli" />
     <None Include="Resources\Shaders\Interop\MaterialInfo.hlsli" />
-    <None Include="Resources\Shaders\Interop\ObjectInfo.hlsli" />
-    <None Include="Resources\Shaders\Interop\Shadow.hlsli" />
+    <None Include="Resources\Shaders\Interop\PostProcessInfo.hlsli" />
+    <None Include="Resources\Shaders\Interop\TransformInfo.hlsli" />
+    <None Include="Resources\Shaders\Interop\ShadowInfo.hlsli" />
     <None Include="Resources\Shaders\Lighting\BRDF.hlsli" />
+    <None Include="Resources\Shaders\Lighting\CSMShadowSampling.hlsli" />
     <None Include="Resources\Shaders\Lighting\PBR.hlsli" />
+    <None Include="Resources\Shaders\Lighting\ShadowSampling.hlsli" />
+    <None Include="Resources\Shaders\Lighting\SimpleDirectional.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="externals\DirectXTex\Shaders\BC6HEncode.hlsl">
@@ -1139,17 +1145,34 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\DirectionalLight.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredComposite.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Deferred\GBuffer.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredDirectionalLight.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster_Directional.VS.hlsl">
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredGBuffer.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">4.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
