@@ -17,13 +17,17 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	ShadowSystem() = default;;
 	ShadowSystem(World& world);
 
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
 	~ShadowSystem() = default;
+
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	void Init() override;
 
 	/// <summary>
 	/// 更新処理
@@ -36,14 +40,15 @@ public:
 	UpdatePhase Phase() const override { return UpdatePhase::SceneContext; }
 
 #pragma region Accessor
-	const ShadowContext& GetContext() const { return context_; }
+	const ShadowContext& GetContext() const { return activeCtx_; }
 #pragma endregion 
 
 private:
 	/// <summary>
 	/// ShadowContextを組み立てる
 	/// </summary>
-	void BuildShadowContext();
+	void BuildShadowContext(ShadowContext& out);
+	void BuildDefault(ShadowContext& out);
 
 	/// <summary>
 	///  CSM の Texel Snapping
@@ -53,7 +58,8 @@ private:
 						  float orthoHeight, uint32_t shadowMapSize);
 
 private:
-	ShadowContext context_{};
+	ShadowContext defaultCtx_{};
+	ShadowContext activeCtx_{};
 	
 	World& world_;
 };

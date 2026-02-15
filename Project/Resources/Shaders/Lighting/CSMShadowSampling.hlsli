@@ -2,31 +2,26 @@
 #define TSUMI_LIGHTING_CSM_SHADOW_SAMPLING_HLSLI
 
 #include "../Core/Common.hlsli"
-#include "../Core/Samplers.hlsli"
-#include "../Interop/ShadowInfo.hlsli"
-#include "../Interop/LightInfo.hlsli"
 
-#ifndef TSUMI_DECLARE_CSM_SHADOWMAP
-Texture2DArray gShadowMapCSM;
-#endif
-
-// ---- cascade selection (view space depth) ----
-// viewDepth = distance along camera forward in view space (positive)
-uint SelectCascade(float viewDepth)
+uint SelectCascade(float viewDepth, float4 cascadeSplits)
 {
-    // splits are far distances
-    if (viewDepth <= gCascadeSplitDepths.x)
+    if (viewDepth <= cascadeSplits.x)
         return 0;
-    if (viewDepth <= gCascadeSplitDepths.y)
+    if (viewDepth <= cascadeSplits.y)
         return 1;
-    if (viewDepth <= gCascadeSplitDepths.z)
+    if (viewDepth <= cascadeSplits.z)
         return 2;
     return 3;
 }
 
-bool WorldToShadowUVZ(uint cascadeIdx, float3 worldPos, out float2 uv, out float z)
+bool WorldToShadowUVZ(
+    float4x4 lightViewProj,
+    float3 worldPos,
+    out float2 uv,
+    out float z)
 {
-    float4 sp = mul(float4(worldPos, 1.0f), gLightViewProj[cascadeIdx]);
+    float4 sp = mul(float4(worldPos, 1.0f), lightViewProj);
+
     if (abs(sp.w) < 1e-6f)
     {
         uv = 0;
@@ -34,58 +29,103 @@ bool WorldToShadowUVZ(uint cascadeIdx, float3 worldPos, out float2 uv, out float
         return false;
     }
 
+    // NDC
     sp.xyz /= sp.w;
 
-    uv = sp.xy * 0.5f + 0.5f;
-    z = sp.z;
+    // ============================
+    // Y反転
+    // ============================
+    uv.x = sp.x * 0.5f + 0.5f;
+    uv.y = -sp.y * 0.5f + 0.5f;
 
-    // outside cascade
-    if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
+    // ============================
+    // zを0〜1へ
+    // ============================
+    z = sp.z * 0.5f + 0.5f;
+
+    // ============================
+    // 範囲チェック
+    // ============================
+    if (uv.x < 0 || uv.x > 1 ||
+        uv.y < 0 || uv.y > 1 ||
+        z < 0 || z > 1)
         return false;
 
     return true;
 }
 
-float ShadowTest(uint cascadeIdx, float2 uv, float z)
-{
-    float depth = gShadowMapCSM.Sample(gPointClamp, float3(uv, cascadeIdx)).r;
-    return (z <= depth) ? 1.0f : 0.0f;
-}
-
-float SampleShadowPCF3x3(uint cascadeIdx, float2 uv, float z)
+float SampleShadowPCF3x3(
+    Texture2DArray shadowMap,
+    SamplerState samplerState,
+    uint cascadeIdx,
+    float2 uv,
+    float z,
+    float2 texelSize)
 {
     float sum = 0.0f;
+
     [unroll]
     for (int y = -1; y <= 1; ++y)
     {
         [unroll]
         for (int x = -1; x <= 1; ++x)
         {
-            float2 o = float2(x, y) * gShadowTexelSize;
-            sum += ShadowTest(cascadeIdx, uv + o, z);
+            float2 offset = float2(x, y) * texelSize;
+
+            float depth =
+                shadowMap.Sample(
+                    samplerState,
+                    float3(uv + offset, cascadeIdx)).r;
+
+            sum += (z <= depth) ? 1.0f : 0.0f;
         }
     }
+
     return sum * (1.0f / 9.0f);
 }
 
-// Main
-float ComputeCSMShadowFactor(float3 worldPos, float3 normalWS, float viewDepth)
+float ComputeCSMShadowFactor(
+    Texture2DArray shadowMap,
+    SamplerState samplerState,
+
+    float3 worldPos,
+    float3 normalWS,
+    float viewDepth,
+
+    float4 cascadeSplits,
+    float4x4 lightViewProj[4],
+
+    float2 shadowTexelSize,
+    float shadowBias,
+    float shadowNormalBias,
+    float3 lightDirWS)
 {
-    uint cascadeIdx = SelectCascade(viewDepth);
+    uint cascadeIdx = SelectCascade(viewDepth, cascadeSplits);
 
     float2 uv;
     float z;
-    if (!WorldToShadowUVZ(cascadeIdx, worldPos, uv, z))
+
+    if (!WorldToShadowUVZ(
+            lightViewProj[cascadeIdx],
+            worldPos,
+            uv,
+            z))
         return 1.0f;
 
-    float3 L = SafeNormalize(-gLightDirWS);
+    float3 L = SafeNormalize(-lightDirWS);
 
     float ndotl = saturate(dot(SafeNormalize(normalWS), L));
-    float normalBias = (1.0f - ndotl) * gShadowNormalBias;
+    float normalBias = (1.0f - ndotl) * shadowNormalBias;
 
-    z -= (gShadowBias + normalBias);
+    z -= (shadowBias + normalBias);
 
-    return SampleShadowPCF3x3(cascadeIdx, uv, z);
+    return SampleShadowPCF3x3(
+        shadowMap,
+        samplerState,
+        cascadeIdx,
+        uv,
+        z,
+        shadowTexelSize);
 }
 
 #endif

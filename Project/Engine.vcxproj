@@ -207,8 +207,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\RootSigs\RootSignatureDesc.cpp" />
     <ClCompile Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.cpp" />
-    <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp" />
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
+    <ClCompile Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.cpp" />
     <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp" />
     <ClCompile Include="Engine\Loader\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp" />
@@ -401,8 +401,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureDesc.h" />
     <ClInclude Include="Engine\Graphic\RootSigs\RootSignatureIndex.h" />
     <ClInclude Include="Engine\Graphic\Rootsigs\RootSignatureLibrary.h" />
-    <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h" />
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
+    <ClInclude Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.h" />
     <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h" />
     <ClInclude Include="Engine\Loader\LoaderAPI.h" />
     <ClInclude Include="Engine\Loader\Mesh\MeshLoader.h" />
@@ -1108,8 +1108,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="Resources\Shaders\Core\Common.hlsli" />
     <None Include="Resources\Shaders\Core\FullScreen.hlsli" />
     <None Include="Resources\Shaders\Core\Math.hlsli" />
-    <None Include="Resources\Shaders\Core\Samplers.hlsli" />
-    <None Include="Resources\Shaders\Interop\Bindings.hlsli" />
     <None Include="Resources\Shaders\Interop\CameraInfo.hlsli" />
     <None Include="Resources\Shaders\Interop\DeferredDebugInfo.hlsli" />
     <None Include="Resources\Shaders\Interop\LightInfo.hlsli" />

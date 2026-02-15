@@ -9,7 +9,7 @@ static const uint DEBUG_VIEW_DEPTH = 3;
 static const uint DEBUG_VIEW_WORLDPOS = 4;
 
 // ---- Debug Constant Buffer ----
-cbuffer DEFERREDDEBUG : register(BIND_DEFERRED_DEBUG_CB)
+struct DeferredDebugCB
 {
     uint gDebugViewMode;
     float gDebugScale;

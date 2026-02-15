@@ -6,6 +6,7 @@
 #include "Math/TMath.h"
 #include "../ISystem.h"
 #include "Graphic/ShadowDMap/ShadowDepthMap.h"
+#include "Graphic/ShadowDMap/CSMShadowDepthMap.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/LightPacket.h"
 
@@ -72,8 +73,7 @@ public:
 		const RenderPrepareSystem& prep);
 	void DrawDebugPass(
 		DX12::CommandContext& cmd,
-		DX12::FrameResources& frame,
-		const RenderPrepareSystem& prep);
+		DX12::FrameResources& frame);
 
 	/// <summary>
 	/// リサイズ通知
@@ -103,8 +103,7 @@ private:
 		const RenderPrepareSystem& prep);
 
 	void BindDebugCommon(
-		DX12::FrameResources& frame,
-		const RenderPrepareSystem& prep);
+		DX12::FrameResources& frame);
 
 	void BindShadowCommon(
 		DX12::FrameResources& frame,
@@ -121,8 +120,9 @@ private:
 
 private:
 	// Shadow
-	std::unique_ptr<Graphic::ShadowDepthMap> shadowDMap_;
+	std::unique_ptr<Graphic::CSMShadowDepthMap> shadowDMap_;
 	uint32_t cachedShadowSize_ = 0;
+	uint32_t cachedCascadeCount_ = 0;
 
 	// State
 	int debugMode_ = 0;

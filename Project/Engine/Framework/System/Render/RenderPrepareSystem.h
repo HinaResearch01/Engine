@@ -31,7 +31,6 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	RenderPrepareSystem() = default;
 	RenderPrepareSystem(World& world);
 
 	/// <summary>
@@ -66,8 +65,8 @@ private:
 	/// 
 	/// </summary>
 	void BuildCameraPacket();
-	void BuildLightPacket();
 	void BuildShadowPacket();
+	void BuildLightPacket();
 	void BuildRenderPackets();
 
 	/// <summary>

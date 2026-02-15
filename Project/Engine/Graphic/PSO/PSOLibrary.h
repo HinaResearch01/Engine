@@ -66,11 +66,11 @@ private:
 	/// <summary>
 	/// PSOの生成と登録
 	/// </summary>
-	void CreateObject3D();
 	void CreateGBuffer();
 	void CreateLightingDirectional();
-	void CreateDebugFullScreen();
 	void CreateShadowCaster();
+	void CreateDeferredComposite();
+	void CreateDeferredDebug();
 
 private:
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> psos_;

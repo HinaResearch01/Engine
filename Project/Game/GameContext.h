@@ -73,12 +73,9 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 {
 	if (!currentScene_) return;
 
-	// ----------------------------
-	// DX12 BeginFrame
-	// ----------------------------
+	// DX12 BeginFrame 
 	auto* dx12 = DX12::DX12Manager::GetInstance();
 	const DX12::FrameIndices idx = dx12->BeginFrame();
-
 	auto* cmd = dx12->GetCommandContext();
 	auto& frame = dx12->GetFrameResource(idx.cpu);
 
@@ -90,42 +87,32 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 		return;
 	}
 
-	// ============================================================
-	// 1. GBuffer Pass（書き込み）
-	// ============================================================
+	// ==== Shadow Pass ====
+	renderSys->DrawShadowPass(*cmd, frame, *prepSys);
+
+	// ==== GBuffer Pass ====
 	dx12->TransitionGBufferToWrite();
 	dx12->BeginGBufferPass();
 	dx12->ClearGBuffer();
-
 	renderSys->DrawGBufferPass(*cmd, frame, *prepSys);
 
-	// ============================================================
-	// 2. Lighting Pass（GBuffer 読み込み → BackBuffer）
-	// ============================================================
+	// ==== Lighting Pass ====
 	dx12->TransitionGBufferToRead();
 	dx12->BeginBackBufferPass(idx.backBuffer);
 	dx12->ClearBackBuffer(idx.backBuffer);
-
 	renderSys->DrawLightingPass(*cmd, frame, *prepSys);
-
-	// ============================================================
-	// 3. Debug Overlay
-	// ============================================================
+	
+	// ==== Debug Overlay ====
 #ifdef _DEBUG
-	//dx12->BeginBackBufferPass(idx.backBuffer);
-	//renderSys->DrawDebugPass(*cmd, frame, *prepSys);
+	renderSys->DrawDebugPass(*cmd, frame);
 #endif
 
-	// ============================================================
-	// 4. UI
-	// ============================================================
+	// ==== UI ====
 	if (uiRenderCallBack) {
-		uiRenderCallBack();
+		//uiRenderCallBack();
 	}
 
-	// ----------------------------
 	// DX12 EndFrame
-	// ----------------------------
 	dx12->EndFrame(idx);
 }
 inline void GameContext::Finalize() { if(currentScene_) currentScene_->Finalize(); }

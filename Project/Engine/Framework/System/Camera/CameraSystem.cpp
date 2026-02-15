@@ -11,6 +11,9 @@ using namespace Tsumi::Framework;
 
 CameraSystem::CameraSystem(World& world)
 	: world_(world)
+{}
+
+void CameraSystem::Init()
 {
 	BuildDefault(defaultCtx_);
 	activeCtx_ = defaultCtx_;
@@ -96,8 +99,8 @@ void CameraSystem::BuildDefault(CameraContext& out)
 	out.nearPlane = defNear;
 	out.farPlane = defFar;
 
-	out.position = Math::Vec3f{ 0,0,-25 };
-	out.forward = Math::Vec3f{ 0,0, 1 };
+	out.position = Math::Vec3f{ 0,10,-30 };
+	out.forward = Math::Vec3f{ 0.5,0,1 };
 
 	const Math::Vec3f scale{ 1,1,1 };
 	const Math::Vec3f rotate{ 0,0,0 };
@@ -120,6 +123,5 @@ void CameraSystem::BuildDefault(CameraContext& out)
 
 Tsumi::Math::Mat4x4 CameraSystem::MakeViewProj(const Math::Mat4x4& view, const Math::Mat4x4& proj)
 {
-	// ここで座標系を固定する
 	return view * proj;
 }

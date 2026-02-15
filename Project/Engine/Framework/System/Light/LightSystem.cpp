@@ -18,104 +18,135 @@ static Math::Vec3f NormalizeSafe(const Math::Vec3f& v, const Math::Vec3f& fallba
 
 LightSystem::LightSystem(World& world)
 	: world_(world)
+{}
+
+void LightSystem::Init()
 {
+	BuildDefault(defaultCtx_);
+	activeCtx_ = defaultCtx_;
 }
 
 void LightSystem::Update(float)
 {
-	BuildLightContext();
+	LightContext ctx{};
+	BuildLightContext(ctx);
+
+	if (!ctx.directional.enabled)
+	{
+		activeCtx_ = defaultCtx_;
+	}
+	else
+	{
+		activeCtx_ = ctx;
+	}
 }
 
-void LightSystem::BuildLightContext()
+void LightSystem::BuildLightContext(LightContext& out)
 {
-	// まず初期化
-	LightContext ctx{};
-	ctx.directional.enabled = false;
-	ctx.points.reserve(world_.GetPointLightCompView().GetActors().size());
-	ctx.spots.reserve(world_.GetSpotLightCompView().GetActors().size());
+	// 初期化
+	out = {};
+	out.directional.enabled = false;
+
+	// reserve（※ actors.size()取れるならそのまま）
+	out.points.reserve(world_.GetPointLightCompView().GetActors().size());
+	out.spots.reserve(world_.GetSpotLightCompView().GetActors().size());
 
 	// ============================================================
-	// 1) Directional Light
+	// 1) Directional Light（最初の1つを採用）
 	// ============================================================
-	auto view = world_.View<TransformComponent, DirectionalLightComponent>();
-	auto it = view.begin();
-	if (it != view.end())
 	{
-		auto [tr, dl] = *it;
+		auto view = world_.View<TransformComponent, DirectionalLightComponent>();
+		auto it = view.begin();
+		if (it != view.end())
+		{
+			auto [tr, dl] = *it;
 
-		Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
+			Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
 
-		Math::Vec3f radiance{
-			dl.color.x * dl.intensity,
-			dl.color.y * dl.intensity,
-			dl.color.z * dl.intensity
-		};
+			Math::Vec3f radiance{
+				dl.color.x * dl.intensity,
+				dl.color.y * dl.intensity,
+				dl.color.z * dl.intensity
+			};
 
-		ctx.directional.enabled = true;
-		ctx.directional.dirWS = dirWS;
-		ctx.directional.radiance = radiance;
+			out.directional.enabled = (dl.intensity > 0.0f);
+			out.directional.dirWS = dirWS;
+			out.directional.radiance = radiance;
+		}
 	}
 
 	// ============================================================
 	// 2) Point Lights
 	// ============================================================
+	for (auto [tr, pl] : world_.View<TransformComponent, PointLightComponent>())
 	{
-		for (auto [tr, pl] : world_.View<TransformComponent, PointLightComponent>())
-		{
-			if (pl.intensity <= 0.0f || pl.range <= 0.0f)
-				continue;
+		if (pl.intensity <= 0.0f || pl.range <= 0.0f)
+			continue;
 
-			Math::Vec3f pos = tr.GetWorldPos();
-			Math::Vec3f radiance{
-				pl.color.x * pl.intensity,
-				pl.color.y * pl.intensity,
-				pl.color.z * pl.intensity
-			};
+		Math::Vec3f pos = tr.GetWorldPos();
+		Math::Vec3f radiance{
+			pl.color.x * pl.intensity,
+			pl.color.y * pl.intensity,
+			pl.color.z * pl.intensity
+		};
 
-			// Resolved（CPU 側）
-			PointLightResolved r{};
-			r.positionWS = pos;
-			r.range = pl.range;
-			r.radiance = radiance;
-			ctx.points.push_back(r);
-		}
+		PointLightResolved r{};
+		r.positionWS = pos;
+		r.range = pl.range;
+		r.radiance = radiance;
+
+		out.points.push_back(r);
 	}
 
 	// ============================================================
 	// 3) Spot Lights
 	// ============================================================
+	for (auto [tr, sl] : world_.View<TransformComponent, SpotLightComponent>())
 	{
-		for (auto [tr, sl] : world_.View<TransformComponent, SpotLightComponent>())
-		{
-			if (sl.intensity <= 0.0f || sl.range <= 0.0f)
-				continue;
+		if (sl.intensity <= 0.0f || sl.range <= 0.0f)
+			continue;
 
-			Math::Vec3f pos = tr.GetWorldPos();
-			Math::Vec3f dir = NormalizeSafe(-tr.forward, { 0,-1,0 });
+		Math::Vec3f pos = tr.GetWorldPos();
+		Math::Vec3f dir = NormalizeSafe(-tr.forward, { 0,-1,0 });
 
-			Math::Vec3f radiance{
-				sl.color.x * sl.intensity,
-				sl.color.y * sl.intensity,
-				sl.color.z * sl.intensity
-			};
+		Math::Vec3f radiance{
+			sl.color.x * sl.intensity,
+			sl.color.y * sl.intensity,
+			sl.color.z * sl.intensity
+		};
 
-			float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
-			float outerRad = Math::Func::NUM::ToRadians(sl.outerAngle);
+		float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
+		float outerRad = Math::Func::NUM::ToRadians(sl.outerAngle);
 
-			SpotLightResolved r{};
-			r.positionWS = pos;
-			r.range = sl.range;
-			r.directionWS = dir;
-			r.innerCos = std::cos(innerRad * 0.5f);
-			r.outerCos = std::cos(outerRad * 0.5f);
-			r.radiance = radiance;
+		SpotLightResolved r{};
+		r.positionWS = pos;
+		r.range = sl.range;
+		r.directionWS = dir;
 
-			ctx.spots.push_back(r);
-		}
+		// 既存コード踏襲（半角にしてcos）
+		r.innerCos = std::cos(innerRad * 0.5f);
+		r.outerCos = std::cos(outerRad * 0.5f);
+
+		r.radiance = radiance;
+
+		out.spots.push_back(r);
 	}
+}
 
-	// ============================================================
-	// 4) LightContext をセット
-	// ============================================================
-	context_ = ctx;
+void LightSystem::BuildDefault(LightContext& out)
+{
+	out = {};
+
+	// Directional を1本だけ保証（Deferredで真っ黒回避）
+	out.directional.enabled = true;
+
+	// 太陽っぽい斜め上から
+	out.directional.dirWS = NormalizeSafe({ 0.3f, -1.0f, 0.2f }, { 0, -1, 0 });
+
+	// radiance（= color * intensity）を直に入れてる前提
+	out.directional.radiance = { 1.0f, 1.0f, 1.0f };
+
+	// Point/Spot は空でOK
+	out.points.clear();
+	out.spots.clear();
 }

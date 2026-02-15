@@ -2,7 +2,6 @@
 #define __LIGHTING_SHADOW_SAMPLING_HLSLI__
 
 #include "../Core/Common.hlsli"
-#include "../Core/Samplers.hlsli"
 #include "../Interop/ShadowInfo.hlsli"
 #include "../Interop/LightInfo.hlsli"
 

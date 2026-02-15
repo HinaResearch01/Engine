@@ -17,11 +17,11 @@ PSOLibrary::PSOLibrary()
 void PSOLibrary::Init()
 {
 	// 生成と登録
-	CreateObject3D();
 	CreateGBuffer();
 	CreateLightingDirectional();
-	CreateDebugFullScreen();
 	CreateShadowCaster();
+	CreateDeferredComposite();
+	CreateDeferredDebug();
 }
 
 void PSOLibrary::Register(const std::string& name, PSODesc& pso)
@@ -66,48 +66,13 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 	Utils::Logger::Info("PSOLibrary::RegisterFromDesc - 登録完了", wname);
 }
 
-void PSOLibrary::CreateObject3D()
-{
-	PSODesc pso;
-
-	pso.SetRootSignature(rootSignsLib_->Get("Object3D"));
-
-	auto vs = shaderLib_->Get("Object3D", ShaderType::VS);
-	auto ps = shaderLib_->Get("Object3D", ShaderType::PS);
-	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
-	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
-
-	// InputLayout
-	std::vector<D3D12_INPUT_ELEMENT_DESC> il = {
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-	};
-	pso.SetInputLayout(il);
-
-	// BlendMode
-	pso.SetBlend(BlendMode::Opaque);
-
-	// RT/DS
-	DXGI_FORMAT rtv = DXGI_FORMAT_R8G8B8A8_UNORM;
-	pso.SetRTVFormats(1, &rtv);
-	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
-
-	// Depth on
-	pso.EnableDepth(true);
-	pso.SetDepthWrite(true);
-	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
-
-	Register("Object3D", pso);
-}
-
 void PSOLibrary::CreateGBuffer()
 {
 	PSODesc pso;
-	pso.SetRootSignature(rootSignsLib_->Get("GBuffer"));
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredGBuffer"));
 
-	auto vs = shaderLib_->Get("GBuffer", ShaderType::VS);
-	auto ps = shaderLib_->Get("GBuffer", ShaderType::PS);
+	auto vs = shaderLib_->Get("DeferredGBuffer", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredGBuffer", ShaderType::PS);
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
 	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
 
@@ -134,63 +99,30 @@ void PSOLibrary::CreateGBuffer()
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
 
-	Register("GBuffer", pso);
+	Register("DeferredGBuffer", pso);
 }
 
 void PSOLibrary::CreateLightingDirectional()
 {
 	PSODesc pso;
-	pso.SetRootSignature(rootSignsLib_->Get("LightingDirectional"));
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredDirectionalLight"));
 
-	auto vs = shaderLib_->Get("LightingDirectional", ShaderType::VS);
-	auto ps = shaderLib_->Get("LightingDirectional", ShaderType::PS);
+	auto vs = shaderLib_->Get("DeferredDirectionalLight", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredDirectionalLight", ShaderType::PS);
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
 	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
 
 	pso.SetBlend(BlendMode::Opaque);
 
-	// 出力先はバックバッファ（またはポストプロセス用バッファ）1枚
 	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
 	pso.SetRTVFormats(1, &rtv);
 
-	// フルスクリーントライアングルなので、頂点バッファ(InputLayout)は不要
 	pso.ClearInputLayout();
 
 	pso.EnableDepth(false);
 	pso.SetCullMode(D3D12_CULL_MODE_NONE);
 
-	Register("LightingDirectional", pso);
-}
-
-void PSOLibrary::CreateDebugFullScreen()
-{
-	PSODesc pso;
-
-	pso.SetRootSignature(rootSignsLib_->Get("DebugFullScreen"));
-
-	auto vs = shaderLib_->Get("DebugFullscreen", ShaderType::VS);
-	auto ps = shaderLib_->Get("DebugFullscreen", ShaderType::PS);
-	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
-	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
-
-	// Fullscreen triangle：InputLayout なし
-	pso.ClearInputLayout();
-
-	// BlendMode
-	pso.SetBlend(BlendMode::Opaque);
-
-	// BackBuffer へ 1RT
-	DXGI_FORMAT rtv = DXGI_FORMAT_R8G8B8A8_UNORM;
-	pso.SetRTVFormats(1, &rtv);
-	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
-
-	// Depth off
-	pso.EnableDepth(false);
-
-	// Cull none が無難
-	pso.SetCullMode(D3D12_CULL_MODE_NONE);
-
-	Register("DebugFullScreen", pso);
+	Register("DeferredDirectionalLight", pso);
 }
 
 void PSOLibrary::CreateShadowCaster()
@@ -200,35 +132,85 @@ void PSOLibrary::CreateShadowCaster()
 	pso.SetRootSignature(rootSignsLib_->Get("ShadowCaster"));
 
 	auto vs = shaderLib_->Get("ShadowCaster", ShaderType::VS);
+	if (!vs)
+		throw std::runtime_error("ShadowCaster VS not found");
+
 	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+	pso.ClearPS(); // Depth Only
 
-	// PS は無し（Depth Only）
-	pso.ClearPS();
-
-	// InputLayout
 	std::vector<D3D12_INPUT_ELEMENT_DESC> il = {
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+		 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 	};
 	pso.SetInputLayout(il);
 
-	// RenderTargetなし
 	pso.SetRTVFormats(0, nullptr);
 	pso.SetDSVFormat(DXGI_FORMAT_D32_FLOAT);
 
-	// Depth ON
 	pso.EnableDepth(true);
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
 
-	// Rasterizer
 	pso.SetCullMode(D3D12_CULL_MODE_BACK);
 
-	// Depth bias（
+	// Bias
 	pso.SetDepthBias(1000);
 	pso.SetSlopeScaledDepthBias(1.0f);
 	pso.SetDepthBiasClamp(0.0f);
 
 	Register("ShadowCaster", pso);
+}
+
+void PSOLibrary::CreateDeferredComposite()
+{
+	PSODesc pso;
+
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredComposite"));
+
+	auto vs = shaderLib_->Get("DeferredComposite", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredComposite", ShaderType::PS);
+
+	if (!vs || !ps)
+		throw std::runtime_error("DeferredComposite shader not found");
+
+	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
+
+	pso.ClearInputLayout();
+	pso.SetBlend(BlendMode::Opaque);
+
+	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
+	pso.SetRTVFormats(1, &rtv);
+
+	pso.EnableDepth(false);
+	pso.SetCullMode(D3D12_CULL_MODE_NONE);
+
+	Register("DeferredComposite", pso);
+}
+
+void PSOLibrary::CreateDeferredDebug()
+{
+	PSODesc pso;
+
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredDebug"));
+
+	auto vs = shaderLib_->Get("DeferredDebug", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredDebug", ShaderType::PS);
+
+	if (!vs || !ps)
+		throw std::runtime_error("DeferredDebug shader not found");
+
+	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
+
+	pso.ClearInputLayout();
+	pso.SetBlend(BlendMode::Opaque);
+
+	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
+	pso.SetRTVFormats(1, &rtv);
+
+	pso.EnableDepth(false);
+	pso.SetCullMode(D3D12_CULL_MODE_NONE);
+
+	Register("DeferredDebug", pso);
 }

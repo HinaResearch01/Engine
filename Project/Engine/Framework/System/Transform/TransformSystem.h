@@ -17,7 +17,6 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	TransformSystem() = default;;
 	TransformSystem(World& world);
 
 	/// <summary>

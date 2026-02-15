@@ -25,7 +25,6 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	MaterialSystem() = default;
 	MaterialSystem(World& world);
 
 	/// <summary>

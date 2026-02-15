@@ -6,6 +6,7 @@
 #include "Framework/Component/Transform/TransformComponent.h"
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #undef min
 #undef max
 
@@ -71,20 +72,40 @@ ShadowSystem::ShadowSystem(World& world)
 	: world_(world)
 {}
 
-void ShadowSystem::Update(float)
+void ShadowSystem::Init()
 {
-	BuildShadowContext();
+	BuildDefault(defaultCtx_);
+	activeCtx_ = defaultCtx_;
 }
 
-void ShadowSystem::BuildShadowContext()
+void ShadowSystem::Update(float)
 {
-	context_ = {};
-	context_.enabled = false;
+	ShadowContext ctx{};
+	BuildShadowContext(ctx);
+
+	// 「影が組めない」ならデフォルトにフォールバック
+	if (!ctx.enabled)
+	{
+		activeCtx_ = defaultCtx_;
+	}
+	else
+	{
+		activeCtx_ = ctx;
+	}
+}
+
+void ShadowSystem::BuildShadowContext(ShadowContext& out)
+{
+	out = {};
+	out.enabled = false;
 
 	// Camera
 	auto camSys = world_.GetSystem<CameraSystem>();
 	const CameraContext& cam = camSys->GetContext();
-	if (!cam.valid) return;
+	if (!cam.valid)
+	{
+		return;
+	}
 
 	// Choose 1 directional light
 	const DirectionalLightComponent* chosenDL = nullptr;
@@ -100,14 +121,19 @@ void ShadowSystem::BuildShadowContext()
 		chosenTR = &tr;
 		break;
 	}
-	if (!chosenDL || !chosenTR) return;
 
-	context_.enabled = true;
-	context_.shadowMapSize = chosenDL->shadow.shadowMapSize;
+	if (!chosenDL || !chosenTR)
+	{
+		// 影を組めない → enabled=falseのまま（Update側でdefaultへ）
+		return;
+	}
+
+	out.enabled = true;
+	out.shadowMapSize = chosenDL->shadow.shadowMapSize;
 
 	// CSM splits
 	constexpr uint32_t cascadeCount = 4;
-	context_.cascadeCount = cascadeCount;
+	out.cascadeCount = cascadeCount;
 
 	const float lambda = 0.7f;
 	const float n = cam.nearPlane;
@@ -123,9 +149,9 @@ void ShadowSystem::BuildShadowContext()
 		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
 	}
 
-	// splitFar を context に格納
-	for (uint32_t i = 0; i < cascadeCount; ++i) {
-		context_.splitFar[i] = splits[i + 1];
+	for (uint32_t i = 0; i < cascadeCount; ++i)
+	{
+		out.splitFar[i] = splits[i + 1];
 	}
 
 	// Light dir
@@ -187,7 +213,7 @@ void ShadowSystem::BuildShadowContext()
 		// texel snap
 		const float orthoW = (maxLS.x - minLS.x);
 		const float orthoH = (maxLS.y - minLS.y);
-		SnapOrthoToTexel(lightView, orthoW, orthoH, context_.shadowMapSize);
+		SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, maxLS.x,
@@ -195,11 +221,58 @@ void ShadowSystem::BuildShadowContext()
 			minLS.z, maxLS.z
 		);
 
-		auto& c = context_.cascades[ci];
+		auto& c = out.cascades[ci];
 		c.view = lightView;
 		c.proj = lightProj;
 		c.viewProj = lightView * lightProj;
 	}
+}
+
+void ShadowSystem::BuildDefault(ShadowContext& out)
+{
+	out = {};
+	out.enabled = true;
+
+	out.shadowMapSize = 1024;
+	out.cascadeCount = 1;
+
+	// Camera
+	auto camSys = world_.GetSystem<CameraSystem>();
+	const CameraContext& cam = camSys->GetContext();
+
+	// 仮ライト方向
+	Math::Vec3f lightDirWS = NormalizeSafe({ 0.3f, -1.0f, 0.2f }, { 0,-1,0 });
+
+	// up決定
+	Math::Vec3f up{ 0,1,0 };
+	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
+	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
+
+	// カメラ位置付近を中心に固定のオルソを作る
+	const Math::Vec3f centerWS = cam.position;
+
+	const float dist = 60.0f;
+	const Math::Vec3f lightPosWS = {
+		centerWS.x - lightDirWS.x * dist,
+		centerWS.y - lightDirWS.y * dist,
+		centerWS.z - lightDirWS.z * dist
+	};
+
+	Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+
+	// 固定オルソ
+	const float half = 50.0f;
+	Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+		-half, half,
+		half, -half, 
+		-150.0f, 150.0f);
+
+	out.cascades[0].view = lightView;
+	out.cascades[0].proj = lightProj;
+	out.cascades[0].viewProj = lightView * lightProj;
+
+	// splitFar[0] だけ埋める
+	out.splitFar[0] = cam.farPlane;
 }
 
 void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)

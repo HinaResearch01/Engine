@@ -12,12 +12,12 @@
 #include <unordered_map>
 #include <mutex>
 #pragma comment(lib, "dxcompiler.lib")
-
 #include "Utils/Logger/Logger.h"
 
 namespace Tsumi::Graphic {
 
-enum class ShaderType : uint8_t {
+enum class ShaderType
+{
 	VS,
 	PS,
 	GS,
@@ -26,7 +26,6 @@ enum class ShaderType : uint8_t {
 	CS
 };
 
-// 1ステージ分の定義（同一hlslにVS/PSが共存してもOK）
 struct ShaderStageDesc
 {
 	std::string file;
@@ -35,7 +34,6 @@ struct ShaderStageDesc
 
 struct ShaderLoadModule
 {
-	// ステージ → (file, entry)
 	std::unordered_map<ShaderType, ShaderStageDesc> sources;
 };
 
@@ -67,7 +65,6 @@ public:
 	void Init();
 
 	IDxcBlob* Get(const std::string& name, ShaderType stage) const;
-	bool Has(const std::string& name) const;
 
 private:
 	void CompileAllShader();
@@ -75,14 +72,12 @@ private:
 	HRESULT InitDXC();
 
 private:
-	mutable std::mutex mutex_;
-	std::unordered_map<std::string, ShaderBlob> shaders_;
-
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> dxcIncludeHandler_;
+
+	std::unordered_map<std::string, ShaderBlob> shaders_;
+	mutable std::mutex mutex_;
 };
-
-
 
 }

@@ -51,6 +51,8 @@ public:
 		AddSystem<RenderPrepareSystem>();
 		AddSystem<RenderSystem>();
 
+		// 追加したSystemの初期化処理
+		InitSystems();
 		// Viewの登録
 		RegisterDefaultViews();
 	}
@@ -83,7 +85,7 @@ public:
 	template<class T, class... Args>
 	T* AddSystem(Args&&... args) {
 		static_assert(std::is_base_of_v<ISystem, T>, "T must derive from ISystem");
-		auto sys = std::make_unique<T>(*this, std::forward<Args>(args)...);
+		auto sys = std::make_unique<T>(*this);
 		T* ptr = sys.get();
 		ownedSystems_.push_back(std::move(sys));
 		systems_[typeid(T)] = ptr;
@@ -199,6 +201,15 @@ protected:
 		updateMgr_.Execute(deltaTime);
 		// Dead Actor の後処理
 		CleanupDeadActorsInternal();
+	}
+
+	// ===============================================
+	// System Update
+	// ===============================================
+	void InitSystems()
+	{
+		for (auto& sys : ownedSystems_)
+			sys->Init();
 	}
 
 	// ===============================================

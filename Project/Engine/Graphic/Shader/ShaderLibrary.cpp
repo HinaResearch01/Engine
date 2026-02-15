@@ -1,12 +1,13 @@
 #include "ShaderLibrary.h"
-#include "DX12/DX12Manager.h"
-#include "ShaderCacheUtil.h"
 #include "Utils/Func/UtilFunc.h"
-#include <iostream>
+#include <vector>
 
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
 
+// ------------------------------------------------------------
+// ShaderType → Profile
+// ------------------------------------------------------------
 static const wchar_t* StageToProfile(ShaderType stage)
 {
 	switch (stage)
@@ -21,237 +22,233 @@ static const wchar_t* StageToProfile(ShaderType stage)
 	}
 }
 
+// ------------------------------------------------------------
+// DXC Init
+// ------------------------------------------------------------
+HRESULT ShaderLibrary::InitDXC()
+{
+	HRESULT hr{};
+
+	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
+	if (FAILED(hr))
+	{
+		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IDxcUtils");
+		return hr;
+	}
+
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
+	if (FAILED(hr))
+	{
+		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IDxcCompiler");
+		return hr;
+	}
+
+	hr = dxcUtils_->CreateDefaultIncludeHandler(&dxcIncludeHandler_);
+	if (FAILED(hr))
+	{
+		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IncludeHandler");
+		return hr;
+	}
+
+	Tsumi::Utils::Logger::Info("[ShaderLibrary] DXC initialized");
+	return S_OK;
+}
+
+// ------------------------------------------------------------
+// Init
+// ------------------------------------------------------------
 void ShaderLibrary::Init()
 {
 	shaders_.clear();
-	Tsumi::Utils::Logger::Info("[ShaderLibrary] Initialized");
 
-	// DXC 初期化
-	InitDXC();
+	if (FAILED(InitDXC()))
+	{
+		Tsumi::Utils::Logger::Error("[ShaderLibrary] DXC init failed");
+		return;
+	}
 
-	// 一括コンパイル
 	CompileAllShader();
-}
-
-void ShaderLibrary::CompileAllShader()
-{
-	auto tryCompile = [&](const std::string& name, const ShaderLoadModule& desc)
-	{
-		try {
-			Compile(name, desc);
-		}
-		catch (const std::exception& e) {
-			std::wcerr << L"ShaderLibrary::CompileAllShader - failed '"
-				<< Tsumi::Utils::Func::Utf8ToWstring(name)
-				<< L"': " << e.what() << std::endl;
-		}
-		catch (...) {
-			std::wcerr << L"ShaderLibrary::CompileAllShader - failed '"
-				<< Tsumi::Utils::Func::Utf8ToWstring(name)
-				<< L"': unknown error" << std::endl;
-		}
-	};
-
-	// -------------------------------
-	// 通常オブジェクト描画
-	// -------------------------------
-	{
-		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/VS/Object3D_Static.VS.hlsl", "main" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/PS/Object3D_Static.PS.hlsl", "main" };
-		tryCompile("Object3D", m);
-	}
-
-	// -------------------------------
-	// Deferred : GBuffer Pass
-	// -------------------------------
-	{
-		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/GBuffer.hlsl", "GBufferVS" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/GBuffer.hlsl", "GBufferPS" };
-		tryCompile("GBuffer", m);
-	}
-
-	// -------------------------------
-	// Deferred : Directional Lighting Pass
-	// -------------------------------
-	{
-		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DirectionalLight.hlsl", "DirLightingVS" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DirectionalLight.hlsl", "DirLightingPS" };
-		tryCompile("DirectinalLight", m);
-	}
-
-	// -------------------------------
-	// Deferred : DebugFullscreen Pass
-	// -------------------------------
-	{
-		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Debug/DDebugFullScreen.hlsl", "DebugFullVS" };
-		m.sources[ShaderType::PS] = { "Resources/Shaders/Debug/DDebugFullScreen.hlsl", "DebugFullPS" };
-		tryCompile("DDebugFullScreen", m);
-	}
-
-	// -------------------------------
-	// Shadow : ShadowCaster (Depth Only)
-	// -------------------------------
-	{
-		ShaderLoadModule m;
-		m.sources[ShaderType::VS] = { "Resources/Shaders/Shadow/ShadowCaster_Directional.VS.hlsl", "main" };
-		// PS は不要（Depth Only）
-		tryCompile("ShadowCaster", m);
-	}
-
-	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader - completed (errors were logged per-shader if any)");
 }
 
 IDxcBlob* ShaderLibrary::Get(const std::string& name, ShaderType stage) const
 {
 	std::lock_guard<std::mutex> lock(mutex_);
+
 	auto it = shaders_.find(name);
-	if (it == shaders_.end()) return nullptr;
+	if (it == shaders_.end())
+		return nullptr;
 
 	auto itStage = it->second.blob.find(stage);
-	if (itStage == it->second.blob.end()) return nullptr;
+	if (itStage == it->second.blob.end())
+		return nullptr;
 
 	return itStage->second.Get();
 }
 
-bool ShaderLibrary::Has(const std::string& name) const
+// ------------------------------------------------------------
+// Compile All
+// ------------------------------------------------------------
+void ShaderLibrary::CompileAllShader()
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	return shaders_.find(name) != shaders_.end();
-}
+	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader start");
 
-HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& module)
-{
-	if (module.sources.empty()) {
-		throw std::runtime_error("ShaderLibrary::Compile - no sources provided for " + name);
+	auto tryCompile = [&](const std::string& name, const ShaderLoadModule& desc)
+	{
+		HRESULT hr = Compile(name, desc);
+		if (FAILED(hr))
+		{
+			Tsumi::Utils::Logger::Error("[ShaderLibrary] Compile failed:", name);
+		}
+		else
+		{
+			Tsumi::Utils::Logger::Info("[ShaderLibrary] Compile succeeded:", name);
+		}
+	};
+
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredGBuffer.hlsl", "GBufferVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredGBuffer.hlsl", "GBufferPS" };
+		tryCompile("DeferredGBuffer", m);
+	}
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredDirectionalLight.hlsl", "DirLightingVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredDirectionalLight.hlsl", "DirLightingPS" };
+		tryCompile("DeferredDirectionalLight", m);
+	}
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredComposite.hlsl", "CompositeVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredComposite.hlsl", "CompositePS" };
+		tryCompile("DeferredComposite", m);
+	}
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Shadow/ShadowCaster.hlsl", "ShadowVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Shadow/ShadowCaster.hlsl", "ShadowPS" };
+		tryCompile("ShadowCaster", m);
+	}
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Debug/DeferredDebugView.hlsl", "DeferredDebugVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Debug/DeferredDebugView.hlsl", "DeferredDebugPS" };
+
+		tryCompile("DeferredDebug", m);
 	}
 
+
+	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader end");
+}
+
+// ------------------------------------------------------------
+// Compile
+// ------------------------------------------------------------
+HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& module)
+{
 	ShaderBlob compiled;
-	HRESULT hr = S_OK;
 
 	for (const auto& kv : module.sources)
 	{
 		const ShaderType stage = kv.first;
 		const ShaderStageDesc& stageDesc = kv.second;
 
-		// file / entry（entry省略なら main）
-		const std::wstring filePath = Tsumi::Utils::Func::Utf8ToWstring(stageDesc.file);
-		const std::string entryUtf8 = stageDesc.entry.empty() ? "main" : stageDesc.entry;
-		const std::wstring entryPoint = Tsumi::Utils::Func::Utf8ToWstring(entryUtf8);
+		std::wstring filePath =
+			Tsumi::Utils::Func::Utf8ToWstring(stageDesc.file);
 
-		// -------------------------------
-		// HLSL 読み込み
-		// -------------------------------
-		ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
-		hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-		if (FAILED(hr) || !shaderSource) {
+		std::wstring entry =
+			Tsumi::Utils::Func::Utf8ToWstring(
+			stageDesc.entry.empty() ? "main" : stageDesc.entry);
+
+		Tsumi::Utils::Logger::Info(
+			"[ShaderLibrary] Compiling:",
+			filePath,
+			L" Entry:", entry);
+
+		ComPtr<IDxcBlobEncoding> source;
+		HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &source);
+		if (FAILED(hr))
+		{
 			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] Failed to load shader", 
-				"file", filePath);
+				"[ShaderLibrary] Failed to load shader file:",
+				filePath);
 			return hr;
 		}
 
-		DxcBuffer shaderSourceBuffer{};
-		shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-		shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-		shaderSourceBuffer.Encoding = DXC_CP_UTF8;
+		DxcBuffer buffer{};
+		buffer.Ptr = source->GetBufferPointer();
+		buffer.Size = source->GetBufferSize();
+		buffer.Encoding = DXC_CP_UTF8;
 
-		// -------------------------------
-		// Compile
-		// -------------------------------
 		const wchar_t* profile = StageToProfile(stage);
 
-		LPCWSTR arguments[] = {
-			filePath.c_str(),
-			L"-E", entryPoint.c_str(),  
+		std::vector<std::wstring> wargs = {
+			filePath,
+			L"-E", entry,
 			L"-T", profile,
 			L"-Zi", L"-Qembed_debug",
 			L"-Od",
-			L"-Zpr"
+			L"-Zpr",
+			L"-I", L"Resources/Shaders"
 		};
 
-		ComPtr<IDxcResult> shaderResult;
+		std::vector<LPCWSTR> args;
+		for (auto& s : wargs)
+			args.push_back(s.c_str());
+
+		ComPtr<IDxcResult> result;
 		hr = dxcCompiler_->Compile(
-			&shaderSourceBuffer,
-			arguments,
-			_countof(arguments),
+			&buffer,
+			args.data(),
+			(UINT32)args.size(),
 			dxcIncludeHandler_.Get(),
-			IID_PPV_ARGS(&shaderResult)
-		);
-		if (FAILED(hr) || !shaderResult) {
-			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC Compile failed:",
-				"file", filePath, 
-				"stage", static_cast<int>(stage), 
-				"entry", entryPoint);
+			IID_PPV_ARGS(&result));
+
+		if (FAILED(hr))
+		{
+			Tsumi::Utils::Logger::Error("[ShaderLibrary] DXC Compile call failed");
 			return hr;
 		}
 
-		// -------------------------------
-		// エラー/警告
-		// -------------------------------
-		ComPtr<IDxcBlobUtf8> shaderError;
-		shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+		HRESULT status{};
+		result->GetStatus(&status);
 
-		if (shaderError && shaderError->GetStringLength() != 0)
+		ComPtr<IDxcBlobUtf8> errors;
+		result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
+
+		if (errors && errors->GetStringLength() > 0)
 		{
-			// 既存の方針：警告も含めて出たら止める
-			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC error/warning",
-				"file:", filePath,
-				"message:", Tsumi::Utils::Func::Utf8ToWstring(
-				shaderError->GetStringPointer()));
+			Tsumi::Utils::Logger::Warn(
+				"[ShaderLibrary] DXC message:",
+				Tsumi::Utils::Func::Utf8ToWstring(
+				errors->GetStringPointer()));
+		}
+
+		if (FAILED(status))
+		{
+			Tsumi::Utils::Logger::Error("[ShaderLibrary] Shader compile failed:", name);
 			return E_FAIL;
 		}
 
-		// -------------------------------
-		// 生成物
-		// -------------------------------
-		ComPtr<IDxcBlob> shaderBlob;
-		hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-		if (FAILED(hr) || !shaderBlob) {
-			Tsumi::Utils::Logger::Error(
-				"[ShaderLibrary] DXC failed to get compiled object",
-				"file:", filePath,
-				"hr:", static_cast<unsigned>(hr));
+		ComPtr<IDxcBlob> blob;
+		hr = result->GetOutput(
+			DXC_OUT_OBJECT,
+			IID_PPV_ARGS(&blob),
+			nullptr);
+
+		if (FAILED(hr))
+		{
+			Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to get compiled object");
 			return hr;
 		}
 
-		Tsumi::Utils::Logger::Info(
-			"[ShaderLibrary] Compile succeeded",
-			"file:", filePath,
-			"profile:", profile,
-			"stage:", static_cast<int>(stage),
-			"entry:", Tsumi::Utils::Func::Utf8ToWstring(entryUtf8));
-
-		compiled.blob[stage] = shaderBlob;
+		compiled.blob[stage] = blob;
 	}
 
-	// 登録（スレッドセーフ）
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		shaders_[name] = std::move(compiled);
 	}
-
-	return S_OK;
-}
-
-HRESULT ShaderLibrary::InitDXC()
-{
-	HRESULT hr{};
-
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	if (FAILED(hr)) return hr;
-
-	// 既存が IDxcCompiler3 を使ってる前提
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	if (FAILED(hr)) return hr;
-
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&dxcIncludeHandler_);
-	if (FAILED(hr)) return hr;
 
 	return S_OK;
 }

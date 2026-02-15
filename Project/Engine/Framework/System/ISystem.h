@@ -11,5 +11,6 @@ class World;
 class ISystem : public IUpdatable {
 public:
 	virtual ~ISystem() = default;
+	virtual void Init() {};
 };
 }

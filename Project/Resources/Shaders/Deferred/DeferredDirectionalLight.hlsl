@@ -1,98 +1,111 @@
-#define TSUMI_DECLARE_CSM_SHADOWMAP
-
-#include "../Interop/Bindings.hlsli"
 #include "../Interop/CameraInfo.hlsli"
 #include "../Interop/LightInfo.hlsli"
 #include "../Interop/ShadowInfo.hlsli"
+
+#include "../Core/Common.hlsli"
 #include "../Core/Fullscreen.hlsli"
 #include "../Core/Math.hlsli"
-#include "../Core/Samplers.hlsli"
+
 #include "../Lighting/CSMShadowSampling.hlsli"
 #include "../Lighting/SimpleDirectional.hlsli"
 
-// ================================
+// ============================================================
+// Constant Buffers
+// ============================================================
+ConstantBuffer<CameraMatricesCB> gCamera : register(b0);
+ConstantBuffer<DirectionalLightCB> gLight : register(b1);
+ConstantBuffer<ShadowCB> gShadow : register(b2);
+
+// ============================================================
 // GBuffer SRVs
-// ================================
-Texture2D gGBuffer0_Albedo : register(BIND_GBUFFER_ALBEDO);
-Texture2D gGBuffer1_NormalWS : register(BIND_GBUFFER_NORMAL_WS);
-Texture2D gGBuffer2_Reflectivity : register(BIND_GBUFFER_REFLECTIVITY);
-Texture2D gDepth01 : register(BIND_GBUFFER_DEPTH);
+// ============================================================
+Texture2D gGBuffer0_Albedo : register(t0);
+Texture2D gGBuffer1_NormalWS : register(t1);
+Texture2D gGBuffer2_Reflectivity : register(t2);
+Texture2D gDepth01 : register(t3);
 
-// ================================
-// CSM ShadowMap (Texture2DArray)
-// ================================
-Texture2DArray gShadowMapCSM : register(BIND_SHADOW_TEX);
+// Shadow map
+Texture2DArray gShadowMapCSM : register(t4);
 
-// ================================
-// Fullscreen VS output
-// ================================
+// Sampler
+SamplerState gPointClamp : register(s0);
+
+// ============================================================
+// Fullscreen VS
+// ============================================================
 struct VSOut
 {
     float4 positionCS : SV_POSITION;
     float2 uv : TEXCOORD0;
 };
 
-// ================================
-// Vertex Shader
-// ================================
 VSOut DirLightingVS(uint vertexID : SV_VertexID)
 {
     FullscreenVSOut f = FullscreenVS(vertexID);
+
     VSOut o;
     o.positionCS = f.positionCS;
     o.uv = f.uv;
     return o;
 }
 
-// ================================
+// ============================================================
 // Pixel Shader
-// ================================
+// ============================================================
 float4 DirLightingPS(VSOut i) : SV_Target
 {
     float2 uv = i.uv;
 
-    // ---- GBuffer sampling ----
+    // ---------------- GBuffer sampling ----------------
     float3 albedo =
         gGBuffer0_Albedo.Sample(gPointClamp, uv).rgb;
-
     float3 N =
         SafeNormalize(
-            gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz
-        );
-
+            gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz);
     float reflectivity =
         gGBuffer2_Reflectivity.Sample(gPointClamp, uv).r;
-
     float depth01 =
         gDepth01.Sample(gPointClamp, uv).r;
 
-    // ---- World position ----
+    // ---------------- World position reconstruction ----------------
     float3 worldPos =
-        ReconstructWorldPos(depth01, uv, gInvViewProj);
-
-    // ---- View depth (for cascade selection) ----
+        ReconstructWorldPos(
+            depth01,
+            uv,
+            gCamera.gInvViewProj);
     float3 viewPos =
-        mul(float4(worldPos, 1.0f), gView).xyz;
-
+        mul(float4(worldPos, 1.0f), gCamera.gView).xyz;
     float viewDepth = abs(viewPos.z);
 
-    // ---- View / Light vectors ----
-    float3 cameraPosWS = gInvView[3].xyz;
+    // ---------------- View / Light vectors ----------------
+    float3 cameraPosWS = gCamera.gInvView[3].xyz;
     float3 V = SafeNormalize(cameraPosWS - worldPos);
-    float3 L = SafeNormalize(-gLightDirWS);
+    float3 L = SafeNormalize(-gLight.gLightDirWS);
 
-    // ---- CSM shadow ----
+    // ---------------- CSM shadow ----------------
     float shadowFactor =
-        ComputeCSMShadowFactor(worldPos, N, viewDepth);
+        ComputeCSMShadowFactor(
+            gShadowMapCSM,
+            gPointClamp,
+            worldPos,
+            N,
+            viewDepth,
+            gShadow.gCascadeSplitDepths,
+            gShadow.gLightViewProj,
+            gShadow.gShadowTexelSize,
+            gShadow.gShadowBias,
+            gShadow.gShadowNormalBias,
+            gLight.gLightDirWS
+        );
 
-    // ---- Lighting ----
+    // ---------------- Lighting ----------------
     float3 lit =
         EvalDirectionalLight(
             albedo,
             N,
             V,
             L,
-            gRadiance,
+            gLight.gRadiance,
             reflectivity
         );
 

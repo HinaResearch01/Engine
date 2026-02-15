@@ -31,8 +31,8 @@ void RenderPrepareSystem::Update(float)
 {
 	Clear();
 	BuildCameraPacket();
-	BuildLightPacket();
 	BuildShadowPacket();
+	BuildLightPacket();
 	BuildRenderPackets();
 }
 
@@ -70,6 +70,52 @@ void RenderPrepareSystem::BuildCameraPacket()
 		cameraPacke_.camParamCB.nearPlane = ctx.nearPlane;
 		cameraPacke_.camParamCB.farPlane = ctx.farPlane;
 	}
+}
+
+void RenderPrepareSystem::BuildShadowPacket()
+{
+	auto shadowSys = world_.GetSystem<ShadowSystem>();
+	const ShadowContext& ctx = shadowSys->GetContext();
+
+	auto& cb = shadowPacket_.csmCB;
+
+	// まず全部ゼロ初期化
+	cb = {};
+
+	// ---- matrices ----
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		if (ctx.enabled && i < ctx.cascadeCount)
+			cb.lightViewProj[i] = ctx.cascades[i].viewProj;
+		else
+			cb.lightViewProj[i] = Math::Mat4x4{};
+	}
+
+	// ---- split depths (far) ----
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		if (ctx.enabled && i < ctx.cascadeCount)
+			cb.cascadeSplitDepths[i] = ctx.splitFar[i];
+		else
+			cb.cascadeSplitDepths[i] = 0.0f;
+	}
+
+	// ---- texel size ----
+	if (ctx.shadowMapSize > 0)
+	{
+		const float inv = 1.0f / static_cast<float>(ctx.shadowMapSize);
+		cb.shadowTexelSize[0] = inv;
+		cb.shadowTexelSize[1] = inv;
+	}
+	else
+	{
+		cb.shadowTexelSize[0] = 0.0f;
+		cb.shadowTexelSize[1] = 0.0f;
+	}
+
+	// ---- bias ----
+	cb.shadowBias = 0.0f;
+	cb.shadowNormalBias = 0.0f;
 }
 
 void RenderPrepareSystem::BuildLightPacket()
@@ -122,31 +168,6 @@ void RenderPrepareSystem::BuildLightPacket()
 		cb.radiance = s.radiance;
 		cb.outerCos = s.outerCos;
 		lightPacket_.spotCB.push_back(cb);
-	}
-}
-
-void RenderPrepareSystem::BuildShadowPacket()
-{
-	auto shadowSys = world_.GetSystem<ShadowSystem>();
-	const ShadowContext& ctx = shadowSys->GetContext();
-
-	auto& cb = shadowPacket_.csmCB;
-
-	cb.enabled = ctx.enabled ? 1 : 0;
-	cb.cascadeCount = static_cast<int>(ctx.cascadeCount);
-	cb.shadowMapSize = static_cast<float>(ctx.shadowMapSize);
-	cb.invShadowMapSize = (ctx.shadowMapSize > 0) ? (1.0f / cb.shadowMapSize) : 0.0f;
-
-	for (int i = 0; i < 4; ++i) {
-		cb.splitFar[i] = ctx.splitFar[i];
-	}
-
-	for (uint32_t i = 0; i < 4; ++i)
-	{
-		if (ctx.enabled && i < ctx.cascadeCount)
-			cb.shadowViewProj[i] = ctx.cascades[i].viewProj;
-		else
-			cb.shadowViewProj[i] = Math::Mat4x4{};
 	}
 }
 

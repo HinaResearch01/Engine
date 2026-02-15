@@ -1,10 +1,8 @@
 #ifndef __POSTPROCESSINFO_HLSLI__
 #define __POSTPROCESSINFO_HLSLI__
 
-#include "Bindings.hlsli"
-
 // Composite / Tonemap params
-cbuffer PostCB : register(BIND_POST_CB)
+struct PostCB
 {
     float gExposure; // 1.0 = no change
     float gGamma; // usually 2.2

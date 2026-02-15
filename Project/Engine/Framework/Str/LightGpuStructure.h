@@ -45,15 +45,11 @@ struct GpuSpotLightCB {
 
 struct GpuShadowCSMCB
 {
-	int enabled;
-	uint32_t cascadeCount;
-	float shadowMapSize;
-	float invShadowMapSize;
-
-	float splitFar[4];
-
-	// 各カスケードの行列
-	Math::Mat4x4 shadowViewProj[4];
+	Math::Mat4x4 lightViewProj[4];
+	float cascadeSplitDepths[4];
+	float shadowTexelSize[2];
+	float shadowBias;
+	float shadowNormalBias;
 };
 
 struct GpuShadowCasterCB

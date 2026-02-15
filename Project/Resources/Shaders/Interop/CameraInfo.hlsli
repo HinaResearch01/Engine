@@ -1,17 +1,15 @@
 #ifndef __CAMERA_INFO_HLSLI__
 #define __CAMERA_INFO_HLSLI__
 
-#include "Bindings.hlsli"
-
 // Camera constant buffer
-cbuffer CameraMatricesCB : register(BIND_CAMERA_CB)
+struct CameraMatricesCB
 {
-    float4x4 gView;
-    float4x4 gProj;
-    float4x4 gViewProj;
-    float4x4 gInvView;
-    float4x4 gInvProj;
-    float4x4 gInvViewProj;
+    row_major float4x4 gView;
+    row_major float4x4 gProj;
+    row_major float4x4 gViewProj;
+    row_major float4x4 gInvView;
+    row_major float4x4 gInvProj;
+    row_major float4x4 gInvViewProj;
     
     float3 gCameraPosWS;
     float _pad0;

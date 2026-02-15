@@ -1,20 +1,25 @@
 #include "../Core/Common.hlsli"
-#include "../Core/Samplers.hlsli"
-#include "../Interop/Bindings.hlsli"
 #include "../Interop/CameraInfo.hlsli"
 #include "../Interop/MaterialInfo.hlsli"
 #include "../Interop/TransformInfo.hlsli"
 
-// Material Texture
-Texture2D gAlbedoTex : register(BIND_MATERIAL_ALBEDO_TEX);
+ConstantBuffer<CameraMatricesCB> gCamera : register(b0);
+ConstantBuffer<TransformCB> gTransform : register(b1);
+ConstantBuffer<MaterialParamsCB> gMaterial : register(b2);
 
+Texture2D gAlbedoTex : register(t0);
+SamplerState gLinearWrap : register(s0);
+
+// ================================
+// Structures
+// ================================
 struct VSInput
 {
     float3 position : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
 };
-struct VSOut
+struct V2P
 {
     float4 positionCS : SV_POSITION;
     float3 positionWS : TEXCOORD0;
@@ -29,36 +34,40 @@ struct GBuffer_Out
 };
 
 // ================================
-// Vertex Shader: GBufferVS
+// Vertex Shader
 // ================================
-VSOut GBufferVS(VSInput input)
+V2P GBufferVS(VSInput input)
 {
-    VSOut o;
+    V2P o;
 
-    float4 wpos = mul(float4(input.position, 1.0f), gWorld);
+    float4 wpos = mul(float4(input.position, 1.0f), gTransform.gWorld);
+
     o.positionWS = wpos.xyz;
     o.normalWS = SafeNormalize(
-        mul(input.normal, (float3x3) gWorldInvTranspose));
-    o.positionCS = mul(wpos, gViewProj);
+        mul(input.normal, (float3x3) gTransform.gWorldInvTranspose));
+    o.positionCS = mul(wpos, gCamera.gViewProj);
     o.uv = input.uv;
-    
+
     return o;
 }
 
 // ================================
-// Pixel Shader: GBufferPS
+// Pixel Shader
 // ================================
-GBuffer_Out GBufferPS(VSOut input)
+GBuffer_Out GBufferPS(V2P input)
 {
     GBuffer_Out o;
 
-    float3 albedo = gBaseColor;
-    if (gUseAlbedoTex > 0.5f)
-        albedo = gAlbedoTex.Sample(gLinearWrap, input.uv).rgb;
+    float3 albedo = gMaterial.gBaseColor;
 
-    o.albedo = float4(albedo, gAlpha);
+    if (gMaterial.gUseAlbedoTex > 0.5f)
+    {
+        albedo = gAlbedoTex.Sample(gLinearWrap, input.uv).rgb;
+    }
+
+    o.albedo = float4(albedo, gMaterial.gAlpha);
     o.normalWS = float4(SafeNormalize(input.normalWS), 1.0f);
-    o.reflectivity = float4(gReflectivity, 0, 0, 1);
-    
+    o.reflectivity = float4(gMaterial.gReflectivity, 0, 0, 1);
+
     return o;
 }

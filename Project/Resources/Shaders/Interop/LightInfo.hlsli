@@ -2,7 +2,7 @@
 #define __LIGHT_INFO_HLSLI__
 
 // LIGHT constant buffer
-cbuffer DirectionalLightCB : register(BIND_DIRECTIONAL_LIGHT_CB)
+struct DirectionalLightCB
 {
     float3 gLightDirWS;
     int gLightEnabled;

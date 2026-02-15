@@ -8,52 +8,49 @@ constexpr uint32_t ToRoot(TRootEnum e) {
 	return static_cast<uint32_t>(e);
 }
 
-
-/// ============================
-/// Object3D
-/// ============================
-enum class Root_Object3D : uint32_t {
-	CameraCB = 0, // b0 VS
-	TransformCB = 1, // b1 VS
-	MaterialCB = 2, // b2 PS (旧)
-	AlbedoSRV = 3, // t0
-};
-
 /// ============================
 /// GBuffer
 /// ============================
 enum class Root_GBuffer : uint32_t {
-	CameraCB = 0,         // b0 VS
-	ObjectCB = 1,         // b10 VS
-	MaterialParamsCB = 2, // b21 PS
-	AlbedoSRV = 3         // t0 PS
+	CameraCB = 0,          // b0
+	TransformCB = 1,       // b1
+	MaterialParamsCB = 2,  // b2
+	AlbedoSRV = 3          // t0
 };
 
 /// ============================
 /// Lighting (Directional)
 /// ============================
 enum class Root_DirectionalLight : uint32_t {
-	CameraCB = 0,     // b0 PS
-	DirLightCB = 1,   // b30 PS
-	GBufferTable = 2  // t10..t12
+	CameraCB = 0,      // b0
+	DirLightCB = 1,    // b1
+	ShadowCB = 2,      // b2
+	GBufferTable = 3   // t0..t4
 };
 
 /// ============================
-/// Debug Fullscreen
+/// Deferred Debug
 /// ============================
-enum class Root_DebugFullScreen : uint32_t {
-	CameraCB = 0,     // b0
-	DebugCB = 1,      // b50
-	GBufferTable = 2, // t10..t12
-	DirLightCB = 3    // b30
+enum class Root_DeferredDebug : uint32_t {
+	DebugCB = 0,       // b0
+	GBufferTable = 1   // t0..t3
+};
+
+/// ============================
+/// Deferred Composite
+/// ============================
+enum class Root_DeferredComposite : uint32_t {
+	PostCB = 0,        // b0
+	LightingSRV = 1    // t0
 };
 
 /// ============================
 /// ShadowCaster (Depth Only)
 /// ============================
 enum class Root_ShadowCaster : uint32_t {
-	ShadowCB = 0, // b40 VS
-	ObjectCB = 1, // b10 VS
+	TransformCB = 0,   // b0
+	ShadowCB = 1,      // b1
+	CascadeIndexCB = 2 // b2
 };
 
-} 
+} // namespace Tsumi::Graphic::RootIndex

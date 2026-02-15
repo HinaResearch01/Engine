@@ -116,9 +116,6 @@
     <ClCompile Include="Engine\Graphic\PSO\PSOLibrary.cpp">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Graphic\Shader\ShaderCacheUtil.cpp">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp">
       <Filter>Engine\Utils\Func</Filter>
     </ClCompile>
@@ -226,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Utils\Logger\FileSink.cpp">
       <Filter>Engine\Utils\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.cpp">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -583,9 +583,6 @@
     <ClInclude Include="Engine\Graphic\PSO\PSOLibrary.h">
       <Filter>Engine\Graphics\PSO</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphic\Shader\ShaderCacheUtil.h">
-      <Filter>Engine\Graphics\Shader</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h">
       <Filter>Engine\Utils\Func</Filter>
     </ClInclude>
@@ -819,6 +816,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Utils\Logger\FileSink.h">
       <Filter>Engine\Utils\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.h">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1241,9 +1241,6 @@
     <None Include="Resources\Shaders\Core\Common.hlsli">
       <Filter>Resources\Shaders\Core</Filter>
     </None>
-    <None Include="Resources\Shaders\Core\Samplers.hlsli">
-      <Filter>Resources\Shaders\Core</Filter>
-    </None>
     <None Include="Resources\Shaders\Lighting\BRDF.hlsli">
       <Filter>Resources\Shaders\Lighting</Filter>
     </None>
@@ -1261,9 +1258,6 @@
     </None>
     <None Include="Resources\Shaders\Lighting\SimpleDirectional.hlsli">
       <Filter>Resources\Shaders\Lighting</Filter>
-    </None>
-    <None Include="Resources\Shaders\Interop\Bindings.hlsli">
-      <Filter>Resources\Shaders\Interop</Filter>
     </None>
     <None Include="Resources\Shaders\Interop\PostProcessInfo.hlsli">
       <Filter>Resources\Shaders\Interop</Filter>

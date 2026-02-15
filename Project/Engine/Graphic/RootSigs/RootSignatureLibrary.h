@@ -67,8 +67,9 @@ private:
 	/// </summary>
 	void CreateGBuffer();
 	void CreateLightingDirectional();
-	void CreateDebugFullScreen();
 	void CreateShadowCaster();
+	void CreateDeferredComposite();
+	void CreateDeferredDebug();
 	
 private:
 	mutable std::mutex mutex_;

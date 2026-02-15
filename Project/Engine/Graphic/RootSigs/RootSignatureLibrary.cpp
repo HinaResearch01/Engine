@@ -17,11 +17,11 @@ RootSignatureLibrary::RootSignatureLibrary()
 void RootSignatureLibrary::Init()
 {
 	// 生成と登録
-	CreateObject3D();
 	CreateGBuffer();
 	CreateLightingDirectional();
-	CreateDebugFullScreen();
 	CreateShadowCaster();
+	CreateDeferredComposite();
+	CreateDeferredDebug();
 }
 
 void RootSignatureLibrary::Register(const std::string& name, RootSignatureDesc& rs)
@@ -123,17 +123,16 @@ void RootSignatureLibrary::CreateGBuffer()
 {
 	RootSignatureDesc rs;
 
-	// VS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0  CameraCB
-	rs.AddCBVRange(10, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b10 ObjectCB
+	// b0 Camera
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_ALL);
+	// b1 Transform
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_ALL);
+	// b2 Material
+	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// t0 Albedo
+	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	// Material
-	rs.AddCBVRange(20, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b20 MaterialUVCB
-	rs.AddCBVRange(21, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b21 MaterialParamsCB
-
-	// PS
-	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // t0  AlbedoSRV
-
+	// s0 LinearWrap
 	rs.AddStaticSampler(
 		0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
@@ -143,21 +142,26 @@ void RootSignatureLibrary::CreateGBuffer()
 	);
 
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-	Register("GBuffer", rs);
+
+	Register("DeferredGBuffer", rs);
 }
 
 void RootSignatureLibrary::CreateLightingDirectional()
 {
 	RootSignatureDesc rs;
 
-	// PS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b0  CameraCB
-	rs.AddCBVRange(30, 1, D3D12_SHADER_VISIBILITY_PIXEL);  // b30 DirectionalLightCB
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);  // t10..t13 GBuffer
+	// b0 Camera
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// b1 DirectionalLight
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// b2 Shadow
+	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// t0..t4
+	rs.AddSRVRange(0, 5, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	// Sampler (s1 : PointClamp)
+	// s0 PointClamp
 	rs.AddStaticSampler(
-		1,
+		0,
 		D3D12_FILTER_MIN_MAG_MIP_POINT,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		0,
@@ -166,41 +170,67 @@ void RootSignatureLibrary::CreateLightingDirectional()
 
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);
 
-	Register("LightingDirectional", rs);
-}
-
-void RootSignatureLibrary::CreateDebugFullScreen()
-{
-	RootSignatureDesc rs;
-
-	// PS
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);    // b0  CameraCB
-	rs.AddCBVRange(50, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b50 DebugCB
-	rs.AddSRVRange(10, 4, D3D12_SHADER_VISIBILITY_PIXEL);   // t10..t13 GBuffer
-	rs.AddCBVRange(30, 1, D3D12_SHADER_VISIBILITY_PIXEL);   // b30 DirectionalLightCB
-
-	// Sampler (s1 : PointClamp)
-	rs.AddStaticSampler(
-		1,
-		D3D12_FILTER_MIN_MAG_MIP_POINT,
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		0,
-		D3D12_SHADER_VISIBILITY_PIXEL
-	);
-
-	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);
-
-	Register("DebugFullScreen", rs);
+	Register("DeferredDirectionalLight", rs);
 }
 
 void RootSignatureLibrary::CreateShadowCaster()
 {
 	RootSignatureDesc rs;
 
-	// VS only
-	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b0 ShadowCasterCB
-	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX); // b1 Object Transform
+	// b0 Transform
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_VERTEX);
+	// b1 Shadow
+	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_VERTEX);
+	// b2 CascadeIndex
+	rs.AddCBVRange(2, 1, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
 	Register("ShadowCaster", rs);
+}
+
+void RootSignatureLibrary::CreateDeferredComposite()
+{
+	RootSignatureDesc rs;
+
+	// b0 PostProcessCB
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// t0 LightingTex
+	rs.AddSRVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+
+	// s0 LinearClamp
+	rs.AddStaticSampler(
+		0,
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		0,
+		D3D12_SHADER_VISIBILITY_PIXEL
+	);
+
+	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);
+
+	Register("DeferredComposite", rs);
+}
+
+void RootSignatureLibrary::CreateDeferredDebug()
+{
+	RootSignatureDesc rs;
+
+	// b0 Debug
+	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	// t0..t3
+	rs.AddSRVRange(0, 4, D3D12_SHADER_VISIBILITY_PIXEL);
+
+	// s0 PointClamp
+	rs.AddStaticSampler(
+		0,
+		D3D12_FILTER_MIN_MAG_MIP_POINT,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		0,
+		D3D12_SHADER_VISIBILITY_PIXEL
+	);
+
+	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);
+
+	Register("DeferredDebug", rs);
 }

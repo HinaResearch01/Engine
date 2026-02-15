@@ -21,13 +21,17 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	CameraSystem() = delete;
 	CameraSystem(World& world);
 
 	/// <summary>
 	/// デストラクタ
 	/// </summary>
 	~CameraSystem() = default;
+
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
+	void Init() override;
 
 	/// <summary>
 	/// 更新処理

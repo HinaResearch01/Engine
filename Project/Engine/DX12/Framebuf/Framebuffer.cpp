@@ -47,7 +47,7 @@ HRESULT Framebuffer::Init()
 	if (!gbufferSrvBase_.valid()) {
 		auto* per = dx12Mgr_->GetPersistentDescAllocator();
 		if (!per) return E_POINTER;
-		gbufferSrvBase_ = per->Allocate(GBUFFER_COUNT + 1);
+		gbufferSrvBase_ = per->Allocate(GBUFFER_COUNT + 2);
 		if (!gbufferSrvBase_.valid()) return E_FAIL;
 	}
 
@@ -60,7 +60,7 @@ void Framebuffer::Destroy()
 
 	if (dx12Mgr_ && gbufferSrvBase_.valid()) {
 		if (auto* per = dx12Mgr_->GetPersistentDescAllocator()) {
-			per->Free(gbufferSrvBase_, GBUFFER_COUNT + 1);
+			gbufferSrvBase_ = per->Allocate(GBUFFER_COUNT + 2);
 		}
 		gbufferSrvBase_ = {};
 	}
@@ -347,6 +347,49 @@ void Framebuffer::TransitionGBufferToRead(ID3D12GraphicsCommandList* list)
 	}
 }
 
+void Framebuffer::WriteShadowSRV(ID3D12Resource* shadowRes, DXGI_FORMAT srvFormat, UINT arraySize)
+{
+	if (!dx12Mgr_) return;
+	auto* device = dx12Mgr_->GetDevice();
+	if (!device) return;
+	if (!gbufferSrvBase_.valid()) return;
+
+	const UINT inc = dx12Mgr_->GetGlobalDescriptorStride();
+
+	// t0..t2: GBuffer RT SRV
+	// t3    : GBuffer Depth SRV
+	// t4    : Shadow SRV  ←ここを書き換える
+	D3D12_CPU_DESCRIPTOR_HANDLE dst = gbufferSrvBase_.cpu;
+	dst.ptr += SIZE_T(GBUFFER_COUNT + 1) * SIZE_T(inc); // t4
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
+	srv.Format = srvFormat; // CSMなら DXGI_FORMAT_R32_FLOAT
+	srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+	if (arraySize <= 1)
+	{
+		// Texture2D
+		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srv.Texture2D.MostDetailedMip = 0;
+		srv.Texture2D.MipLevels = 1;
+		srv.Texture2D.ResourceMinLODClamp = 0.0f;
+	}
+	else
+	{
+		// Texture2DArray（CSM）
+		srv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		srv.Texture2DArray.MostDetailedMip = 0;
+		srv.Texture2DArray.MipLevels = 1;
+		srv.Texture2DArray.FirstArraySlice = 0;
+		srv.Texture2DArray.ArraySize = arraySize;
+		srv.Texture2DArray.PlaneSlice = 0;
+		srv.Texture2DArray.ResourceMinLODClamp = 0.0f;
+	}
+
+	// Copy じゃなく CreateSRV で上書き
+	device->CreateShaderResourceView(shadowRes, &srv, dst);
+}
+
 HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 {
 	if (!dx12Mgr_) return E_POINTER;
@@ -446,6 +489,7 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 	// GBuffer SRV (Persistent, GlobalDescriptorHeap 上)
 	//   [0..2] RT SRV
 	//   [3]    Depth SRV
+	//   [4]    Shadow SRV
 	// =========================================================
 	assert(gbufferSrvBase_.valid());
 
@@ -568,6 +612,22 @@ HRESULT Framebuffer::CreateHeapsAndViews(UINT width, UINT height)
 
 		// state tracking
 		gbufferDepthState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	}
+
+	// =========================================================
+	// t4: Shadow SRV（初期はダミー）
+	// =========================================================
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC dummy{};
+		dummy.Format = DXGI_FORMAT_R32_FLOAT;
+		dummy.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		dummy.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		dummy.Texture2D.MipLevels = 1;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE shadowSrvCpu = gbufferSrvBase_.cpu;
+		shadowSrvCpu.ptr += SIZE_T(GBUFFER_COUNT + 1) * SIZE_T(inc);
+
+		device->CreateShaderResourceView(nullptr, &dummy, shadowSrvCpu);
 	}
 
 	return S_OK;

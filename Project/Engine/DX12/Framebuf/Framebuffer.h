@@ -10,7 +10,6 @@
 
 namespace Tsumi::DX12 {
 
-// Framebuffer.h の上の方
 constexpr UINT GBUFFER_COUNT = 3;
 
 enum class GBufferType : UINT {
@@ -108,6 +107,11 @@ public:
 	/// </summary>
 	void TransitionGBufferToWrite(ID3D12GraphicsCommandList* list);
 	void TransitionGBufferToRead(ID3D12GraphicsCommandList* list);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void WriteShadowSRV(ID3D12Resource* shadowRes, DXGI_FORMAT srvFormat, UINT arraySize = 1);
 
 #pragma region Accessor
 	UINT GetWidth() const { return width_; }
