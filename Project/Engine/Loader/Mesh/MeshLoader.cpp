@@ -46,8 +46,7 @@ HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
 	const unsigned int flags =
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace |
-		aiProcess_PreTransformVertices;
+		aiProcess_CalcTangentSpace;
 
 	const aiScene* scene = importer.ReadFile(fullPath, flags);
 	if (!scene || !scene->HasMeshes())
@@ -99,10 +98,8 @@ HRESULT MeshLoader::RegisterFromScene(const aiScene* scene, const std::string& k
 	return S_OK;
 }
 
-HRESULT MeshLoader::ParseScene(
-	const aiScene* scene,
-	std::vector<Vertex>& outVertices,
-	std::vector<uint32_t>& outIndices)
+HRESULT MeshLoader::ParseScene(const aiScene* scene, 
+							   std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
 {
 	if (!scene || !scene->HasMeshes())
 		return E_FAIL;
@@ -124,7 +121,7 @@ HRESULT MeshLoader::ParseScene(
 			const aiVector3D& p = mesh->mVertices[v];
 			Vertex dst{};
 
-			// position（座標系合わせ）
+			// position
 			dst.pos = { -p.x, p.y, p.z };
 
 			// normal
@@ -151,9 +148,9 @@ HRESULT MeshLoader::ParseScene(
 			if (face.mNumIndices != 3)
 				continue;
 
-			outIndices.push_back(vertexOffset + face.mIndices[2]);
-			outIndices.push_back(vertexOffset + face.mIndices[1]);
 			outIndices.push_back(vertexOffset + face.mIndices[0]);
+			outIndices.push_back(vertexOffset + face.mIndices[1]);
+			outIndices.push_back(vertexOffset + face.mIndices[2]);
 		}
 
 		vertexOffset += mesh->mNumVertices;

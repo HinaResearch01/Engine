@@ -39,7 +39,8 @@ inline FullscreenVSOut FullscreenVS(uint vertexID)
     // pos(-1,-1)->uv(0,0)
     // pos( 3,-1)->uv(2,0)
     // pos(-1, 3)->uv(0,2)
-    o.uv = pos * 0.5f + 0.5f;
+    o.uv.x = pos.x * 0.5f + 0.5f;
+    o.uv.y = -pos.y * 0.5f + 0.5f;
 
     return o;
 }

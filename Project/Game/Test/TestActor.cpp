@@ -9,5 +9,5 @@ void TestActor::Init()
 	IActor::AddComp<TestMaterialComponent>();
 
 	auto* rendComp = IActor::AddComp<TestRenderComponent>();
-	rendComp->mesh = "TestCube";
+	rendComp->mesh = "axis";
 }	

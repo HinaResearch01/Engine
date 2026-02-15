@@ -24,8 +24,7 @@ HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias,
 	const unsigned int flags =
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace |
-		aiProcess_PreTransformVertices;
+		aiProcess_CalcTangentSpace;
 
 	const aiScene* scene = importer.ReadFile(fullPath, flags);
 	if (!scene)

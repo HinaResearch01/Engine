@@ -72,15 +72,16 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	tr.worldInvTranspose = tr.world.Inverse().Transpose();
 
 	// 3) basis（正規直交化）
-	Math::Vec3f r{ tr.world.m[0][0], tr.world.m[1][0], tr.world.m[2][0] };
-	Math::Vec3f u{ tr.world.m[0][1], tr.world.m[1][1], tr.world.m[2][1] };
-	Math::Vec3f f{ tr.world.m[0][2], tr.world.m[1][2], tr.world.m[2][2] };
+	Math::Vec3f r{ tr.world.m[0][0], tr.world.m[0][1], tr.world.m[0][2] };
+	Math::Vec3f u{ tr.world.m[1][0], tr.world.m[1][1], tr.world.m[1][2] };
+	Math::Vec3f f{ tr.world.m[2][0], tr.world.m[2][1], tr.world.m[2][2] };
 
 	r = r.Normalized();
 	u = (u - r * Math::Func::VEC3::Dot(u, r)).Normalized();
+	f = Math::Func::VEC3::Cross(r, u);
 
-	tr.right = r.Normalized();
-	tr.up = u.Normalized();
+	tr.right = r;
+	tr.up = u;
 	tr.forward = f.Normalized();
 
 	// 4) clear dirty

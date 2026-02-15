@@ -284,8 +284,8 @@ struct Mat4x4 {
 		float c = std::cos(angle);
 		float s = std::sin(angle);
 		mat.m[1][1] = c;
-		mat.m[1][2] = s;
-		mat.m[2][1] = -s;
+		mat.m[1][2] = -s;
+		mat.m[2][1] = s;
 		mat.m[2][2] = c;
 		return mat;
 	}
@@ -295,8 +295,8 @@ struct Mat4x4 {
 		float c = std::cos(angle);
 		float s = std::sin(angle);
 		mat.m[0][0] = c;
-		mat.m[0][2] = -s;
-		mat.m[2][0] = s;
+		mat.m[0][2] = s;
+		mat.m[2][0] = -s;
 		mat.m[2][2] = c;
 		return mat;
 	}
@@ -306,8 +306,8 @@ struct Mat4x4 {
 		float c = std::cos(angle);
 		float s = std::sin(angle);
 		mat.m[0][0] = c;
-		mat.m[0][1] = s;
-		mat.m[1][0] = -s;
+		mat.m[0][1] = -s;
+		mat.m[1][0] = s;
 		mat.m[1][1] = c;
 		return mat;
 	}
