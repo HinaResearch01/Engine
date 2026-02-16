@@ -1,3 +1,4 @@
+#include "../../../Math/TMath.h"
 #include "ShadowSystem.h"
 #include "Framework/World/World.h"
 #include "Framework/System/Camera/CameraSystem.h"
@@ -25,12 +26,12 @@ static float Clamp(float x, float a, float b)
 {
 	return std::max(a, std::min(x, b));
 }
+
 static void GetFrustumCornersWS(
 	const Math::Mat4x4& invViewProj,
 	float ndcNearZ, float ndcFarZ,
 	Math::Vec3f outCorners[8]
 )
-
 {
 	// D3D NDC: x,y [-1..1], z [0..1]
 	const float xs[2] = { -1.0f, 1.0f };
@@ -86,7 +87,9 @@ void ShadowSystem::Update(float)
 	// 「影が組めない」ならデフォルトにフォールバック
 	if (!ctx.enabled)
 	{
-		activeCtx_ = defaultCtx_;
+		// activeCtx_ = defaultCtx_;
+		// Force rebuild default every frame to ensure debug values apply
+		BuildDefault(activeCtx_);
 	}
 	else
 	{
@@ -157,12 +160,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 	for (uint32_t i = 0; i < cascadeCount; ++i)
 	{
-		// out.splitFar[i] = splits[i + 1];
-        // DEBUG: Hardcode splits to verify shader reading
-        if (i == 0) out.splitFar[i] = 5.0f;
-        else if (i == 1) out.splitFar[i] = 15.0f;
-        else if (i == 2) out.splitFar[i] = 40.0f;
-        else out.splitFar[i] = 100.0f;
+		// 実際にカメラのFOVやNear/Farから計算した splits[i + 1] を渡す
+		out.splitFar[i] = splits[i + 1];
 	}
 
 	// Light dir
@@ -214,21 +213,24 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		// pad
 		const float padXY = 300.0f;
-		const float padZ = 500.0f; 
+		const float padZ = 500.0f;
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-        // texel snap
-        //const float orthoW = (maxLS.x - minLS.x);
-        //const float orthoH = (maxLS.y - minLS.y);
-        // SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
+		// texel snap
+		//const float orthoW = (maxLS.x - minLS.x);
+		//const float orthoH = (maxLS.y - minLS.y);
+		// SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			minLS.x, maxLS.y,
-			maxLS.x, minLS.y,
-			minLS.z, maxLS.z
+			minLS.x, // left
+			maxLS.x, // right
+			minLS.y, // bottom 
+			maxLS.y, // top    
+			minLS.z, // nearZ
+			maxLS.z  // farZ
 		);
 
 		auto& c = out.cascades[ci];
@@ -246,33 +248,35 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 	out.shadowMapSize = 1024;
 	out.cascadeCount = 4;
 
-	// Camera
 	auto camSys = world_.GetSystem<CameraSystem>();
 	const CameraContext& cam = camSys->GetContext();
 
-	// 仮ライト方向
 	Math::Vec3f lightDirWS = NormalizeSafe({ 0.3f, -1.0f, 0.2f }, { 0,-1,0 });
 
-	// up決定
 	Math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
-
-	// 4分割
-	float splits[5] = { cam.nearPlane, 5.0f, 15.0f, 40.0f, 100.0f };
-	// もしカメラのFarが100未満なら合わせる等の処理はお好みで
+	const float lambda = 0.96f;
+	const float n = cam.nearPlane;
+	const float f = cam.farPlane;
+	float splits[5]{};
+	splits[0] = n;
+	for (int i = 1; i <= 4; ++i)
+	{
+		const float p = (float)i / 4.0f;
+		const float logSplit = n * std::pow(f / n, p);
+		const float uniSplit = n + (f - n) * p;
+		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
+	}
 
 	for (uint32_t ci = 0; ci < 4; ++ci)
 	{
 		float cn = splits[ci];
 		float cf = splits[ci + 1];
 
-		// カメラ位置付近を中心に固定のオルソを作る
-		// 簡易的に、カメラ位置(cn~cfの中点)を見るようなLightView
 		const Math::Vec3f centerWS = cam.position + cam.forward * ((cn + cf) * 0.5f);
-
-		const float dist = 50.0f; // ライト距離
+		const float dist = 50.0f;
 		const Math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
 			centerWS.y - lightDirWS.y * dist,
@@ -281,11 +285,12 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
 
-		// 固定オルソ (カスケードごとにサイズ変えてもいいが、Defaultなので適当に広め)
-		const float half = 50.0f; 
+		const float half = 50.0f;
 		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			-half, half,
-			half, -half,
+			-half,  // left
+			half,  // right
+			-half,  // bottom 
+			half,  // top    
 			-150.0f, 150.0f);
 
 		out.cascades[ci].view = lightView;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Math/TMath.h"
+#include "../../../Math/TMath.h"
 #include "../ISystem.h"
 #include "Framework/Context/ShadowContext.h"
 #include "Framework/Component/Light/DirectionalLightComponent.h"
