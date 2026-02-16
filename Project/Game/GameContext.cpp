@@ -1,5 +1,5 @@
 #include "GameContext.h"
-#include "Test/TestWorld.h"
+#include "Test/World/TestWorld.h"
 
 using namespace Tsumi::Framework;
 

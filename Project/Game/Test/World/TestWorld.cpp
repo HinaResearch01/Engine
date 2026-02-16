@@ -13,7 +13,9 @@ void TestWorld::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/floor/floor.obj", "floor");
 
 	// TestActorの追加
-	World::SpawnActor<TestActor>();
+	World::SpawnActor<TestAxis>();
+	World::SpawnActor<TestFloor>();
+	World::SpawnActor<TestCylinder>();
 
 }
 

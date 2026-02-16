@@ -337,8 +337,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imguidocking\imgui_tables.cpp" />
     <ClCompile Include="externals\imguidocking\imgui_widgets.cpp" />
     <ClCompile Include="Game\GameContext.cpp" />
-    <ClCompile Include="Game\Test\TestActor.cpp" />
-    <ClCompile Include="Game\Test\TestWorld.cpp" />
+    <ClCompile Include="Game\Test\Actor\Axis\TestAxis.cpp" />
+    <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp" />
+    <ClCompile Include="Game\Test\Actor\Floor\TestFloor.cpp" />
+    <ClCompile Include="Game\Test\World\TestWorld.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -899,10 +901,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\LuaJIT\lualib.h" />
     <ClInclude Include="externals\stb_image\stb_image.h" />
     <ClInclude Include="Game\GameContext.h" />
-    <ClInclude Include="Game\Test\TestActor.h" />
-    <ClInclude Include="Game\Test\TestMaterialComponent.h" />
-    <ClInclude Include="Game\Test\TestRenderComponent.h" />
-    <ClInclude Include="Game\Test\TestWorld.h" />
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxis.h" />
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxisMaterialComp.h" />
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxisRenderComp.h" />
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinder.h" />
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderMaterialComp.h" />
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h" />
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloor.h" />
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloorMaterialComp.h" />
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloorRenderComp.h" />
+    <ClInclude Include="Game\Test\World\TestWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="externals\assimp\include\assimp\.editorconfig">

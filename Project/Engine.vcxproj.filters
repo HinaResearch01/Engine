@@ -152,12 +152,6 @@
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp">
       <Filter>Engine\Loader\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\TestActor.cpp">
-      <Filter>Game\Test</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\Test\TestWorld.cpp">
-      <Filter>Game\Test</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Resource\ResourceSystem.cpp">
       <Filter>Engine\Resource</Filter>
     </ClCompile>
@@ -226,6 +220,18 @@
     </ClCompile>
     <ClCompile Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.cpp">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\World\TestWorld.cpp">
+      <Filter>Game\Test\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Axis\TestAxis.cpp">
+      <Filter>Game\Test\Actor\Axis</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Floor\TestFloor.cpp">
+      <Filter>Game\Test\Actor\Floor</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp">
+      <Filter>Game\Test\Actor\Cylinder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -649,12 +655,6 @@
     <ClInclude Include="Engine\Loader\LoaderAPI.h">
       <Filter>Engine\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\TestActor.h">
-      <Filter>Game\Test</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Test\TestWorld.h">
-      <Filter>Game\Test</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Resource\ResourceSystem.h">
       <Filter>Engine\Resource</Filter>
     </ClInclude>
@@ -690,12 +690,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\World\CompView\ComponentViewRange.h">
       <Filter>Engine\Framework\World\CompView</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Test\TestMaterialComponent.h">
-      <Filter>Game\Test</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Test\TestRenderComponent.h">
-      <Filter>Game\Test</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\Camera\CameraSystem.h">
       <Filter>Engine\Framework\System\Camera</Filter>
@@ -819,6 +813,36 @@
     </ClInclude>
     <ClInclude Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.h">
       <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\World\TestWorld.h">
+      <Filter>Game\Test\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxis.h">
+      <Filter>Game\Test\Actor\Axis</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxisMaterialComp.h">
+      <Filter>Game\Test\Actor\Axis</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Axis\TestAxisRenderComp.h">
+      <Filter>Game\Test\Actor\Axis</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloor.h">
+      <Filter>Game\Test\Actor\Floor</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloorMaterialComp.h">
+      <Filter>Game\Test\Actor\Floor</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Floor\TestFloorRenderComp.h">
+      <Filter>Game\Test\Actor\Floor</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinder.h">
+      <Filter>Game\Test\Actor\Cylinder</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderMaterialComp.h">
+      <Filter>Game\Test\Actor\Cylinder</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h">
+      <Filter>Game\Test\Actor\Cylinder</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1020,9 +1044,6 @@
     <Filter Include="Game\GameObject">
       <UniqueIdentifier>{5fe58151-51d1-435c-9bf7-09b5e9921115}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\Scene">
-      <UniqueIdentifier>{6708bf80-8e61-41b5-9a4e-f07f5ba409ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Game\Test">
       <UniqueIdentifier>{0a97b779-5bcf-4efc-b8d4-9ef624ba2a6c}</UniqueIdentifier>
     </Filter>
@@ -1100,6 +1121,21 @@
     </Filter>
     <Filter Include="Resources\Shaders\Lighting">
       <UniqueIdentifier>{dbe4a743-cae5-412b-8aef-68dfc0e77fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\World">
+      <UniqueIdentifier>{eb489b01-86d5-4a04-b72b-da9d3691e02f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor">
+      <UniqueIdentifier>{302c4243-00c5-42e7-94d7-605e5d45a5c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Axis">
+      <UniqueIdentifier>{381bbc0d-d7fd-4a98-9ff1-8af43af5ac97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Floor">
+      <UniqueIdentifier>{1d8aedf9-1b45-428e-8594-4a841eea8853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Cylinder">
+      <UniqueIdentifier>{cfb288e4-34fa-48dd-a938-cb06bf93942e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

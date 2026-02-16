@@ -210,10 +210,10 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-		// texel snap
-		const float orthoW = (maxLS.x - minLS.x);
-		const float orthoH = (maxLS.y - minLS.y);
-		SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
+        // texel snap
+        //const float orthoW = (maxLS.x - minLS.x);
+        //const float orthoH = (maxLS.y - minLS.y);
+        // SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, maxLS.x,
