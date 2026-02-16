@@ -212,7 +212,7 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		}
 
 		// pad
-		const float padXY = 5.0f;  
+		const float padXY = 20.0f;  
 		const float padZ = 100.0f; 
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
@@ -226,9 +226,9 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, // left
+			maxLS.y, // top
 			maxLS.x, // right
-			minLS.y, // bottom 
-			maxLS.y, // top    
+			minLS.y, // bottom
 			minLS.z, // nearZ
 			maxLS.z  // farZ
 		);
@@ -251,7 +251,10 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 	auto camSys = world_.GetSystem<CameraSystem>();
 	const CameraContext& cam = camSys->GetContext();
 
-	Math::Vec3f lightDirWS = NormalizeSafe({ 0.3f, -1.0f, 0.2f }, { 0,-1,0 });
+	// 左上前（-1, 1, -1）あたりから原点を見下ろすようなライト方向にする
+	// ライトの方向ベクトルなので、光源からターゲットへの向き
+	// 例: 斜め上から (1, -1, 1) の向き
+	Math::Vec3f lightDirWS = NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
@@ -272,10 +275,11 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 	for (uint32_t ci = 0; ci < 4; ++ci)
 	{
-		float cn = splits[ci];
+		//float cn = splits[ci];
 		float cf = splits[ci + 1];
 
-		const Math::Vec3f centerWS = cam.position + cam.forward * ((cn + cf) * 0.5f);
+		// カメラに関係なく原点 (0,0,0) を見る
+		const Math::Vec3f centerWS = { 0.0f, 0.0f, 0.0f };
 		const float dist = 50.0f;
 		const Math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
@@ -285,12 +289,12 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
 
-		const float half = 50.0f;
+		const float half = 150.0f;
 		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			-half,  // left
-			half,  // right
-			-half,  // bottom 
-			half,  // top    
+			 half,  // top
+			 half,  // right
+			-half,  // bottom
 			-150.0f, 150.0f);
 
 		out.cascades[ci].view = lightView;
