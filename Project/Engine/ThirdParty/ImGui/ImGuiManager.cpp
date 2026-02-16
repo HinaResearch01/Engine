@@ -26,7 +26,7 @@ void ImGuiManager::Init()
 
 	io.Fonts->AddFontFromFileTTF(
 		"Resources/font/komorebi.ttf",
-		17.0f,
+		15.0f,
 		nullptr,
 		io.Fonts->GetGlyphRangesJapanese()
 	);
@@ -42,7 +42,7 @@ void ImGuiManager::Init()
 	ImGui_ImplDX12_Init(
 		dx12Mgr_->GetDevice(),
 		static_cast<int>(dx12Mgr_->GetBufferCount()),
-		dx12Mgr_->GetBackBufferFormat(),          // ★ accessor用意してある前提
+		dx12Mgr_->GetBackBufferFormat(),
 		dx12Mgr_->GetGlobalDescriptorHeap(),
 		fontSrv_.cpu,
 		fontSrv_.gpu
