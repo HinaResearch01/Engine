@@ -212,8 +212,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		}
 
 		// pad
-		const float padXY = 300.0f;
-		const float padZ = 500.0f;
+		const float padXY = 5.0f;  
+		const float padZ = 100.0f; 
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
 		minLS.z -= padZ;

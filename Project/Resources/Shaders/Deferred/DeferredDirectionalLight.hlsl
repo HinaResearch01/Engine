@@ -107,5 +107,5 @@ float4 DirLightingPS(VSOut i) : SV_Target
         debugColor = float3(1, 1, 0); // 黄色
     
     // 影が落ちている部分を暗くして表示
-    return float4(debugColor * shadow, 1.0f);
+    return float4(diffuse, 1.0f);
 }
