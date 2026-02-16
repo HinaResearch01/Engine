@@ -23,6 +23,7 @@
 #include "Framework/Update/UpdateManager.h"
 #include "Framework/System/ISystem.h"
 #include "Framework/System/Camera/CameraSystem.h"
+#include "Framework/System/DebugUI/DebugUISystem.h"
 #include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
 #include "Framework/System/Render/RenderPrepareSystem.h"
@@ -50,6 +51,7 @@ public:
 		AddSystem<ShadowSystem>();
 		AddSystem<RenderPrepareSystem>();
 		AddSystem<RenderSystem>();
+		AddSystem<DebugUISystem>();
 
 		// 追加したSystemの初期化処理
 		InitSystems();

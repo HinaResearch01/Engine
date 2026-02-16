@@ -22,5 +22,4 @@ void TestWorld::Init()
 void TestWorld::Update(float deltaTime)
 {
 	World::WorldUpdate(deltaTime);
-	ImGui::ShowDemoWindow();
 }

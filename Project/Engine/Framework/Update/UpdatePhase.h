@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Tsumi::Framework {
 
 /* 更新順序 */
@@ -17,6 +19,11 @@ enum class UpdatePhase : uint8_t {
 	Transform,
 	SceneContext,
 	RenderPrepare,
+
+	// --------------------
+	// Debug / UI
+	// --------------------
+	DebugUI,
 
 	// --------------------
 	// Render Execution

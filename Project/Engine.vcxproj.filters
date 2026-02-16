@@ -239,6 +239,7 @@
     <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp">
       <Filter>Game\Test\Actor\DirLight</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\System\DebugUI\DebugUISystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -859,6 +860,7 @@
     <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h">
       <Filter>Game\Test\Actor\DirLight</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Framework\System\DebugUI\DebugUISystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1157,6 +1159,9 @@
     </Filter>
     <Filter Include="Game\Test\Actor\DirLight">
       <UniqueIdentifier>{6101c56f-9a09-4250-b27c-619fe431f11d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\DebugUI">
+      <UniqueIdentifier>{553a4849-f5bb-41cf-9f60-c8d07a8fe367}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
