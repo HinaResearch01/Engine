@@ -56,46 +56,46 @@ float4 DirLightingPS(VSOut i) : SV_Target
 {
     float2 uv = i.uv;
 
-    // 画面分割デバッグ (UVで領域判定)
-    // ------------------------------------------------
-    // | Albedo (t0)      | Normal (t1)               |
-    // ------------------------------------------------
-    // | Depth (t3)       | Test (Green = Running)    |
-    // ------------------------------------------------
+    // 1. GBuffer Sampling
+    float4 albedoData = gGBuffer0_Albedo.Sample(gPointClamp, uv);
+    float3 albedo = albedoData.rgb;
+    float alpha = albedoData.a;
 
-    if (uv.y < 0.5)
-    {
-        if (uv.x < 0.5)
-        {
-            // Top-Left: Albedo
-            float2 subUV = uv * 2.0;
-            float3 albedo = gGBuffer0_Albedo.Sample(gPointClamp, subUV).rgb;
-            return float4(albedo, 1.0f);
-        }
-        else
-        {
-            // Top-Right: Normal
-            float2 subUV = (uv - float2(0.5, 0.0)) * 2.0;
-            float3 normal = gGBuffer1_NormalWS.Sample(gPointClamp, subUV).xyz;
-            return float4((normal + 1.0f) * 0.5f, 1.0f); // -1..1 -> 0..1 for visualization
-        }
-    }
-    else
-    {
-        if (uv.x < 0.5)
-        {
-            // Bottom-Left: Depth
-            float2 subUV = (uv - float2(0.0, 0.5)) * 2.0;
-            float d = gDepth01.Sample(gPointClamp, subUV).r;
-            // 深度を強調表示 (0.0に近いほど黒、1.0に近いほど白)
-            // リニアデプスではないので、遠くはすぐ白くなるが、0.0なら真っ黒になるはず
-            return float4(d, d, d, 1.0f); 
-        }
-        else
-        {
-            // Bottom-Right: Test Connection
-            // シェーダーが正常に動いているか確認用
-            return float4(0.0f, 1.0f, 0.0f, 1.0f); // Green
-        }
-    }
+    float3 normal = gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz; // Float format stores -1..1 directly
+    normal = normalize(normal);
+
+    float depth = gDepth01.Sample(gPointClamp, uv).r;
+
+    // 2. Reconstruct World Position
+    float3 positionWS = ReconstructWorldPos(depth, uv, gCamera.gInvViewProj);
+
+    // 3. Shadow Calculation
+    float shadow = 1.0f;
+    float viewDepth = mul(float4(positionWS, 1.0f), gCamera.gView).z;
+
+    // シャドウ計算
+    // ※シャドウマップテクスチャがバインドされていない場合は 1.0 が返ることを期待
+    shadow = ComputeCSMShadowFactor(
+        gShadowMapCSM,
+        gPointClamp, // シャドウマップ用サンプラー（PCF用にはLinearが望ましいかもだが一旦Point）
+        positionWS,
+        normal,
+        viewDepth,
+        gShadow.gCascadeSplitDepths,
+        gShadow.gLightViewProj, // 配列
+        gShadow.gShadowTexelSize, // texelSize
+        gShadow.gShadowBias, // Shadow Bias
+        gShadow.gShadowNormalBias, // Normal Bias
+        gLight.gLightDirWS
+    );
+
+    // 4. Lighting Calculation
+    // Simple Directional Light
+    float3 L = normalize(-gLight.gLightDirWS);
+    float NdotL = saturate(dot(normal, L));
+
+    float3 diffuse = albedo * gLight.gRadiance * NdotL * shadow;
+
+    // Visualize Shadow / Lighting
+    return float4(diffuse, 1.0f);
 }
