@@ -8,7 +8,7 @@ PSODesc::PSODesc()
 	std::memset(&desc_, 0, sizeof(desc_));
 
 	desc_.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	desc_.RasterizerState.FrontCounterClockwise = TRUE;
+	desc_.RasterizerState.FrontCounterClockwise = FALSE;
 	desc_.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 
 	desc_.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);

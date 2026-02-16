@@ -56,58 +56,46 @@ float4 DirLightingPS(VSOut i) : SV_Target
 {
     float2 uv = i.uv;
 
-    // ---------------- GBuffer sampling ----------------
-    float3 albedo =
-        gGBuffer0_Albedo.Sample(gPointClamp, uv).rgb;
-    float3 N =
-        SafeNormalize(
-            gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz);
-    float reflectivity =
-        gGBuffer2_Reflectivity.Sample(gPointClamp, uv).r;
-    float depth01 =
-        gDepth01.Sample(gPointClamp, uv).r;
+    // 画面分割デバッグ (UVで領域判定)
+    // ------------------------------------------------
+    // | Albedo (t0)      | Normal (t1)               |
+    // ------------------------------------------------
+    // | Depth (t3)       | Test (Green = Running)    |
+    // ------------------------------------------------
 
-    // ---------------- World position reconstruction ----------------
-    float3 worldPos =
-        ReconstructWorldPos(
-            depth01,
-            uv,
-            gCamera.gInvViewProj);
-    float3 viewPos =
-        mul(float4(worldPos, 1.0f), gCamera.gView).xyz;
-    float viewDepth = abs(viewPos.z);
-
-    // ---------------- View / Light vectors ----------------
-    float3 cameraPosWS = gCamera.gInvView[3].xyz;
-    float3 V = SafeNormalize(cameraPosWS - worldPos);
-    float3 L = SafeNormalize(-gLight.gLightDirWS);
-
-    // ---------------- CSM shadow ----------------
-    float shadowFactor =
-        ComputeCSMShadowFactor(
-            gShadowMapCSM,
-            gPointClamp,
-            worldPos,
-            N,
-            viewDepth,
-            gShadow.gCascadeSplitDepths,
-            gShadow.gLightViewProj,
-            gShadow.gShadowTexelSize,
-            gShadow.gShadowBias,
-            gShadow.gShadowNormalBias,
-            gLight.gLightDirWS
-        );
-
-    // ---------------- Lighting ----------------
-    float3 lit =
-        EvalDirectionalLight(
-            albedo,
-            N,
-            V,
-            L,
-            gLight.gRadiance,
-            reflectivity
-        );
-
-    return float4(lit * shadowFactor, 1.0f);
+    if (uv.y < 0.5)
+    {
+        if (uv.x < 0.5)
+        {
+            // Top-Left: Albedo
+            float2 subUV = uv * 2.0;
+            float3 albedo = gGBuffer0_Albedo.Sample(gPointClamp, subUV).rgb;
+            return float4(albedo, 1.0f);
+        }
+        else
+        {
+            // Top-Right: Normal
+            float2 subUV = (uv - float2(0.5, 0.0)) * 2.0;
+            float3 normal = gGBuffer1_NormalWS.Sample(gPointClamp, subUV).xyz;
+            return float4((normal + 1.0f) * 0.5f, 1.0f); // -1..1 -> 0..1 for visualization
+        }
+    }
+    else
+    {
+        if (uv.x < 0.5)
+        {
+            // Bottom-Left: Depth
+            float2 subUV = (uv - float2(0.0, 0.5)) * 2.0;
+            float d = gDepth01.Sample(gPointClamp, subUV).r;
+            // 深度を強調表示 (0.0に近いほど黒、1.0に近いほど白)
+            // リニアデプスではないので、遠くはすぐ白くなるが、0.0なら真っ黒になるはず
+            return float4(d, d, d, 1.0f); 
+        }
+        else
+        {
+            // Bottom-Right: Test Connection
+            // シェーダーが正常に動いているか確認用
+            return float4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+        }
+    }
 }

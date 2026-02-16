@@ -258,6 +258,30 @@ struct Mat4x4 {
 	} {}
 
 	// =========================
+	// Raw Access
+	// =========================
+	[[nodiscard]] const float* GetRaw() const
+	{
+		return &m[0][0];
+	}
+	[[nodiscard]] float* GetRaw()
+	{
+		return &m[0][0];
+	}
+	[[nodiscard]] Vec4f GetRow(int i) const
+	{
+		return { m[i][0], m[i][1], m[i][2], m[i][3] };
+	}
+	[[nodiscard]] Vec4f GetColumn(int j) const
+	{
+		return { m[0][j], m[1][j], m[2][j], m[3][j] };
+	}
+	Vec3f GetRight() const { return { m[0][0], m[0][1], m[0][2] }; }
+	Vec3f GetUp() const { return { m[1][0], m[1][1], m[1][2] }; }
+	Vec3f GetForward() const { return { m[2][0], m[2][1], m[2][2] }; }
+	Vec3f GetPosition() const { return { m[3][0], m[3][1], m[3][2] }; }
+
+	// =========================
 	// 行列操作
 	// =========================
 	// ===== Factory =====

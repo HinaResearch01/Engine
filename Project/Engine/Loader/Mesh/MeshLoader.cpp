@@ -26,35 +26,6 @@ static std::string MakeDefaultDiffuseAlias(const std::string& baseAlias)
 	return std::format("{}_diffuse", baseAlias);
 }
 
-HRESULT MeshLoader::Load(const std::string& fullPath, const std::string& alias)
-{
-	if (fullPath.empty())
-		return E_INVALIDARG;
-
-	// key = 正規化パス（TextureLoader と同一ルール）
-	const std::string key = Utils::Func::MakeKeyFromRoot("", fullPath);
-
-	// 既読チェック（存在するなら alias を張って終わり）
-	if (TryResolveAlias(key, alias))
-		return S_OK;
-
-	if (!fs::exists(fullPath))
-		return E_FAIL;
-
-	Assimp::Importer importer;
-
-	const unsigned int flags =
-		aiProcess_Triangulate |
-		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace;
-
-	const aiScene* scene = importer.ReadFile(fullPath, flags);
-	if (!scene || !scene->HasMeshes())
-		return E_FAIL;
-
-	return RegisterFromScene(scene, key, alias);
-}
-
 HRESULT MeshLoader::LoadFromScene(const aiScene* scene, const std::string& key, const std::string& alias)
 {
 	if (!scene || !scene->HasMeshes())
@@ -130,6 +101,10 @@ HRESULT MeshLoader::ParseScene(const aiScene* scene,
 				const aiVector3D& n = mesh->mNormals[v];
 				dst.normal = { -n.x, n.y, n.z };
 			}
+			else
+			{
+				dst.normal = { 0.0f, 1.0f, 0.0f }; // fallback
+			}
 
 			// UV
 			if (mesh->HasTextureCoords(0))
@@ -149,8 +124,8 @@ HRESULT MeshLoader::ParseScene(const aiScene* scene,
 				continue;
 
 			outIndices.push_back(vertexOffset + face.mIndices[0]);
-			outIndices.push_back(vertexOffset + face.mIndices[1]);
 			outIndices.push_back(vertexOffset + face.mIndices[2]);
+			outIndices.push_back(vertexOffset + face.mIndices[1]);
 		}
 
 		vertexOffset += mesh->mNumVertices;

@@ -98,6 +98,7 @@ void PSOLibrary::CreateGBuffer()
 	pso.EnableDepth(true);
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
+	pso.SetCullMode(D3D12_CULL_MODE_BACK);
 
 	Register("DeferredGBuffer", pso);
 }

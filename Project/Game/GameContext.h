@@ -101,15 +101,15 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 	dx12->BeginBackBufferPass(idx.backBuffer);
 	dx12->ClearBackBuffer(idx.backBuffer);
 	renderSys->DrawLightingPass(*cmd, frame, *prepSys);
-	
+
 	// ==== Debug Overlay ====
 #ifdef _DEBUG
-	renderSys->DrawDebugPass(*cmd, frame);
+	//renderSys->DrawDebugPass(*cmd, frame);
 #endif
 
 	// ==== UI ====
 	if (uiRenderCallBack) {
-		//uiRenderCallBack();
+		uiRenderCallBack();
 	}
 
 	// DX12 EndFrame

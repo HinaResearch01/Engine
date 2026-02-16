@@ -21,7 +21,6 @@ public:
 	/// <summary>
 	/// メッシュの読み込み処理
 	/// </summary>
-	static HRESULT Load(const std::string& fullPath, const std::string& alias);
 	static HRESULT LoadFromScene(
 		const aiScene* scene,
 		const std::string& key,

@@ -172,7 +172,7 @@ void DX12Manager::ClearBackBuffer(uint32_t backBufferIndex)
 	auto* list = graphicsCtx_ ? graphicsCtx_->GetList() : nullptr;
 	if (!list || !framebuffer_) return;
 
-	static const FLOAT red[4] = { 1.f, 0.f, 0.f, 1.f }; // 赤に変更
+	static const FLOAT red[4] = { 0.f, 1.f, 0.f, 1.f }; // みどりに変更
 	framebuffer_->ClearRenderTarget(list, backBufferIndex, red);
 
 	framebuffer_->ClearDepthStencil(list);

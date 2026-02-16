@@ -21,7 +21,7 @@ HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias,
 
 	Assimp::Importer importer;
 
-	const unsigned int flags =
+	uint32_t flags =
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace;
