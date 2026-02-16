@@ -135,7 +135,13 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 	constexpr uint32_t cascadeCount = 4;
 	out.cascadeCount = cascadeCount;
 
-	const float lambda = 0.7f;
+	/*
+	Lambda = 0.96f : Logarithmic bias strongly to Near
+	If n=0.1, f=1000:
+	Split[1] ~ 10m
+	This ensures Cascade 0 covers only immediate foreground.
+	*/
+	const float lambda = 0.96f;
 	const float n = cam.nearPlane;
 	const float f = cam.farPlane;
 
@@ -151,7 +157,12 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 	for (uint32_t i = 0; i < cascadeCount; ++i)
 	{
-		out.splitFar[i] = splits[i + 1];
+		// out.splitFar[i] = splits[i + 1];
+        // DEBUG: Hardcode splits to verify shader reading
+        if (i == 0) out.splitFar[i] = 5.0f;
+        else if (i == 1) out.splitFar[i] = 15.0f;
+        else if (i == 2) out.splitFar[i] = 40.0f;
+        else out.splitFar[i] = 100.0f;
 	}
 
 	// Light dir
@@ -161,7 +172,6 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
-	// Each cascade build ortho
 	for (uint32_t ci = 0; ci < cascadeCount; ++ci)
 	{
 		const float cn = splits[ci];
@@ -203,8 +213,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		}
 
 		// pad
-		const float padXY = 10.0f;
-		const float padZ = 300.0f; // 手前のオブジェクトも影を落とせるように大きく取る
+		const float padXY = 300.0f;
+		const float padZ = 500.0f; 
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
 		minLS.z -= padZ;
@@ -216,8 +226,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
         // SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			minLS.x, maxLS.x,
-			minLS.y, maxLS.y,
+			minLS.x, maxLS.y,
+			maxLS.x, minLS.y,
 			minLS.z, maxLS.z
 		);
 
@@ -234,7 +244,7 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 	out.enabled = true;
 
 	out.shadowMapSize = 1024;
-	out.cascadeCount = 1;
+	out.cascadeCount = 4;
 
 	// Camera
 	auto camSys = world_.GetSystem<CameraSystem>();
@@ -248,31 +258,42 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
-	// カメラ位置付近を中心に固定のオルソを作る
-	const Math::Vec3f centerWS = cam.position;
 
-	const float dist = 60.0f;
-	const Math::Vec3f lightPosWS = {
-		centerWS.x - lightDirWS.x * dist,
-		centerWS.y - lightDirWS.y * dist,
-		centerWS.z - lightDirWS.z * dist
-	};
+	// 4分割
+	float splits[5] = { cam.nearPlane, 5.0f, 15.0f, 40.0f, 100.0f };
+	// もしカメラのFarが100未満なら合わせる等の処理はお好みで
 
-	Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+	for (uint32_t ci = 0; ci < 4; ++ci)
+	{
+		float cn = splits[ci];
+		float cf = splits[ci + 1];
 
-	// 固定オルソ
-	const float half = 50.0f;
-	Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-		-half, half,
-		half, -half, 
-		-150.0f, 150.0f);
+		// カメラ位置付近を中心に固定のオルソを作る
+		// 簡易的に、カメラ位置(cn~cfの中点)を見るようなLightView
+		const Math::Vec3f centerWS = cam.position + cam.forward * ((cn + cf) * 0.5f);
 
-	out.cascades[0].view = lightView;
-	out.cascades[0].proj = lightProj;
-	out.cascades[0].viewProj = lightView * lightProj;
+		const float dist = 50.0f; // ライト距離
+		const Math::Vec3f lightPosWS = {
+			centerWS.x - lightDirWS.x * dist,
+			centerWS.y - lightDirWS.y * dist,
+			centerWS.z - lightDirWS.z * dist
+		};
 
-	// splitFar[0] だけ埋める
-	out.splitFar[0] = cam.farPlane;
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+
+		// 固定オルソ (カスケードごとにサイズ変えてもいいが、Defaultなので適当に広め)
+		const float half = 50.0f; 
+		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+			-half, half,
+			half, -half,
+			-150.0f, 150.0f);
+
+		out.cascades[ci].view = lightView;
+		out.cascades[ci].proj = lightProj;
+		out.cascades[ci].viewProj = lightView * lightProj;
+
+		out.splitFar[ci] = cf;
+	}
 }
 
 void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)

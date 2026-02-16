@@ -16,7 +16,7 @@ void TestWorld::Init()
 	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestFloor>();
 	World::SpawnActor<TestCylinder>();
-
+	//World::SpawnActor<TestCamera>();
 }
 
 void TestWorld::Update(float deltaTime)

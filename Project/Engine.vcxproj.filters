@@ -233,6 +233,12 @@
     <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp">
       <Filter>Game\Test\Actor\Cylinder</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Camera\TestCamera.cpp">
+      <Filter>Game\Test\Actor\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -844,6 +850,15 @@
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h">
       <Filter>Game\Test\Actor\Cylinder</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Camera\TestCamera.h">
+      <Filter>Game\Test\Actor\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Camera\TestCameraComponent.h">
+      <Filter>Game\Test\Actor\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1136,6 +1151,12 @@
     </Filter>
     <Filter Include="Game\Test\Actor\Cylinder">
       <UniqueIdentifier>{cfb288e4-34fa-48dd-a938-cb06bf93942e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Camera">
+      <UniqueIdentifier>{07761aa9-f4c5-4b40-80ab-e879be6ee180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\DirLight">
+      <UniqueIdentifier>{6101c56f-9a09-4250-b27c-619fe431f11d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

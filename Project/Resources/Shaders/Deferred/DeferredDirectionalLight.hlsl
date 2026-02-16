@@ -94,8 +94,13 @@ float4 DirLightingPS(VSOut i) : SV_Target
     float3 L = normalize(-gLight.gLightDirWS);
     float NdotL = saturate(dot(normal, L));
 
-    float3 diffuse = albedo * gLight.gRadiance * NdotL * shadow;
+    // float3 diffuse = albedo * gLight.gRadiance * NdotL * shadow;
+    // return float4(diffuse, 1.0f);
 
-    // Visualize Shadow / Lighting
-    return float4(diffuse, 1.0f);
+    // DEBUG: Visualize Cascade Index
+    uint cascadeIdx = SelectCascade(viewDepth, gShadow.gCascadeSplitDepths);
+    if (cascadeIdx == 0) return float4(1, 0, 0, 1); // Red
+    if (cascadeIdx == 1) return float4(0, 1, 0, 1); // Green
+    if (cascadeIdx == 2) return float4(0, 0, 1, 1); // Blue
+    return float4(1, 1, 1, 1); // White
 }

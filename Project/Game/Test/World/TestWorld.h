@@ -2,6 +2,7 @@
 
 #include "Framework/World/World.h"
 #include "../Actor/Axis/TestAxis.h"
+#include "../Actor/Camera/TestCamera.h"
 #include "../Actor/Floor/TestFloor.h"
 #include "../Actor/Cylinder/TestCylinder.h"
 
