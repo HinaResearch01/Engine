@@ -203,8 +203,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		}
 
 		// pad
-		const float padXY = 5.0f;
-		const float padZ = 20.0f;
+		const float padXY = 10.0f;
+		const float padZ = 300.0f; // 手前のオブジェクトも影を落とせるように大きく取る
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
 		minLS.z -= padZ;

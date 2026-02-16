@@ -114,8 +114,8 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- bias ----
-	cb.shadowBias = 0.0f;
-	cb.shadowNormalBias = 0.0f;
+	cb.shadowBias = 0.001f;
+	cb.shadowNormalBias = 0.002f;
 }
 
 void RenderPrepareSystem::BuildLightPacket()

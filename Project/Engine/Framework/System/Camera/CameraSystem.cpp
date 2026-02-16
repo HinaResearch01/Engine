@@ -102,8 +102,8 @@ void CameraSystem::BuildDefault(CameraContext& out)
 	const float defNear = 0.1f;
 	const float defFar = 1000.0f;
 
-	const Math::Vec3f rotate{ -25, 0,0 };
-	const Math::Vec3f position = { 10,20,-30 };
+	const Math::Vec3f rotate{ -30, 0,0 };
+	const Math::Vec3f position = { 0,45,-60 };
 
 	out.fovY = Math::Func::NUM::ToRadians(defFov);
 	out.aspectRatio = world_.GetAspectRatio();
