@@ -7,6 +7,7 @@
 #include "../ISystem.h"
 #include "Graphic/ShadowDMap/ShadowDepthMap.h"
 #include "Graphic/ShadowDMap/CSMShadowDepthMap.h"
+#include "Graphic/ShadowDMap/SpotShadowDepthMap.h"
 #include "Framework/Str/RenderPacket.h"
 #include "Framework/Str/LightPacket.h"
 
@@ -60,6 +61,10 @@ public:
 	/// 描画パスエントリ
 	/// </summary>
 	void DrawShadowPass(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawSpotShadowPass(
 		DX12::CommandContext& cmd,
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
@@ -129,8 +134,11 @@ private:
 private:
 	// Shadow
 	std::unique_ptr<Graphic::CSMShadowDepthMap> shadowDMap_;
+	std::unique_ptr<Graphic::SpotShadowDepthMap> spotShadowDMap_; // New
 	uint32_t cachedShadowSize_ = 0;
 	uint32_t cachedCascadeCount_ = 0;
+	uint32_t cachedSpotShadowSize_ = 0;
+	uint32_t cachedSpotCount_ = 0;
 
 	// State
 	int debugMode_ = 0;

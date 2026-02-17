@@ -111,7 +111,11 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <summary>
+	/// 
+	/// </summary>
 	void WriteShadowSRV(ID3D12Resource* shadowRes, DXGI_FORMAT srvFormat, UINT arraySize = 1);
+	void WriteSpotShadowSRV(ID3D12Resource* shadowRes, DXGI_FORMAT srvFormat, UINT arraySize = 1);
 
 #pragma region Accessor
 	UINT GetWidth() const { return width_; }

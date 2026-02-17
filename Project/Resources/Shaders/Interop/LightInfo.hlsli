@@ -34,8 +34,13 @@ struct SpotLightCB
     float3 gRadiance;
     float gOuterCos;
 
-    float gIntensity;
-    float3 _padSpot;
+    	// 拡張
+	float gIntensity;
+	int gShadowIndex;
+	float gShadowBias;
+	float _padSpot;
+
+	float4x4 gLightViewProj;
 };
 
 #endif // __LIGHT_INFO_HLSLI__

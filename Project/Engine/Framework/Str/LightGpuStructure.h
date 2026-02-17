@@ -44,7 +44,11 @@ struct GpuSpotLightCB {
 
 	// 拡張
 	float intensity;
-	float _pad[3];
+	int shadowIndex;
+	float shadowBias;
+	float _pad;
+
+	Math::Mat4x4 lightViewProj;
 };
 
 struct GpuShadowCSMCB

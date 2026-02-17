@@ -22,8 +22,12 @@ Texture2D gGBuffer1_NormalWS : register(t1);
 Texture2D gGBuffer2_Reflectivity : register(t2);
 Texture2D gDepth01 : register(t3);
 
+// t4 is unused (or reserved for CSM in other shaders)
+Texture2DArray gSpotShadowMap : register(t5);
+
 // Sampler
 SamplerState gPointClamp : register(s0);
+SamplerComparisonState gShadowSampler : register(s1);
 
 // ============================================================
 // Fullscreen VS
@@ -42,6 +46,41 @@ VSOut SpotLightingVS(uint vertexID : SV_VertexID)
     o.positionCS = f.positionCS;
     o.uv = f.uv;
     return o;
+}
+
+// ============================================================
+// Spot Shadow Calculation
+// ============================================================
+float CalcSpotShadow(float3 positionWS)
+{
+	if (gLight.gShadowIndex < 0) return 1.0f;
+
+	float4 posLS = mul(float4(positionWS, 1.0f), gLight.gLightViewProj);
+	float3 projCoords = posLS.xyz / posLS.w;
+
+	projCoords.x = projCoords.x * 0.5f + 0.5f;
+	projCoords.y = -projCoords.y * 0.5f + 0.5f;
+
+	if (projCoords.z > 1.0f || projCoords.z < 0.0f ||
+		projCoords.x < 0.0f || projCoords.x > 1.0f ||
+		projCoords.y < 0.0f || projCoords.y > 1.0f)
+	{
+		return 1.0f; // Outside light frustum
+	}
+
+	// Bias
+	float currentDepth = projCoords.z;
+	float bias = gLight.gShadowBias;
+
+	// Sample
+	// float3(uv.x, uv.y, slice)
+	float shadow = gSpotShadowMap.SampleCmpLevelZero(
+		gShadowSampler,
+		float3(projCoords.xy, (float)gLight.gShadowIndex),
+		currentDepth - bias
+	).r;
+
+	return shadow;
 }
 
 // ============================================================
@@ -86,13 +125,15 @@ float4 SpotLightingPS(VSOut i) : SV_Target
     float cosAngle = dot(-L, normalize(gLight.gDirectionWS));
     
     // innerCos > outerCos (e.g. 0.9 > 0.8)
-    // if cosAngle > innerCos -> factor = 1
-    // if cosAngle < outerCos -> factor = 0
     float spotFactor = saturate((cosAngle - gLight.gOuterCos) / (gLight.gInnerCos - gLight.gOuterCos));
     
     attenuation *= spotFactor;
 
     if (attenuation <= 0.0f) discard;
+
+    // Shadow
+    float shadow = CalcSpotShadow(positionWS);
+    attenuation *= shadow;
 
     // Radiance
     float3 radiance = gLight.gRadiance * gLight.gIntensity * attenuation;

@@ -26,6 +26,13 @@ public:
 	float farZ = 200.0f;
 
 	// ----------------------------------------
+	// Spot Light Specific
+	// ----------------------------------------
+	// ShadowSystemによってフレーム毎に割り当てられるIndex (-1 なら影なし)
+	int32_t spotShadowIndex = -1;
+	float shadowBias = 0.005f;
+
+	// ----------------------------------------
 	// Future: Point/Spot Light specific params (Bias etc.)
 	// ----------------------------------------
 };

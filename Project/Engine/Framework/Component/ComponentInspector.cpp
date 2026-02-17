@@ -1,3 +1,4 @@
+#include "Framework/Actor/IActor.h"
 #include "Framework/Component/Camera/CameraComponent.h"
 #include "Framework/Component/Light/DirectionalLightComponent.h"
 #include "Framework/Component/Light/PointLightComponent.h"
@@ -6,7 +7,6 @@
 #include "Framework/Component/Shadow/ShadowComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
-
 #include "imgui.h"
 
 namespace Tsumi::Framework {
@@ -48,6 +48,23 @@ void DirectionalLightComponent::OnInspectorGui() {
 		ImGui::ColorEdit3("Color", &color.x);
 		ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 100.0f);
 		ImGui::ColorEdit3("Ambient", &ambient.x);
+
+		bool changed = false;
+		if (ImGui::SliderFloat("Elevation (Pitch)", &elevation, -90.0f, 90.0f)) changed = true;
+		if (ImGui::SliderFloat("Azimuth (Yaw)", &azimuth, 0.0f, 360.0f)) changed = true;
+
+		if (changed) {
+			UpdateTransform();
+		}
+
+		ImGui::Separator();
+		ImGui::Checkbox("Cast Shadow", &castShadow);
+		if (castShadow) {
+			ImGui::DragFloat("Ortho Size", &orthoHalfSize, 0.1f, 1.0f, 1000.0f);
+			ImGui::DragFloat("Near Z", &nearZ, 0.1f, 0.01f, 1000.0f);
+			ImGui::DragFloat("Far Z", &farZ, 1.0f, 1.0f, 5000.0f);
+		}
+
 		ImGui::TreePop();
 	}
 }
@@ -106,6 +123,13 @@ void SpotLightComponent::OnInspectorGui() {
 		}
 		if (ImGui::DragFloat("Outer Angle", &outerDeg, 0.1f, 0.0f, 180.0f)) {
 			outerCos = std::cos(Math::Func::NUM::ToRadians(outerDeg));
+		}
+
+		ImGui::Separator();
+		ImGui::Checkbox("Cast Shadow", &castShadow);
+		if (castShadow) {
+			ImGui::DragFloat("Near Z", &nearZ, 0.1f, 0.01f, 1000.0f);
+			ImGui::DragFloat("Far Z", &farZ, 1.0f, 1.0f, 5000.0f);
 		}
 		ImGui::TreePop();
 	}

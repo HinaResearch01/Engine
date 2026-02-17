@@ -212,6 +212,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphic\Shader\ShaderLibrary.cpp" />
     <ClCompile Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.cpp" />
     <ClCompile Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.cpp" />
+    <ClCompile Include="Engine\Graphic\ShadowDMap\SpotShadowDepthMap.cpp" />
     <ClCompile Include="Engine\Loader\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Engine\Loader\Model\ModelLoader.cpp" />
     <ClCompile Include="Engine\Loader\Tex\TextureLoader.cpp" />
@@ -345,7 +346,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp" />
     <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp" />
     <ClCompile Include="Game\Test\Actor\Floor\TestFloor.cpp" />
-    <ClCompile Include="Game\Test\Actor\Shadow\TestShadow.cpp" />
+    <ClCompile Include="Game\Test\Actor\SpotLight\TestSpotLight.cpp" />
     <ClCompile Include="Game\Test\World\TestWorld.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -414,6 +415,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphic\Shader\ShaderLibrary.h" />
     <ClInclude Include="Engine\Graphic\ShadowDMap\CSMShadowDepthMap.h" />
     <ClInclude Include="Engine\Graphic\ShadowDMap\ShadowDepthMap.h" />
+    <ClInclude Include="Engine\Graphic\ShadowDMap\SpotShadowDepthMap.h" />
     <ClInclude Include="Engine\Loader\LoaderAPI.h" />
     <ClInclude Include="Engine\Loader\Mesh\MeshLoader.h" />
     <ClInclude Include="Engine\Loader\Model\ModelLoader.h" />
@@ -914,16 +916,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Test\Actor\Axis\TestAxisMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Axis\TestAxisRenderComp.h" />
     <ClInclude Include="Game\Test\Actor\Camera\TestCamera.h" />
-    <ClInclude Include="Game\Test\Actor\Camera\TestCameraComponent.h" />
+    <ClInclude Include="Game\Test\Actor\Camera\TestCameraComp.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinder.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h" />
+    <ClInclude Include="Game\Test\Actor\DirLight\TestDiretionalLightComp.h" />
     <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h" />
+    <ClInclude Include="Game\Test\Actor\DirLight\TestShadowComp.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloor.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorRenderComp.h" />
-    <ClInclude Include="Game\Test\Actor\Shadow\TestShadow.h" />
-    <ClInclude Include="Game\Test\Actor\Shadow\TestShadowShadowComp.h" />
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLight.h" />
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h" />
     <ClInclude Include="Game\Test\World\TestWorld.h" />
   </ItemGroup>
   <ItemGroup>

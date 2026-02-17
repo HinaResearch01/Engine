@@ -3,7 +3,9 @@
 #include "Framework/Component/Light/DirectionalLightComponent.h"
 #include "Framework/Component/Light/PointLightComponent.h"
 #include "Framework/Component/Light/SpotLightComponent.h"
+#include "Framework/Component/Shadow/ShadowComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
+#include "Framework/Actor/IActor.h"
 
 using namespace Tsumi;
 using namespace Tsumi::Framework;
@@ -61,7 +63,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 		{
 			auto [tr, dl] = *it;
 
-			Math::Vec3f dirWS = NormalizeSafe(-tr.forward, { 0, -1, 0 });
+			Math::Vec3f dirWS = NormalizeSafe(-tr.world.GetForward(), {0, -1, 0});
 
 			Math::Vec3f radiance{
 				dl.color.x,
@@ -131,6 +133,48 @@ void LightSystem::BuildLightContext(LightContext& out)
 
 		r.radiance = radiance;
 		r.intensity = sl.intensity;
+
+
+		// Shadow
+		// Default (Implicit)
+		if (sl.castShadow) {
+			r.shadowIndex = sl.runtimeShadowIndex;
+			r.shadowBias = 0.005f; // Default bias
+		}
+
+		// Explicit Override
+		if (auto* owner = sl.GetOwner())
+		{
+			if (auto* shadow = owner->GetComponent<ShadowComponent>())
+			{
+				if (shadow->castShadow) {
+					// If ShadowComponent is present and enabled, it might override settings.
+					// ShadowSystem logic prioritized ShadowComponent index if present.
+					// But we unified index assignment to `sl.runtimeShadowIndex` (conceptually), 
+					// or we should read from `shadow->spotShadowIndex` if valid?
+					// In `ShadowSystem::BuildSpotShadowContext`, we assigned index to BOTH 
+					// `sh->spotShadowIndex` (if sh exists) AND `sl->runtimeShadowIndex` (missing in my prev edit, but I should have).
+
+					// Wait, I missed adding `sl->runtimeShadowIndex = i` in ShadowSystem in previous step!
+					// I only added the field to .h but didn't update .cpp to write to it.
+					// I MUST fix ShadowSystem.cpp first or concurrently. 
+					// For now, let's assume I fix ShadowSystem.cpp.
+					
+					// If ShadowComponent exists, we might want to use its bias.
+					r.shadowBias = shadow->shadowBias;
+				}
+				else {
+					// If ShadowComponent says NO shadow, we respect it?
+					// Or do we respect SpotLightComponent?
+					// Design: SpotLightComponent.castShadow is master for simple usage.
+					// If ShadowComponent is attached but disabled... does it mean "Disable Advanced Shadow" or "Disable All Shadow"?
+					// Let's assume if ShadowComponent is attached, it controls.
+					if (!shadow->castShadow) {
+						r.shadowIndex = -1;
+					}
+				}
+			}
+		}
 
 		out.spots.push_back(r);
 	}

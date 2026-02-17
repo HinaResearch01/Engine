@@ -133,6 +133,9 @@ void RenderPrepareSystem::BuildLightPacket()
 	auto lightSys = world_.GetSystem<LightSystem>();
 	const LightContext& ctx = lightSys->GetContext();
 
+	auto shadowSys = world_.GetSystem<ShadowSystem>();
+	const ShadowContext& shadowCtx = shadowSys->GetContext();
+
 	// -------------------------
 	// Directional
 	// -------------------------
@@ -182,6 +185,14 @@ void RenderPrepareSystem::BuildLightPacket()
 		cb.radiance = s.radiance;
 		cb.outerCos = s.outerCos;
 		cb.intensity = s.intensity;
+		cb.shadowIndex = s.shadowIndex;
+		cb.shadowBias = s.shadowBias;
+
+		if (s.shadowIndex >= 0 && s.shadowIndex < (int)shadowCtx.spotShadows.size())
+		{
+			cb.lightViewProj = shadowCtx.spotShadows[s.shadowIndex].viewProj;
+		}
+
 		lightPacket_.spotCB.push_back(cb);
 	}
 }

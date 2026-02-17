@@ -208,8 +208,8 @@ void RootSignatureLibrary::CreateLightingSpot()
 	rs.AddCBVRange(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	// b1 SpotLight
 	rs.AddCBVRange(1, 1, D3D12_SHADER_VISIBILITY_PIXEL);
-	// t0..t3 GBuffer (Albedo, Normal, Material, Depth)
-	rs.AddSRVRange(0, 4, D3D12_SHADER_VISIBILITY_PIXEL);
+	// t0..t5 GBuffer (Albedo, Normal, Material, Depth, CSM, SpotShadow)
+	rs.AddSRVRange(0, 6, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	// s0 PointClamp
 	rs.AddStaticSampler(
@@ -218,6 +218,15 @@ void RootSignatureLibrary::CreateLightingSpot()
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		0,
 		D3D12_SHADER_VISIBILITY_PIXEL
+	);
+	// s1 ShadowSampler (Comparison)
+	rs.AddStaticSampler(
+		1,
+		D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+		0,
+		D3D12_SHADER_VISIBILITY_PIXEL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE
 	);
 
 	rs.SetFlags(D3D12_ROOT_SIGNATURE_FLAG_NONE);

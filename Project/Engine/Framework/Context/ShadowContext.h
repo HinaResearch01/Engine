@@ -17,6 +17,18 @@ struct ShadowContext {
 	uint32_t shadowMapSize = 0;
 	std::array<float, 4> splitFar{};
 	std::array<ShadowCascade, 4> cascades{};
+
+	// Spot Light Shadow
+	bool spotEnabled = false;
+	uint32_t spotShadowMapSize = 0;
+	// 最大数はシェーダー側の配列サイズと合わせる必要あり（仮に16）
+	static constexpr uint32_t kMaxSpotShadows = 16;
+	struct SpotShadowData {
+		Math::Mat4x4 viewProj;
+		uint32_t lightIndex; // LightSystem側のindexとの対応付け（必要なら）
+	};
+	uint32_t activeSpotShadowCount = 0;
+	std::array<SpotShadowData, kMaxSpotShadows> spotShadows{};
 };
 
 /*

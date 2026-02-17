@@ -29,6 +29,9 @@ struct SpotLightResolved {
 	float outerCos;
 	Math::Vec3f radiance;
 	float intensity;
+	// Shadow
+	int shadowIndex = -1;
+	float shadowBias = 0.001f;
 };
 
 struct LightContext {

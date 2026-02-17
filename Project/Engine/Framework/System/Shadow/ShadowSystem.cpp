@@ -77,25 +77,37 @@ void ShadowSystem::Init()
 	activeCtx_ = defaultCtx_;
 }
 
+
 void ShadowSystem::Update(float)
 {
 	ShadowContext ctx{};
-	BuildShadowContext(ctx);
+	
+	// 有効なDirectionalLightが見つかったか？
+	bool foundCaster = BuildShadowContext(ctx);
+	
+	// SpotLightの影構築
+	BuildSpotShadowContext(ctx);
 
-	// 「影が組めない」ならデフォルトにフォールバック
-	if (!ctx.enabled)
+	if (foundCaster || ctx.spotEnabled)
 	{
-		// activeCtx_ = defaultCtx_;
-		// Force rebuild default every frame to ensure debug values apply
-		BuildDefault(activeCtx_);
+		// どちらか片方でも有効なら採用
+		activeCtx_ = ctx;
+		// ただし foundCaster が false なら enabled=false になるので、
+		// Spotだけ有効なケースを考慮して enabled フラグの扱いを調整する必要がある。
+		// ShadowContext.enabled は "CSM Enabled" の意味合いが強かった。
+		// SpotEnabled は別フラグ (spotEnabled) にしたので、混在しても大丈夫。
+		// activeCtx_.enabled = foundCaster; // CSM有効フラグとして使う
 	}
 	else
 	{
-		activeCtx_ = ctx;
+		// どちらも無い場合
+		BuildDefault(activeCtx_);
+		activeCtx_.enabled = false; 
+		activeCtx_.spotEnabled = false;
 	}
 }
 
-void ShadowSystem::BuildShadowContext(ShadowContext& out)
+bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 {
 	out = {};
 	out.enabled = false;
@@ -105,34 +117,51 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 	const CameraContext& cam = camSys->GetContext();
 	if (!cam.valid)
 	{
-		return;
+		return false;
 	}
 
+	// Choose 1 directional light
 	// Choose 1 directional light
 	const DirectionalLightComponent* chosenDL = nullptr;
 	const ShadowComponent* chosenShadow = nullptr;
 	const TransformComponent* chosenTR = nullptr;
+	uint32_t shadowMapSize = 2048; // Default
 
-	for (auto [tr, dl, sh] : world_.View<TransformComponent, DirectionalLightComponent, ShadowComponent>())
+	// Iterate all Directional Lights
+	for (auto [tr, dl] : world_.View<TransformComponent, DirectionalLightComponent>())
 	{
-		if (!sh.castShadow) continue;
 		if (dl.intensity <= 0.0f) continue;
-		if (sh.shadowMapSize == 0) continue;
+		if (!dl.castShadow) continue; // Check Light's flag
+
+		// Try to find ShadowComponent
+		ShadowComponent* sh = nullptr;
+		if (auto* owner = dl.GetOwner()) {
+			sh = owner->GetComponent<ShadowComponent>();
+		}
+		
+		// If ShadowComponent exists, check its castShadow too?
+		if (sh) {
+			if (!sh->castShadow) continue;
+			// Use ShadowComponent's size if valid
+			if (sh->shadowMapSize > 0) {
+				shadowMapSize = sh->shadowMapSize;
+			}
+		}
 
 		chosenDL = &dl;
-		chosenShadow = &sh;
+		chosenShadow = sh; // Can be null
 		chosenTR = &tr;
-		break;
+		break; // Only 1 directional light supported
 	}
 
-	if (!chosenDL || !chosenTR || !chosenShadow)
+	if (!chosenDL || !chosenTR)
 	{
-		// 影を組めない → enabled=falseのまま（Update側でdefaultへ）
-		return;
+		// No caster
+		return false;
 	}
 
 	out.enabled = true;
-	out.shadowMapSize = chosenShadow->shadowMapSize;
+	out.shadowMapSize = shadowMapSize;
 
 	// CSM splits
 	constexpr uint32_t cascadeCount = 4;
@@ -140,7 +169,8 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 	const float lambda = 0.96f;
 	const float n = cam.nearPlane;
-	const float f = cam.farPlane;
+	// Use Light's FarZ as Shadow Distance, clamped by Camera Far
+	const float f = std::min(cam.farPlane, chosenDL->farZ);
 
 	float splits[5]{};
 	splits[0] = n;
@@ -181,7 +211,19 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		const Math::Vec3f centerWS = Average8(cornersWS);
 
-		const float dist = (cf - cn) + chosenShadow->orthoHalfSize;
+		float orthoSize = chosenDL->orthoHalfSize;
+		if (chosenShadow) {
+			// If ShadowComponent defines orthoHalfSize, use it?
+			// Assumption: ShadowComponent also has this field.
+			// Let's defer to ShadowComponent if it looks customized (e.g. not default).
+			// But for simplicity, let's say DirectionalLightComponent is the source of truth for projection size now.
+			// Or we check which one is "touched".
+			// Given the refactor goal is to move props to Light, let's prefer Light's prop.
+			// But ShadowComponent might be used for "Advanced Override".
+			// Let's stick to Light Component for now as requested.
+		}
+
+		const float dist = (cf - cn) + orthoSize;
 		const Math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
 			centerWS.y - lightDirWS.y * dist,
@@ -213,6 +255,34 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
+		// Use Light's Near/Far to clamp or define range? 
+		// Actually CSM fits to the frustum splits.
+		// `minLS.z` and `maxLS.z` are derived from the camera frustum corners in light space.
+		// However, we might want to ensure we don't clip casters behind the camera.
+		// The `padZ` is usually for that.
+		// The `nearZ`/`farZ` in DirectionalLightComponent are often for "Shadow Distance" (max distance from camera)
+		// or "Light Projection Z range" if manual?
+		// In CSM, `shadowDistance` (farZ?) is used to cap the cascades.
+		// Let's use `chosenDL->farZ` as the maximum shadow distance (CSM max distance).
+		
+		// Wait, `BuildShadowContext` uses `cam.farPlane` for splits. 
+		// We should cap it at `chosenDL->farZ` if we want to limit shadow distance.
+		
+		// And for Ortho Matrix Z:
+		// We usually use minLS.z / maxLS.z. 
+		// `chosenDL->nearZ` / `farZ` might not be directly applicable to "Ortho Z" per cascade,
+		// BUT `orthoHalfSize` is definitely the Ortho Size (XY).
+		
+		// Let's override the `cam.farPlane` used for splits calculation with `chosenDL->farZ`!
+		// But I am editing inside the loop.
+		// The splits were calculated before this loop.
+		// I should check where splits are calculated.
+		
+		// Ah, I need to update the split calculation logic earlier in the function!
+		// But I am restricted to replace this chunk.
+		// Standard CSM implementation uses minLS.z/maxLS.z for Z range.
+		// So `nearZ`/`farZ` of light component might be better interpreted as "Shadow Max Distance".
+		
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, // left
 			maxLS.y, // top
@@ -227,6 +297,159 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		c.proj = lightProj;
 		c.viewProj = lightView * lightProj;
 	}
+
+	return true;
+}
+
+void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
+{
+	out.spotEnabled = false;
+	out.spotShadowMapSize = 1024; // Default
+	out.activeSpotShadowCount = 0;
+
+	// 1. Collect Spot Lights
+	// Transform, SpotLight (ShadowComponent is optional now)
+	struct LightEntry {
+		const TransformComponent* tr;
+		const SpotLightComponent* sl;
+		ShadowComponent* sh; // Can be nullptr
+		uint32_t mapSize;
+	};
+	std::vector<LightEntry> lights;
+	lights.reserve(ShadowContext::kMaxSpotShadows);
+
+	// Iterate all SpotLights
+	for (auto [tr, sl] : world_.View<TransformComponent, SpotLightComponent>())
+	{
+		// Check explicit ShadowComponent
+		ShadowComponent* sh = nullptr;
+		// Since we don't have GetComp<T>(entity) easily in this View loop unless we have entity ID,
+		// we might need a different approach or just iterate separately.
+		// However, World::View usually gives components. 
+		// Let's assume we can't easily get sibling component without Entity ID.
+		// BUT, we can iterate <Transform, Spot, Shadow> and <Transform, Spot> separately? No that's duplicate.
+		// Standard ECS approach: Iterate Entity that has Transform & Spot. Then TryGet Shadow.
+		// If View definition supports Entity ID, use that. 
+		// Current codebase View seems to return tuples of references/pointers.
+		
+		// Workaround: We iterate all SpotLights. 
+		// If the engine ECS doesn't support "Optional" component in View, we might need a helper.
+		// For now, let's assume we iterate all SpotLights, and we need to find if they have ShadowComponent.
+		// If we can't do that easily, we might need to rely on the user adding ShadowComponent for *advanced* features,
+		// but for *basic* features we rely on SpotLightComponent's new fields.
+		
+		// Wait, if we want to support "SpotLight without ShadowComponent casts shadow", 
+		// we need to know if it *should* cast shadow.
+		// SpotLightComponent now has `castShadow`.
+		
+		if (!sl.castShadow) continue;
+		if (sl.intensity <= 0.0f) continue;
+
+		// Try to find ShadowComponent on this entity?
+		// Since I don't see EntityID in the loop `auto [tr, sl]`, I cannot query ShadowComponent easily.
+		// I will rely on `SpotLightComponent`'s params for now.
+		// If ShadowComponent exists, it would be great to use it.
+		// Let's check `ShadowSystem.cpp` imports. It includes `World.h`.
+		// If `View` returns valid pointers, maybe I can find owner?
+		// `IComponent` has `GetOwner()`.
+		
+		auto* owner = sl.GetOwner();
+		if (owner) {
+			sh = owner->GetComponent<ShadowComponent>();
+		}
+
+		uint32_t size = 1024;
+		if (sh) {
+			// If ShadowComponent exists, we might defer to its castShadow flag? 
+			// Or we sync them?
+			// Let's say: If ShadowComponent is present, use its settings.
+			// But SpotLightComponent also has castShadow. Confusion might arise.
+			// DESIGN DECISION: SpotLightComponent.castShadow is the master switch for "Simple usage".
+			// If ShadowComponent is attached, we override size/bias etc.
+			// But if ShadowComponent.castShadow is false, should we disable it?
+			// Let's assume yes.
+			if (!sh->castShadow) continue; 
+			size = sh->shadowMapSize;
+		}
+
+		lights.push_back({ &tr, &sl, sh, size });
+	}
+
+	if (lights.empty()) return;
+
+	// Sort? (Optional)
+
+	const uint32_t count = std::min((uint32_t)lights.size(), ShadowContext::kMaxSpotShadows);
+	
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		auto& entry = lights[i];
+
+		// Assign Index to ShadowComponent if exists, OR we need a way to tell RenderSystem which index to use.
+		// RenderSystem uses `light.shadowIndex` from `SpotLightResolved`.
+		// `LightSystem` builds `SpotLightResolved`.
+		// We need to store the assigned index somewhere `LightSystem` can find it.
+		// Previously it was `sh->spotShadowIndex`.
+		// Now, if `sh` is null, where do we store it?
+		// `SpotLightComponent` doesn't have `spotShadowIndex` (runtime).
+		// We should add `int32_t shadowIndex` to `SpotLightComponent` (runtime transient) or `ShadowSystem` needs to pass a map.
+		// Adding `runtimeShadowIndex` to `SpotLightComponent` is cleanest for now (mutable).
+		
+		// const_cast to modify runtime transient data
+		auto* slMutable = const_cast<SpotLightComponent*>(entry.sl);
+		// Note: We need to add `shadowIndex` to SpotLightComponent.h first if we want to store it there.
+		// Wait, I didn't add `shadowIndex` to SpotLightComponent.h in the previous step.
+		// I added `castShadow`, `nearZ`, `farZ`.
+		// `SpotLightComponent` has `type`, `intensity`... but no `shadowIndex`.
+		// `LightContext` has `SpotLightResolved` which has `shadowIndex`.
+		// `LightSystem` reads from Component.
+		// If I cannot store it in Component, `Component` won't know its index.
+		// I MUST add `shadowIndex` (transient) to `SpotLightComponent` or `ShadowComponent`.
+		// If `ShadowComponent` is missing, I have nowhere to store it.
+		// -> I should add `mutable int32_t shadowIndex = -1;` to `SpotLightComponent`.
+		
+		// Temporarily, I will assume I can add it or it exists. 
+		// Actually I missed adding it to the .h file in previous step.
+		// I will handle this by adding it to the .h file in a separate step or assume I can add it now.
+		// But I cannot edit .h and .cpp in same step.
+		// I will proceed assuming I will fix .h next.
+		
+		// For now, I will write the logic assuming `sl->runtimeShadowIndex` exists.
+		// And verify/add it in next step.
+		
+		if (entry.sh) {
+			entry.sh->spotShadowIndex = (int32_t)i;
+		}
+		// Also set on SpotLightComponent so LightSystem can pick it up without looking for ShadowComponent
+		auto* slMutable = const_cast<SpotLightComponent*>(entry.sl);
+		slMutable->runtimeShadowIndex = (int32_t)i; 
+		
+		auto& data = out.spotShadows[i];
+		data.lightIndex = 0;
+
+		Math::Vec3f pos = { entry.tr->world.m[3][0], entry.tr->world.m[3][1], entry.tr->world.m[3][2] };
+		Math::Vec3f fwd = entry.tr->forward; 
+		Math::Vec3f up = entry.tr->up;
+
+		Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(pos, pos + fwd, up);
+
+		float angle = 2.0f * std::acos(entry.sl->outerCos);
+		
+		// Use component params or fallback
+		float n = entry.sl->nearZ;
+		float f = entry.sl->farZ;
+		if (entry.sh) {
+			n = entry.sh->nearZ;
+			f = entry.sh->farZ;
+		}
+
+		Math::Mat4x4 proj = Math::Func::MAT4x4::PerspectiveFovMatrix(angle, 1.0f, n, f);
+
+		data.viewProj = view * proj;
+	}
+
+	out.activeSpotShadowCount = count;
+	out.spotEnabled = (count > 0);
 }
 
 void ShadowSystem::BuildDefault(ShadowContext& out)

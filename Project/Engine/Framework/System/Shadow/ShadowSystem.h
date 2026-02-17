@@ -49,8 +49,10 @@ public:
 private:
 	/// <summary>
 	/// ShadowContextを組み立てる
+	/// 戻り値: 有効なDirectionalLightが見つかったかどうか
 	/// </summary>
-	void BuildShadowContext(ShadowContext& out);
+	bool BuildShadowContext(ShadowContext& out);
+	void BuildSpotShadowContext(ShadowContext& out);
 	void BuildDefault(ShadowContext& out);
 
 	/// <summary>

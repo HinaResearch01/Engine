@@ -26,6 +26,14 @@ public:
 	// GPU 用
 	float innerCos;
 	float outerCos;
+
+	// Shadow (Simple)
+	bool castShadow = false;
+	float nearZ = 0.5f;
+	float farZ = 100.0f;
+
+	// Runtime (Transient)
+	mutable int32_t runtimeShadowIndex = -1;
 };
 
 }

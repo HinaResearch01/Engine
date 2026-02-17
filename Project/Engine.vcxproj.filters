@@ -239,17 +239,20 @@
     <ClCompile Include="Game\Test\Actor\Camera\TestCamera.cpp">
       <Filter>Game\Test\Actor\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp">
-      <Filter>Game\Test\Actor\DirLight</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Utils\FixFPS\FixFPS.cpp">
       <Filter>Engine\Utils\FixFPS</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Editor\EngineUI.cpp">
       <Filter>Engine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\Actor\Shadow\TestShadow.cpp">
-      <Filter>Game\Test\Actor\Shadow</Filter>
+    <ClCompile Include="Engine\Graphic\ShadowDMap\SpotShadowDepthMap.cpp">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\SpotLight\TestSpotLight.cpp">
+      <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -865,11 +868,8 @@
     <ClInclude Include="Game\Test\Actor\Camera\TestCamera.h">
       <Filter>Game\Test\Actor\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\Actor\Camera\TestCameraComponent.h">
+    <ClInclude Include="Game\Test\Actor\Camera\TestCameraComp.h">
       <Filter>Game\Test\Actor\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h">
-      <Filter>Game\Test\Actor\DirLight</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Utils\FixFPS\FixFPS.h">
       <Filter>Engine\Utils\FixFPS</Filter>
@@ -877,14 +877,26 @@
     <ClInclude Include="Engine\Editor\EngineUI.h">
       <Filter>Engine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\Actor\Shadow\TestShadow.h">
-      <Filter>Game\Test\Actor\Shadow</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Test\Actor\Shadow\TestShadowShadowComp.h">
-      <Filter>Game\Test\Actor\Shadow</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\Component\Shadow\ShadowComponent.h">
       <Filter>Engine\Framework\Component\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Graphic\ShadowDMap\SpotShadowDepthMap.h">
+      <Filter>Engine\Graphics\ShadowDMap</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\DirLight\TestDiretionalLightComp.h">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\DirLight\TestShadowComp.h">
+      <Filter>Game\Test\Actor\DirLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLight.h">
+      <Filter>Game\Test\Actor\SpotLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h">
+      <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1182,20 +1194,20 @@
     <Filter Include="Game\Test\Actor\Camera">
       <UniqueIdentifier>{07761aa9-f4c5-4b40-80ab-e879be6ee180}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\Test\Actor\DirLight">
-      <UniqueIdentifier>{6101c56f-9a09-4250-b27c-619fe431f11d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Utils\FixFPS">
       <UniqueIdentifier>{ae5a7286-8d91-45cf-a76c-443fea02fc68}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Editor">
       <UniqueIdentifier>{9314a57e-f7ec-4ef9-ac68-d4e1eb731cdb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Game\Test\Actor\Shadow">
-      <UniqueIdentifier>{e495a965-6404-442c-a675-784b765deb32}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Framework\Component\Shadow">
       <UniqueIdentifier>{2e61526b-079a-498a-a257-6d9bc32e9fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\DirLight">
+      <UniqueIdentifier>{6101c56f-9a09-4250-b27c-619fe431f11d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\SpotLight">
+      <UniqueIdentifier>{c9a0fe78-5804-4ce5-b471-00c6f919ad82}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

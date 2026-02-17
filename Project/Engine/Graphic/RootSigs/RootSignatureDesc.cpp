@@ -52,7 +52,7 @@ void RootSignatureDesc::AddUAVRange(UINT baseRegister, UINT count, D3D12_SHADER_
 }
 
 void RootSignatureDesc::AddStaticSampler(UINT shaderRegister, D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE address,
-										 UINT space, D3D12_SHADER_VISIBILITY visibility)
+										 UINT space, D3D12_SHADER_VISIBILITY visibility, D3D12_STATIC_BORDER_COLOR borderColor)
 {
 	D3D12_STATIC_SAMPLER_DESC s{};
 	s.Filter = filter;
@@ -60,9 +60,21 @@ void RootSignatureDesc::AddStaticSampler(UINT shaderRegister, D3D12_FILTER filte
 	s.AddressV = address;
 	s.AddressW = address;
 	s.MipLODBias = 0.0f;
-	s.MaxAnisotropy = 0;
-	s.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	s.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	s.MaxAnisotropy = 16;
+	
+	if (filter == D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT ||
+		filter == D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR ||
+		filter == D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT ||
+		filter == D3D12_FILTER_COMPARISON_ANISOTROPIC)
+	{
+		s.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	}
+	else
+	{
+		s.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	}
+
+	s.BorderColor = borderColor;
 	s.MinLOD = 0.0f;
 	s.MaxLOD = D3D12_FLOAT32_MAX;
 	s.ShaderRegister = shaderRegister;

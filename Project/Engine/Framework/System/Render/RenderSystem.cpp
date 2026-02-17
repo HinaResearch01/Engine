@@ -43,6 +43,10 @@ void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameResource
 	if (shadowDMap_) {
 		shadowDMap_->TransitionToWrite(cmd);
 	}
+	else {
+		// ShadowMapがない場合は描画できない
+		return;
+	}
 
 	list->SetGraphicsRootSignature(rsLib_->Get("ShadowCaster"));
 	list->SetPipelineState(psoLib_->Get("ShadowCaster"));
@@ -182,6 +186,22 @@ void RenderSystem::DrawSpotLights(DX12::CommandContext& cmd, DX12::FrameResource
 	const auto& lights = prep.GetLightPacket().spotCB;
 	if (lights.empty()) return;
 
+	// Shadow Map Transition & Bind
+	if (spotShadowDMap_) {
+		spotShadowDMap_->TransitionToRead(cmd);
+
+		dx12Mgr_->GetFramebuffer()->WriteSpotShadowSRV(
+			spotShadowDMap_->GetResource(),
+			Graphic::SpotShadowDepthMap::kSRVFormat,
+			ShadowContext::kMaxSpotShadows
+		);
+	}
+	else {
+		// No shadow map
+		dx12Mgr_->GetFramebuffer()->WriteSpotShadowSRV(
+			nullptr, Graphic::SpotShadowDepthMap::kSRVFormat, 1);
+	}
+
 	// PSO / RS
 	list->SetGraphicsRootSignature(rsLib_->Get("DeferredSpotLight"));
 	list->SetPipelineState(psoLib_->Get("DeferredSpotLight"));
@@ -191,7 +211,7 @@ void RenderSystem::DrawSpotLights(DX12::CommandContext& cmd, DX12::FrameResource
 	frame.bind.SetTable(ToRoot(Root_SpotLight::CameraCB),
 						frame.UploadToTableCB(camPkt.camMatCB));
 
-	// t0..t3: GBuffer
+	// t0..t5: GBuffer Table
 	frame.bind.SetTable(ToRoot(Root_SpotLight::GBufferTable),
 						dx12Mgr_->GetGBufferSrvTable());
 
@@ -245,6 +265,75 @@ void RenderSystem::SyncShadowResources()
 		shadowDMap_->Resize(ctx.shadowMapSize, ctx.cascadeCount);
 		cachedShadowSize_ = ctx.shadowMapSize;
 		cachedCascadeCount_ = ctx.cascadeCount;
+	}
+
+	// Spot Shadow
+	if (ctx.spotEnabled && ctx.spotShadowMapSize > 0 && ctx.activeSpotShadowCount > 0)
+	{
+		if (!spotShadowDMap_) {
+			spotShadowDMap_ = std::make_unique<Graphic::SpotShadowDepthMap>();
+			spotShadowDMap_->Init(ctx.spotShadowMapSize, ShadowContext::kMaxSpotShadows);
+			cachedSpotShadowSize_ = ctx.spotShadowMapSize;
+			cachedSpotCount_ = ShadowContext::kMaxSpotShadows;
+		}
+		else if (cachedSpotShadowSize_ != ctx.spotShadowMapSize) {
+			spotShadowDMap_->Resize(ctx.spotShadowMapSize, ShadowContext::kMaxSpotShadows);
+			cachedSpotShadowSize_ = ctx.spotShadowMapSize;
+		}
+	}
+}
+
+void RenderSystem::DrawSpotShadowPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+{
+	auto* list = cmd.GetList();
+	if (!list) return;
+
+	auto shadowSys = world_.GetSystem<ShadowSystem>();
+	const ShadowContext& ctx = shadowSys->GetContext();
+
+	SyncShadowResources();
+
+	if (!spotShadowDMap_ || !ctx.spotEnabled) return;
+
+	spotShadowDMap_->TransitionToWrite(cmd);
+
+	// Reuse ShadowCaster PSO/RS (same vertex layout, depth write only)
+	list->SetGraphicsRootSignature(rsLib_->Get("ShadowCaster"));
+	list->SetPipelineState(psoLib_->Get("ShadowCaster"));
+
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	const float size = (float)spotShadowDMap_->GetSize();
+	D3D12_VIEWPORT vp{ 0,0,size,size,0,1 };
+	D3D12_RECT sc{ 0,0,(LONG)size,(LONG)size };
+
+	list->RSSetViewports(1, &vp);
+	list->RSSetScissorRects(1, &sc);
+
+	// Iterate over active spot shadows
+	for (uint32_t i = 0; i < ctx.activeSpotShadowCount; ++i)
+	{
+		const auto& data = ctx.spotShadows[i];
+
+		list->OMSetRenderTargets(0, nullptr, FALSE, spotShadowDMap_->GetDSVPtr(i));
+		list->ClearDepthStencilView(
+			spotShadowDMap_->GetDSV(i),
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.0f, 0, 0, nullptr);
+
+		Tsumi::Framework::GpuShadowCSMCB cb{};
+		cb.lightViewProj[0] = data.viewProj;
+		
+		auto shadowHandle = frame.UploadToTableCB(cb);
+		frame.bind.SetTable(RootIndex::ToRoot(RootIndex::Root_ShadowCaster::ShadowCB), shadowHandle);
+
+		// CascadeIndex = 0
+		struct CascadeIndexCB { uint32_t gCascadeIndex; float _pad[3]; };
+		CascadeIndexCB ci{ 0 };
+		auto ciHandle = frame.UploadToTableCB(ci);
+		frame.bind.SetTable(RootIndex::ToRoot(RootIndex::Root_ShadowCaster::CascadeIndexCB), ciHandle);
+
+		DrawShadowCasters(cmd, frame, prep);
 	}
 }
 

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Framework/World/World.h"
-#include "../Actor/Axis/TestAxis.h"
 #include "../Actor/Camera/TestCamera.h"
+#include "../Actor/DirLight/TestDirLight.h"
+#include "../Actor/SpotLight/TestSpotLight.h"
+#include "../Actor/Axis/TestAxis.h"
 #include "../Actor/Floor/TestFloor.h"
 #include "../Actor/Cylinder/TestCylinder.h"
 
