@@ -136,7 +136,7 @@ float4 SpotLightingPS(VSOut i) : SV_Target
     attenuation *= shadow;
 
     // Radiance
-    float3 radiance = gLight.gRadiance * gLight.gIntensity * attenuation;
+    float3 radiance = gLight.gRadiance * attenuation;
 
     float3 lighting = LightingPBR(
         positionWS,

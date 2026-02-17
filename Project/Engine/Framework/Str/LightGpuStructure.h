@@ -12,7 +12,7 @@ struct GpuDirectionalLightCB {
 
 	// 放射輝度（HDR）
 	Math::Vec3f radiance;
-	float intensity; // Was pad1
+	float pad1;
 
 	// 環境光色 (Ambient)
 	Math::Vec3f ambientColor;
@@ -26,7 +26,7 @@ struct GpuPointLightCB {
 
 	// 放射輝度（HDR）
 	Math::Vec3f radiance;
-	float intensity; // Was _pad0
+	float _pad0;
 };
 
 struct GpuSpotLightCB {

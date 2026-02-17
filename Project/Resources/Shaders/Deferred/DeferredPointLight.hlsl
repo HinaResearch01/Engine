@@ -89,7 +89,7 @@ float4 PointLightingPS(VSOut i) : SV_Target
     attenuation *= attenuation; // Quartic falloff
 
     // Radiance
-    float3 radiance = gLight.gRadiance * gLight.gIntensity * attenuation;
+    float3 radiance = gLight.gRadiance * attenuation;
 
     float3 lighting = LightingPBR(
         positionWS,

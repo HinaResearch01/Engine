@@ -8,7 +8,7 @@ struct DirectionalLightCB
     int gLightEnabled;
 
     float3 gRadiance;
-    float gIntensity;
+    float _padLight1;
 
     float3 gAmbientColor;
     float _padLight2;
@@ -20,7 +20,7 @@ struct PointLightCB
     float gRange;
 
     float3 gRadiance;
-    float gIntensity;
+    float _padPoint;
 };
 
 struct SpotLightCB

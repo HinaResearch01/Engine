@@ -10,7 +10,6 @@ struct DirectionalLightResolved {
 	bool enabled = false;
 	Math::Vec3f dirWS;
 	Math::Vec3f radiance;
-	float intensity; 
 	Math::Vec3f ambient;
 };
 
@@ -18,7 +17,6 @@ struct PointLightResolved {
 	Math::Vec3f positionWS;
 	float range;
 	Math::Vec3f radiance;
-	float intensity;
 };
 
 struct SpotLightResolved {

@@ -304,7 +304,7 @@ Mat4x4 MAT4x4::AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f
 	Mat4x4 r = Mat4x4::Rotation(rotate);
 	Mat4x4 t = Mat4x4::Translation(translate);
 
-	return s * r * t;
+	return t * r * s;
 }
 
 Mat4x4 MAT4x4::PerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip)

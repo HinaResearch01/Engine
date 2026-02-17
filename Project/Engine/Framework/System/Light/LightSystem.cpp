@@ -66,15 +66,14 @@ void LightSystem::BuildLightContext(LightContext& out)
 			Math::Vec3f dirWS = NormalizeSafe(-tr.world.GetForward(), {0, -1, 0});
 
 			Math::Vec3f radiance{
-				dl.color.x,
-				dl.color.y,
-				dl.color.z
+				dl.color.x * dl.intensity,
+				dl.color.y * dl.intensity,
+				dl.color.z * dl.intensity
 			};
 
 			out.directional.enabled = (dl.intensity > 0.0f);
 			out.directional.dirWS = dirWS;
 			out.directional.radiance = radiance;
-			out.directional.intensity = dl.intensity;
 		}
 	}
 
@@ -88,16 +87,15 @@ void LightSystem::BuildLightContext(LightContext& out)
 
 		Math::Vec3f pos = tr.GetWorldPos();
 		Math::Vec3f radiance{
-			pl.color.x,
-			pl.color.y,
-			pl.color.z
+			pl.color.x * pl.intensity,
+			pl.color.y * pl.intensity,
+			pl.color.z * pl.intensity
 		};
 
 		PointLightResolved r{};
 		r.positionWS = pos;
 		r.range = pl.range;
 		r.radiance = radiance;
-		r.intensity = pl.intensity;
 
 		out.points.push_back(r);
 	}
@@ -114,9 +112,9 @@ void LightSystem::BuildLightContext(LightContext& out)
 		Math::Vec3f dir = NormalizeSafe(-tr.forward, { 0,-1,0 });
 
 		Math::Vec3f radiance{
-			sl.color.x,
-			sl.color.y,
-			sl.color.z
+			sl.color.x * sl.intensity,
+			sl.color.y * sl.intensity,
+			sl.color.z * sl.intensity
 		};
 
 		float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
@@ -132,7 +130,6 @@ void LightSystem::BuildLightContext(LightContext& out)
 		r.outerCos = std::cos(outerRad * 0.5f);
 
 		r.radiance = radiance;
-		r.intensity = sl.intensity;
 
 
 		// Shadow
@@ -184,16 +181,13 @@ void LightSystem::BuildDefault(LightContext& out)
 {
 	out = {};
 
-	// Directional を1本だけ保証
+	// Directional を1本だけ保証（Deferredで真っ黒回避）
 	out.directional.enabled = true;
 
 	// 太陽っぽい斜め上から
 	out.directional.dirWS = NormalizeSafe({ 0.3f, -1.0f, 0.2f }, { 0, -1, 0 });
 
-	// Intensity
-	out.directional.intensity = 3.0f;
-
-	// radiance
+	// radiance（= color * intensity）を直に入れてる前提
 	out.directional.radiance = { 1.0f, 1.0f, 1.0f };
 
 	// Point/Spot は空でOK
