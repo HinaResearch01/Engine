@@ -55,6 +55,7 @@ public:
 
 #pragma region Accessor
 	bool GetPedingInit() const { return pendingInit_; }
+	Framework::World* GetWorld() const { return currentScene_; }
 #pragma endregion
 
 private:

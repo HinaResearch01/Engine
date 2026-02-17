@@ -133,6 +133,9 @@ public:
 	void SetWorld(World* w) { world_ = w; }
 
 	bool IsPaused() const { return state_ == State::Paused; }
+
+	const std::string& GetName() const { return name_; }
+	void SetName(const std::string& name) { name_ = name; }
 #pragma endregion
 
 private:
@@ -144,7 +147,7 @@ protected:
 	State state_ = State::Active;
 	ActorID id_ = 0;
 
-	std::string name_;
+	std::string name_ = "Actor";
 	std::bitset<32> tags_{};
 
 	std::unordered_map<std::type_index, std::unique_ptr<IComponent>> comps_;

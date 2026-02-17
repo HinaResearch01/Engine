@@ -125,6 +125,9 @@
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp">
       <Filter>Engine\Framework\Actor</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Framework\Component\ComponentInspector.cpp">
+      <Filter>Engine\Framework\Component</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\DX12\FrameSync\FrameSync.cpp">
       <Filter>Engine\DX12\FrameSync</Filter>
     </ClCompile>

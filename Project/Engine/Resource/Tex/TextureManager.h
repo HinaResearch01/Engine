@@ -108,6 +108,16 @@ public:
 
 		return nullptr;
 	}
+
+	std::vector<std::string> GetTextureNames() const {
+		std::lock_guard lock(mutex_);
+		std::vector<std::string> names;
+		names.reserve(textures_.size());
+		for (const auto& [key, _] : textures_) {
+			names.push_back(key);
+		}
+		return names;
+	}
 #pragma endregion 
 
 private:

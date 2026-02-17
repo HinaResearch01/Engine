@@ -29,6 +29,11 @@ public:
 	/// </summary>
 	virtual void Init() {};
 
+	/// <summary>
+	/// Inspector描画
+	/// </summary>
+	virtual void OnInspectorGui() {};
+
 #pragma region Accessor
 	// 親
 	IActor* GetOwner() const { return owner_; }

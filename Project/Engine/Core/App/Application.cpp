@@ -52,6 +52,7 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     imgui_->Init();
 	fixFPS_->Init();
 	engineUI_->Init(fixFPS_.get());
+	engineUI_->SetGameContext(gameCtx_.get());
 }
 
 void Application::Run()

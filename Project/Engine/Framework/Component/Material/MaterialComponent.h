@@ -30,6 +30,9 @@ public:
 	Math::UVTransform uv;
 
 	bool visible = true;
+
+	// Inspector
+	void OnInspectorGui() override;
 };
 
 }

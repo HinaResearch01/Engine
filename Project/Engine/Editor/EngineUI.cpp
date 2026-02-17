@@ -1,5 +1,11 @@
 #include "EngineUI.h"
 #include "imgui.h"
+#include "../../Game/GameContext.h"
+#include "Framework/World/World.h"
+#include "Framework/Actor/IActor.h"
+#include "Resource/ResourceSystem.h"
+#include "Resource/Mesh/MeshManager.h"
+#include "Resource/Tex/TextureManager.h"
 
 using namespace Tsumi::Editor;
 
@@ -20,7 +26,18 @@ void EngineUI::Draw()
 		}
 
 		if (ImGui::BeginTabItem("Scene")) {
+			// Left pane for Scene Graph
+			ImGui::BeginChild("SceneGraph", { ImGui::GetContentRegionAvail().x * 0.4f, 0 }, true);
 			DrawScene();
+			ImGui::EndChild();
+
+			ImGui::SameLine();
+
+			// Right pane for Inspector
+			ImGui::BeginChild("Inspector", { 0, 0 }, true);
+			DrawInspector();
+			ImGui::EndChild();
+
 			ImGui::EndTabItem();
 		}
 
@@ -53,11 +70,74 @@ void EngineUI::DrawPerformance()
 
 void EngineUI::DrawScene()
 {
-	ImGui::Text("Scene Graph (ToDo)");
+	if (!gameContext_) {
+		ImGui::Text("No Game Context");
+		return;
+	}
+
+	auto* world = gameContext_->GetWorld();
+	if (!world) {
+		ImGui::Text("No Active World");
+		return;
+	}
+
+	const auto& actors = world->GetActors();
+	for (const auto& actor : actors) {
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		if (selectedActor_ == actor.get()) {
+			flags |= ImGuiTreeNodeFlags_Selected;
+		}
+		
+		// Leaf node for now (no hierarchy visualization yet, confusing with parent/child transform)
+		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+		ImGui::TreeNodeEx((void*)actor.get(), flags, "%s", actor->GetName().c_str());
+		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+			selectedActor_ = actor.get();
+		}
+	}
+}
+
+void EngineUI::DrawInspector()
+{
+	if (!selectedActor_) {
+		ImGui::Text("No Actor Selected");
+		return;
+	}
+
+	// Name editing
+	char nameBuf[256];
+	strcpy_s(nameBuf, selectedActor_->GetName().c_str());
+	if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf))) {
+		selectedActor_->SetName(nameBuf);
+	}
+
+	ImGui::Separator();
+
+	// Components
+	selectedActor_->ForEachComponent([](Tsumi::Framework::IComponent* comp) {
+		comp->OnInspectorGui();
+		ImGui::Separator();
+	});
 }
 
 void EngineUI::DrawResources()
 {
-	ImGui::Text("Texture Count: (ToDo)");
-	ImGui::Text("Model Count: (ToDo)");
+	auto* resSys = Tsumi::Resource::ResourceSystem::GetInstance();
+	
+	if (ImGui::TreeNode("Meshes")) {
+		auto names = resSys->GetMeshManager()->GetMeshNames();
+		for (const auto& name : names) {
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Textures")) {
+		auto names = resSys->GetTextureManager()->GetTextureNames();
+		for (const auto& name : names) {
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
 }

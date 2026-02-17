@@ -13,6 +13,9 @@ public:
 	bool castShadow = true;
 
 	// TODO: bounds / layerMask / submesh 等も後から
+
+	// Inspector
+	void OnInspectorGui() override;
 };
 
 }

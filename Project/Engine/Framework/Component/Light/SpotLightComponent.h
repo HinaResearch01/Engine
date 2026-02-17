@@ -23,6 +23,9 @@ public:
 	// GPU 用
 	float innerCos;
 	float outerCos;
+
+	// Inspector
+	void OnInspectorGui() override;
 };
 
 }

@@ -24,6 +24,11 @@ float NUM::ToRadians(float degrees)
 	return degrees * (Const::PI / 180.0f);
 }
 
+float NUM::ToDegrees(float radians)
+{
+	return radians * (180.0f / Const::PI);
+}
+
 float NUM::ConvertToRange(const Vec2f& input, const Vec2f& output, float value)
 {
 	// 入力値を入力範囲に正規化

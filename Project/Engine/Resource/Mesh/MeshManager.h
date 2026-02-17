@@ -108,6 +108,16 @@ public:
 
 		return nullptr;
 	}
+
+	std::vector<std::string> GetMeshNames() const {
+		std::lock_guard lock(mutex_);
+		std::vector<std::string> names;
+		names.reserve(meshes_.size());
+		for (const auto& [key, _] : meshes_) {
+			names.push_back(key);
+		}
+		return names;
+	}
 #pragma endregion
 
 private:

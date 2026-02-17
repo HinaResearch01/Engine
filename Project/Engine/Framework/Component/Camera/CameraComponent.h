@@ -15,6 +15,9 @@ public:
 	// デストラクタ
 	~CameraComponent() = default;
 
+	// Inspector
+	void OnInspectorGui() override;
+
 public:
 	float fovY = 60.0f;
 	float nearZ = 0.1f;

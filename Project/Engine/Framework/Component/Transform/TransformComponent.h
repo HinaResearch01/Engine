@@ -26,6 +26,9 @@ public:
 	// デストラクタ
 	~TransformComponent() = default;
 
+	// Inspector
+	void OnInspectorGui() override;
+
 	Math::Vec3f GetWorldPos() const {
 		return { world.m[3][0], world.m[3][1], world.m[3][2] };
 	}

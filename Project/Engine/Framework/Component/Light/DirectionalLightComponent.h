@@ -27,6 +27,9 @@ public:
 	Math::Vec3f ambient{ 0.1f, 0.1f, 0.1f };
 
 	ShadowParams shadow;
+
+	// Inspector
+	void OnInspectorGui() override;
 };
 
 }

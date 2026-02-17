@@ -27,6 +27,8 @@ float Clamp(const float& value, const float& minValue, const float& maxValue);
 float APOneAsZeroCloser(float value);
 // 角度を度からラジアンに変換する処理
 float ToRadians(float degrees);
+// 角度をラジアンから度に変換する処理
+float ToDegrees(float radians);
 // 範囲に変換
 float ConvertToRange(const Vec2f& input, const Vec2f& output, float value);
 }
