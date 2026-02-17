@@ -14,9 +14,9 @@ struct GpuDirectionalLightCB {
 	Math::Vec3f radiance;
 	float pad1;
 
-	// shadow 有無
-	uint32_t castShadow;
-	Math::Vec3f pad2;
+	// 環境光色 (Ambient)
+	Math::Vec3f ambientColor;
+	float pad2;
 };
 
 struct GpuPointLightCB {

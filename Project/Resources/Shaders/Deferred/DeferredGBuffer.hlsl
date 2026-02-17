@@ -30,7 +30,7 @@ struct GBuffer_Out
 {
     float4 albedo : SV_Target0;
     float4 normalWS : SV_Target1;
-    float4 reflectivity : SV_Target2;
+    float4 materialParams : SV_Target2; 
 };
 
 // ================================
@@ -68,7 +68,12 @@ GBuffer_Out GBufferPS(V2P input)
     o.albedo = float4(albedo, gMaterial.gAlpha);
 
     o.normalWS = float4(SafeNormalize(input.normalWS), 1.0f);
-    o.reflectivity = float4(gMaterial.gReflectivity, 0, 0, 1);
+    
+    // PBR Parameters
+    o.materialParams.r = gMaterial.gMetallic;
+    o.materialParams.g = gMaterial.gRoughness;
+    o.materialParams.b = gMaterial.gAO;
+    o.materialParams.a = 1.0f; 
     
     return o;
 }

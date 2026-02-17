@@ -24,6 +24,8 @@ public:
 	Math::Vec3f color{ 1,1,1 };
 	float intensity = 1.0f;
 
+	Math::Vec3f ambient{ 0.1f, 0.1f, 0.1f };
+
 	ShadowParams shadow;
 };
 

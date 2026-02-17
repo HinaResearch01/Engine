@@ -67,6 +67,8 @@ private:
 	/// </summary>
 	void CreateGBuffer();
 	void CreateLightingDirectional();
+	void CreateLightingPoint();
+	void CreateLightingSpot();
 	void CreateShadowCaster();
 	void CreateDeferredComposite();
 	void CreateDeferredDebug();

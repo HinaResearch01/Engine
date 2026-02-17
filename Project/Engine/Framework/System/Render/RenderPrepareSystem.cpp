@@ -141,6 +141,9 @@ void RenderPrepareSystem::BuildLightPacket()
 		lightPacket_.dirCB.enabled = 1;
 		lightPacket_.dirCB.directionWS = ctx.directional.dirWS;
 		lightPacket_.dirCB.radiance = ctx.directional.radiance;
+		// Ambient Color
+		// PBR用：ユーザー指定のアンビエント色を使用
+		lightPacket_.dirCB.ambientColor = ctx.directional.ambient;
 	}
 	else
 	{

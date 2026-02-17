@@ -119,6 +119,18 @@ void ShaderLibrary::CompileAllShader()
 	}
 	{
 		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredPointLight.hlsl", "PointLightingVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredPointLight.hlsl", "PointLightingPS" };
+		tryCompile("DeferredPointLight", m);
+	}
+	{
+		ShaderLoadModule m;
+		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredSpotLight.hlsl", "SpotLightingVS" };
+		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredSpotLight.hlsl", "SpotLightingPS" };
+		tryCompile("DeferredSpotLight", m);
+	}
+	{
+		ShaderLoadModule m;
 		m.sources[ShaderType::VS] = { "Resources/Shaders/Deferred/DeferredComposite.hlsl", "CompositeVS" };
 		m.sources[ShaderType::PS] = { "Resources/Shaders/Deferred/DeferredComposite.hlsl", "CompositePS" };
 		tryCompile("DeferredComposite", m);

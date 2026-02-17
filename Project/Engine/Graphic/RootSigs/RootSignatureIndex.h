@@ -29,6 +29,24 @@ enum class Root_DirectionalLight : uint32_t {
 };
 
 /// ============================
+/// Lighting (Point)
+/// ============================
+enum class Root_PointLight : uint32_t {
+	CameraCB = 0,      // b0
+	PointLightCB = 1,  // b1
+	GBufferTable = 2   // t0..t3
+};
+
+/// ============================
+/// Lighting (Spot)
+/// ============================
+enum class Root_SpotLight : uint32_t {
+	CameraCB = 0,      // b0
+	SpotLightCB = 1,   // b1
+	GBufferTable = 2   // t0..t3
+};
+
+/// ============================
 /// Deferred Debug
 /// ============================
 enum class Root_DeferredDebug : uint32_t {

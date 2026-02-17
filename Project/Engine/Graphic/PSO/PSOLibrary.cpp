@@ -19,6 +19,8 @@ void PSOLibrary::Init()
 	// 生成と登録
 	CreateGBuffer();
 	CreateLightingDirectional();
+	CreateLightingPoint();
+	CreateLightingSpot();
 	CreateShadowCaster();
 	CreateDeferredComposite();
 	CreateDeferredDebug();
@@ -124,6 +126,55 @@ void PSOLibrary::CreateLightingDirectional()
 	pso.SetCullMode(D3D12_CULL_MODE_NONE);
 
 	Register("DeferredDirectionalLight", pso);
+}
+
+void PSOLibrary::CreateLightingPoint()
+{
+	PSODesc pso;
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredPointLight"));
+
+	auto vs = shaderLib_->Get("DeferredPointLight", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredPointLight", ShaderType::PS);
+	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
+
+	// Use Additive Blending for accumulation
+	pso.SetBlend(BlendMode::Additive);
+
+	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
+	pso.SetRTVFormats(1, &rtv);
+
+	pso.ClearInputLayout(); // Fullscreen triangle
+
+	// No depth test/write (handled in shader via manual depth read if needed, but here we just draw quad)
+	pso.EnableDepth(false); 
+	pso.SetCullMode(D3D12_CULL_MODE_NONE);
+
+	Register("DeferredPointLight", pso);
+}
+
+void PSOLibrary::CreateLightingSpot()
+{
+	PSODesc pso;
+	pso.SetRootSignature(rootSignsLib_->Get("DeferredSpotLight"));
+
+	auto vs = shaderLib_->Get("DeferredSpotLight", ShaderType::VS);
+	auto ps = shaderLib_->Get("DeferredSpotLight", ShaderType::PS);
+	pso.SetVS({ vs->GetBufferPointer(), vs->GetBufferSize() });
+	pso.SetPS({ ps->GetBufferPointer(), ps->GetBufferSize() });
+
+	// Use Additive Blending for accumulation
+	pso.SetBlend(BlendMode::Additive);
+
+	DXGI_FORMAT rtv = dx12Mgr_->GetBackBufferFormat();
+	pso.SetRTVFormats(1, &rtv);
+
+	pso.ClearInputLayout(); // Fullscreen triangle
+
+	pso.EnableDepth(false);
+	pso.SetCullMode(D3D12_CULL_MODE_NONE);
+
+	Register("DeferredSpotLight", pso);
 }
 
 void PSOLibrary::CreateShadowCaster()

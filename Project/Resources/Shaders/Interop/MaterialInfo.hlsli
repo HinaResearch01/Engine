@@ -4,13 +4,13 @@
 // Material constant buffer
 struct MaterialParamsCB
 {
-float3 gBaseColor;
-float gAlpha;
+    float3 gBaseColor;
+    float gAlpha;
 
-float gReflectivity;
-float gRoughness;
-float gUseAlbedoTex;
-float _padMat;
+    float gRoughness;
+    float gMetallic;
+    float gAO; 
+    float gUseAlbedoTex;
 };
 
 #endif // __MATERIAL_INFO_HLSLI__

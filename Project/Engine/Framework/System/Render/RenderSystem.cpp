@@ -66,7 +66,7 @@ void RenderSystem::DrawShadowPass(DX12::CommandContext& cmd, DX12::FrameResource
 			1.0f, 0, 0, nullptr);
 
 		// ShadowCB Bind
-		BindShadowCommon(frame, prep, ci);
+		BindShadow(frame, prep, ci);
 
 		// TransformCB & draw
 		DrawShadowCasters(cmd, frame, prep);
@@ -93,6 +93,13 @@ void RenderSystem::DrawGBufferPass(DX12::CommandContext& cmd, DX12::FrameResourc
 
 void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
+	DrawDirectionalLights(cmd, frame, prep);
+	DrawPointLights(cmd, frame, prep);
+	DrawSpotLights(cmd, frame, prep);
+}
+
+void RenderSystem::DrawDirectionalLights(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+{
 	using namespace Tsumi::Graphic::RootIndex;
 
 	auto* list = cmd.GetList();
@@ -100,10 +107,10 @@ void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResour
 	if (!dx12Mgr_) return;
 
 	// 0) States / Barriers
-	// GBuffer: RT -> SRV (Lightingで読む)
+	// GBuffer: RT -> SRV
 	dx12Mgr_->TransitionGBufferToRead();
 
-	// Shadow: DepthWrite -> SRV (Lightingで読む)
+	// Shadow: DepthWrite -> SRV
 	if (shadowDMap_) {
 		shadowDMap_->TransitionToRead(cmd);
 
@@ -116,7 +123,7 @@ void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResour
 		);
 	}
 	else {
-		// shadow無しの場合：null SRV（ダミー）
+		// shadow無しの場合：null SRV
 		dx12Mgr_->GetFramebuffer()->WriteShadowSRV(
 			nullptr, Graphic::CSMShadowDepthMap::kSRVFormat, 1);
 	}
@@ -126,11 +133,79 @@ void RenderSystem::DrawLightingPass(DX12::CommandContext& cmd, DX12::FrameResour
 	list->SetPipelineState(psoLib_->Get("DeferredDirectionalLight"));
 
 	// Bind constants + tables
-	BindLightingCommon(frame, prep); 
+	BindDirectionalLighting(frame, prep);
 
 	// Fullscreen triangle
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	list->DrawInstanced(3, 1, 0, 0);
+}
+
+void RenderSystem::DrawPointLights(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+{
+	using namespace Tsumi::Graphic::RootIndex;
+
+	auto* list = cmd.GetList();
+	const auto& lights = prep.GetLightPacket().pointCB;
+	if (lights.empty()) return;
+
+	// PSO / RS
+	list->SetGraphicsRootSignature(rsLib_->Get("DeferredPointLight"));
+	list->SetPipelineState(psoLib_->Get("DeferredPointLight"));
+
+	// b0: Camera (Common)
+	const auto& camPkt = prep.GetCameraPacket();
+	frame.bind.SetTable(ToRoot(Root_PointLight::CameraCB),
+						frame.UploadToTableCB(camPkt.camMatCB));
+
+	// t0..t3: GBuffer
+	frame.bind.SetTable(ToRoot(Root_PointLight::GBufferTable),
+						dx12Mgr_->GetGBufferSrvTable());
+
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw Loop
+	for (const auto& l : lights)
+	{
+		// b1: PointLightCB
+		frame.bind.SetTable(ToRoot(Root_PointLight::PointLightCB),
+							frame.UploadToTableCB(l));
+
+		list->DrawInstanced(3, 1, 0, 0);
+	}
+}
+
+void RenderSystem::DrawSpotLights(DX12::CommandContext& cmd, DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+{
+	using namespace Tsumi::Graphic::RootIndex;
+
+	auto* list = cmd.GetList();
+	const auto& lights = prep.GetLightPacket().spotCB;
+	if (lights.empty()) return;
+
+	// PSO / RS
+	list->SetGraphicsRootSignature(rsLib_->Get("DeferredSpotLight"));
+	list->SetPipelineState(psoLib_->Get("DeferredSpotLight"));
+
+	// b0: Camera (Common)
+	const auto& camPkt = prep.GetCameraPacket();
+	frame.bind.SetTable(ToRoot(Root_SpotLight::CameraCB),
+						frame.UploadToTableCB(camPkt.camMatCB));
+
+	// t0..t3: GBuffer
+	frame.bind.SetTable(ToRoot(Root_SpotLight::GBufferTable),
+						dx12Mgr_->GetGBufferSrvTable());
+
+	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Draw Loop
+	for (const auto& l : lights)
+	{
+		// b1: SpotLightCB
+		frame.bind.SetTable(ToRoot(Root_SpotLight::SpotLightCB),
+							frame.UploadToTableCB(l));
+
+		list->DrawInstanced(3, 1, 0, 0);
+	}
 }
 
 void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameResources& frame)
@@ -143,16 +218,11 @@ void RenderSystem::DrawDebugPass(DX12::CommandContext& cmd, DX12::FrameResources
 	list->SetPipelineState(psoLib_->Get("DeferredDebug"));
 
 	// Bind
-	BindDebugCommon(frame);
+	BindDebug(frame);
 
 	// Fullscreen triangle
 	list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	list->DrawInstanced(3, 1, 0, 0);
-}
-
-void RenderSystem::OnResize(uint32_t w, uint32_t h)
-{
-	w, h;
 }
 
 void RenderSystem::SyncShadowResources()
@@ -212,7 +282,7 @@ void RenderSystem::BindGBufferObjects(DX12::CommandContext& cmd, DX12::FrameReso
 	}
 }
 
-void RenderSystem::BindLightingCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
+void RenderSystem::BindDirectionalLighting(DX12::FrameResources& frame, const RenderPrepareSystem& prep)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 
@@ -237,7 +307,7 @@ void RenderSystem::BindLightingCommon(DX12::FrameResources& frame, const RenderP
 						dx12Mgr_->GetGBufferSrvTable());
 }
 
-void RenderSystem::BindDebugCommon(DX12::FrameResources& frame)
+void RenderSystem::BindDebug(DX12::FrameResources& frame)
 {
 	using namespace RootIndex;
 
@@ -257,7 +327,7 @@ void RenderSystem::BindDebugCommon(DX12::FrameResources& frame)
 	);
 }
 
-void RenderSystem::BindShadowCommon(DX12::FrameResources& frame, const RenderPrepareSystem& prep, uint32_t cascadeIndex)
+void RenderSystem::BindShadow(DX12::FrameResources& frame, const RenderPrepareSystem& prep, uint32_t cascadeIndex)
 {
 	using namespace Tsumi::Graphic::RootIndex;
 

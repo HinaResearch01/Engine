@@ -71,6 +71,18 @@ public:
 		DX12::CommandContext& cmd,
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
+	void DrawDirectionalLights(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawPointLights(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
+	void DrawSpotLights(
+		DX12::CommandContext& cmd,
+		DX12::FrameResources& frame,
+		const RenderPrepareSystem& prep);
 	void DrawDebugPass(
 		DX12::CommandContext& cmd,
 		DX12::FrameResources& frame);
@@ -92,20 +104,16 @@ private:
 	void BindGBufferCamera(
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
-
 	void BindGBufferObjects(
 		DX12::CommandContext& cmd,
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
-
-	void BindLightingCommon(
+	void BindDirectionalLighting(
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep);
-
-	void BindDebugCommon(
+	void BindDebug(
 		DX12::FrameResources& frame);
-
-	void BindShadowCommon(
+	void BindShadow(
 		DX12::FrameResources& frame,
 		const RenderPrepareSystem& prep,
 		uint32_t cascadeIndex);

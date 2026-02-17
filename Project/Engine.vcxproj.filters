@@ -1366,6 +1366,12 @@
     <FxCompile Include="Resources\Shaders\Shadow\ShadowCaster.hlsl">
       <Filter>Resources\Shaders\Shadow</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredPointLight.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Deferred\DeferredSpotLight.hlsl">
+      <Filter>Resources\Shaders\Deferred</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Debug\assimp-vc143-mdd.lib">
