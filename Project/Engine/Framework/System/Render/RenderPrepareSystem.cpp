@@ -141,6 +141,7 @@ void RenderPrepareSystem::BuildLightPacket()
 		lightPacket_.dirCB.enabled = 1;
 		lightPacket_.dirCB.directionWS = ctx.directional.dirWS;
 		lightPacket_.dirCB.radiance = ctx.directional.radiance;
+		lightPacket_.dirCB.intensity = ctx.directional.intensity;
 		// Ambient Color
 		// PBR用：ユーザー指定のアンビエント色を使用
 		lightPacket_.dirCB.ambientColor = ctx.directional.ambient;
@@ -150,6 +151,7 @@ void RenderPrepareSystem::BuildLightPacket()
 		lightPacket_.dirCB.enabled = 0;
 		lightPacket_.dirCB.directionWS = { 0,-1,0 };
 		lightPacket_.dirCB.radiance = { 0,0,0 };
+		lightPacket_.dirCB.intensity = 0.0f;
 	}
 
 	// -------------------------
@@ -162,7 +164,7 @@ void RenderPrepareSystem::BuildLightPacket()
 		cb.positionWS = p.positionWS;
 		cb.range = p.range;
 		cb.radiance = p.radiance;
-		cb._pad0 = 0.0f;
+		cb.intensity = p.intensity;
 		lightPacket_.pointCB.push_back(cb);
 	}
 
@@ -179,6 +181,7 @@ void RenderPrepareSystem::BuildLightPacket()
 		cb.innerCos = s.innerCos;
 		cb.radiance = s.radiance;
 		cb.outerCos = s.outerCos;
+		cb.intensity = s.intensity;
 		lightPacket_.spotCB.push_back(cb);
 	}
 }

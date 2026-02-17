@@ -8,7 +8,7 @@ struct DirectionalLightCB
     int gLightEnabled;
 
     float3 gRadiance;
-    float _padLight1;
+    float gIntensity;
 
     float3 gAmbientColor;
     float _padLight2;
@@ -20,7 +20,7 @@ struct PointLightCB
     float gRange;
 
     float3 gRadiance;
-    float _padPoint;
+    float gIntensity;
 };
 
 struct SpotLightCB
@@ -33,6 +33,9 @@ struct SpotLightCB
 
     float3 gRadiance;
     float gOuterCos;
+
+    float gIntensity;
+    float3 _padSpot;
 };
 
 #endif // __LIGHT_INFO_HLSLI__

@@ -104,7 +104,7 @@ float4 DirLightingPS(VSOut i) : SV_Target
         albedo,
         metallic,
         roughness,
-        gLight.gRadiance
+        gLight.gRadiance * gLight.gIntensity
     );
 
     // Ambient
