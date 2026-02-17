@@ -248,6 +248,9 @@
     <ClCompile Include="Engine\Editor\EngineUI.cpp">
       <Filter>Engine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Shadow\TestShadow.cpp">
+      <Filter>Game\Test\Actor\Shadow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -874,6 +877,15 @@
     <ClInclude Include="Engine\Editor\EngineUI.h">
       <Filter>Engine\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Shadow\TestShadow.h">
+      <Filter>Game\Test\Actor\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Shadow\TestShadowShadowComp.h">
+      <Filter>Game\Test\Actor\Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\Component\Shadow\ShadowComponent.h">
+      <Filter>Engine\Framework\Component\Shadow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1178,6 +1190,12 @@
     </Filter>
     <Filter Include="Engine\Editor">
       <UniqueIdentifier>{9314a57e-f7ec-4ef9-ac68-d4e1eb731cdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Shadow">
+      <UniqueIdentifier>{e495a965-6404-442c-a675-784b765deb32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\Component\Shadow">
+      <UniqueIdentifier>{2e61526b-079a-498a-a257-6d9bc32e9fd6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

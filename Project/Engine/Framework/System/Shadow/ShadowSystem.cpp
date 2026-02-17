@@ -3,8 +3,6 @@
 #include "Framework/World/World.h"
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/Context/CameraContext.h"
-#include "Framework/Component/Light/DirectionalLightComponent.h"
-#include "Framework/Component/Transform/TransformComponent.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -112,38 +110,34 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 	// Choose 1 directional light
 	const DirectionalLightComponent* chosenDL = nullptr;
+	const ShadowComponent* chosenShadow = nullptr;
 	const TransformComponent* chosenTR = nullptr;
 
-	for (auto [tr, dl] : world_.View<TransformComponent, DirectionalLightComponent>())
+	for (auto [tr, dl, sh] : world_.View<TransformComponent, DirectionalLightComponent, ShadowComponent>())
 	{
-		if (!dl.shadow.castShadow) continue;
+		if (!sh.castShadow) continue;
 		if (dl.intensity <= 0.0f) continue;
-		if (dl.shadow.shadowMapSize == 0) continue;
+		if (sh.shadowMapSize == 0) continue;
 
 		chosenDL = &dl;
+		chosenShadow = &sh;
 		chosenTR = &tr;
 		break;
 	}
 
-	if (!chosenDL || !chosenTR)
+	if (!chosenDL || !chosenTR || !chosenShadow)
 	{
 		// 影を組めない → enabled=falseのまま（Update側でdefaultへ）
 		return;
 	}
 
 	out.enabled = true;
-	out.shadowMapSize = chosenDL->shadow.shadowMapSize;
+	out.shadowMapSize = chosenShadow->shadowMapSize;
 
 	// CSM splits
 	constexpr uint32_t cascadeCount = 4;
 	out.cascadeCount = cascadeCount;
 
-	/*
-	Lambda = 0.96f : Logarithmic bias strongly to Near
-	If n=0.1, f=1000:
-	Split[1] ~ 10m
-	This ensures Cascade 0 covers only immediate foreground.
-	*/
 	const float lambda = 0.96f;
 	const float n = cam.nearPlane;
 	const float f = cam.farPlane;
@@ -187,7 +181,7 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		const Math::Vec3f centerWS = Average8(cornersWS);
 
-		const float dist = (cf - cn) + chosenDL->shadow.orthoHalfSize;
+		const float dist = (cf - cn) + chosenShadow->orthoHalfSize;
 		const Math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
 			centerWS.y - lightDirWS.y * dist,
@@ -219,11 +213,6 @@ void ShadowSystem::BuildShadowContext(ShadowContext& out)
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-		// texel snap
-		//const float orthoW = (maxLS.x - minLS.x);
-		//const float orthoH = (maxLS.y - minLS.y);
-		// SnapOrthoToTexel(lightView, orthoW, orthoH, out.shadowMapSize);
-
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			minLS.x, // left
 			maxLS.y, // top
@@ -253,7 +242,6 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 	// 左上前（-1, 1, -1）あたりから原点を見下ろすようなライト方向にする
 	// ライトの方向ベクトルなので、光源からターゲットへの向き
-	// 例: 斜め上から (1, -1, 1) の向き
 	Math::Vec3f lightDirWS = NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };

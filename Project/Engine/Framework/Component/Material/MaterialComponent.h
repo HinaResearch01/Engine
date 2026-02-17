@@ -12,9 +12,12 @@ using MaterialHandle = uint32_t;
 class MaterialComponent : public IComponent {
 
 public:
+	void OnInspectorGui() override;
+
+public:
 	SurfaceType surface = SurfaceType::Opaque;
 
-	// ===== PBR =====
+	// PBR 
 	Math::Vec3f baseColor = { 1.0f, 1.0f, 1.0f };
 	float alpha = 1.0f;
 	float roughness = 1.0f;
@@ -23,16 +26,14 @@ public:
 
 	float useAlbedoTex = 1.0f;
 
-	// ===== Texture =====
+	// Texture 
 	std::string albedo;
 
-	// ===== UV =====
+	// UV 
 	Math::UVTransform uv;
 
 	bool visible = true;
 
-	// Inspector
-	void OnInspectorGui() override;
 };
 
 }

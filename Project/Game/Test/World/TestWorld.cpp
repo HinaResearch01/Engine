@@ -11,12 +11,12 @@ void TestWorld::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/Cube/TestCube.obj", "TestCube");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/cylinder/cylinder.obj", "cylinder");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/floor/floor.obj", "floor");
-	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+
 	// TestActorの追加
+	World::SpawnActor<TestCamera>();
 	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestFloor>();
 	World::SpawnActor<TestCylinder>();
-	World::SpawnActor<TestCamera>();
 }
 
 void TestWorld::Update(float deltaTime)

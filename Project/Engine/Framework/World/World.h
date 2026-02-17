@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <typeindex>
 #include <cassert>
-
 #include "Framework/World/CompView/ComponentView.h"
 #include "Framework/World/CompView/ComponentViewRange.h"
 #include "Framework/Actor/IActor.h"
@@ -17,6 +16,7 @@
 #include "Framework/Component/Light/PointLightComponent.h"
 #include "Framework/Component/Light/SpotLightComponent.h"
 #include "Framework/Component/Material/MaterialComponent.h"
+#include "Framework/Component/Shadow/ShadowComponent.h"
 #include "Framework/Component/Render/RenderComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
 #include "Framework/Update/IUpdatable.h"
@@ -187,6 +187,7 @@ public:
 	ComponentView<PointLightComponent>& GetPointLightCompView() { return pointLightCompView_; }
 	ComponentView<SpotLightComponent>& GetSpotLightCompView() { return spotLightCompView_; }
 	ComponentView<MaterialComponent>& GetMaterialsCompView() { return materialCompView_; }
+	ComponentView<ShadowComponent>& GetShadowCompView() { return shadowCompView_; }
 	ComponentView<RenderComponent>& GetRenderCompView() { return renderCompView_; }
 	ComponentView<TransformComponent>& GetTransformsCompView() { return transformCompView_; }
 	UpdateManager& GetUpdateManager() { return updateMgr_; }
@@ -250,6 +251,7 @@ protected:
 		RegisterView(pointLightCompView_);
 		RegisterView(spotLightCompView_);
 		RegisterView(materialCompView_);
+		RegisterView(shadowCompView_);
 		RegisterView(renderCompView_);
 		RegisterView(transformCompView_);
 	}
@@ -315,6 +317,7 @@ protected:
 	ComponentView<PointLightComponent> pointLightCompView_;
 	ComponentView<SpotLightComponent> spotLightCompView_;
 	ComponentView<MaterialComponent> materialCompView_;
+	ComponentView<ShadowComponent> shadowCompView_;
 	ComponentView<RenderComponent> renderCompView_;
 	ComponentView<TransformComponent> transformCompView_;
 

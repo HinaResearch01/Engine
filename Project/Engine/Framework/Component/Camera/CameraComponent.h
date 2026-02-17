@@ -9,13 +9,6 @@ namespace Tsumi::Framework {
 class CameraComponent : public IComponent {
 
 public:
-	// コンストラクタ
-	CameraComponent() = default;
-
-	// デストラクタ
-	~CameraComponent() = default;
-
-	// Inspector
 	void OnInspectorGui() override;
 
 public:

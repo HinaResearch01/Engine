@@ -20,13 +20,6 @@ struct SRT {
 class TransformComponent : public IComponent {
 
 public:
-	// コンストラクタ
-	TransformComponent() = default;
-
-	// デストラクタ
-	~TransformComponent() = default;
-
-	// Inspector
 	void OnInspectorGui() override;
 
 	Math::Vec3f GetWorldPos() const {

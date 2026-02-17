@@ -10,6 +10,9 @@ namespace Tsumi::Framework {
 class SpotLightComponent : public IComponent {
 
 public:
+	void OnInspectorGui() override;
+
+public:
 	LightType type = LightType::Spot;
 
 	Math::Vec3f color{ 1,1,1 };
@@ -23,9 +26,6 @@ public:
 	// GPU 用
 	float innerCos;
 	float outerCos;
-
-	// Inspector
-	void OnInspectorGui() override;
 };
 
 }

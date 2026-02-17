@@ -8,14 +8,15 @@ namespace Tsumi::Framework {
 class RenderComponent : public IComponent {
 
 public:
+	void OnInspectorGui() override;
+
+public:
 	std::string mesh;
 	bool visible = true;
 	bool castShadow = true;
 
 	// TODO: bounds / layerMask / submesh 等も後から
 
-	// Inspector
-	void OnInspectorGui() override;
 };
 
 }
