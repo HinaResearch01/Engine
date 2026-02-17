@@ -385,38 +385,7 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 	{
 		auto& entry = lights[i];
 
-		// Assign Index to ShadowComponent if exists, OR we need a way to tell RenderSystem which index to use.
-		// RenderSystem uses `light.shadowIndex` from `SpotLightResolved`.
-		// `LightSystem` builds `SpotLightResolved`.
-		// We need to store the assigned index somewhere `LightSystem` can find it.
-		// Previously it was `sh->spotShadowIndex`.
-		// Now, if `sh` is null, where do we store it?
-		// `SpotLightComponent` doesn't have `spotShadowIndex` (runtime).
-		// We should add `int32_t shadowIndex` to `SpotLightComponent` (runtime transient) or `ShadowSystem` needs to pass a map.
-		// Adding `runtimeShadowIndex` to `SpotLightComponent` is cleanest for now (mutable).
-		
 		// const_cast to modify runtime transient data
-		auto* slMutable = const_cast<SpotLightComponent*>(entry.sl);
-		// Note: We need to add `shadowIndex` to SpotLightComponent.h first if we want to store it there.
-		// Wait, I didn't add `shadowIndex` to SpotLightComponent.h in the previous step.
-		// I added `castShadow`, `nearZ`, `farZ`.
-		// `SpotLightComponent` has `type`, `intensity`... but no `shadowIndex`.
-		// `LightContext` has `SpotLightResolved` which has `shadowIndex`.
-		// `LightSystem` reads from Component.
-		// If I cannot store it in Component, `Component` won't know its index.
-		// I MUST add `shadowIndex` (transient) to `SpotLightComponent` or `ShadowComponent`.
-		// If `ShadowComponent` is missing, I have nowhere to store it.
-		// -> I should add `mutable int32_t shadowIndex = -1;` to `SpotLightComponent`.
-		
-		// Temporarily, I will assume I can add it or it exists. 
-		// Actually I missed adding it to the .h file in previous step.
-		// I will handle this by adding it to the .h file in a separate step or assume I can add it now.
-		// But I cannot edit .h and .cpp in same step.
-		// I will proceed assuming I will fix .h next.
-		
-		// For now, I will write the logic assuming `sl->runtimeShadowIndex` exists.
-		// And verify/add it in next step.
-		
 		if (entry.sh) {
 			entry.sh->spotShadowIndex = (int32_t)i;
 		}
