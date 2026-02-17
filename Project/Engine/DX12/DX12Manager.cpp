@@ -123,7 +123,8 @@ HRESULT DX12Manager::EndFrame(const FrameIndices& idx)
 	if (FAILED(hr)) return hr;
 
 	// ---- present ----
-	hr = swapChain_->Present(1, 0);
+	// VSync off (FPS制御は FixFPS で行うため)
+	hr = swapChain_->Present(0, 0);
 	if (FAILED(hr)) return hr;
 
 	// ---- frame sync (CPUフレーム基準) ----

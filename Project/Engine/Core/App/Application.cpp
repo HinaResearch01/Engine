@@ -26,6 +26,8 @@ Application::Application()
     resourceMgr_ = Resource::ResourceSystem::GetInstance();
     imgui_ = GUI::ImGuiManager::GetInstance();
 	gameCtx_ = std::make_unique<Framework::GameContext>();
+	fixFPS_ = std::make_unique<Utils::FixFPS>();
+	engineUI_ = std::make_unique<Editor::EngineUI>();
 }
 
 Application::~Application()
@@ -48,6 +50,8 @@ void Application::Init(const Win32::Win32Desc& windowDesc)
     psos_->Init();
 	resourceMgr_->Init();
     imgui_->Init();
+	fixFPS_->Init();
+	engineUI_->Init(fixFPS_.get());
 }
 
 void Application::Run()
@@ -77,11 +81,12 @@ void Application::Run()
 		// 描画フェーズ
 		// =====================================================
 		gameCtx_->Render([this]() {
+			engineUI_->Draw();
 			imgui_->Render();
 		});
 
-		// CPU側で少しスリープ（100%使用防止）
-		::Sleep(0);
+		// FPS固定
+		fixFPS_->Update();
 	}
 
 	// =====================================================

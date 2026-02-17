@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <memory>
 #include "../Game/GameContext.h"
+#include "Utils/FixFPS/FixFPS.h"
+#include "Editor/EngineUI.h"
 
 namespace Tsumi {
 
@@ -72,6 +74,8 @@ private:
 
     GUI::ImGuiManager* imgui_ = nullptr;
 
-	std::unique_ptr<Framework::GameContext> gameCtx_;
+    std::unique_ptr<Framework::GameContext> gameCtx_;
+    std::unique_ptr<Utils::FixFPS> fixFPS_;
+    std::unique_ptr<Editor::EngineUI> engineUI_;
 };
 }

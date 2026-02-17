@@ -194,9 +194,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\DX12\PerFrame\FrameResources.cpp" />
     <ClCompile Include="Engine\DX12\PerFrame\FrameUploadArena.cpp" />
     <ClCompile Include="Engine\DX12\SwapChain\SwapChain.cpp" />
+    <ClCompile Include="Engine\Editor\EngineUI.cpp" />
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp" />
-    <ClCompile Include="Engine\Framework\System\DebugUI\DebugUISystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Light\LightSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Material\MaterialSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp" />
@@ -220,6 +220,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Resource\Tex\stb_image.cpp" />
     <ClCompile Include="Engine\Resource\Tex\TextureManager.cpp" />
     <ClCompile Include="Engine\ThirdParty\ImGui\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Utils\FixFPS\FixFPS.cpp" />
     <ClCompile Include="Engine\Utils\Func\UtilFunc.cpp" />
     <ClCompile Include="Engine\Utils\Logger\DebugOutputSink.cpp" />
     <ClCompile Include="Engine\Utils\Logger\FileSink.cpp" />
@@ -363,6 +364,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\DX12\PerFrame\FrameResources.h" />
     <ClInclude Include="Engine\DX12\PerFrame\FrameUploadArena.h" />
     <ClInclude Include="Engine\DX12\SwapChain\SwapChain.h" />
+    <ClInclude Include="Engine\Editor\EngineUI.h" />
     <ClInclude Include="Engine\Framework\Actor\ActorTag.h" />
     <ClInclude Include="Engine\Framework\Actor\IActor.h" />
     <ClInclude Include="Engine\Framework\Component\Camera\CameraComponent.h" />
@@ -387,7 +389,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Str\RenderPassTable.h" />
     <ClInclude Include="Engine\Framework\Str\RenderSurfaceType.h" />
     <ClInclude Include="Engine\Framework\System\Camera\CameraSystem.h" />
-    <ClInclude Include="Engine\Framework\System\DebugUI\DebugUISystem.h" />
     <ClInclude Include="Engine\Framework\System\ISystem.h" />
     <ClInclude Include="Engine\Framework\System\Light\LightSystem.h" />
     <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h" />
@@ -427,6 +428,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\ThirdParty\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\Utils\DXAlign\DXAlign.h" />
     <ClInclude Include="Engine\Utils\DxException\DxException.h" />
+    <ClInclude Include="Engine\Utils\FixFPS\FixFPS.h" />
     <ClInclude Include="Engine\Utils\Func\UtilFunc.h" />
     <ClInclude Include="Engine\Utils\Hash\FNV1a.h" />
     <ClInclude Include="Engine\Utils\Logger\DebugOutputSink.h" />
