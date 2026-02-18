@@ -12,7 +12,7 @@ void TestWorld::Init()
 {
 	// テクスチャ
 	tme::API::AssetLoader::Load<tex>("Resources/Texture/uvChecker.png", "uvChecker");
-
+	
 	// モデル
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/axis/axis.obj", "axis");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/Cube/TestCube.obj", "TestCube");
@@ -27,12 +27,14 @@ void TestWorld::Init()
 	auto* spot2 = World::SpawnActor<TestSpotLight>();
 	spot2->SetName("TestSpotLight 2");
 
-	//World::SpawnActor<TestAxis>();
-	//World::SpawnActor<TestCylinder>();
-	auto* floor = World::SpawnActor<TestFloor>();
+	World::SpawnActor<TestAxis>();
+	World::SpawnActor<TestCylinder>();
+	World::SpawnActor<TestFloor>();
+
+	/*auto* floor = World::SpawnActor<TestFloor>();
 	auto* transComp = floor->GetComponent<Tsumi::Framework::TransformComponent>();
-	transComp->srt.scale = { 100.0f, 1.0f, 100.0f };
-	World::SpawnActor<KamataCity>();
+	transComp->srt.scale = { 100.0f, 1.0f, 100.0f };*/
+	//World::SpawnActor<KamataCity>();
 }
 
 void TestWorld::Update(float deltaTime)
