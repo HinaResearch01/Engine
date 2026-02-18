@@ -101,7 +101,7 @@ public:
 	T* SpawnActor(Args&&... args) {
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
 
-		auto actor = std::make_unique<T>(std::forward<Args>(args)...);
+		auto actor = std::make_unique<T>();
 		actor->SetID(GenerateActorID()); // IDの設定
 		actor->SetWorld(this);			 // Worldを知らせる
 		actor->Init();					 // 初期化処理

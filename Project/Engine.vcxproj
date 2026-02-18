@@ -202,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\System\Material\MaterialSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Render\RenderSystem.cpp" />
+    <ClCompile Include="Engine\Framework\System\Shadow\ShadowHelpers.cpp" />
     <ClCompile Include="Engine\Framework\System\Shadow\ShadowSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Transform\TransformSystem.cpp" />
     <ClCompile Include="Engine\Framework\World\World.cpp" />
@@ -400,6 +401,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h" />
     <ClInclude Include="Engine\Framework\System\Render\RenderPrepareSystem.h" />
     <ClInclude Include="Engine\Framework\System\Render\RenderSystem.h" />
+    <ClInclude Include="Engine\Framework\System\Shadow\ShadowHelpers.h" />
     <ClInclude Include="Engine\Framework\System\Shadow\ShadowSystem.h" />
     <ClInclude Include="Engine\Framework\System\Transform\TransformSystem.h" />
     <ClInclude Include="Engine\Framework\Update\IUpdatable.h" />

@@ -4,7 +4,6 @@
 #include "../ISystem.h"
 #include "Framework/Context/ShadowContext.h"
 #include "Framework/Component/Light/DirectionalLightComponent.h"
-#include "Framework/Component/Light/DirectionalLightComponent.h"
 #include "Framework/Component/Shadow/ShadowComponent.h"
 #include "Framework/Component/Transform/TransformComponent.h"
 

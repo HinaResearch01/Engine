@@ -6,8 +6,7 @@
 #include "../Actor/Axis/TestAxis.h"
 #include "../Actor/Floor/TestFloor.h"
 #include "../Actor/Cylinder/TestCylinder.h"
-#include "../Actor/Kamata/KamataCity.h"
-#include "../Actor/LakeTown/LakeTownCity.h"
+#include "../Actor/KamataCity/KamataCity.h"
 
 void TestWorld::Init()
 {
@@ -20,18 +19,20 @@ void TestWorld::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/cylinder/cylinder.obj", "cylinder");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/floor/floor.obj", "floor");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/kamata/kamata.obj", "kamata");
-	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/laketown/laketown.obj", "laketown");
-
-	// Actorの追加
+	// TestActorの追加
 	World::SpawnActor<TestCamera>();
 	World::SpawnActor<TestDirLight>();
+	auto* spot1 = World::SpawnActor<TestSpotLight>();
+	spot1->SetName("TestSpotLight 1");
+	auto* spot2 = World::SpawnActor<TestSpotLight>();
+	spot2->SetName("TestSpotLight 2");
 
-	World::SpawnActor<TestAxis>();
-	World::SpawnActor<TestFloor>();
-	World::SpawnActor<TestCylinder>();
-
-	//World::SpawnActor<KamataCity>();
-	//World::SpawnActor<LakeTownCity>();
+	//World::SpawnActor<TestAxis>();
+	//World::SpawnActor<TestCylinder>();
+	auto* floor = World::SpawnActor<TestFloor>();
+	auto* transComp = floor->GetComponent<Tsumi::Framework::TransformComponent>();
+	transComp->srt.scale = { 100.0f, 1.0f, 100.0f };
+	World::SpawnActor<KamataCity>();
 }
 
 void TestWorld::Update(float deltaTime)
