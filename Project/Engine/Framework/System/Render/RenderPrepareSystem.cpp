@@ -92,14 +92,6 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- split depths (far) ----
-	// ---- split depths (far) ----
-	// DEBUG: Force hardcoded splits to DIAGNOSE data transfer
-	cb.cascadeSplitDepths[0] = 5.0f;
-	cb.cascadeSplitDepths[1] = 15.0f;
-	cb.cascadeSplitDepths[2] = 40.0f;
-	cb.cascadeSplitDepths[3] = 100.0f;
-
-	/*
 	for (uint32_t i = 0; i < 4; ++i)
 	{
 		if (ctx.enabled && i < ctx.cascadeCount)
@@ -107,7 +99,6 @@ void RenderPrepareSystem::BuildShadowPacket()
 		else
 			cb.cascadeSplitDepths[i] = 0.0f;
 	}
-	*/
 
 	// ---- texel size ----
 	if (ctx.shadowMapSize > 0)
@@ -123,8 +114,8 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- bias ----
-	cb.shadowBias = 0.0001f;
-	cb.shadowNormalBias = 0.0002f;
+	cb.shadowBias = 0.0005f;
+	cb.shadowNormalBias = 0.001f;
 }
 
 void RenderPrepareSystem::BuildLightPacket()

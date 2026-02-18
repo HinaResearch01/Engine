@@ -26,11 +26,11 @@ void TestWorld::Init()
 	World::SpawnActor<TestCamera>();
 	World::SpawnActor<TestDirLight>();
 
-	//World::SpawnActor<TestAxis>();
+	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestFloor>();
-	//World::SpawnActor<TestCylinder>();
+	World::SpawnActor<TestCylinder>();
 
-	World::SpawnActor<KamataCity>();
+	//World::SpawnActor<KamataCity>();
 	//World::SpawnActor<LakeTownCity>();
 }
 

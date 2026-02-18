@@ -44,11 +44,11 @@ bool WorldToShadowUVZ(
     z = sp.z;
 
     // ============================
-    // 範囲チェック
+    // 範囲チェック (Add epsilon to prevent edge artifacts)
     // ============================
-    if (uv.x < 0 || uv.x > 1 ||
-        uv.y < 0 || uv.y > 1 ||
-        z < 0 || z > 1)
+    if (uv.x < -0.01f || uv.x > 1.01f ||
+        uv.y < -0.01f || uv.y > 1.01f ||
+        z < -0.01f || z > 1.01f)
         return false;
 
     return true;
@@ -112,12 +112,8 @@ float ComputeCSMShadowFactor(
             z))
         return 1.0f;
 
-    float3 L = SafeNormalize(-lightDirWS);
-
-    float ndotl = saturate(dot(SafeNormalize(normalWS), L));
-    float normalBias = (1.0f - ndotl) * shadowNormalBias;
-
-    z -= (shadowBias + normalBias);
+    // Apply constant depth bias
+    z -= shadowBias;
 
     return SampleShadowPCF3x3(
         shadowMap,

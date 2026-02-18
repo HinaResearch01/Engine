@@ -47,7 +47,7 @@ public:
 	bool castShadow = true;
 	float orthoHalfSize = 50.0f;
 	float nearZ = 100.0f;
-	float farZ = 200.0f;
+	float farZ = 1000.0f;
 };
 
 }

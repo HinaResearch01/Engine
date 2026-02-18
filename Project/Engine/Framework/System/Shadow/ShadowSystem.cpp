@@ -193,7 +193,8 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 	}
 
 	// Light dir
-	Math::Vec3f lightDirWS = NormalizeSafe(chosenTR->forward, { 0,-1,0 });
+	// FORCE DEBUG DIRECTION: Down
+	Math::Vec3f lightDirWS = NormalizeSafe({ 0.1f, -1.0f, 0.1f }, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
@@ -215,67 +216,28 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		const Math::Vec3f centerWS = Average8(cornersWS);
 
-		float orthoSize = chosenDL->orthoHalfSize;
-		if (chosenShadow) {
-			// If ShadowComponent defines orthoHalfSize, use it?
-			// Assumption: ShadowComponent also has this field.
-			// Let's defer to ShadowComponent if it looks customized (e.g. not default).
-			// But for simplicity, let's say DirectionalLightComponent is the source of truth for projection size now.
-			// Or we check which one is "touched".
-			// Given the refactor goal is to move props to Light, let's prefer Light's prop.
-			// But ShadowComponent might be used for "Advanced Override".
-			// Let's stick to Light Component for now as requested.
-		}
+		// 2. Build Light View Matrix (Standard "Look At Center")
+		// Place the camera exactly at the center (virtual) but look from light direction
+		Math::Vec3f eyeWS = centerWS - lightDirWS * 500.0f; // Pull back 500m
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(eyeWS, centerWS, up);
 
-		const float dist = (cf - cn) + orthoSize;
-		const Math::Vec3f lightPosWS = {
-			centerWS.x - lightDirWS.x * dist,
-			centerWS.y - lightDirWS.y * dist,
-			centerWS.z - lightDirWS.z * dist
-		};
+		// 3. Build Fixed Ortho Projection (Debug Simplification)
+		// FORCE HUGE SIZE
+		float boxSize = 500.0f; 
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
-
-		// corners -> light space AABB
-		Math::Vec3f minLS{ +1e30f, +1e30f, +1e30f };
-		Math::Vec3f maxLS{ -1e30f, -1e30f, -1e30f };
-
-		for (int i = 0; i < 8; ++i)
-		{
-			const Math::Vec3f pLS = lightView.TransformPoint(cornersWS[i]);
-			minLS.x = std::min(minLS.x, pLS.x);
-			minLS.y = std::min(minLS.y, pLS.y);
-			minLS.z = std::min(minLS.z, pLS.z);
-			maxLS.x = std::max(maxLS.x, pLS.x);
-			maxLS.y = std::max(maxLS.y, pLS.y);
-			maxLS.z = std::max(maxLS.z, pLS.z);
-		}
-
-
-		// pad
-		const float padXY = chosenDL->orthoHalfSize;  // Use component ortho size for XY padding
-		const float padZ = chosenDL->nearZ;           // Use component nearZ for back coverage distance
-		minLS.x -= padXY; minLS.y -= padXY;
-		maxLS.x += padXY; maxLS.y += padXY;
-		minLS.z -= padZ;
-		maxLS.z += padZ;
-
-		// Use Light's FarZ as Shadow Distance (CSM Max Distance)
-		// We clamp the last cascade's far plane with chosenDL->farZ earlier (in splits calculation loop).
-		// Here we just ensure the ortho projection covers the casters.
+		float radius = boxSize;
+		Math::Vec3f centerLS = lightView.TransformPoint(centerWS);
 		
-		// Ah, I need to update the split calculation logic earlier in the function!
-		// But I am restricted to replace this chunk.
-		// Standard CSM implementation uses minLS.z/maxLS.z for Z range.
-		// So `nearZ`/`farZ` of light component might be better interpreted as "Shadow Max Distance".
+		float left = centerLS.x - radius;
+		float right = centerLS.x + radius;
+		float bottom = centerLS.y - radius;
+		float top = centerLS.y + radius;
 		
+		float zn = centerLS.z - 1000.0f; 
+		float zf = centerLS.z + 1000.0f;
+
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			minLS.x, // left
-			maxLS.y, // top
-			maxLS.x, // right
-			minLS.y, // bottom
-			minLS.z, // nearZ
-			maxLS.z  // farZ
+			left, top, right, bottom, zn, zf
 		);
 
 		auto& c = out.cascades[ci];
@@ -412,95 +374,30 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 void ShadowSystem::BuildDefault(ShadowContext& out)
 {
 	out = {};
-	out.enabled = true;
-
+	out.enabled = true; // Force enable for debugging if needed, or false.
+	// Let's keep it enabled so we can see *something* if the system falls back.
+	
 	out.shadowMapSize = 1024;
 	out.cascadeCount = 4;
 
-	auto camSys = world_.GetSystem<CameraSystem>();
-	const CameraContext& cam = camSys->GetContext();
+	// Use a fixed light direction (Down-Forward-Right)
+	Math::Vec3f lightDir = NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
+	Math::Vec3f up = { 0,1,0 };
+	if (std::abs(lightDir.y) > 0.99f) up = { 1,0,0 };
 
-	// 左上前（-1, 1, -1）あたりから原点を見下ろすようなライト方向にする
-	// ライトの方向ベクトルなので、光源からターゲットへの向き
-	Math::Vec3f lightDirWS = NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
+	// Fixed View: Look at Origin from 50m away
+	Math::Vec3f centerS = { 0,0,0 };
+	Math::Vec3f eyeS = centerS - lightDir * 50.0f;
+	Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(eyeS, centerS, up);
 
-	Math::Vec3f up{ 0,1,0 };
-	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
-	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
+	// Fixed Proj: Ortho 20x20 area
+	// This ensures that if the camera is near origin, we see shadows.
+	Math::Mat4x4 proj = Math::Func::MAT4x4::OrthographicMatrix(-20, 20, 20, -20, 0.1f, 200.0f);
 
-	const float lambda = 0.96f;
-	const float n = cam.nearPlane;
-	const float f = cam.farPlane;
-	float splits[5]{};
-	splits[0] = n;
-	for (int i = 1; i <= 4; ++i)
-	{
-		const float p = (float)i / 4.0f;
-		const float logSplit = n * std::pow(f / n, p);
-		const float uniSplit = n + (f - n) * p;
-		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
+	for (int i = 0; i < 4; ++i) {
+		out.cascades[i].view = view;
+		out.cascades[i].proj = proj;
+		out.cascades[i].viewProj = view * proj;
+		out.splitFar[i] = (float)(i + 1) * 10.0f; // Dummy splits
 	}
-
-	for (uint32_t ci = 0; ci < 4; ++ci)
-	{
-		//float cn = splits[ci];
-		float cf = splits[ci + 1];
-
-		// カメラに関係なく原点 (0,0,0) を見る
-		const Math::Vec3f centerWS = { 0.0f, 0.0f, 0.0f };
-		const float dist = 50.0f;
-		const Math::Vec3f lightPosWS = {
-			centerWS.x - lightDirWS.x * dist,
-			centerWS.y - lightDirWS.y * dist,
-			centerWS.z - lightDirWS.z * dist
-		};
-
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
-
-		const float half = 150.0f;
-		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			-half,  // left
-			 half,  // top
-			 half,  // right
-			-half,  // bottom
-			-150.0f, 150.0f);
-
-		out.cascades[ci].view = lightView;
-		out.cascades[ci].proj = lightProj;
-		out.cascades[ci].viewProj = lightView * lightProj;
-
-		out.splitFar[ci] = cf;
-	}
-}
-
-void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)
-{
-	if (shadowMapSize == 0) return;
-
-	const float texelSizeX = orthoWidth / (float)shadowMapSize;
-	const float texelSizeY = orthoHeight / (float)shadowMapSize;
-	if (texelSizeX <= 1e-6f || texelSizeY <= 1e-6f) return;
-
-	// light space 原点（WS origin を light space に）
-	Math::Vec3f originLS = lightView.TransformPoint({ 0,0,0 });
-
-	originLS.x = std::floor(originLS.x / texelSizeX) * texelSizeX;
-	originLS.y = std::floor(originLS.y / texelSizeY) * texelSizeY;
-
-	// 平行移動だけ調整（君の行列規約に合わせてる：m[3][*] が translate）
-	lightView.m[3][0] = -(
-		originLS.x * lightView.m[0][0] +
-		originLS.y * lightView.m[1][0] +
-		originLS.z * lightView.m[2][0]
-		);
-	lightView.m[3][1] = -(
-		originLS.x * lightView.m[0][1] +
-		originLS.y * lightView.m[1][1] +
-		originLS.z * lightView.m[2][1]
-		);
-	lightView.m[3][2] = -(
-		originLS.x * lightView.m[0][2] +
-		originLS.y * lightView.m[1][2] +
-		originLS.z * lightView.m[2][2]
-		);
 }
