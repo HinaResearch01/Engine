@@ -116,12 +116,7 @@ void CameraSystem::BuildDefault(CameraContext& out)
 	const Math::Mat4x4 rotMat = Math::Mat4x4::Rotation(
 		Math::Func::VEC3::ToRadians(rotate));
 
-	const Math::Vec3f forward =
-		Math::Vec3f{
-			rotMat.m[2][0],
-			rotMat.m[2][1],
-			rotMat.m[2][2]
-	}.Normalized();
+	const Math::Vec3f forward = rotMat.GetForward().Normalized();
 
 	const Math::Vec3f target = position + forward;
 	const Math::Vec3f up{ 0,1,0 };

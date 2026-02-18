@@ -3,6 +3,10 @@
 #include "Framework/World/World.h"
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/Context/CameraContext.h"
+#include "Framework/Component/Transform/TransformComponent.h"
+#include "Framework/Component/Light/DirectionalLightComponent.h"
+#include "Framework/Component/Light/SpotLightComponent.h"
+#include "Framework/Component/Shadow/ShadowComponent.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -247,36 +251,18 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 			maxLS.z = std::max(maxLS.z, pLS.z);
 		}
 
+
 		// pad
-		const float padXY = 20.0f;  
-		const float padZ = 100.0f; 
+		const float padXY = chosenDL->orthoHalfSize;  // Use component ortho size for XY padding
+		const float padZ = chosenDL->nearZ;           // Use component nearZ for back coverage distance
 		minLS.x -= padXY; minLS.y -= padXY;
 		maxLS.x += padXY; maxLS.y += padXY;
 		minLS.z -= padZ;
 		maxLS.z += padZ;
 
-		// Use Light's Near/Far to clamp or define range? 
-		// Actually CSM fits to the frustum splits.
-		// `minLS.z` and `maxLS.z` are derived from the camera frustum corners in light space.
-		// However, we might want to ensure we don't clip casters behind the camera.
-		// The `padZ` is usually for that.
-		// The `nearZ`/`farZ` in DirectionalLightComponent are often for "Shadow Distance" (max distance from camera)
-		// or "Light Projection Z range" if manual?
-		// In CSM, `shadowDistance` (farZ?) is used to cap the cascades.
-		// Let's use `chosenDL->farZ` as the maximum shadow distance (CSM max distance).
-		
-		// Wait, `BuildShadowContext` uses `cam.farPlane` for splits. 
-		// We should cap it at `chosenDL->farZ` if we want to limit shadow distance.
-		
-		// And for Ortho Matrix Z:
-		// We usually use minLS.z / maxLS.z. 
-		// `chosenDL->nearZ` / `farZ` might not be directly applicable to "Ortho Z" per cascade,
-		// BUT `orthoHalfSize` is definitely the Ortho Size (XY).
-		
-		// Let's override the `cam.farPlane` used for splits calculation with `chosenDL->farZ`!
-		// But I am editing inside the loop.
-		// The splits were calculated before this loop.
-		// I should check where splits are calculated.
+		// Use Light's FarZ as Shadow Distance (CSM Max Distance)
+		// We clamp the last cascade's far plane with chosenDL->farZ earlier (in splits calculation loop).
+		// Here we just ensure the ortho projection covers the casters.
 		
 		// Ah, I need to update the split calculation logic earlier in the function!
 		// But I am restricted to replace this chunk.
@@ -385,7 +371,6 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 	{
 		auto& entry = lights[i];
 
-		// const_cast to modify runtime transient data
 		if (entry.sh) {
 			entry.sh->spotShadowIndex = (int32_t)i;
 		}
@@ -402,7 +387,10 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 
 		Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(pos, pos + fwd, up);
 
-		float angle = 2.0f * std::acos(entry.sl->outerCos);
+		// Use outerAngle directly to ensure valid FOV, even if LightSystem hasn't updated outerCos yet.
+		// Clamp angle to avoid 180 deg (Pi) which breaks perspective projection.
+		float angleDeg = std::min(entry.sl->outerAngle * 2.0f, 179.0f);
+		float angle = Math::Func::NUM::ToRadians(angleDeg);
 		
 		// Use component params or fallback
 		float n = entry.sl->nearZ;

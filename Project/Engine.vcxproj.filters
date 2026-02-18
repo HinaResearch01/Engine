@@ -889,9 +889,6 @@
     <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h">
       <Filter>Game\Test\Actor\DirLight</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\Actor\DirLight\TestShadowComp.h">
-      <Filter>Game\Test\Actor\DirLight</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLight.h">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClInclude>

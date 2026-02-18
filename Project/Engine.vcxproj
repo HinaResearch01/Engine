@@ -922,7 +922,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h" />
     <ClInclude Include="Game\Test\Actor\DirLight\TestDiretionalLightComp.h" />
     <ClInclude Include="Game\Test\Actor\DirLight\TestDirLight.h" />
-    <ClInclude Include="Game\Test\Actor\DirLight\TestShadowComp.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloor.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorRenderComp.h" />

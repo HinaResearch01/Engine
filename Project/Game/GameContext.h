@@ -90,6 +90,7 @@ inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 
 	// ==== Shadow Pass ====
 	renderSys->DrawShadowPass(*cmd, frame, *prepSys);
+	renderSys->DrawSpotShadowPass(*cmd, frame, *prepSys);
 
 	// ==== GBuffer Pass ====
 	dx12->TransitionGBufferToWrite();
