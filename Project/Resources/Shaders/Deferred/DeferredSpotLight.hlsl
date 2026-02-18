@@ -21,8 +21,6 @@ Texture2D gGBuffer0_Albedo : register(t0);
 Texture2D gGBuffer1_NormalWS : register(t1);
 Texture2D gGBuffer2_Reflectivity : register(t2);
 Texture2D gDepth01 : register(t3);
-
-// t4 is unused (or reserved for CSM in other shaders)
 Texture2DArray gSpotShadowMap : register(t5);
 
 // Sampler

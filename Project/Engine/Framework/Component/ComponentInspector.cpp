@@ -51,7 +51,7 @@ void DirectionalLightComponent::OnInspectorGui()
 		ImGui::ColorEdit3("Ambient", &ambient.x);
 
 		bool changed = false;
-		if (ImGui::SliderFloat("Elevation (Pitch)", &elevation, -90.0f, 90.0f)) changed = true;
+		if (ImGui::SliderFloat("Elevation (Pitch)", &elevation, 0.0f, 90.0f)) changed = true;
 		if (ImGui::SliderFloat("Azimuth (Yaw)", &azimuth, 0.0f, 360.0f)) changed = true;
 
 		if (changed) {

@@ -23,7 +23,8 @@ public:
 	void UpdateTransform() {
 		if (auto* owner = GetOwner()) {
 			if (auto* tr = owner->GetComponent<TransformComponent>()) {
-				tr->srt.rotate.x = elevation;
+				// 高度（Elevation）がプラスのときに下を向く（空から照らす）ようにマイナスを付与
+				tr->srt.rotate.x = -elevation;
 				tr->srt.rotate.y = azimuth;
 				tr->MarkDirty();    
 			}
@@ -37,7 +38,7 @@ public:
 	Math::Vec3f ambient{ 0.1f, 0.1f, 0.1f };
 
 	// Sun Control Params
-	// Elevation (Pitch): -90 to 90
+	// Elevation (Pitch): 0 to 90
 	float elevation = 45.0f; 
 	// Azimuth (Yaw): 0 to 360
 	float azimuth = 315.0f;

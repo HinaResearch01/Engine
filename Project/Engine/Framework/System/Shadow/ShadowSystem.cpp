@@ -193,7 +193,7 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 	}
 
 	// Light dir
-	Math::Vec3f lightDirWS = NormalizeSafe(-chosenTR->forward, { 0,-1,0 });
+	Math::Vec3f lightDirWS = NormalizeSafe(chosenTR->forward, { 0,-1,0 });
 
 	Math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;

@@ -63,7 +63,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 		{
 			auto [tr, dl] = *it;
 
-			Math::Vec3f dirWS = NormalizeSafe(-tr.world.GetForward(), {0, -1, 0});
+			Math::Vec3f dirWS = NormalizeSafe(tr.world.GetForward(), {0, -1, 0});
 
 			Math::Vec3f radiance{
 				dl.color.x * dl.intensity,
@@ -74,6 +74,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 			out.directional.enabled = (dl.intensity > 0.0f);
 			out.directional.dirWS = dirWS;
 			out.directional.radiance = radiance;
+			out.directional.ambient = dl.ambient;
 		}
 	}
 
@@ -109,7 +110,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 			continue;
 
 		Math::Vec3f pos = tr.GetWorldPos();
-		Math::Vec3f dir = NormalizeSafe(-tr.forward, { 0,-1,0 });
+		Math::Vec3f dir = NormalizeSafe(tr.forward, { 0,-1,0 });
 
 		Math::Vec3f radiance{
 			sl.color.x * sl.intensity,
@@ -126,8 +127,8 @@ void LightSystem::BuildLightContext(LightContext& out)
 		r.directionWS = dir;
 
 		// 既存コード踏襲（半角にしてcos）
-		r.innerCos = std::cos(innerRad * 0.5f);
-		r.outerCos = std::cos(outerRad * 0.5f);
+		r.innerCos = std::cos(innerRad);
+		r.outerCos = std::cos(outerRad);
 
 		r.radiance = radiance;
 
