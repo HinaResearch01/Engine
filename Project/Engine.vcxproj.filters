@@ -254,6 +254,12 @@
     <ClCompile Include="Game\Test\Actor\SpotLight\TestSpotLight.cpp">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Kamata\KamataCity.cpp">
+      <Filter>Game\Test\Actor\Kamata</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\LakeTown\LakeTownCity.cpp">
+      <Filter>Game\Test\Actor\LakeTown</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -895,6 +901,12 @@
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Kamata\KamataCity.h">
+      <Filter>Game\Test\Actor\Kamata</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\LakeTown\LakeTownCity.h">
+      <Filter>Game\Test\Actor\LakeTown</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1205,6 +1217,12 @@
     </Filter>
     <Filter Include="Game\Test\Actor\SpotLight">
       <UniqueIdentifier>{c9a0fe78-5804-4ce5-b471-00c6f919ad82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\Kamata">
+      <UniqueIdentifier>{4dedba8c-9d0b-42bb-b9e6-42b5fcb80f68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\LakeTown">
+      <UniqueIdentifier>{79d331e0-fab7-4134-b99c-f0eb56883a91}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

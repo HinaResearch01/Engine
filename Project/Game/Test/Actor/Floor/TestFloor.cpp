@@ -8,4 +8,6 @@ void TestFloor::Init()
 	IActor::AddComp<TestFloorMaterialComp>();
 	auto* rendComp = IActor::AddComp<TestFloorRenderComp>();
 	rendComp->mesh = "floor";
+	auto* transComp = IActor::GetComponent<Tsumi::Framework::TransformComponent>();
+	transComp->srt.scale = { 100.0f, 1.0f, 100.0f };
 }
