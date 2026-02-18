@@ -62,6 +62,12 @@ private:
 	void SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth,
 		float orthoHeight, uint32_t shadowMapSize);
 
+	void CalculateBoundingSphere(
+		const Math::Mat4x4& invViewProj,
+		float nearZ, float farZ,
+		Math::Vec3f& outCenter,
+		float& outRadius);
+
 private:
 	ShadowContext defaultCtx_{};
 	ShadowContext activeCtx_{};

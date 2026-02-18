@@ -155,51 +155,62 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		const Math::Vec3f centerWS = ShadowDetail::ShadowMath::Average8(cornersWS);
 
-		float orthoSize = chosenDL->orthoHalfSize;
-		if (chosenShadow) {
-			
-		}
+		// ===== Bounding Sphere =====
+		Math::Vec3f sphereCenterWS;
+		float radius;
 
-		const float dist = (cf - cn) + orthoSize;
+		CalculateBoundingSphere(invCascadeVP, 0.0f, 1.0f, sphereCenterWS, radius);
+
+		// Light position
+		// const float padXY = chosenDL->orthoHalfSize; // REMOVED: Do not pad with light size for CSM
+		const float dist = radius; // Removed padding with orthoHalfSize
+
 		const Math::Vec3f lightPosWS = {
-			centerWS.x - lightDirWS.x * dist,
-			centerWS.y - lightDirWS.y * dist,
-			centerWS.z - lightDirWS.z * dist
+			sphereCenterWS.x - lightDirWS.x * dist,
+			sphereCenterWS.y - lightDirWS.y * dist,
+			sphereCenterWS.z - lightDirWS.z * dist
 		};
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, sphereCenterWS, up);
 
-		// corners -> light space AABB
-		Math::Vec3f minLS{ +1e30f, +1e30f, +1e30f };
-		Math::Vec3f maxLS{ -1e30f, -1e30f, -1e30f };
+		// ===== Light space center =====
+		Math::Vec3f centerLS = lightView.TransformPoint(sphereCenterWS);
 
-		for (int i = 0; i < 8; ++i)
-		{
-			const Math::Vec3f pLS = lightView.TransformPoint(cornersWS[i]);
-			minLS.x = std::min(minLS.x, pLS.x);
-			minLS.y = std::min(minLS.y, pLS.y);
-			minLS.z = std::min(minLS.z, pLS.z);
-			maxLS.x = std::max(maxLS.x, pLS.x);
-			maxLS.y = std::max(maxLS.y, pLS.y);
-			maxLS.z = std::max(maxLS.z, pLS.z);
-		}
+		// ===== Texel Snap =====
+		float texelSize = (radius * 2.0f) / (float)out.shadowMapSize;
 
+		centerLS.x = std::floor(centerLS.x / texelSize) * texelSize;
+		centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
 
-		// pad
-		const float padXY = chosenDL->orthoHalfSize; 
-		const float padZ = chosenDL->nearZ;          
-		minLS.x -= padXY; minLS.y -= padXY;
-		maxLS.x += padXY; maxLS.y += padXY;
-		minLS.z -= padZ;
-		maxLS.z += padZ;
+		// ===== View位置再調整 =====
+		lightView.m[3][0] = -(
+			centerLS.x * lightView.m[0][0] +
+			centerLS.y * lightView.m[1][0] +
+			centerLS.z * lightView.m[2][0]
+			);
+
+		lightView.m[3][1] = -(
+			centerLS.x * lightView.m[0][1] +
+			centerLS.y * lightView.m[1][1] +
+			centerLS.z * lightView.m[2][1]
+			);
+
+		lightView.m[3][2] = -(
+			centerLS.x * lightView.m[0][2] +
+			centerLS.y * lightView.m[1][2] +
+			centerLS.z * lightView.m[2][2]
+			);
+
+		// ===== 固定サイズ Ortho =====
+		float r = radius;
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			minLS.x, // left
-			maxLS.y, // top
-			maxLS.x, // right
-			minLS.y, // bottom
-			minLS.z, // nearZ
-			maxLS.z  // farZ
+			-r,
+			r,
+			r,
+			-r,
+			-r,
+			r
 		);
 
 		auto& c = out.cascades[ci];
@@ -388,4 +399,27 @@ void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, f
 		originLS.y * lightView.m[1][2] +
 		originLS.z * lightView.m[2][2]
 		);
+}
+
+void ShadowSystem::CalculateBoundingSphere(const Math::Mat4x4& invViewProj, float nearZ, float farZ, Math::Vec3f& outCenter, float& outRadius)
+{
+	Math::Vec3f corners[8];
+	ShadowDetail::ShadowMath::GetFrustumCornersWS(invViewProj, nearZ, farZ, corners);
+
+	// center = 平均
+	outCenter = ShadowDetail::ShadowMath::Average8(corners);
+
+	// 半径 = 最大距離
+	outRadius = 0.0f;
+	for (int i = 0; i < 8; ++i)
+	{
+		Math::Vec3f d = {
+			corners[i].x - outCenter.x,
+			corners[i].y - outCenter.y,
+			corners[i].z - outCenter.z
+		};
+
+		float dist = std::sqrt(d.x * d.x + d.y * d.y + d.z * d.z);
+		outRadius = std::max(outRadius, dist);
+	}
 }
