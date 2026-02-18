@@ -63,7 +63,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 		{
 			auto [tr, dl] = *it;
 
-			Math::Vec3f dirWS = NormalizeSafe(tr.world.GetForward(), {0, -1, 0});
+			Math::Vec3f dirWS = NormalizeSafe(tr.world.GetForward(), { 0, -1, 0 });
 
 			Math::Vec3f radiance{
 				dl.color.x * dl.intensity,
@@ -145,7 +145,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 		{
 			if (auto* shadow = owner->GetComponent<ShadowComponent>())
 			{
-				if (shadow->castShadow) {					
+				if (shadow->castShadow) {
 					r.shadowBias = shadow->shadowBias;
 				}
 				else {

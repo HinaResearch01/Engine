@@ -1,5 +1,6 @@
-#include "ShadowSystem.h"
 #include "../../../Math/TMath.h"
+#include "ShadowSystem.h"
+#include "ShadowHelpers.h"
 #include "Framework/World/World.h"
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/Context/CameraContext.h"
@@ -7,7 +8,6 @@
 #include "Framework/Component/Light/DirectionalLightComponent.h"
 #include "Framework/Component/Light/SpotLightComponent.h"
 #include "Framework/Component/Shadow/ShadowComponent.h"
-#include "ShadowHelpers.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -16,12 +16,11 @@
 
 using namespace Tsumi;
 using namespace Framework;
-using namespace Framework::ShadowDetail;
-
 
 ShadowSystem::ShadowSystem(World& world)
 	: world_(world)
-{}
+{
+}
 
 void ShadowSystem::Init()
 {
@@ -29,51 +28,68 @@ void ShadowSystem::Init()
 	activeCtx_ = defaultCtx_;
 }
 
-
 void ShadowSystem::Update(float)
 {
 	ShadowContext ctx{};
-	
+
 	// 有効なDirectionalLightが見つかったか？
 	bool foundCaster = BuildShadowContext(ctx);
-	
+
 	// SpotLightの影構築
 	BuildSpotShadowContext(ctx);
 
 	if (foundCaster || ctx.spotEnabled)
 	{
-		// どちらか片方でも有効なら採用
 		activeCtx_ = ctx;
 	}
 	else
 	{
 		// どちらも無い場合
 		BuildDefault(activeCtx_);
-		activeCtx_.enabled = false; 
+		activeCtx_.enabled = false;
 		activeCtx_.spotEnabled = false;
 	}
 }
 
 bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 {
-	// 1. Find the primary directional light
+	out = {};
+	out.enabled = false;
+
+	// Camera
+	auto camSys = world_.GetSystem<CameraSystem>();
+	const CameraContext& cam = camSys->GetContext();
+	if (!cam.valid)
+	{
+		return false;
+	}
+
+	// Choose 1 directional light
+	// Choose 1 directional light
 	const DirectionalLightComponent* chosenDL = nullptr;
 	const ShadowComponent* chosenShadow = nullptr;
 	const TransformComponent* chosenTR = nullptr;
+	uint32_t shadowMapSize = 2048; // Default
 
+	// Iterate all Directional Lights
 	for (auto [tr, dl] : world_.View<TransformComponent, DirectionalLightComponent>())
 	{
 		if (dl.intensity <= 0.0f) continue;
-		
-		// Optional: Check ShadowComponent on the same entity
+		if (!dl.castShadow) continue; // Check Light's flag
+
+		// Try to find ShadowComponent
 		ShadowComponent* sh = nullptr;
-		auto* owner = dl.GetOwner();
-		if (owner) {
+		if (auto* owner = dl.GetOwner()) {
 			sh = owner->GetComponent<ShadowComponent>();
 		}
 
-		if (!dl.castShadow) {
-			continue;
+		// If ShadowComponent exists, check its castShadow too?
+		if (sh) {
+			if (!sh->castShadow) continue;
+			// Use ShadowComponent's size if valid
+			if (sh->shadowMapSize > 0) {
+				shadowMapSize = sh->shadowMapSize;
+			}
 		}
 
 		chosenDL = &dl;
@@ -88,37 +104,110 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		return false;
 	}
 
-	// 2. Prepare Config
-	// Use ShadowComponent settings if available, else defaults
-	ShadowDetail::ShadowCascadeConfig config;
-	config.cascadeCount = 4;
-	config.shadowMapSize = (float)2048; // Default
-	config.lambda = 0.96f;
-	config.lightNearZ = chosenDL->nearZ;
-	config.lightFarZ = chosenDL->farZ;
-	config.lightOrthoHalfSize = chosenDL->orthoHalfSize; // Used for padding if needed
+	out.enabled = true;
+	out.shadowMapSize = shadowMapSize;
 
-	if (chosenShadow) {
-		if (chosenShadow->shadowMapSize > 0) {
-			config.shadowMapSize = (float)chosenShadow->shadowMapSize;
-		}
-		// Overwrite with ShadowComponent specific settings if desired,
-		// though typically DL settings control the light volume.
+	// CSM splits
+	constexpr uint32_t cascadeCount = 4;
+	out.cascadeCount = cascadeCount;
+
+	const float lambda = 0.96f;
+	const float n = cam.nearPlane;
+	// Use Light's FarZ as Shadow Distance, clamped by Camera Far
+	const float f = std::min(cam.farPlane, chosenDL->farZ);
+
+	float splits[5]{};
+	splits[0] = n;
+	for (int i = 1; i <= 4; ++i)
+	{
+		const float p = (float)i / 4.0f;
+		const float logSplit = n * std::pow(f / n, p);
+		const float uniSplit = n + (f - n) * p;
+		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
 	}
 
-	// 3. Get Camera
-	auto* camSys = world_.GetSystem<CameraSystem>();
-	if (!camSys) return false;
-	const auto& cam = camSys->GetContext();
+	for (uint32_t i = 0; i < cascadeCount; ++i)
+	{
+		// 実際にカメラのFOVやNear/Farから計算した splits[i + 1] を渡す
+		out.splitFar[i] = splits[i + 1];
+	}
 
-	// 4. Run Generator
-	// Light dir: Forward vector of the light transform
-	// Ensure normalized. Assuming 'forward' is correct, but re-normalizing is safe.
-	Math::Vec3f lightDir = ShadowDetail::ShadowMath::NormalizeSafe(chosenTR->forward, { 0, -1, 0 });
+	// Light dir
+	Math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe(chosenTR->forward, { 0,-1,0 });
 
-	ShadowDetail::CSMGenerator generator;
-	generator.Update(cam, lightDir, config, out);
-	
+	Math::Vec3f up{ 0,1,0 };
+	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
+	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
+
+	for (uint32_t ci = 0; ci < cascadeCount; ++ci)
+	{
+		const float cn = splits[ci];
+		const float cf = splits[ci + 1];
+
+		const Math::Mat4x4 cascadeProj =
+			Math::Func::MAT4x4::PerspectiveFovMatrix(cam.fovY, cam.aspectRatio, cn, cf);
+
+		const Math::Mat4x4 cascadeVP = cam.view * cascadeProj;
+		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
+
+		Math::Vec3f cornersWS[8]{};
+		ShadowDetail::ShadowMath::GetFrustumCornersWS(invCascadeVP, 0.0f, 1.0f, cornersWS);
+
+		const Math::Vec3f centerWS = ShadowDetail::ShadowMath::Average8(cornersWS);
+
+		float orthoSize = chosenDL->orthoHalfSize;
+		if (chosenShadow) {
+			
+		}
+
+		const float dist = (cf - cn) + orthoSize;
+		const Math::Vec3f lightPosWS = {
+			centerWS.x - lightDirWS.x * dist,
+			centerWS.y - lightDirWS.y * dist,
+			centerWS.z - lightDirWS.z * dist
+		};
+
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+
+		// corners -> light space AABB
+		Math::Vec3f minLS{ +1e30f, +1e30f, +1e30f };
+		Math::Vec3f maxLS{ -1e30f, -1e30f, -1e30f };
+
+		for (int i = 0; i < 8; ++i)
+		{
+			const Math::Vec3f pLS = lightView.TransformPoint(cornersWS[i]);
+			minLS.x = std::min(minLS.x, pLS.x);
+			minLS.y = std::min(minLS.y, pLS.y);
+			minLS.z = std::min(minLS.z, pLS.z);
+			maxLS.x = std::max(maxLS.x, pLS.x);
+			maxLS.y = std::max(maxLS.y, pLS.y);
+			maxLS.z = std::max(maxLS.z, pLS.z);
+		}
+
+
+		// pad
+		const float padXY = chosenDL->orthoHalfSize; 
+		const float padZ = chosenDL->nearZ;          
+		minLS.x -= padXY; minLS.y -= padXY;
+		maxLS.x += padXY; maxLS.y += padXY;
+		minLS.z -= padZ;
+		maxLS.z += padZ;
+
+		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+			minLS.x, // left
+			maxLS.y, // top
+			maxLS.x, // right
+			minLS.y, // bottom
+			minLS.z, // nearZ
+			maxLS.z  // farZ
+		);
+
+		auto& c = out.cascades[ci];
+		c.view = lightView;
+		c.proj = lightProj;
+		c.viewProj = lightView * lightProj;
+	}
+
 	return true;
 }
 
@@ -151,96 +240,152 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 			sh = owner->GetComponent<ShadowComponent>();
 		}
 
-		uint32_t size = 512;
-		if (sh && sh->shadowMapSize > 0) size = sh->shadowMapSize;
+		uint32_t size = 1024;
+		if (sh) {
+			if (!sh->castShadow) continue;
+			size = sh->shadowMapSize;
+		}
 
 		lights.push_back({ &tr, &sl, sh, size });
 	}
 
-	if (lights.empty()) {
-		out.spotEnabled = false;
-		return;
-	}
+	if (lights.empty()) return;
 
-	// Limit count
-	if (lights.size() > ShadowContext::kMaxSpotShadows) {
-		lights.resize(ShadowContext::kMaxSpotShadows);
-	}
+	// Sort? (Optional)
 
-	out.spotEnabled = true;
-	out.activeSpotShadowCount = (uint32_t)lights.size();
-	
-	// Use max size among lights or constant? Let's pick max.
-	uint32_t maxSz = 512;
-	for (auto& l : lights) maxSz = std::max(maxSz, l.mapSize);
-	out.spotShadowMapSize = maxSz;
+	const uint32_t count = std::min((uint32_t)lights.size(), ShadowContext::kMaxSpotShadows);
 
-	for (size_t i = 0; i < lights.size(); ++i)
+	for (uint32_t i = 0; i < count; ++i)
 	{
 		auto& entry = lights[i];
-		auto& info = out.spotShadows[i];
 
-		Math::Vec3f pos = entry.tr->GetWorldPos();
-		Math::Vec3f dir = ShadowDetail::ShadowMath::NormalizeSafe(entry.tr->forward, {0,0,1}); // Spot direction
-		Math::Vec3f up = { 0,1,0 };
-		
-		// Spot Light View
-		// LookAtLH: eye, focus, up.
-		// focus = pos + dir
-		Math::Vec3f focus = { pos.x + dir.x, pos.y + dir.y, pos.z + dir.z };
-		info.view = Math::Func::MAT4x4::LookAtLH(pos, focus, up);
+		if (entry.sh) {
+			entry.sh->spotShadowIndex = (int32_t)i;
+		}
+		auto* slMutable = const_cast<SpotLightComponent*>(entry.sl);
+		slMutable->runtimeShadowIndex = (int32_t)i;
 
-		// Spot Light Proj
-		// PerspectiveFov
-		// SpotLightComponent has innerAngle/outerAngle in Degrees (based on usage elsewhere typical).
-		// standard spot light "angle" usually refers to the half-angle of the cone.
-		// PerspectiveFov takes fovY (Full vertical angle) in Radians.
-		// So we need outerAngle * 2 * Deg2Rad.
-		
-		float halfAngleDeg = entry.sl->outerAngle > 0.0f ? entry.sl->outerAngle : 45.0f;
-		float fovRad = (halfAngleDeg * 2.0f) * (3.14159f / 180.0f);
-		
-		float aspect = 1.0f; // Shadow map is square
-		float nz = entry.sl->nearZ > 0.0f ? entry.sl->nearZ : 0.1f;
-		float fz = entry.sl->farZ > 0.0f ? entry.sl->farZ : 100.0f; 
-		// Use component's nearZ/farZ, fallbacks if needed.
-		// SpotLightComponent has nearZ/farZ fields.
+		auto& data = out.spotShadows[i];
+		data.lightIndex = 0;
 
-		info.proj = Math::Func::MAT4x4::PerspectiveFovMatrix(fovRad, aspect, nz, fz);
-		info.viewProj = info.view * info.proj;
+		Math::Vec3f pos = { entry.tr->world.m[3][0], entry.tr->world.m[3][1], entry.tr->world.m[3][2] };
+		Math::Vec3f fwd = entry.tr->forward;
+		Math::Vec3f up = entry.tr->up;
+
+		Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(pos, pos + fwd, up);
+
+		float angleDeg = std::min(entry.sl->outerAngle * 2.0f, 179.0f);
+		float angle = Math::Func::NUM::ToRadians(angleDeg);
+
+		// Use component params or fallback
+		float n = entry.sl->nearZ;
+		float f = entry.sl->farZ;
+		if (entry.sh) {
+			n = entry.sh->nearZ;
+			f = entry.sh->farZ;
+		}
+
+		Math::Mat4x4 proj = Math::Func::MAT4x4::PerspectiveFovMatrix(angle, 1.0f, n, f);
+
+		data.viewProj = view * proj;
 	}
+
+	out.activeSpotShadowCount = count;
+	out.spotEnabled = (count > 0);
 }
 
 void ShadowSystem::BuildDefault(ShadowContext& out)
 {
 	out = {};
-	out.enabled = true; // Debug default
-	
+	out.enabled = true;
+
 	out.shadowMapSize = 1024;
 	out.cascadeCount = 4;
 
-	// Use a fixed light direction (Down-Forward-Right)
-	Math::Vec3f lightDir = ShadowDetail::ShadowMath::NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
-	Math::Vec3f up = { 0,1,0 };
-	if (std::abs(lightDir.y) > 0.99f) up = { 1,0,0 };
+	auto camSys = world_.GetSystem<CameraSystem>();
+	const CameraContext& cam = camSys->GetContext();
 
-	// Fixed View
-	Math::Vec3f centerS = { 0,0,0 };
-	Math::Vec3f eyeS = centerS - lightDir * 50.0f;
-	Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(eyeS, centerS, up);
+	// 左上前（-1, 1, -1）あたりから原点を見下ろすようなライト方向にする
+	// ライトの方向ベクトルなので、光源からターゲットへの向き
+	Math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
 
-	// Fixed Proj
-	Math::Mat4x4 proj = Math::Func::MAT4x4::OrthographicMatrix(-20, 20, 20, -20, 0.1f, 200.0f);
+	Math::Vec3f up{ 0,1,0 };
+	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
+	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
-	for (int i = 0; i < 4; ++i) {
-		out.cascades[i].view = view;
-		out.cascades[i].proj = proj;
-		out.cascades[i].viewProj = view * proj;
-		out.splitFar[i] = (float)(i + 1) * 10.0f; 
+	const float lambda = 0.96f;
+	const float n = cam.nearPlane;
+	const float f = cam.farPlane;
+	float splits[5]{};
+	splits[0] = n;
+	for (int i = 1; i <= 4; ++i)
+	{
+		const float p = (float)i / 4.0f;
+		const float logSplit = n * std::pow(f / n, p);
+		const float uniSplit = n + (f - n) * p;
+		splits[i] = lambda * logSplit + (1.0f - lambda) * uniSplit;
+	}
+
+	for (uint32_t ci = 0; ci < 4; ++ci)
+	{
+		//float cn = splits[ci];
+		float cf = splits[ci + 1];
+
+		// カメラに関係なく原点 (0,0,0) を見る
+		const Math::Vec3f centerWS = { 0.0f, 0.0f, 0.0f };
+		const float dist = 50.0f;
+		const Math::Vec3f lightPosWS = {
+			centerWS.x - lightDirWS.x * dist,
+			centerWS.y - lightDirWS.y * dist,
+			centerWS.z - lightDirWS.z * dist
+		};
+
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+
+		const float half = 150.0f;
+		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+			-half,  // left
+			half,  // top
+			half,  // right
+			-half,  // bottom
+			-150.0f, 150.0f);
+
+		out.cascades[ci].view = lightView;
+		out.cascades[ci].proj = lightProj;
+		out.cascades[ci].viewProj = lightView * lightProj;
+
+		out.splitFar[ci] = cf;
 	}
 }
 
-void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4&, float, float, uint32_t)
+void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)
 {
-	// Deprecated / Unused: Logic moved to CSMGenerator
+	if (shadowMapSize == 0) return;
+
+	const float texelSizeX = orthoWidth / (float)shadowMapSize;
+	const float texelSizeY = orthoHeight / (float)shadowMapSize;
+	if (texelSizeX <= 1e-6f || texelSizeY <= 1e-6f) return;
+
+	// light space 原点（WS origin を light space に）
+	Math::Vec3f originLS = lightView.TransformPoint({ 0,0,0 });
+
+	originLS.x = std::floor(originLS.x / texelSizeX) * texelSizeX;
+	originLS.y = std::floor(originLS.y / texelSizeY) * texelSizeY;
+
+	// 平行移動だけ調整（君の行列規約に合わせてる：m[3][*] が translate）
+	lightView.m[3][0] = -(
+		originLS.x * lightView.m[0][0] +
+		originLS.y * lightView.m[1][0] +
+		originLS.z * lightView.m[2][0]
+		);
+	lightView.m[3][1] = -(
+		originLS.x * lightView.m[0][1] +
+		originLS.y * lightView.m[1][1] +
+		originLS.z * lightView.m[2][1]
+		);
+	lightView.m[3][2] = -(
+		originLS.x * lightView.m[0][2] +
+		originLS.y * lightView.m[1][2] +
+		originLS.z * lightView.m[2][2]
+		);
 }
