@@ -123,8 +123,8 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- bias ----
-	cb.shadowBias = 0.001f;
-	cb.shadowNormalBias = 0.002f;
+	cb.shadowBias = 0.0001f;
+	cb.shadowNormalBias = 0.0002f;
 }
 
 void RenderPrepareSystem::BuildLightPacket()
@@ -184,7 +184,7 @@ void RenderPrepareSystem::BuildLightPacket()
 		cb.outerCos = s.outerCos;
 		cb.intensity = s.intensity;
 		cb.shadowIndex = s.shadowIndex;
-		cb.shadowBias = s.shadowBias;
+		cb.shadowBias = 0.0005f; // Default bias
 
 		if (s.shadowIndex >= 0 && s.shadowIndex < (int)shadowCtx.spotShadows.size())
 		{

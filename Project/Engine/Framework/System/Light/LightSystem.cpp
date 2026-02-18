@@ -137,7 +137,7 @@ void LightSystem::BuildLightContext(LightContext& out)
 		// Default (Implicit)
 		if (sl.castShadow) {
 			r.shadowIndex = sl.runtimeShadowIndex;
-			r.shadowBias = 0.005f; // Default bias
+			r.shadowBias = 0.0005f; // Default bias
 		}
 
 		// Explicit Override

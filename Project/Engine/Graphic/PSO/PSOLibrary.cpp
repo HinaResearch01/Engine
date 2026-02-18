@@ -206,7 +206,7 @@ void PSOLibrary::CreateShadowCaster()
 	pso.SetCullMode(D3D12_CULL_MODE_BACK);
 
 	// Bias
-	pso.SetDepthBias(1000);
+	pso.SetDepthBias(10);
 	pso.SetSlopeScaledDepthBias(1.0f);
 	pso.SetDepthBiasClamp(0.0f);
 
