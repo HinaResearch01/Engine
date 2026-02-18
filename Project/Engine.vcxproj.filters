@@ -255,10 +255,10 @@
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClCompile>
     <ClCompile Include="Game\Test\Actor\Kamata\KamataCity.cpp">
-      <Filter>Game\Test\Actor\Kamata</Filter>
+      <Filter>Game\Test\Actor\KamataCity</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\Actor\LakeTown\LakeTownCity.cpp">
-      <Filter>Game\Test\Actor\LakeTown</Filter>
+    <ClCompile Include="Engine\Framework\System\Shadow\ShadowHelpers.cpp">
+      <Filter>Engine\Framework\System\Shadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -901,6 +901,12 @@
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Kamata\KamataCity.h">
+      <Filter>Game\Test\Actor\KamataCity</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Shadow\ShadowHelpers.h">
+      <Filter>Engine\Framework\System\Shadow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1211,6 +1217,9 @@
     </Filter>
     <Filter Include="Game\Test\Actor\SpotLight">
       <UniqueIdentifier>{c9a0fe78-5804-4ce5-b471-00c6f919ad82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\KamataCity">
+      <UniqueIdentifier>{183ebcf4-4c82-4db4-bcd6-792dc038e75d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
