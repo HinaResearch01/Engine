@@ -32,11 +32,7 @@ void TestWorld::Init()
 	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestCylinder>();
 	World::SpawnActor<TestFloor>();
-
-	/*auto* floor = World::SpawnActor<TestFloor>();
-	auto* transComp = floor->GetComponent<Tsumi::Framework::TransformComponent>();
-	transComp->srt.scale = { 100.0f, 1.0f, 100.0f };*/
-	//World::SpawnActor<KamataCity>();
+	World::SpawnActor<KamataCity>();
 }
 
 void TestWorld::Update(float deltaTime)

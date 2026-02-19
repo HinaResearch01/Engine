@@ -111,7 +111,9 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 	constexpr uint32_t cascadeCount = 4;
 	out.cascadeCount = cascadeCount;
 
-	const float lambda = 0.96f;
+	// Lambda controls the split distribution (0 = uniform, 1 = logarithmic)
+	// Reduced to 0.6 to give Cascade 0 more range and prevent it from being too small/useless.
+	const float lambda = 0.6f;
 	const float n = cam.nearPlane;
 	// Use Light's FarZ as Shadow Distance, clamped by Camera Far
 	const float f = std::min(cam.farPlane, chosenDL->farZ);
@@ -163,62 +165,66 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 			radius = std::max(radius, d);
 		}
 
+		// Prevent the shadow map from becoming too small when zooming in.
+		// If radius is too small, casters outside the frustum (but casting shadows into it) are clipped in X/Y.
+		radius = std::max(radius, 50.0f);
+
 		// Transform center to World Space
 		// cam.view.Inverse() * centerVS
 		Math::Mat4x4 invView = cam.view.Inverse();
 		Math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
 
-		// Light position
-		// const float padXY = chosenDL->orthoHalfSize; // REMOVED: Do not pad with light size for CSM
-		const float dist = radius; // Removed padding with orthoHalfSize
-
-		const Math::Vec3f lightPosWS = {
-			sphereCenterWS.x - lightDirWS.x * dist,
-			sphereCenterWS.y - lightDirWS.y * dist,
-			sphereCenterWS.z - lightDirWS.z * dist
-		};
-
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, sphereCenterWS, up);
-
-		// ===== Light space center =====
-		Math::Vec3f centerLS = lightView.TransformPoint(sphereCenterWS);
+		// Light Orientation
+		Math::Mat4x4 lightViewRot = Math::Func::MAT4x4::LookAtLH({ 0,0,0 }, lightDirWS, up);
+		
+		// Transform Sphere Center to Light Space (Rotation only)
+		Math::Vec3f centerLS = lightViewRot.TransformPoint(sphereCenterWS);
 
 		// ===== Texel Snap =====
 		float texelSize = (radius * 2.0f) / (float)out.shadowMapSize;
 
-		centerLS.x = std::floor(centerLS.x / texelSize) * texelSize;
-		centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
+		if (texelSize > 0.0001f) {
+			centerLS.x = std::floor(centerLS.x / texelSize) * texelSize;
+			centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
+		}
 
-		// ===== View位置再調整 (Snapping) =====
-		// Snap translation to prevent shimmering
-		lightView.m[3][0] = -(
-			centerLS.x * lightView.m[0][0] +
-			centerLS.y * lightView.m[1][0] +
-			centerLS.z * lightView.m[2][0]
-			);
+		// Transform back to World Space to get 'Snapped' Sphere Center
+		// Since we only rotated, Inverse is Transpose
+		Math::Mat4x4 lightViewRotInv = lightViewRot.Transpose(); 
+		Math::Vec3f snappedCenterWS = lightViewRotInv.TransformPoint(centerLS);
 
-		lightView.m[3][1] = -(
-			centerLS.x * lightView.m[0][1] +
-			centerLS.y * lightView.m[1][1] +
-			centerLS.z * lightView.m[2][1]
-			);
+		// ===== Final Light View Matrix =====
+		// Place camera at Snapped Center - Distance * LightDir
+		// Revert to 500.0f (Proven value that ensured visibility in Step 756).
+		const float backDistance = 500.0f;
+		const float dist = radius + backDistance;
 
-		lightView.m[3][2] = -(
-			centerLS.x * lightView.m[0][2] +
-			centerLS.y * lightView.m[1][2] +
-			centerLS.z * lightView.m[2][2]
-			);
+		const Math::Vec3f lightPosWS = {
+			snappedCenterWS.x - lightDirWS.x * dist,
+			snappedCenterWS.y - lightDirWS.y * dist,
+			snappedCenterWS.z - lightDirWS.z * dist
+		};
+
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, snappedCenterWS, up);
+
 
 		// ===== 固定サイズ Ortho =====
 		float r = radius;
+		// Aggressive NearZ Optimization:
+		// We crop significantly to the sphere volume to maximize depth precision and contrast.
+		// 'dist' is distance from Camera to Center.
+		// Sphere starts at 'dist - radius'.
+		// We add a tiny 20.0f buffer for casters just outside the sphere.
+		float nearZ = std::max(0.0f, dist - radius - 20.0f);
+		float farZ = dist + r;
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
 			-r,
 			r,
 			r,
 			-r,
-			-r,
-			r
+			nearZ,
+			farZ
 		);
 
 		auto& c = out.cascades[ci];

@@ -114,8 +114,10 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- bias ----
-	cb.shadowBias = 0.0005f;
-	cb.shadowNormalBias = 0.001f;
+	// Tuned for 600m Range (500m BackDistance + Radius).
+	// Bias 0.00005f * 600m ~= 3cm.
+	cb.shadowBias = 0.00005f; 
+	cb.shadowNormalBias = 0.01f;
 }
 
 void RenderPrepareSystem::BuildLightPacket()

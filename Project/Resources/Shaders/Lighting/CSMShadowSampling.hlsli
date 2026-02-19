@@ -105,9 +105,12 @@ float ComputeCSMShadowFactor(
     float2 uv;
     float z;
 
+    // Apply Normal Bias to prevent shadow acne (especially on curved surfaces)
+    float3 biasedPos = worldPos + normalWS * shadowNormalBias;
+
     if (!WorldToShadowUVZ(
             lightViewProj[cascadeIdx],
-            worldPos,
+            biasedPos,
             uv,
             z))
         return 1.0f;
