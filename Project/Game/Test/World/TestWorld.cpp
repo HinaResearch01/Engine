@@ -10,6 +10,8 @@
 
 void TestWorld::Init()
 {
+	World::Init();
+
 	// テクスチャ
 	tme::API::AssetLoader::Load<tex>("Resources/Texture/uvChecker.png", "uvChecker");
 	
@@ -26,7 +28,7 @@ void TestWorld::Init()
 	spot1->SetName("TestSpotLight 1");
 	auto* spot2 = World::SpawnActor<TestSpotLight>();
 	spot2->SetName("TestSpotLight 2");
-
+	
 	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestCylinder>();
 	World::SpawnActor<TestFloor>();

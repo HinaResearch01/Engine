@@ -55,7 +55,7 @@ void InputSystem::Init() {
 	assert(SUCCEEDED(result));
 }
 
-void InputSystem::Update(float deltaTime) {
+void InputSystem::Update(float) {
 	// キーボード情報の取得開始
 	keyboard_->Acquire();
 	preKeyState_ = keyState_;

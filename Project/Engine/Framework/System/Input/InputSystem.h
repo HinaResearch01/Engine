@@ -33,6 +33,11 @@ public:
 	/// <param name="deltaTime"></param>
 	void Update(float deltaTime) override;
 
+	/// <summary>
+	/// Phaseの取得
+	/// </summary>
+	UpdatePhase Phase() const override { return UpdatePhase::PreLogic; }
+
 	// Keyboard
 	bool IsTrigger(Input::Key key) const;
 	bool IsHold(Input::Key key) const;

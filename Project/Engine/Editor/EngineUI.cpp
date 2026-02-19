@@ -17,64 +17,55 @@ void EngineUI::Init(Utils::FixFPS* fixFPS)
 
 void EngineUI::Draw()
 {
-	// DockSpace Setup
-	// Create a window that covers the entire viewport
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
+	// Main Window
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(400, 720), ImGuiCond_FirstUseEver);
 
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-	ImGui::Begin("Tsumi Engine DockSpace", nullptr, window_flags);
-	ImGui::PopStyleVar(3);
-
-	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
-
-	if (ImGui::BeginMenuBar())
+	if (ImGui::Begin("EngineUI", nullptr, ImGuiWindowFlags_MenuBar))
 	{
-		if (ImGui::BeginMenu("View"))
+		if (ImGui::BeginMenuBar())
 		{
-			// Add menu items to toggle windows if needed
-			ImGui::EndMenu();
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Exit")) { PostQuitMessage(0); }
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
 		}
-		ImGui::EndMenuBar();
-	}
-	ImGui::End();
 
-	// Individual Windows
-	if (ImGui::Begin("Performance")) {
-		DrawPerformance();
-	}
-	ImGui::End();
+		if (ImGui::BeginTabBar("MainTabBar"))
+		{
+			if (ImGui::BeginTabItem("Performance")) {
+				DrawPerformance();
+				ImGui::EndTabItem();
+			}
 
-	if (ImGui::Begin("Scene")) {
-		// Layout Scene Graph and Inspector
-		// For now, let's keep them together or separate? User might want them separate.
-		// Let's separate them.
-		DrawScene();
-	}
-	ImGui::End();
+			if (ImGui::BeginTabItem("Scene")) {
+				// Scene Graph (Top Half)
+				ImGui::BeginChild("SceneGraph", { 0, ImGui::GetContentRegionAvail().y * 0.5f }, true);
+				DrawScene();
+				ImGui::EndChild();
 
-	if (ImGui::Begin("Inspector")) {
-		DrawInspector();
-	}
-	ImGui::End();
+				// Inspector (Bottom Half)
+				ImGui::BeginChild("Inspector", { 0, 0 }, true);
+				DrawInspector();
+				ImGui::EndChild();
 
-	if (ImGui::Begin("Resources")) {
-		DrawResources();
-	}
-	ImGui::End();
+				ImGui::EndTabItem();
+			}
 
-	if (ImGui::Begin("Debug")) {
-		DrawShadowDebug();
+			if (ImGui::BeginTabItem("Resources")) {
+				DrawResources();
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Debug")) {
+				DrawShadowDebug();
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
 	}
 	ImGui::End();
 }

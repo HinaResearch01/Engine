@@ -25,11 +25,11 @@
 #include "Framework/System/Camera/CameraSystem.h"
 #include "Framework/System/Light/LightSystem.h"
 #include "Framework/System/Material/MaterialSystem.h"
+#include "Framework/System/Input/InputSystem.h"
 #include "Framework/System/Render/RenderPrepareSystem.h"
 #include "Framework/System/Render/RenderSystem.h"
 #include "Framework/System/Shadow/ShadowSystem.h"
 #include "Framework/System/Transform/TransformSystem.h"
-#include "Framework/System/Input/InputSystem.h"
 
 namespace Tsumi::Framework {
 
@@ -44,7 +44,7 @@ public:
 	{
 		// System系をUpdateManagerに登録
 		// 基本Update順に追加(内部で順操作はある)
-		AddSystem<InputSystem>(); // Input first
+		AddSystem<InputSystem>();
 		AddSystem<TransformSystem>();
 		AddSystem<CameraSystem>();
 		AddSystem<MaterialSystem>();
@@ -53,8 +53,6 @@ public:
 		AddSystem<RenderPrepareSystem>();
 		AddSystem<RenderSystem>();
 
-		// 追加したSystemの初期化処理
-		InitSystems();
 		// Viewの登録
 		RegisterDefaultViews();
 	}
@@ -63,7 +61,9 @@ public:
 	// ===============================================
 	// World LifeCycle
 	// ===============================================
-	virtual void Init() {}
+	virtual void Init() {
+		InitSystems();
+	}
 	virtual void Update(float deltaTime) {
 		WorldUpdate(deltaTime);
 	}

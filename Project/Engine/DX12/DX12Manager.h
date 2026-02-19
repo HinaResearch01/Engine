@@ -150,7 +150,7 @@ private:
 	uint32_t totalDescriptors_ = 65536;
 	uint32_t persistentCap_ = 32768;
 	uint32_t transientCapPerFrame_ = 8192;
-	uint32_t uploadBytesPerFrame_ = 16 * 1024;
+	uint32_t uploadBytesPerFrame_ = 1024 * 1024; // 1MB for safety
 
 };
 

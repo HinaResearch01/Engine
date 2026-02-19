@@ -2,5 +2,5 @@
 #include "Framework/World/World.h"
 
 Tsumi::Framework::ISystem::ISystem(World& world) 
-	: world_(world);
+	: world_(world)
 {}

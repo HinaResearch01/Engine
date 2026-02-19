@@ -150,16 +150,23 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		const Math::Mat4x4 cascadeVP = cam.view * cascadeProj;
 		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
 
-		Math::Vec3f cornersWS[8]{};
-		ShadowDetail::ShadowMath::GetFrustumCornersWS(invCascadeVP, 0.0f, 1.0f, cornersWS);
+		// ===== Bounding Sphere (View Space Calculation for Stability) =====
+		// Calculate in View Space to avoid radius jitter due to camera rotation
+		Math::Vec3f cornersVS[8]{};
+		ShadowDetail::ShadowMath::GetFrustumCornersWS(cascadeProj.Inverse(), 0.0f, 1.0f, cornersVS); // Using proj inverse gives View Space corners
 
-		const Math::Vec3f centerWS = ShadowDetail::ShadowMath::Average8(cornersWS);
+		Math::Vec3f centerVS = ShadowDetail::ShadowMath::Average8(cornersVS);
+		
+		float radius = 0.0f;
+		for (const auto& c : cornersVS) {
+			float d = (c - centerVS).Length();
+			radius = std::max(radius, d);
+		}
 
-		// ===== Bounding Sphere =====
-		Math::Vec3f sphereCenterWS;
-		float radius;
-
-		CalculateBoundingSphere(invCascadeVP, 0.0f, 1.0f, sphereCenterWS, radius);
+		// Transform center to World Space
+		// cam.view.Inverse() * centerVS
+		Math::Mat4x4 invView = cam.view.Inverse();
+		Math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
 
 		// Light position
 		// const float padXY = chosenDL->orthoHalfSize; // REMOVED: Do not pad with light size for CSM
@@ -182,7 +189,8 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		centerLS.x = std::floor(centerLS.x / texelSize) * texelSize;
 		centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
 
-		// ===== View位置再調整 =====
+		// ===== View位置再調整 (Snapping) =====
+		// Snap translation to prevent shimmering
 		lightView.m[3][0] = -(
 			centerLS.x * lightView.m[0][0] +
 			centerLS.y * lightView.m[1][0] +
@@ -242,7 +250,7 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 	for (auto [tr, sl] : world_.View<TransformComponent, SpotLightComponent>())
 	{
 		ShadowComponent* sh = nullptr;
-		
+
 		if (!sl.castShadow) continue;
 		if (sl.intensity <= 0.0f) continue;
 

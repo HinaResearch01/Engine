@@ -69,7 +69,7 @@ inline void GameContext::Init() {
 	if (!pendingInit_ || !currentScene_) return;
 	currentScene_->Init(), pendingInit_ = false;
 }
-inline void GameContext::Update() {	if(currentScene_) currentScene_->Update(0); }
+inline void GameContext::Update() {	if(currentScene_) currentScene_->Update(1.0f / 60.0f); }
 inline void GameContext::Render(std::function<void()> uiRenderCallBack)
 {
 	if (!currentScene_) return;
