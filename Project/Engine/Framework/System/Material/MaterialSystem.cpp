@@ -5,7 +5,7 @@
 using namespace Tsumi::Framework;
 
 MaterialSystem::MaterialSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {
 	resourceSys_ = Resource::ResourceSystem::GetInstance();
 }

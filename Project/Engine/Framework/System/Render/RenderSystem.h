@@ -49,9 +49,11 @@ public:
 
 	/// <summary>
 	/// Update（描画は RenderModel で行う）
-	/// </summary>
-	void Update(float deltaTime) override;
+	void Init() override;
+	void Update(float dt) override;
+	void Render();
 
+	Graphic::CSMShadowDepthMap* GetShadowMap() const { return shadowDMap_.get(); }
 	/// <summary>
 	/// Phase
 	/// </summary>
@@ -144,7 +146,6 @@ private:
 	int debugMode_ = 0;
 
 	// References
-	World& world_;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Graphic::PSOLibrary* psoLib_ = nullptr;
 	Graphic::RootSignatureLibrary* rsLib_ = nullptr;

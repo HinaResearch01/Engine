@@ -198,6 +198,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Framework\Actor\IActor.cpp" />
     <ClCompile Include="Engine\Framework\Component\ComponentInspector.cpp" />
     <ClCompile Include="Engine\Framework\System\Camera\CameraSystem.cpp" />
+    <ClCompile Include="Engine\Framework\System\Input\InputSystem.cpp" />
+    <ClCompile Include="Engine\Framework\System\ISystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Light\LightSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Material\MaterialSystem.cpp" />
     <ClCompile Include="Engine\Framework\System\Render\RenderPrepareSystem.cpp" />
@@ -344,6 +346,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\GameContext.cpp" />
     <ClCompile Include="Game\Test\Actor\Axis\TestAxis.cpp" />
     <ClCompile Include="Game\Test\Actor\Camera\TestCamera.cpp" />
+    <ClCompile Include="Game\Test\Actor\Camera\TestCameraMoveComp.cpp" />
     <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp" />
     <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp" />
     <ClCompile Include="Game\Test\Actor\Floor\TestFloor.cpp" />
@@ -395,6 +398,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Framework\Str\RenderPassTable.h" />
     <ClInclude Include="Engine\Framework\Str\RenderSurfaceType.h" />
     <ClInclude Include="Engine\Framework\System\Camera\CameraSystem.h" />
+    <ClInclude Include="Engine\Framework\System\Input\InputSystem.h" />
+    <ClInclude Include="Engine\Framework\System\Input\Keys.h" />
     <ClInclude Include="Engine\Framework\System\ISystem.h" />
     <ClInclude Include="Engine\Framework\System\Light\LightSystem.h" />
     <ClInclude Include="Engine\Framework\System\Material\MaterialSystem.h" />
@@ -920,6 +925,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Test\Actor\Axis\TestAxisRenderComp.h" />
     <ClInclude Include="Game\Test\Actor\Camera\TestCamera.h" />
     <ClInclude Include="Game\Test\Actor\Camera\TestCameraComp.h" />
+    <ClInclude Include="Game\Test\Actor\Camera\TestCameraMoveComp.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinder.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Cylinder\TestCylinderRenderComp.h" />

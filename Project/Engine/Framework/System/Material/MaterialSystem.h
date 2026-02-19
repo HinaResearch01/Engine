@@ -50,7 +50,6 @@ private:
 	MaterialContext ctx_;
 
 	Resource::ResourceSystem* resourceSys_ = nullptr;
-	World& world_;
 };
 
 }

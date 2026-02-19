@@ -19,7 +19,7 @@ static Math::Vec3f NormalizeSafe(const Math::Vec3f& v, const Math::Vec3f& fallba
 }
 
 LightSystem::LightSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {}
 
 void LightSystem::Init()

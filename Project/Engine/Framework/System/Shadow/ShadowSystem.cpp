@@ -18,7 +18,7 @@ using namespace Tsumi;
 using namespace Framework;
 
 ShadowSystem::ShadowSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {
 }
 
@@ -378,27 +378,11 @@ void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, f
 	if (texelSizeX <= 1e-6f || texelSizeY <= 1e-6f) return;
 
 	// light space 原点（WS origin を light space に）
-	Math::Vec3f originLS = lightView.TransformPoint({ 0,0,0 });
+	// View Matrix (LookAt) の Translation 部分 (m[3]) は "World Origin in View Space" を表す
+	// したがって、この値をTexelサイズでSnapすれば、World GridとTexel Gridが整合する
 
-	originLS.x = std::floor(originLS.x / texelSizeX) * texelSizeX;
-	originLS.y = std::floor(originLS.y / texelSizeY) * texelSizeY;
-
-	// 平行移動だけ調整（君の行列規約に合わせてる：m[3][*] が translate）
-	lightView.m[3][0] = -(
-		originLS.x * lightView.m[0][0] +
-		originLS.y * lightView.m[1][0] +
-		originLS.z * lightView.m[2][0]
-		);
-	lightView.m[3][1] = -(
-		originLS.x * lightView.m[0][1] +
-		originLS.y * lightView.m[1][1] +
-		originLS.z * lightView.m[2][1]
-		);
-	lightView.m[3][2] = -(
-		originLS.x * lightView.m[0][2] +
-		originLS.y * lightView.m[1][2] +
-		originLS.z * lightView.m[2][2]
-		);
+	lightView.m[3][0] = std::floor(lightView.m[3][0] / texelSizeX) * texelSizeX;
+	lightView.m[3][1] = std::floor(lightView.m[3][1] / texelSizeY) * texelSizeY;
 }
 
 void ShadowSystem::CalculateBoundingSphere(const Math::Mat4x4& invViewProj, float nearZ, float farZ, Math::Vec3f& outCenter, float& outRadius)

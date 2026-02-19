@@ -71,8 +71,6 @@ private:
 private:
 	CameraContext activeCtx_{};
 	CameraContext defaultCtx_{};
-
-	World& world_;
 };
 
 }

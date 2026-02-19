@@ -22,7 +22,7 @@ uint64_t MakeSortKey(const RenderPacket& p, bool /*transparent*/)
 }
 
 RenderPrepareSystem::RenderPrepareSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {
 	resourceSys_ = Resource::ResourceSystem::GetInstance();
 }

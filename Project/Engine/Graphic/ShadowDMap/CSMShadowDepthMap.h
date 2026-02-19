@@ -43,6 +43,9 @@ public:
 	// SRV（Texture2DArray）
 	const DX12::DescriptorHandle& GetSRV() const { return srv_; }
 
+	// Debug用 各CascadeのSRV (Texture2D)
+	const DX12::DescriptorHandle& GetDebugSRV(uint32_t cascadeIdx) const; 
+
 	// DSV（cascadeごと）
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV(uint32_t cascadeIdx) const;
 	const D3D12_CPU_DESCRIPTOR_HANDLE* GetDSVPtr(uint32_t cascadeIdx) const;
@@ -75,6 +78,7 @@ private:
 
 	// SRV（persistent）
 	DX12::DescriptorHandle srv_{};
+	std::vector<DX12::DescriptorHandle> debugSrvs_; // Debug
 
 	D3D12_RESOURCE_STATES currentState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 };

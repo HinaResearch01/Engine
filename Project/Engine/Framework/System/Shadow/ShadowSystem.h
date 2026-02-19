@@ -71,8 +71,6 @@ private:
 private:
 	ShadowContext defaultCtx_{};
 	ShadowContext activeCtx_{};
-
-	World& world_;
 };
 
 }

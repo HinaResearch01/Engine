@@ -19,11 +19,15 @@ using namespace Tsumi::Framework;
 using namespace Tsumi::Graphic;
 
 RenderSystem::RenderSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {
 	dx12Mgr_ = DX12::DX12Manager::GetInstance();
 	psoLib_ = Graphic::PSOLibrary::GetInstance();
 	rsLib_ = Graphic::RootSignatureLibrary::GetInstance();
+}
+
+void RenderSystem::Init()
+{
 }
 
 void RenderSystem::Update(float)

@@ -85,7 +85,6 @@ private:
 	ShadowPacket shadowPacket_{};
 	std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)> renderPackets_;
 
-	World& world_;
 	Resource::ResourceSystem* resourceSys_ = nullptr;
 };
 

@@ -6,6 +6,7 @@
 #include "Resource/ResourceSystem.h"
 #include "Resource/Mesh/MeshManager.h"
 #include "Resource/Tex/TextureManager.h"
+#include "Framework/System/Render/RenderSystem.h"
 
 using namespace Tsumi::Editor;
 
@@ -16,43 +17,65 @@ void EngineUI::Init(Utils::FixFPS* fixFPS)
 
 void EngineUI::Draw()
 {
-	ImGui::Begin("Tsumi Engine UI");
+	// DockSpace Setup
+	// Create a window that covers the entire viewport
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->Pos);
+	ImGui::SetNextWindowSize(viewport->Size);
+	ImGui::SetNextWindowViewport(viewport->ID);
 
-	if (ImGui::BeginTabBar("EngineUITabBar")) {
-		
-		if (ImGui::BeginTabItem("Performance")) {
-			DrawPerformance();
-			ImGui::EndTabItem();
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+	ImGui::Begin("Tsumi Engine DockSpace", nullptr, window_flags);
+	ImGui::PopStyleVar(3);
+
+	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("View"))
+		{
+			// Add menu items to toggle windows if needed
+			ImGui::EndMenu();
 		}
-
-		if (ImGui::BeginTabItem("Scene")) {
-			// Left pane for Scene Graph
-			ImGui::BeginChild("SceneGraph", { ImGui::GetContentRegionAvail().x * 0.4f, 0 }, true);
-			DrawScene();
-			ImGui::EndChild();
-
-			ImGui::SameLine();
-
-			// Right pane for Inspector
-			ImGui::BeginChild("Inspector", { 0, 0 }, true);
-			DrawInspector();
-			ImGui::EndChild();
-
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Resources")) {
-			DrawResources();
-			ImGui::EndTabItem();
-		}
-
-		if (ImGui::BeginTabItem("Debug")) {
-			ImGui::EndTabItem();
-		}
-
-		ImGui::EndTabBar();
+		ImGui::EndMenuBar();
 	}
+	ImGui::End();
 
+	// Individual Windows
+	if (ImGui::Begin("Performance")) {
+		DrawPerformance();
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Scene")) {
+		// Layout Scene Graph and Inspector
+		// For now, let's keep them together or separate? User might want them separate.
+		// Let's separate them.
+		DrawScene();
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Inspector")) {
+		DrawInspector();
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Resources")) {
+		DrawResources();
+	}
+	ImGui::End();
+
+	if (ImGui::Begin("Debug")) {
+		DrawShadowDebug();
+	}
 	ImGui::End();
 }
 
@@ -140,4 +163,59 @@ void EngineUI::DrawResources()
 		}
 		ImGui::TreePop();
 	}
+}
+
+void EngineUI::DrawShadowDebug()
+{
+	if (!gameContext_) return;
+	auto* world = gameContext_->GetWorld();
+	if (!world) return;
+
+	auto* renderSys = world->GetSystem<Tsumi::Framework::RenderSystem>();
+	if (!renderSys) return;
+
+	auto* shadowMap = renderSys->GetShadowMap();
+	if (!shadowMap) {
+		ImGui::Text("No Shadow Map active");
+		return;
+	}
+
+	ImGui::Text("Shadow Map Debug View");
+	ImGui::Text("Size: %d, Cascades: %d", shadowMap->GetSize(), shadowMap->GetCascadeCount());
+
+	// 2カラムレイアウトで表示
+	float windowWidth = ImGui::GetContentRegionAvail().x;
+	float spacing = 10.0f;
+	float imgSize = (windowWidth - spacing) * 0.5f; 
+	if (imgSize < 100.0f) imgSize = 100.0f;
+
+	for (uint32_t i = 0; i < shadowMap->GetCascadeCount(); ++i) {
+		ImGui::PushID(i);
+		ImGui::BeginGroup(); // グループ化してテキストと画像をセットにする
+		
+		ImGui::Text("Cascade %d", i);
+		
+		auto& srv = shadowMap->GetDebugSRV(i);
+		if (srv.valid()) {
+			// 画像の枠線をつける（視認性向上）
+			ImVec2 cursor = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)srv.gpu.ptr, { imgSize, imgSize }, { 0,0 }, { 1,1 }, { 1,1,1,1 }, { 1,1,1,1 });
+			
+			// 枠線描画
+			ImGui::GetWindowDrawList()->AddRect(cursor, { cursor.x + imgSize, cursor.y + imgSize }, IM_COL32(255, 255, 255, 100));
+		}
+		else {
+			ImGui::Dummy({ imgSize, imgSize });
+			ImGui::Text("Invalid SRV");
+		}
+		
+		ImGui::EndGroup();
+		ImGui::PopID();
+		
+		// 偶数（0, 2...）の次は改行しない = SameLine
+		if (i % 2 == 0 && i < shadowMap->GetCascadeCount() - 1) {
+			ImGui::SameLine(0.0f, spacing);
+		}
+	}
+	ImGui::NewLine();
 }

@@ -44,9 +44,6 @@ private:
 	/// ノード更新
 	/// </summary>
 	void UpdateComponent(TransformComponent& tr);
-
-private:
-	World& world_;
 };
 
 }

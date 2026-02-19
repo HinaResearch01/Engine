@@ -29,6 +29,7 @@
 #include "Framework/System/Render/RenderSystem.h"
 #include "Framework/System/Shadow/ShadowSystem.h"
 #include "Framework/System/Transform/TransformSystem.h"
+#include "Framework/System/Input/InputSystem.h"
 
 namespace Tsumi::Framework {
 
@@ -43,6 +44,7 @@ public:
 	{
 		// System系をUpdateManagerに登録
 		// 基本Update順に追加(内部で順操作はある)
+		AddSystem<InputSystem>(); // Input first
 		AddSystem<TransformSystem>();
 		AddSystem<CameraSystem>();
 		AddSystem<MaterialSystem>();

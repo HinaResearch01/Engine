@@ -260,6 +260,15 @@
     <ClCompile Include="Engine\Framework\System\Shadow\ShadowHelpers.cpp">
       <Filter>Engine\Framework\System\Shadow</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Camera\TestCameraMoveComp.cpp">
+      <Filter>Game\Test\Actor\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\Input\InputSystem.cpp">
+      <Filter>Engine\Framework\System\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Framework\System\ISystem.cpp">
+      <Filter>Engine\Framework\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -907,6 +916,15 @@
     <ClInclude Include="Engine\Framework\System\Shadow\ShadowHelpers.h">
       <Filter>Engine\Framework\System\Shadow</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Camera\TestCameraMoveComp.h">
+      <Filter>Game\Test\Actor\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Input\InputSystem.h">
+      <Filter>Engine\Framework\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Framework\System\Input\Keys.h">
+      <Filter>Engine\Framework\System\Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1220,6 +1238,9 @@
     </Filter>
     <Filter Include="Game\Test\Actor\KamataCity">
       <UniqueIdentifier>{183ebcf4-4c82-4db4-bcd6-792dc038e75d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Framework\System\Input">
+      <UniqueIdentifier>{8afd6657-e2d4-492c-8b2e-0b37bf1ef365}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

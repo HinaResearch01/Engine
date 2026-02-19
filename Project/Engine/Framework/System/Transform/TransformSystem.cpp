@@ -4,7 +4,7 @@
 using namespace Tsumi::Framework;
 
 TransformSystem::TransformSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {}
 
 void TransformSystem::Update(float)

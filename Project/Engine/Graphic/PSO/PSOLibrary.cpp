@@ -203,11 +203,12 @@ void PSOLibrary::CreateShadowCaster()
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
 
-	pso.SetCullMode(D3D12_CULL_MODE_BACK);
+	// Change to Front Culling to reduce self-shadow acne
+	pso.SetCullMode(D3D12_CULL_MODE_FRONT);
 
-	// Bias
-	pso.SetDepthBias(10);
-	pso.SetSlopeScaledDepthBias(1.0f);
+	// Bias (Reduced significantly because of Front Culling)
+	pso.SetDepthBias(0); 
+	pso.SetSlopeScaledDepthBias(0.0f);
 	pso.SetDepthBiasClamp(0.0f);
 
 	Register("ShadowCaster", pso);

@@ -52,8 +52,6 @@ private:
 private:
 	LightContext defaultCtx_;
 	LightContext activeCtx_;
-
-	World& world_;
 };
 
 }

@@ -10,7 +10,7 @@
 using namespace Tsumi::Framework;
 
 CameraSystem::CameraSystem(World& world)
-	: world_(world)
+	: ISystem(world)
 {}
 
 void CameraSystem::Init()
