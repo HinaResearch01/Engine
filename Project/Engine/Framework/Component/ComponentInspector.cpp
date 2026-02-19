@@ -35,9 +35,9 @@ void CameraComponent::OnInspectorGui()
 		ImGui::Checkbox("Main Candidate", &mainCandidate);
 		ImGui::DragInt("Priority", &priority);
 		
-		ImGui::DragFloat("FOV Y", &fovY, 0.1f);
-		ImGui::DragFloat("Near Z", &nearZ, 0.1f);
-		ImGui::DragFloat("Far Z", &farZ, 0.1f);
+		ImGui::DragFloat("FOV Y", &fovY, 0.1f, 1.0f, 179.0f);
+		ImGui::DragFloat("Near Z", &nearZ, 0.01f, 0.001f, 100.0f);
+		ImGui::DragFloat("Far Z", &farZ, 1.0f, 1.0f, 10000.0f);
 
 		ImGui::TreePop();
 	}
