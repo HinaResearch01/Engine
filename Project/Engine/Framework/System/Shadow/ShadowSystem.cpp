@@ -153,7 +153,6 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
 
 		// ===== Bounding Sphere (View Space Calculation for Stability) =====
-		// Calculate in View Space to avoid radius jitter due to camera rotation
 		Math::Vec3f cornersVS[8]{};
 		ShadowDetail::ShadowMath::GetFrustumCornersWS(cascadeProj.Inverse(), 0.0f, 1.0f, cornersVS); // Using proj inverse gives View Space corners
 
@@ -165,22 +164,17 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 			radius = std::max(radius, d);
 		}
 
-		// Prevent the shadow map from becoming too small when zooming in.
-		// If radius is too small, casters outside the frustum (but casting shadows into it) are clipped in X/Y.
 		radius = std::max(radius, 50.0f);
 		
-		// Stabilize radius to prevent flickering (Texel Size Jitter)
 		radius = std::ceil(radius);
 
 		// Transform center to World Space
-		// cam.view.Inverse() * centerVS
 		Math::Mat4x4 invView = cam.view.Inverse();
 		Math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
 
 		// Light Orientation
 		Math::Mat4x4 lightViewRot = Math::Func::MAT4x4::LookAtLH({ 0,0,0 }, lightDirWS, up);
 		
-		// Transform Sphere Center to Light Space (Rotation only)
 		Math::Vec3f centerLS = lightViewRot.TransformPoint(sphereCenterWS);
 
 		// ===== Texel Snap =====
@@ -191,14 +185,10 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 			centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
 		}
 
-		// Transform back to World Space to get 'Snapped' Sphere Center
-		// Since we only rotated, Inverse is Transpose
 		Math::Mat4x4 lightViewRotInv = lightViewRot.Transpose(); 
 		Math::Vec3f snappedCenterWS = lightViewRotInv.TransformPoint(centerLS);
 
 		// ===== Final Light View Matrix =====
-		// Place camera at Snapped Center - Distance * LightDir
-		// Revert to 500.0f (Proven value that ensured visibility in Step 756).
 		const float backDistance = 500.0f;
 		const float dist = radius + backDistance;
 
@@ -213,16 +203,16 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		// ===== 固定サイズ Ortho =====
 		float r = radius;
-		float nearZ = 0.0f;
+		float nearZ = dist - r; 
 		float farZ = dist + r;
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			-r,
-			r,
-			r,
-			-r,
-			nearZ,
-			farZ
+			-r,     // left
+			r,      // right
+			-r,     // bottom
+			r,      // top
+			nearZ,  // nearClip
+			farZ    // farClip
 		);
 
 		auto& c = out.cascades[ci];
@@ -367,11 +357,13 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 		const float half = 150.0f;
 		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			-half,  // left
-			half,  // top
-			half,  // right
-			-half,  // bottom
-			-150.0f, 150.0f);
+			-half,   // left
+			half,    // right
+			-half,   // bottom
+			half,    // top
+			-150.0f, // nearClip
+			150.0f   // farClip
+		);
 
 		out.cascades[ci].view = lightView;
 		out.cascades[ci].proj = lightProj;

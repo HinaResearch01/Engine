@@ -326,7 +326,7 @@ Mat4x4 MAT4x4::PerspectiveFovMatrix(float fovY, float aspectRatio, float nearCli
 	return result;
 }
 
-Mat4x4 MAT4x4::OrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
+Mat4x4 MAT4x4::OrthographicMatrix(float left, float right, float bottom, float top, float nearClip, float farClip)
 {
 	float width = right - left;
 	float height = top - bottom;

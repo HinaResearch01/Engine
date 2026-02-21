@@ -108,7 +108,7 @@ Mat4x4 AffineMatrix(const Vec3f& scale, const Vec3f& rotate, const Vec3f& transl
 // 透視投影行列
 Mat4x4 PerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
 // 正射影行列
-Mat4x4 OrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+Mat4x4 OrthographicMatrix(float left, float right, float bottom, float top, float nearClip, float farClip);
 // ビューポート変換行列
 Mat4x4 ViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 // 任意軸回転行列

@@ -76,8 +76,9 @@ float4 DirLightingPS(VSOut i) : SV_Target
     // 2. Reconstruct World Position
     float3 positionWS = ReconstructWorldPos(depth, uv, gCamera.gInvViewProj);
 
-    /// 3. Shadow Calculation
-    float viewDepth = length(positionWS - gCamera.gCameraPosWS);
+    // 3. Shadow Calculation
+    float3 viewPos = mul(float4(positionWS, 1.0f), gCamera.gView).xyz;
+    float viewDepth = viewPos.z;
     
     float shadow = ComputeCSMShadowFactor(
         gShadowMapCSM,
