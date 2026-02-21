@@ -44,12 +44,15 @@ bool WorldToShadowUVZ(
     z = sp.z;
 
     // ============================
-    // 範囲チェック (Add epsilon to prevent edge artifacts)
+    // 範囲チェック 
+    // 💡【修正】ゴミを拾わないように 0.0f と 1.0f で厳格に弾く
     // ============================
-    if (uv.x < -0.01f || uv.x > 1.01f ||
-        uv.y < -0.01f || uv.y > 1.01f ||
-        z < -0.01f || z > 1.01f)
+    if (uv.x < 0.0f || uv.x > 1.0f ||
+        uv.y < 0.0f || uv.y > 1.0f ||
+        z < 0.0f || z > 1.0f)
+    {
         return false;
+    }
 
     return true;
 }
@@ -71,9 +74,7 @@ float SampleShadowPCF3x3(
         for (int x = -1; x <= 1; ++x)
         {
             float2 offset = float2(x, y) * texelSize;
-
             float depth = shadowMap.SampleLevel(samplerState, float3(uv + offset, cascadeIdx), 0).r;
-
             sum += (z <= depth) ? 1.0f : 0.0f;
         }
     }
@@ -102,19 +103,30 @@ float ComputeCSMShadowFactor(
     float2 uv;
     float z;
 
-    // Apply Normal Bias to prevent shadow acne (especially on curved surfaces)
-    float cascadeScale = shadowTexelSize.x * 1000.0f; 
+    // 1. Apply Normal Bias to prevent shadow acne
+    float cascadeScale = shadowTexelSize.x * 1000.0f;
     float3 biasedPos = worldPos + normalWS * (shadowNormalBias * cascadeScale);
 
-    if (!WorldToShadowUVZ(
-            lightViewProj[cascadeIdx],
-            biasedPos,
-            uv,
-            z))
+    // 2. 該当カスケードの行列でUVとZを計算
+    bool isInside = WorldToShadowUVZ(lightViewProj[cascadeIdx], biasedPos, uv, z);
+
+    // 境界付近でUVがギリギリ範囲外だった場合、1つ奥のカスケードを試す
+    if (!isInside && cascadeIdx < 3)
+    {
+        cascadeIdx++;
+        isInside = WorldToShadowUVZ(lightViewProj[cascadeIdx], biasedPos, uv, z);
+    }
+
+    // 3. それでも範囲外なら影なし（ライトが当たる）
+    if (!isInside)
+    {
         return 1.0f;
+    }
     
+    // 4. 深度バイアスの適用
     z -= shadowBias;
 
+    // 5. PCFサンプリング
     return SampleShadowPCF3x3(
         shadowMap,
         samplerState,
