@@ -154,10 +154,10 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		// ===== Bounding Sphere (View Space Calculation for Stability) =====
 		Math::Vec3f cornersVS[8]{};
-		ShadowDetail::ShadowMath::GetFrustumCornersWS(cascadeProj.Inverse(), 0.0f, 1.0f, cornersVS); // Using proj inverse gives View Space corners
+		ShadowDetail::ShadowMath::GetFrustumCornersWS(cascadeProj.Inverse(), 0.0f, 1.0f, cornersVS);
 
 		Math::Vec3f centerVS = ShadowDetail::ShadowMath::Average8(cornersVS);
-		
+
 		float radius = 0.0f;
 		for (const auto& c : cornersVS) {
 			float d = (c - centerVS).Length();
@@ -165,60 +165,63 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		}
 
 		radius = std::max(radius, 50.0f);
-		
 		radius = std::ceil(radius);
 
 		// Transform center to World Space
 		Math::Mat4x4 invView = cam.view.Inverse();
 		Math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
 
-		// Light Orientation
-		Math::Mat4x4 lightViewRot = Math::Func::MAT4x4::LookAtLH({ 0,0,0 }, lightDirWS, up);
-		
-		Math::Vec3f centerLS = lightViewRot.TransformPoint(sphereCenterWS);
-
-		// ===== Texel Snap =====
-		float texelSize = (radius * 2.0f) / (float)out.shadowMapSize;
-
-		if (texelSize > 0.0001f) {
-			centerLS.x = std::floor(centerLS.x / texelSize) * texelSize;
-			centerLS.y = std::floor(centerLS.y / texelSize) * texelSize;
-		}
-
-		Math::Mat4x4 lightViewRotInv = lightViewRot.Transpose(); 
-		Math::Vec3f snappedCenterWS = lightViewRotInv.TransformPoint(centerLS);
-
 		// ===== Final Light View Matrix =====
+		// 💡 注意: 前半にあった centerLS のスナップ処理は削除しました（二重スナップ防止のため）
 		const float backDistance = 500.0f;
 		const float dist = radius + backDistance;
 
 		const Math::Vec3f lightPosWS = {
-			snappedCenterWS.x - lightDirWS.x * dist,
-			snappedCenterWS.y - lightDirWS.y * dist,
-			snappedCenterWS.z - lightDirWS.z * dist
+			sphereCenterWS.x - lightDirWS.x * dist,
+			sphereCenterWS.y - lightDirWS.y * dist,
+			sphereCenterWS.z - lightDirWS.z * dist
 		};
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, snappedCenterWS, up);
-
+		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, sphereCenterWS, up);
 
 		// ===== 固定サイズ Ortho =====
 		float r = radius;
-		float nearZ = dist - r; 
+		float nearZ = dist - r;
 		float farZ = dist + r;
 
-		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
-			-r,     // left
-			r,      // right
-			-r,     // bottom
-			r,      // top
-			nearZ,  // nearClip
-			farZ    // farClip
+		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+			-r,      // left
+			r,       // right
+			-r,      // bottom
+			r,       // top
+			nearZ,   // nearClip
+			farZ     // farClip
 		);
 
+		// ===== 新しい テクセル・スナップ処理 (プロジェクション行列の補正) =====
+		// ① 1テクセルあたりのサイズを計算 (プロジェクション空間の幅は 2.0)
+		float ndcTexelSize = 2.0f / float(shadowMapSize);
+
+		// ② ワールド空間の原点 (0, 0, 0) を、現在のライトのプロジェクション空間へ変換
+		Math::Mat4x4 lightViewProj = lightView * lightProj;
+
+		// Vector4(0,0,0,1) と 行列 の乗算処理
+		Math::Vec4f originWS = { 0.0f, 0.0f, 0.0f, 1.0f };
+		Math::Vec4f originPS = originWS * lightViewProj;
+
+		// ③ テクセルサイズに対する「端数（ズレ）」を std::fmodf で計算
+		float offsetX = std::fmodf(originPS.x, ndcTexelSize);
+		float offsetY = std::fmodf(originPS.y, ndcTexelSize);
+
+		// ④ プロジェクション行列の平行移動成分(X, Y) からズレを引き算して、テクセル単位にピタッとスナップ
+		lightProj.m[3][0] -= offsetX;
+		lightProj.m[3][1] -= offsetY;
+
+		// ===== 出力 =====
 		auto& c = out.cascades[ci];
 		c.view = lightView;
 		c.proj = lightProj;
-		c.viewProj = lightView * lightProj;
+		c.viewProj = lightView * lightProj; // スナップ済みの proj で再計算
 	}
 
 	return true;
