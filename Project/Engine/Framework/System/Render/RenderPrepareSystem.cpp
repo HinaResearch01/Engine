@@ -114,9 +114,9 @@ void RenderPrepareSystem::BuildShadowPacket()
 	}
 
 	// ---- bias ----
-	// Tuned for 600m Range (500m BackDistance + Radius).
-	// Bias 0.00005f * 600m ~= 3cm.
-	cb.shadowBias = 0.00005f; 
+	// Tuned for Front Face Culling.
+	// Bias 0.0001f * 600m ~= 6cm.
+	cb.shadowBias = 0.0001f; 
 	cb.shadowNormalBias = 0.01f;
 }
 

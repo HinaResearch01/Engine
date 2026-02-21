@@ -72,10 +72,7 @@ float SampleShadowPCF3x3(
         {
             float2 offset = float2(x, y) * texelSize;
 
-            float depth =
-                shadowMap.Sample(
-                    samplerState,
-                    float3(uv + offset, cascadeIdx)).r;
+            float depth = shadowMap.SampleLevel(samplerState, float3(uv + offset, cascadeIdx), 0).r;
 
             sum += (z <= depth) ? 1.0f : 0.0f;
         }
@@ -114,8 +111,7 @@ float ComputeCSMShadowFactor(
             uv,
             z))
         return 1.0f;
-
-    // Apply constant depth bias
+    
     z -= shadowBias;
 
     return SampleShadowPCF3x3(

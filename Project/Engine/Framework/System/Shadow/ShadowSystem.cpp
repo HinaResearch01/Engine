@@ -168,6 +168,9 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		// Prevent the shadow map from becoming too small when zooming in.
 		// If radius is too small, casters outside the frustum (but casting shadows into it) are clipped in X/Y.
 		radius = std::max(radius, 50.0f);
+		
+		// Stabilize radius to prevent flickering (Texel Size Jitter)
+		radius = std::ceil(radius);
 
 		// Transform center to World Space
 		// cam.view.Inverse() * centerVS
@@ -210,12 +213,7 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 
 		// ===== 固定サイズ Ortho =====
 		float r = radius;
-		// Aggressive NearZ Optimization:
-		// We crop significantly to the sphere volume to maximize depth precision and contrast.
-		// 'dist' is distance from Camera to Center.
-		// Sphere starts at 'dist - radius'.
-		// We add a tiny 20.0f buffer for casters just outside the sphere.
-		float nearZ = std::max(0.0f, dist - radius - 20.0f);
+		float nearZ = 0.0f;
 		float farZ = dist + r;
 
 		const Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(

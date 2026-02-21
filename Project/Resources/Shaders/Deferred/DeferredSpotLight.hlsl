@@ -93,7 +93,9 @@ float4 SpotLightingPS(VSOut i) : SV_Target
     if (albedoData.a == 0.0f) discard;
 
     float3 albedo = albedoData.rgb;
-    float3 normal = normalize(gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz);
+    float3 normal = gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz;
+    normal = normal * 2.0f - 1.0f;
+    normal = normalize(normal);
 
     float4 materialData = gGBuffer2_Reflectivity.Sample(gPointClamp, uv);
     float metallic = materialData.r;

@@ -61,8 +61,9 @@ float4 DirLightingPS(VSOut i) : SV_Target
     float3 albedo = albedoData.rgb;
     float alpha = albedoData.a;
 
-    // Float format stores -1..1 directly
+    // Float format stores 0..1 packed normals
     float3 normal = gGBuffer1_NormalWS.Sample(gPointClamp, uv).xyz; 
+    normal = normal * 2.0f - 1.0f;
     normal = normalize(normal);
 
     float4 materialData = gGBuffer2_Reflectivity.Sample(gPointClamp, uv);
@@ -76,7 +77,7 @@ float4 DirLightingPS(VSOut i) : SV_Target
     float3 positionWS = ReconstructWorldPos(depth, uv, gCamera.gInvViewProj);
 
     /// 3. Shadow Calculation
-    float viewDepth = mul(float4(positionWS, 1.0f), gCamera.gView).z;
+    float viewDepth = length(positionWS - gCamera.gCameraPosWS);
     
     float shadow = ComputeCSMShadowFactor(
         gShadowMapCSM,

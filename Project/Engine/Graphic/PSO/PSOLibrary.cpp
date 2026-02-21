@@ -203,8 +203,8 @@ void PSOLibrary::CreateShadowCaster()
 	pso.SetDepthWrite(true);
 	pso.SetDepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL);
 
-	// Change to Back Culling (Standard)
-	pso.SetCullMode(D3D12_CULL_MODE_BACK);
+	// Change to Front Culling (Render Backfaces)
+	pso.SetCullMode(D3D12_CULL_MODE_FRONT);
 
 	// Disable Hardware Bias (We use manual shader bias)
 	pso.SetDepthBias(0); 

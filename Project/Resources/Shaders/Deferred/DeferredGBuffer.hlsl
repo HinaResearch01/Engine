@@ -67,7 +67,9 @@ GBuffer_Out GBufferPS(V2P input)
 
     o.albedo = float4(albedo, gMaterial.gAlpha);
 
-    o.normalWS = float4(SafeNormalize(input.normalWS), 1.0f);
+    // Normal (R16G16B16A16_FLOAT)
+    // User requested 0..1 range.
+    o.normalWS = float4(SafeNormalize(input.normalWS), 1.0f) * 0.5f + 0.5f;
     
     // PBR Parameters
     o.materialParams.r = gMaterial.gMetallic;

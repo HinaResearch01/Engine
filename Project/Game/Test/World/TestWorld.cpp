@@ -28,6 +28,12 @@ void TestWorld::Init()
 	spot1->SetName("TestSpotLight 1");
 	auto* spot2 = World::SpawnActor<TestSpotLight>();
 	spot2->SetName("TestSpotLight 2");
+
+	auto* spot3 = World::SpawnActor<TestSpotLight>();
+	spot3->SetName("TestSpotLight 3");
+
+	auto* spot4 = World::SpawnActor<TestSpotLight>();
+	spot4->SetName("TestSpotLight 4");
 	
 	World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestCylinder>();
@@ -37,5 +43,5 @@ void TestWorld::Init()
 
 void TestWorld::Update(float deltaTime)
 {
-	World::WorldUpdate(deltaTime);
+	WorldUpdate(deltaTime);
 }

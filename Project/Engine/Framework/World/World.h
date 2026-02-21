@@ -75,7 +75,6 @@ public:
 	// ===============================================
 	// System Accessor
 	// ===============================================
-
 	template<class T>
 	T* GetSystem() {
 		const std::type_index ti = typeid(T);
@@ -98,7 +97,6 @@ public:
 	// ===============================================
 	// Actor Management
 	// ===============================================
-
 	template<class T, class... Args>
 	T* SpawnActor(Args&&... args) {
 		static_assert(std::is_base_of_v<IActor, T>, "T must derive from IActor");
@@ -147,7 +145,6 @@ public:
 	// ===============================================
 	// ComponentView View 
 	// ===============================================
-
 	template<class T>
 	ComponentView<T>& GetView()
 	{
@@ -218,7 +215,6 @@ protected:
 	// ===============================================
 	// UpdateManager Management
 	// ===============================================
-
 	void RegisterActorUpdatables(IActor* actor) {
 		actor->ForEachComponent([this](IComponent* comp) {
 			if (auto* updatable = dynamic_cast<IUpdatable*>(comp)) {
@@ -238,7 +234,6 @@ protected:
 	// ===============================================
 	// ComponentView Management
 	// ===============================================
-
 	template<class T>
 	void RegisterView(ComponentView<T>& view)
 	{
@@ -283,7 +278,6 @@ protected:
 	// ===============================================
 	// Dead Actor Cleanup
 	// ===============================================
-
 	void CleanupDeadActorsInternal() {
 		for (auto& a : actors_) {
 			if (a->GetState() == IActor::State::Dead) {
