@@ -254,9 +254,6 @@
     <ClCompile Include="Game\Test\Actor\SpotLight\TestSpotLight.cpp">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Test\Actor\Kamata\KamataCity.cpp">
-      <Filter>Game\Test\Actor\KamataCity</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Framework\System\Shadow\ShadowHelpers.cpp">
       <Filter>Engine\Framework\System\Shadow</Filter>
     </ClCompile>
@@ -268,6 +265,12 @@
     </ClCompile>
     <ClCompile Include="Engine\Framework\System\ISystem.cpp">
       <Filter>Engine\Framework\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\KamataCity\KamataCity.cpp">
+      <Filter>Game\Test\Actor\KamataCity</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Test\Actor\LakeTown\LakeTownCity.cpp">
+      <Filter>Game\Test\Actor\LakeTown</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -910,9 +913,6 @@
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h">
       <Filter>Game\Test\Actor\SpotLight</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Test\Actor\Kamata\KamataCity.h">
-      <Filter>Game\Test\Actor\KamataCity</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Framework\System\Shadow\ShadowHelpers.h">
       <Filter>Engine\Framework\System\Shadow</Filter>
     </ClInclude>
@@ -924,6 +924,12 @@
     </ClInclude>
     <ClInclude Include="Engine\Framework\System\Input\Keys.h">
       <Filter>Engine\Framework\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\KamataCity\KamataCity.h">
+      <Filter>Game\Test\Actor\KamataCity</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Test\Actor\LakeTown\LakeTownCity.h">
+      <Filter>Game\Test\Actor\LakeTown</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1241,6 +1247,9 @@
     </Filter>
     <Filter Include="Engine\Framework\System\Input">
       <UniqueIdentifier>{8afd6657-e2d4-492c-8b2e-0b37bf1ef365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\LakeTown">
+      <UniqueIdentifier>{fd60a80c-fa1a-4058-bd70-791b78054b84}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

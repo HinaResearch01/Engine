@@ -350,7 +350,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Test\Actor\Cylinder\TestCylinder.cpp" />
     <ClCompile Include="Game\Test\Actor\DirLight\TestDirLight.cpp" />
     <ClCompile Include="Game\Test\Actor\Floor\TestFloor.cpp" />
-    <ClCompile Include="Game\Test\Actor\Kamata\KamataCity.cpp" />
+    <ClCompile Include="Game\Test\Actor\KamataCity\KamataCity.cpp" />
+    <ClCompile Include="Game\Test\Actor\LakeTown\LakeTownCity.cpp" />
     <ClCompile Include="Game\Test\Actor\SpotLight\TestSpotLight.cpp" />
     <ClCompile Include="Game\Test\World\TestWorld.cpp" />
     <ClCompile Include="main.cpp" />
@@ -934,7 +935,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Test\Actor\Floor\TestFloor.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorMaterialComp.h" />
     <ClInclude Include="Game\Test\Actor\Floor\TestFloorRenderComp.h" />
-    <ClInclude Include="Game\Test\Actor\Kamata\KamataCity.h" />
+    <ClInclude Include="Game\Test\Actor\KamataCity\KamataCity.h" />
+    <ClInclude Include="Game\Test\Actor\LakeTown\LakeTownCity.h" />
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLight.h" />
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h" />
     <ClInclude Include="Game\Test\World\TestWorld.h" />

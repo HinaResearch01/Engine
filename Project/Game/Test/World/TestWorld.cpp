@@ -7,6 +7,7 @@
 #include "../Actor/Floor/TestFloor.h"
 #include "../Actor/Cylinder/TestCylinder.h"
 #include "../Actor/KamataCity/KamataCity.h"
+#include "../Actor/LakeTown/LakeTownCity.h"
 
 void TestWorld::Init()
 {
@@ -21,6 +22,7 @@ void TestWorld::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/cylinder/cylinder.obj", "cylinder");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/floor/floor.obj", "floor");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/kamata/kamata.obj", "kamata");
+	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/laketown/laketown.obj", "laketown");
 	// TestActorの追加
 	World::SpawnActor<TestCamera>();
 	World::SpawnActor<TestDirLight>();
@@ -28,17 +30,16 @@ void TestWorld::Init()
 	spot1->SetName("TestSpotLight 1");
 	auto* spot2 = World::SpawnActor<TestSpotLight>();
 	spot2->SetName("TestSpotLight 2");
-
 	auto* spot3 = World::SpawnActor<TestSpotLight>();
 	spot3->SetName("TestSpotLight 3");
-
 	auto* spot4 = World::SpawnActor<TestSpotLight>();
 	spot4->SetName("TestSpotLight 4");
 	
-	World::SpawnActor<TestAxis>();
-	World::SpawnActor<TestCylinder>();
+	/*World::SpawnActor<TestAxis>();
+	World::SpawnActor<TestCylinder>();*/
 	World::SpawnActor<TestFloor>();
-	World::SpawnActor<KamataCity>();
+	//World::SpawnActor<KamataCity>();
+	World::SpawnActor<LakeTownCity>();
 }
 
 void TestWorld::Update(float deltaTime)
