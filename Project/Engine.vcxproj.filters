@@ -272,6 +272,9 @@
     <ClCompile Include="Game\Test\Actor\LakeTown\LakeTownCity.cpp">
       <Filter>Game\Test\Actor\LakeTown</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Test\Actor\Terrain\TestTerrain.cpp">
+      <Filter>Game\Test\Actor\TestTerrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\json\json.hpp">
@@ -931,6 +934,9 @@
     <ClInclude Include="Game\Test\Actor\LakeTown\LakeTownCity.h">
       <Filter>Game\Test\Actor\LakeTown</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\Terrain\TestTerrain.h">
+      <Filter>Game\Test\Actor\TestTerrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">
@@ -1250,6 +1256,9 @@
     </Filter>
     <Filter Include="Game\Test\Actor\LakeTown">
       <UniqueIdentifier>{fd60a80c-fa1a-4058-bd70-791b78054b84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Test\Actor\TestTerrain">
+      <UniqueIdentifier>{cdaa9e28-38c1-42a2-a67c-b2396bfa1b5e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

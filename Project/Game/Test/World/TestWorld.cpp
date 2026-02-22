@@ -8,6 +8,7 @@
 #include "../Actor/Cylinder/TestCylinder.h"
 #include "../Actor/KamataCity/KamataCity.h"
 #include "../Actor/LakeTown/LakeTownCity.h"
+#include "../Actor/Terrain/TestTerrain.h"
 
 void TestWorld::Init()
 {
@@ -23,11 +24,11 @@ void TestWorld::Init()
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/floor/floor.obj", "floor");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/kamata/kamata.obj", "kamata");
 	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/laketown/laketown.obj", "laketown");
+	tme::API::AssetLoader::Load<mdl>("Resources/Model/Test/Terrein/TestTerrain.obj", "TestTerrain");
 	// TestActorの追加
 	World::SpawnActor<TestCamera>();
 	World::SpawnActor<TestDirLight>();
-	World::SpawnActor<TestFloor>();
-	World::SpawnActor<KamataCity>();
+	World::SpawnActor<TestTerrain>();
 }
 
 void TestWorld::Update(float deltaTime)
