@@ -38,8 +38,8 @@ void TestWorld::Init()
 	/*World::SpawnActor<TestAxis>();
 	World::SpawnActor<TestCylinder>();*/
 	World::SpawnActor<TestFloor>();
-	//World::SpawnActor<KamataCity>();
-	World::SpawnActor<LakeTownCity>();
+	World::SpawnActor<KamataCity>();
+	//World::SpawnActor<LakeTownCity>();
 }
 
 void TestWorld::Update(float deltaTime)
