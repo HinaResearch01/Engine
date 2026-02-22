@@ -59,6 +59,11 @@ void EngineUI::Draw()
 				ImGui::EndTabItem();
 			}
 
+			if (ImGui::BeginTabItem("Camera")) {
+				DrawCameraControl();
+				ImGui::EndTabItem();
+			}
+
 			if (ImGui::BeginTabItem("Debug")) {
 				DrawShadowDebug();
 				ImGui::EndTabItem();
@@ -209,4 +214,45 @@ void EngineUI::DrawShadowDebug()
 		}
 	}
 	ImGui::NewLine();
+}
+
+void EngineUI::DrawCameraControl()
+{
+	if (!gameContext_) return;
+	auto* world = gameContext_->GetWorld();
+	if (!world) return;
+
+	// 全アクターからCameraComponentを持つものを探す
+	Tsumi::Framework::IActor* mainCamera = nullptr;
+	const auto& actors = world->GetActors();
+	for (const auto& actor : actors) {
+		if (actor->HasComp<Tsumi::Framework::CameraComponent>()) {
+			// 一旦最初に見つかったものをメインとする
+			mainCamera = actor.get();
+			break;
+		}
+	}
+
+	if (!mainCamera) {
+		ImGui::Text("No Camera Actor found in World.");
+		return;
+	}
+
+	ImGui::Text("Active Camera: %s", mainCamera->GetName().c_str());
+	ImGui::Separator();
+
+	// 操作方法の説明を追加
+	if (ImGui::CollapsingHeader("How to Use (Keyboard Controls)", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::BulletText("W/S: Move Forward / Backward");
+		ImGui::BulletText("A/D: Move Left / Right");
+		ImGui::BulletText("E/Q: Move Up / Down");
+		ImGui::BulletText("Left Shift: Turbo Speed (x5)");
+		ImGui::BulletText("Arrow Keys: Rotate Camera (Pitch/Yaw)");
+	}
+	ImGui::Separator();
+
+	// その場でインスペクターを表示しちゃう（利便性のため）
+	mainCamera->ForEachComponent([](Tsumi::Framework::IComponent* comp) {
+		comp->OnInspectorGui();
+	});
 }

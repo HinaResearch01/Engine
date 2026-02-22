@@ -42,6 +42,7 @@ private:
 	void DrawInspector();
 	void DrawResources();
 	void DrawShadowDebug();
+	void DrawCameraControl();
 
 private:
 	Utils::FixFPS* fixFPS_ = nullptr;

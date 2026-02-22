@@ -11,9 +11,10 @@ public:
 	~TestCameraMoveComp() = default;
 
 	void Update(float dt) override;
+	void OnInspectorGui() override;
 	Tsumi::Framework::UpdatePhase Phase() const override { return Tsumi::Framework::UpdatePhase::Logic; }
 
 private:
 	float moveSpeed_ = 15.0f;
-	float rotateSpeed_ = 30.0f;
+	float rotateSpeed_ = 50.0f;
 };

@@ -3,6 +3,7 @@
 #include "Framework/System/Input/InputSystem.h"
 #include "Framework/Actor/IActor.h"
 #include "Framework/Component/Transform/TransformComponent.h"
+#include "imgui.h"
 
 using namespace Tsumi::Framework;
 
@@ -46,5 +47,24 @@ void TestCameraMoveComp::Update(float dt)
 
 	if (isMoved) {
 		trans->MarkDirty();
+	}
+}
+
+void TestCameraMoveComp::OnInspectorGui()
+{
+	if (ImGui::TreeNode("Camera Movement")) {
+		ImGui::DragFloat("Move Speed", &moveSpeed_, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("Rotate Speed", &rotateSpeed_, 0.1f, 0.0f, 200.0f);
+		
+		if (ImGui::Button("Reset Position")) {
+			auto* trans = GetOwner()->GetComponent<TransformComponent>();
+			if (trans) {
+				trans->srt.translate = { 120.0f, 115.0f, -40.0f };
+				trans->srt.rotate = { -30.0f, 35.0f, 0.0f };
+				trans->MarkDirty();
+			}
+		}
+
+		ImGui::TreePop();
 	}
 }
