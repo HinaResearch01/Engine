@@ -937,6 +937,9 @@
     <ClInclude Include="Game\Test\Actor\Terrain\TestTerrain.h">
       <Filter>Game\Test\Actor\TestTerrain</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightMoveComp.h">
+      <Filter>Game\Test\Actor\SpotLight</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resources">

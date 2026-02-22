@@ -1,10 +1,12 @@
 #include "TestSpotLight.h"
 #include "TestSpotLightComp.h"
+#include "TestSpotLightMoveComp.h"
 
 void TestSpotLight::Init()
 {
 	IActor::name_ = "TestSpotLight";
 	IActor::AddComp<TestSpotLightComp>();
+	IActor::AddComp<TestSpotLightMoveComp>();
 
 	auto* tr = IActor::GetComponent<Tsumi::Framework::TransformComponent>();
 	// 上から下を照らす

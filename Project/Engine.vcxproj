@@ -940,6 +940,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Test\Actor\LakeTown\LakeTownCity.h" />
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLight.h" />
     <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightComp.h" />
+    <ClInclude Include="Game\Test\Actor\SpotLight\TestSpotLightMoveComp.h" />
     <ClInclude Include="Game\Test\Actor\Terrain\TestTerrain.h" />
     <ClInclude Include="Game\Test\World\TestWorld.h" />
   </ItemGroup>

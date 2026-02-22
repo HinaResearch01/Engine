@@ -113,8 +113,8 @@ void SpotLightComponent::OnInspectorGui()
 {
 	if (ImGui::TreeNode("Spot Light")) {
 		ImGui::ColorEdit3("Color", &color.x);
-		ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 100.0f);
-		ImGui::DragFloat("Range", &range, 0.1f, 0.0f);
+		ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 1000.0f);
+		ImGui::DragFloat("Range", &range, 0.5f, 0.0f, 1000.0f);
 		
 		float innerDeg = Math::Func::NUM::ToDegrees(std::acos(innerCos));
 		float outerDeg = Math::Func::NUM::ToDegrees(std::acos(outerCos));

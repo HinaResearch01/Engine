@@ -10,5 +10,10 @@ public:
 	~TestWorld() = default;
 	void Init() override;
 	void Update(float deltaTime) override;
+
+private:
+	void LoadAssets();
+	void SpawnBaseActors();
+	void SpawnStressLights();
 };
 
