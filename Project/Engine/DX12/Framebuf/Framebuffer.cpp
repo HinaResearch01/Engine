@@ -15,7 +15,7 @@ namespace {
 inline bool HRFailed(HRESULT hr, const char* where)
 {
 	if (FAILED(hr)) {
-		Tsumi::Utils::Logger::Error(
+		util::Logger::Error(
 			where, "hr:", static_cast<unsigned>(hr));
 		return true;
 	}
@@ -41,7 +41,7 @@ HRESULT Framebuffer::Init()
 	height_ = desc.windowHeight;
 
 	if (width_ == 0 || height_ == 0) {
-		Tsumi::Utils::Logger::Warn("Framebuffer::Init skipped (size=0).");
+		util::Logger::Warn("Framebuffer::Init skipped (size=0).");
 		return S_FALSE;
 	}
 

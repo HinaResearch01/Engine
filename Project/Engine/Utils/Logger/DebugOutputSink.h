@@ -2,7 +2,7 @@
 
 #include "ILogSink.h"
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 class DebugOutputSink final : public ILogSink {
 public:

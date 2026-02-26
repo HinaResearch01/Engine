@@ -1,7 +1,7 @@
 #pragma once
 #include <string_view>
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 class ILogSink {
 public:

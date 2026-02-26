@@ -5,6 +5,7 @@
 #include <format>
 
 using namespace Tsumi::DX12;
+using namespace tme;
 
 DX12Manager::DX12Manager()
 {
@@ -75,7 +76,7 @@ void DX12Manager::Finalize()
 FrameIndices DX12Manager::BeginFrame()
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
-		Utils::Logger::Error("DX12Manager::BeginFrame - subsystem missing");
+		util::Logger::Error("DX12Manager::BeginFrame - subsystem missing");
 		return {}; // cpu=0, backBuffer=0
 	}
 
@@ -89,7 +90,7 @@ FrameIndices DX12Manager::BeginFrame()
 	// ---- Reset command list / allocator ----
 	HRESULT hr = graphicsCtx_->ResetForFrame(cpuFrameIndex_);
 	if (FAILED(hr)) {
-		Utils::Logger::Error(
+		util::Logger::Error(
 			"DX12Manager::BeginFrame - ResetForFrame failed",
 			"hr", (unsigned)hr);
 		return {};
@@ -111,7 +112,7 @@ FrameIndices DX12Manager::BeginFrame()
 HRESULT DX12Manager::EndFrame(const FrameIndices& idx)
 {
 	if (!graphicsCtx_ || !swapChain_ || !framebuffer_ || !frameSync_) {
-		Utils::Logger::Error("DX12Manager::EndFrame - subsystem missing");
+		util::Logger::Error("DX12Manager::EndFrame - subsystem missing");
 		return E_POINTER;
 	}
 
@@ -191,7 +192,7 @@ D3D12_VIEWPORT DX12Manager::GetMainViewport() const
 	float h = static_cast<float>(framebuffer_ ? framebuffer_->GetHeight() : 0);
 
 	if (w <= 0.0f || h <= 0.0f) {
-		Tsumi::Utils::Logger::Warn(
+		util::Logger::Warn(
 			"Viewport Size is INVALID!", 
 			"w:", static_cast<float>(w), 
 			"h:", static_cast<float>(h));

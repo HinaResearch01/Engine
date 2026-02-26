@@ -7,6 +7,7 @@
 
 using namespace Tsumi::Graphic;
 using namespace Tsumi::DX12;
+using namespace tme;
 
 static DXGI_FORMAT MakeTypelessDepth_(DXGI_FORMAT dsvFmt)
 {
@@ -84,7 +85,7 @@ void ShadowDepthMap::Create(uint32_t size)
 	);
 	assert(SUCCEEDED(hr));
 	if (FAILED(hr)) {
-		Utils::Logger::Error("ShadowDepthMap: CreateCommittedResource failed");
+		util::Logger::Error("ShadowDepthMap: CreateCommittedResource failed");
 		return;
 	}
 
@@ -133,7 +134,7 @@ void ShadowDepthMap::CreateViews()
 	srv_ = alloc->Allocate(1);
 	assert(srv_.valid());
 	if (!srv_.valid()) {
-		Tsumi::Utils::Logger::Error("ShadowDepthMap: SRV Allocate failed");
+		util::Logger::Error("ShadowDepthMap: SRV Allocate failed");
 		return;
 	}
 

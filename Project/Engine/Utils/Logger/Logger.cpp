@@ -4,7 +4,7 @@
 #include <Windows.h>
 #endif
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 void Logger::AddSink(std::unique_ptr<ILogSink> sink)
 {

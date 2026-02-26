@@ -8,6 +8,7 @@
 
 using namespace Tsumi::Graphic;
 using Microsoft::WRL::ComPtr;
+using namespace tme;
 
 RootSignatureLibrary::RootSignatureLibrary()
 {
@@ -81,13 +82,13 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 
 			std::wstring werr = Utils::Func::Utf8ToWstring(err);
 
-			Utils::Logger::Error(
+			util::Logger::Error(
 				"RootSignatureLibrary::Register serialize error",
 				"name:", wname,
 				"message:", werr);
 		}
 		else {
-			Utils::Logger::Error(
+			util::Logger::Error(
 				"RootSignatureLibrary::Register serialize failed",
 				"name:", wname,
 				"hr:", static_cast<unsigned>(hr));
@@ -105,7 +106,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 	);
 
 	if (FAILED(hr) || !rootSig) {
-		Utils::Logger::Error(
+		util::Logger::Error(
 			"RootSignatureLibrary::Register - CreateRootSignature に失敗 '{}', hr=0x{:08X}\n",
 			wname, static_cast<unsigned>(hr));
 		throw std::runtime_error("RootSignature create failed: " + name);
@@ -117,7 +118,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 		rootSigs_[name] = rootSig;
 	}
 
-	Utils::Logger::Info(
+	util::Logger::Info(
 		"RootSignatureLibrary::Register - 登録完了 ", wname);
 }
 

@@ -17,8 +17,8 @@ using namespace tme;
 
 Application::Application()
 {
-	Utils::Logger::AddSink(std::make_unique<Utils::DebugOutputSink>());
-	Utils::Logger::AddSink(std::make_unique<Utils::FileSink>("TsumiEngine.log"));
+	util::Logger::AddSink(std::make_unique<util::DebugOutputSink>());
+	util::Logger::AddSink(std::make_unique<util::FileSink>("TsumiEngine.log"));
     window_ = sys::win::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
