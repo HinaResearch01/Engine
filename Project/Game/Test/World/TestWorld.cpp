@@ -7,6 +7,10 @@
 #include "../Actor/SpotLight/TestSpotLight.h"
 #include "../Actor/SpotLight/TestSpotLightComp.h"
 #include "../Actor/Terrain/TestTerrain.h"
+#include "../Actor/Axis/TestAxis.h"
+#include "../Actor/Floor/TestFloor.h"
+#include "../Actor/Cylinder/TestCylinder.h"
+#include "../Actor/KamataCity/KamataCity.h"
 
 #include <random>
 #include <ctime>
@@ -22,7 +26,7 @@ void TestWorld::Init()
 
 	LoadAssets();
 	SpawnBaseActors();
-	SpawnStressLights();
+	//SpawnStressLights();
 }
 
 // =====================================================
@@ -60,7 +64,8 @@ void TestWorld::SpawnBaseActors()
 {
 	SpawnActor<TestCamera>();
 	SpawnActor<TestDirLight>();
-	SpawnActor<TestTerrain>();
+	SpawnActor<TestFloor>();
+	SpawnActor<KamataCity>();
 }
 
 // =====================================================

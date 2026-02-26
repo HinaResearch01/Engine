@@ -36,7 +36,8 @@ public:
 	/// <summary>
 	/// Phaseの取得
 	/// </summary>
-	UpdatePhase Phase() const override { return UpdatePhase::SceneContext; }
+	UpdatePhase Phase() const override { 
+		return UpdatePhase::SceneContext; }
 
 #pragma region Accessor
 	const LightContext& GetContext() const { return activeCtx_; }

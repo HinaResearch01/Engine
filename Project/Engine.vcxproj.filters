@@ -1026,9 +1026,6 @@
     <Filter Include="Engine\Utils\Logger">
       <UniqueIdentifier>{d002f3da-3379-45ac-83ba-a246dc604341}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Win">
-      <UniqueIdentifier>{91e3d93b-ffbd-4196-a3dc-66bced151c5c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\DX12\Cmd">
       <UniqueIdentifier>{075855fe-faf6-4380-8981-7ac2336d4bff}</UniqueIdentifier>
     </Filter>
@@ -1262,6 +1259,9 @@
     </Filter>
     <Filter Include="Game\Test\Actor\TestTerrain">
       <UniqueIdentifier>{cdaa9e28-38c1-42a2-a67c-b2396bfa1b5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Win">
+      <UniqueIdentifier>{91e3d93b-ffbd-4196-a3dc-66bced151c5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
