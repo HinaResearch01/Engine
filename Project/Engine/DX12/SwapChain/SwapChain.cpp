@@ -17,8 +17,8 @@ HRESULT SwapChain::Create(UINT desiredBufferCount)
 {
 	if (!dx12Mgr_) return E_POINTER;
 
-	HWND hwnd = sys::Win32::Win32Window::GetInstance()->GetHWND();
-	auto winDesc = sys::Win32::Win32Window::GetInstance()->GetDesc();
+	HWND hwnd = sys::win::Win32Window::GetInstance()->GetHWND();
+	auto winDesc = sys::win::Win32Window::GetInstance()->GetDesc();
 
 	DXGI_SWAP_CHAIN_DESC1 desc{};
 	desc.Width = winDesc.windowWidth;

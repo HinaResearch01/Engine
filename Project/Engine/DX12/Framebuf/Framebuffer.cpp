@@ -36,7 +36,7 @@ HRESULT Framebuffer::Init()
 	auto* device = dx12Mgr_->GetDevice();
 	if (!device) return E_POINTER;
 
-	sys::Win32::Win32Desc desc = sys::Win32::Win32Window::GetInstance()->GetDesc();
+	sys::win::Win32Desc desc = sys::win::Win32Window::GetInstance()->GetDesc();
 	width_ = desc.windowWidth;
 	height_ = desc.windowHeight;
 

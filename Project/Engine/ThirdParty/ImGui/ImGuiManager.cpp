@@ -13,7 +13,7 @@ using namespace tme;
 
 ImGuiManager::ImGuiManager()
 {
-    win_ = sys::Win32::Win32Window::GetInstance();
+    win_ = sys::win::Win32Window::GetInstance();
     dx12Mgr_ = DX12::DX12Manager::GetInstance();
 }
 

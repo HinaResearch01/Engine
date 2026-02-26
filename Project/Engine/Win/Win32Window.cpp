@@ -1,6 +1,8 @@
 #include "Win32Window.h"
 
-using namespace tme::sys::Win32;
+using namespace tme;
+using namespace sys;
+using namespace win;
 
 void Win32Window::CreateMainWindow(const Win32Desc& desc)
 {

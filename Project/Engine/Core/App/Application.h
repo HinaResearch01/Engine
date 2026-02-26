@@ -28,7 +28,7 @@ class ImGuiManager;
 namespace tme {
 
 namespace sys {
-namespace Win32 {
+namespace win {
 class Win32Window;
 struct Win32Desc;
 }
@@ -56,7 +56,7 @@ public:
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Init(const sys::Win32::Win32Desc& windowDesc);
+    void Init(const sys::win::Win32Desc& windowDesc);
 
     /// <summary>
     /// メインループ処理
@@ -66,7 +66,7 @@ public:
 private:
     bool isRunning_ = true;
 
-	tme::sys::Win32::Win32Window* window_ = nullptr;
+	tme::sys::win::Win32Window* window_ = nullptr;
 
 	Tsumi::DX12::DX12Manager* dx12_ = nullptr;
 

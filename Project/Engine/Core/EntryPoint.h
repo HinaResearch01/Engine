@@ -10,7 +10,7 @@
 #define ENGINE_ENTRY_POINT(Title) \
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) \
 { \
-    tme::sys::Win32::Win32Desc desc; \
+    tme::sys::win::Win32Desc desc; \
     desc.hInstance = hInstance; \
     desc.windowTitle = Title; \
     desc.windowWidth = 1280; \

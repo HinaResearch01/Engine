@@ -19,7 +19,7 @@ Application::Application()
 {
 	Utils::Logger::AddSink(std::make_unique<Utils::DebugOutputSink>());
 	Utils::Logger::AddSink(std::make_unique<Utils::FileSink>("TsumiEngine.log"));
-    window_ = sys::Win32::Win32Window::GetInstance();
+    window_ = sys::win::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
@@ -41,7 +41,7 @@ Application::~Application()
     dx12_->Finalize();
 }
 
-void Application::Init(const sys::Win32::Win32Desc& windowDesc)
+void Application::Init(const sys::win::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();
