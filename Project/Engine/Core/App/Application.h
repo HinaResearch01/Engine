@@ -20,9 +20,6 @@ class PSOLibrary;
 namespace Resource {
 class ResourceSystem;
 }
-namespace GUI {
-class ImGuiManager;
-}
 }
 
 namespace tme {
@@ -32,6 +29,10 @@ namespace win {
 class Win32Window;
 struct Win32Desc;
 }
+}
+
+namespace gui {
+class ImGuiManager;
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -76,10 +77,11 @@ private:
 
 	Tsumi::Resource::ResourceSystem* resourceMgr_ = nullptr;
 
-	Tsumi::GUI::ImGuiManager* imgui_ = nullptr;
+	tme::gui::ImGuiManager* imgui_ = nullptr;
 
     std::unique_ptr<Tsumi::Framework::GameContext> gameCtx_;
     std::unique_ptr<tme::util::FixFPS> fixFPS_;
     std::unique_ptr<tme::editor::EngineUI> engineUI_;
 };
+
 }

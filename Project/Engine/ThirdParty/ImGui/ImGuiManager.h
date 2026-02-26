@@ -18,7 +18,7 @@ class DX12Manager;
 struct DescAlloc;
 }
 
-namespace Tsumi::GUI {
+namespace tme::gui{
 
 /* デバッグ用GUI表示 */
 class ImGuiManager {
@@ -69,7 +69,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap_;
 
 	tme::sys::win::Win32Window* win_ = nullptr;
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	Tsumi::DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Tsumi::DX12::DescriptorHandle fontSrv_{};
 };
 

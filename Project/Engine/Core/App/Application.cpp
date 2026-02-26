@@ -25,7 +25,7 @@ Application::Application()
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
     resourceMgr_ = Resource::ResourceSystem::GetInstance();
-    imgui_ = GUI::ImGuiManager::GetInstance();
+    imgui_ = gui::ImGuiManager::GetInstance();
 	gameCtx_ = std::make_unique<Framework::GameContext>();
 	fixFPS_ = std::make_unique<util::FixFPS>();
 	engineUI_ = std::make_unique<editor::EngineUI>();

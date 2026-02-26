@@ -8,13 +8,14 @@
 #include "DX12/Desc/PersistentDescAllocator.h"
 #include "Utils/Logger/Logger.h"
 
-using namespace Tsumi::GUI;
+using namespace Tsumi::DX12;
 using namespace tme;
+using namespace gui;
 
 ImGuiManager::ImGuiManager()
 {
     win_ = sys::win::Win32Window::GetInstance();
-    dx12Mgr_ = DX12::DX12Manager::GetInstance();
+    dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
 }
 
 void ImGuiManager::Init()
