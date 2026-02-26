@@ -13,12 +13,13 @@
 #include "Utils/Logger/FileSink.h"
 
 using namespace Tsumi;
+using namespace tme;
 
 Application::Application()
 {
-	Utils::Logger::AddSink(std::make_unique<Utils::DebugOutputSink>());
-	Utils::Logger::AddSink(std::make_unique<Utils::FileSink>("TsumiEngine.log"));
-    window_ = Win32::Win32Window::GetInstance();
+	util::Logger::AddSink(std::make_unique<util::DebugOutputSink>());
+	util::Logger::AddSink(std::make_unique<util::FileSink>("TsumiEngine.log"));
+    window_ = sys::win::Win32Window::GetInstance();
     dx12_ = DX12::DX12Manager::GetInstance();
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
@@ -40,7 +41,7 @@ Application::~Application()
     dx12_->Finalize();
 }
 
-void Application::Init(const Win32::Win32Desc& windowDesc)
+void Application::Init(const sys::win::Win32Desc& windowDesc)
 {
     window_->CreateMainWindow(windowDesc);
     dx12_->Init();

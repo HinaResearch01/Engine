@@ -4,6 +4,7 @@
 
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
+using namespace tme;
 
 // ------------------------------------------------------------
 // ShaderType → Profile
@@ -32,25 +33,25 @@ HRESULT ShaderLibrary::InitDXC()
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
 	if (FAILED(hr))
 	{
-		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IDxcUtils");
+		util::Logger::Error("[ShaderLibrary] Failed to create IDxcUtils");
 		return hr;
 	}
 
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
 	if (FAILED(hr))
 	{
-		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IDxcCompiler");
+		util::Logger::Error("[ShaderLibrary] Failed to create IDxcCompiler");
 		return hr;
 	}
 
 	hr = dxcUtils_->CreateDefaultIncludeHandler(&dxcIncludeHandler_);
 	if (FAILED(hr))
 	{
-		Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to create IncludeHandler");
+		util::Logger::Error("[ShaderLibrary] Failed to create IncludeHandler");
 		return hr;
 	}
 
-	Tsumi::Utils::Logger::Info("[ShaderLibrary] DXC initialized");
+	util::Logger::Info("[ShaderLibrary] DXC initialized");
 	return S_OK;
 }
 
@@ -63,7 +64,7 @@ void ShaderLibrary::Init()
 
 	if (FAILED(InitDXC()))
 	{
-		Tsumi::Utils::Logger::Error("[ShaderLibrary] DXC init failed");
+		util::Logger::Error("[ShaderLibrary] DXC init failed");
 		return;
 	}
 
@@ -90,18 +91,18 @@ IDxcBlob* ShaderLibrary::Get(const std::string& name, ShaderType stage) const
 // ------------------------------------------------------------
 void ShaderLibrary::CompileAllShader()
 {
-	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader start");
+	util::Logger::Info("[ShaderLibrary] CompileAllShader start");
 
 	auto tryCompile = [&](const std::string& name, const ShaderLoadModule& desc)
 	{
 		HRESULT hr = Compile(name, desc);
 		if (FAILED(hr))
 		{
-			Tsumi::Utils::Logger::Error("[ShaderLibrary] Compile failed:", name);
+			util::Logger::Error("[ShaderLibrary] Compile failed:", name);
 		}
 		else
 		{
-			Tsumi::Utils::Logger::Info("[ShaderLibrary] Compile succeeded:", name);
+			util::Logger::Info("[ShaderLibrary] Compile succeeded:", name);
 		}
 	};
 
@@ -150,7 +151,7 @@ void ShaderLibrary::CompileAllShader()
 	}
 
 
-	Tsumi::Utils::Logger::Info("[ShaderLibrary] CompileAllShader end");
+	util::Logger::Info("[ShaderLibrary] CompileAllShader end");
 }
 
 // ------------------------------------------------------------
@@ -166,13 +167,13 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		const ShaderStageDesc& stageDesc = kv.second;
 
 		std::wstring filePath =
-			Tsumi::Utils::Func::Utf8ToWstring(stageDesc.file);
+			Utils::Func::Utf8ToWstring(stageDesc.file);
 
 		std::wstring entry =
-			Tsumi::Utils::Func::Utf8ToWstring(
+			Utils::Func::Utf8ToWstring(
 			stageDesc.entry.empty() ? "main" : stageDesc.entry);
 
-		Tsumi::Utils::Logger::Info(
+		util::Logger::Info(
 			"[ShaderLibrary] Compiling:",
 			filePath,
 			L" Entry:", entry);
@@ -181,7 +182,7 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &source);
 		if (FAILED(hr))
 		{
-			Tsumi::Utils::Logger::Error(
+			util::Logger::Error(
 				"[ShaderLibrary] Failed to load shader file:",
 				filePath);
 			return hr;
@@ -218,7 +219,7 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 
 		if (FAILED(hr))
 		{
-			Tsumi::Utils::Logger::Error("[ShaderLibrary] DXC Compile call failed");
+			util::Logger::Error("[ShaderLibrary] DXC Compile call failed");
 			return hr;
 		}
 
@@ -230,15 +231,15 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 
 		if (errors && errors->GetStringLength() > 0)
 		{
-			Tsumi::Utils::Logger::Warn(
+			util::Logger::Warn(
 				"[ShaderLibrary] DXC message:",
-				Tsumi::Utils::Func::Utf8ToWstring(
+				Utils::Func::Utf8ToWstring(
 				errors->GetStringPointer()));
 		}
 
 		if (FAILED(status))
 		{
-			Tsumi::Utils::Logger::Error("[ShaderLibrary] Shader compile failed:", name);
+			util::Logger::Error("[ShaderLibrary] Shader compile failed:", name);
 			return E_FAIL;
 		}
 
@@ -250,7 +251,7 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 
 		if (FAILED(hr))
 		{
-			Tsumi::Utils::Logger::Error("[ShaderLibrary] Failed to get compiled object");
+			util::Logger::Error("[ShaderLibrary] Failed to get compiled object");
 			return hr;
 		}
 

@@ -8,12 +8,6 @@
 #include "Editor/EngineUI.h"
 
 namespace Tsumi {
-
-// 前方宣言
-namespace Win32 {
-class Win32Window;
-struct Win32Desc;
-}
 namespace DX12 {
 class DX12Manager;
 class DescriptorAllocator;
@@ -28,6 +22,16 @@ class ResourceSystem;
 }
 namespace GUI {
 class ImGuiManager;
+}
+}
+
+namespace tme {
+
+namespace sys {
+namespace win {
+class Win32Window;
+struct Win32Desc;
+}
 }
 
 /* ウィンドウ・DirectX初期化・メインループ管理 */
@@ -52,7 +56,7 @@ public:
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Init(const Win32::Win32Desc& windowDesc);
+    void Init(const sys::win::Win32Desc& windowDesc);
 
     /// <summary>
     /// メインループ処理
@@ -62,20 +66,20 @@ public:
 private:
     bool isRunning_ = true;
 
-    Win32::Win32Window* window_ = nullptr;
+	tme::sys::win::Win32Window* window_ = nullptr;
 
-    DX12::DX12Manager* dx12_ = nullptr;
+	Tsumi::DX12::DX12Manager* dx12_ = nullptr;
 
-    Graphic::ShaderLibrary* shaders_ = nullptr;
-    Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
-    Graphic::PSOLibrary* psos_ = nullptr;
+	Tsumi::Graphic::ShaderLibrary* shaders_ = nullptr;
+	Tsumi::Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
+	Tsumi::Graphic::PSOLibrary* psos_ = nullptr;
 
-    Resource::ResourceSystem* resourceMgr_ = nullptr;
+	Tsumi::Resource::ResourceSystem* resourceMgr_ = nullptr;
 
-    GUI::ImGuiManager* imgui_ = nullptr;
+	Tsumi::GUI::ImGuiManager* imgui_ = nullptr;
 
-    std::unique_ptr<Framework::GameContext> gameCtx_;
-    std::unique_ptr<Utils::FixFPS> fixFPS_;
-    std::unique_ptr<Editor::EngineUI> engineUI_;
+    std::unique_ptr<Tsumi::Framework::GameContext> gameCtx_;
+    std::unique_ptr<Tsumi::Utils::FixFPS> fixFPS_;
+    std::unique_ptr<Tsumi::Editor::EngineUI> engineUI_;
 };
 }

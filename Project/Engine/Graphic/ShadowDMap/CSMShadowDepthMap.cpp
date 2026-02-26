@@ -8,6 +8,7 @@
 
 using namespace Tsumi::Graphic;
 using namespace Tsumi::DX12;
+using namespace tme;
 
 DXGI_FORMAT CSMShadowDepthMap::MakeTypelessDepth_(DXGI_FORMAT dsvFmt)
 {
@@ -92,7 +93,7 @@ void CSMShadowDepthMap::Create(uint32_t size, uint32_t cascadeCount)
 	);
 	if (FAILED(hr) || !depth_)
 	{
-		Tsumi::Utils::Logger::Error("CSMShadowDepthMap: CreateCommittedResource failed");
+		util::Logger::Error("CSMShadowDepthMap: CreateCommittedResource failed");
 		assert(false);
 		return;
 	}
@@ -123,7 +124,7 @@ void CSMShadowDepthMap::CreateViews()
 	HRESULT hr = device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap_));
 	if (FAILED(hr) || !dsvHeap_)
 	{
-		Tsumi::Utils::Logger::Error("CSMShadowDepthMap: Create DSV heap failed");
+		util::Logger::Error("CSMShadowDepthMap: Create DSV heap failed");
 		assert(false);
 		return;
 	}
@@ -159,7 +160,7 @@ void CSMShadowDepthMap::CreateViews()
 	srv_ = alloc->Allocate(1);
 	if (!srv_.valid())
 	{
-		Tsumi::Utils::Logger::Error("CSMShadowDepthMap: SRV Allocate failed");
+		util::Logger::Error("CSMShadowDepthMap: SRV Allocate failed");
 		assert(false);
 		return;
 	}

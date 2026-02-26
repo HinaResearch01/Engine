@@ -9,12 +9,13 @@
 
 using namespace Tsumi::DX12;
 using namespace Microsoft::WRL;
+using namespace tme;
 
 namespace {
 inline bool HRFailed(HRESULT hr, const char* where)
 {
 	if (FAILED(hr)) {
-		Tsumi::Utils::Logger::Error(
+		util::Logger::Error(
 			where, "hr:", static_cast<unsigned>(hr));
 		return true;
 	}
@@ -35,12 +36,12 @@ HRESULT Framebuffer::Init()
 	auto* device = dx12Mgr_->GetDevice();
 	if (!device) return E_POINTER;
 
-	Win32::Win32Desc desc = Win32::Win32Window::GetInstance()->GetDesc();
+	sys::win::Win32Desc desc = sys::win::Win32Window::GetInstance()->GetDesc();
 	width_ = desc.windowWidth;
 	height_ = desc.windowHeight;
 
 	if (width_ == 0 || height_ == 0) {
-		Tsumi::Utils::Logger::Warn("Framebuffer::Init skipped (size=0).");
+		util::Logger::Warn("Framebuffer::Init skipped (size=0).");
 		return S_FALSE;
 	}
 

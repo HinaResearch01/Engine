@@ -5,9 +5,14 @@
 #include "DX12/Desc/DescriptorUtils.h"
 
 // 前方宣言
-namespace Tsumi::Win32 {
+namespace tme {
+namespace sys {
+namespace win {
 class Win32Window;
 }
+}
+}
+
 namespace Tsumi::DX12 {
 class DX12Manager;
 struct DescAlloc;
@@ -63,7 +68,7 @@ private:
 	// imgui用のヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap_;
 
-	Win32::Win32Window* win_ = nullptr;
+	tme::sys::win::Win32Window* win_ = nullptr;
 	DX12::DX12Manager* dx12Mgr_ = nullptr;
 	Tsumi::DX12::DescriptorHandle fontSrv_{};
 };

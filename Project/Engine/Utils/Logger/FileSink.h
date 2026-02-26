@@ -4,7 +4,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 class FileSink final : public ILogSink {
 public:

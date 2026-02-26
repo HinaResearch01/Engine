@@ -10,7 +10,7 @@
 
 #include "ILogSink.h"
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 class Logger {
 public:

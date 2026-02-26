@@ -6,6 +6,7 @@
 
 using namespace Tsumi::Graphic;
 using namespace Microsoft::WRL;
+using namespace tme;
 
 PSOLibrary::PSOLibrary()
 {
@@ -53,7 +54,7 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 	std::wstring wname = Utils::Func::Utf8ToWstring(name);
 
 	if (FAILED(hr) || !pso) {
-		Utils::Logger::Error(
+		util::Logger::Error(
 			"PSOLibrary::RegisterFromDesc - CreateGraphicsPipelineState failed",
 			"name:", wname,
 			"hr", static_cast<unsigned>(hr));
@@ -65,7 +66,7 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 		psos_[name] = pso;
 	}
 
-	Utils::Logger::Info("PSOLibrary::RegisterFromDesc - 登録完了", wname);
+	util::Logger::Info("PSOLibrary::RegisterFromDesc - 登録完了", wname);
 }
 
 void PSOLibrary::CreateGBuffer()

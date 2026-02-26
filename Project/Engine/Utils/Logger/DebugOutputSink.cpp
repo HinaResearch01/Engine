@@ -4,7 +4,7 @@
 #include <Windows.h>
 #endif
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 void DebugOutputSink::Write(std::string_view msg)
 {

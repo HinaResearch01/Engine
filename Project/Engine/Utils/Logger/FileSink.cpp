@@ -1,6 +1,6 @@
 #include "FileSink.h"
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 FileSink::FileSink(const std::filesystem::path& path)
 	: file_(path, std::ios::out | std::ios::trunc)
