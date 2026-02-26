@@ -51,7 +51,7 @@ void PSOLibrary::RegisterFromDesc(const std::string& name, const D3D12_GRAPHICS_
 	ComPtr<ID3D12PipelineState> pso;
 	HRESULT hr = dx12Mgr_->GetDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso));
 
-	std::wstring wname = Utils::Func::Utf8ToWstring(name);
+	std::wstring wname = tme::util::Utf8ToWstring(name);
 
 	if (FAILED(hr) || !pso) {
 		util::Logger::Error(

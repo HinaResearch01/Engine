@@ -72,7 +72,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 	);
 
 	// 名前を安全に wstring に変換
-	std::wstring wname = Utils::Func::Utf8ToWstring(name);
+	std::wstring wname = tme::util::Utf8ToWstring(name);
 
 	if (FAILED(hr)) {
 		if (errorBlob) {
@@ -80,7 +80,7 @@ void RootSignatureLibrary::RegisterFromDesc(const std::string& name, const D3D12
 				static_cast<const char*>(errorBlob->GetBufferPointer()),
 				errorBlob->GetBufferSize());
 
-			std::wstring werr = Utils::Func::Utf8ToWstring(err);
+			std::wstring werr = tme::util::Utf8ToWstring(err);
 
 			util::Logger::Error(
 				"RootSignatureLibrary::Register serialize error",

@@ -3,7 +3,7 @@
 #include <string_view>
 #include <cstdint>
 
-namespace Tsumi::Utils::Hash {
+namespace tme::util::Hash {
 
 using Hash64 = uint64_t;
 

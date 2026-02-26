@@ -38,7 +38,7 @@ inline HRESULT AssetLoader::Load<mdl>(const std::string& fullPath, const std::st
 	if (FAILED(hr)) {
 		util::Logger::Error(
 			"[AssetLoader::Load<Model>] Failed to load model",
-			"path:", Tsumi::Utils::Func::Utf8ToWstring(fullPath),
+			"path:", tme::util::Utf8ToWstring(fullPath),
 			"alias:", alias,
 			"hr:", static_cast<unsigned>(hr));
 		return hr;
@@ -55,7 +55,7 @@ inline HRESULT AssetLoader::Load<tex>(const std::string& fullPath, const std::st
 	if (FAILED(hr)) {
 		util::Logger::Error(
 			"[AssetLoader::Load<Tex>] Failed to load texture",
-			"path:", Tsumi::Utils::Func::Utf8ToWstring(fullPath),
+			"path:", tme::util::Utf8ToWstring(fullPath),
 			"alias:", alias,
 			"hr:", static_cast<unsigned>(hr));
 		return hr;

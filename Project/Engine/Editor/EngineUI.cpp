@@ -8,9 +8,10 @@
 #include "Resource/Tex/TextureManager.h"
 #include "Framework/System/Render/RenderSystem.h"
 
-using namespace Tsumi::Editor;
+using namespace tme;
+using namespace editor;
 
-void EngineUI::Init(Utils::FixFPS* fixFPS)
+void EngineUI::Init(util::FixFPS* fixFPS)
 {
 	fixFPS_ = fixFPS;
 }

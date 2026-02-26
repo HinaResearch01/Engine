@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace Tsumi::Utils {
+namespace tme::util {
 
 class FixFPS {
 

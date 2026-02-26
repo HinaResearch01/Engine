@@ -2,7 +2,7 @@
 
 namespace fs = std::filesystem;
 
-std::wstring Tsumi::Utils::Func::Utf8ToWstring(const std::string& utf8)
+std::wstring tme::util::Utf8ToWstring(const std::string& utf8)
 {
     if (utf8.empty()) return L"";
 
@@ -12,7 +12,7 @@ std::wstring Tsumi::Utils::Func::Utf8ToWstring(const std::string& utf8)
     return wstr;
 }
 
-std::string Tsumi::Utils::Func::WstringToUtf8(const std::wstring& wstr)
+std::string tme::util::WstringToUtf8(const std::wstring& wstr)
 {
     if (wstr.empty()) return "";
 
@@ -22,7 +22,7 @@ std::string Tsumi::Utils::Func::WstringToUtf8(const std::wstring& wstr)
     return str;
 }
 
-std::string Tsumi::Utils::Func::MakeKeyFromRoot(
+std::string tme::util::MakeKeyFromRoot(
 	const std::string& root,
 	const std::string& name)
 {

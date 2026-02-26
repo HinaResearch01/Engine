@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 static std::string MakeKey(const std::string& fullPath)
 {
 	// 他と同じルールに統一（Mesh/Model と一致させる）
-	return Tsumi::Utils::Func::MakeKeyFromRoot("", fullPath);
+	return tme::util::MakeKeyFromRoot("", fullPath);
 }
 
 static std::string MakeMaterialDiffuseAlias(const std::string& baseAlias, unsigned matIndex)

@@ -10,6 +10,7 @@
 
 using namespace Tsumi::Loader;
 namespace fs = std::filesystem;
+using namespace tme;
 
 HRESULT ModelLoader::Load(const std::string& fullPath, const std::string& alias, bool srgb)
 {
@@ -38,7 +39,7 @@ HRESULT ModelLoader::LoadFromScene(const aiScene* scene, const std::string& full
 	if (!scene)
 		return E_FAIL;
 
-	const std::string modelKey = Utils::Func::MakeKeyFromRoot("", fullPath);
+	const std::string modelKey = util::MakeKeyFromRoot("", fullPath);
 
 	HRESULT hr = S_OK;
 

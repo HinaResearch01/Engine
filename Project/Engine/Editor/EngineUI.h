@@ -7,7 +7,7 @@ class GameContext;
 class IActor;
 }
 
-namespace Tsumi::Editor {
+namespace tme::editor {
 
 class EngineUI {
 
@@ -25,7 +25,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Init(Utils::FixFPS* fixFPS);
+	void Init(util::FixFPS* fixFPS);
 
 	/// <summary>
 	/// 描画
@@ -33,7 +33,7 @@ public:
 	void Draw();
 
 #pragma region Accessor
-	void SetGameContext(Framework::GameContext* context) { gameContext_ = context; }
+	void SetGameContext(Tsumi::Framework::GameContext* context) { gameContext_ = context; }
 #pragma endregion
 
 private:
@@ -45,9 +45,9 @@ private:
 	void DrawCameraControl();
 
 private:
-	Utils::FixFPS* fixFPS_ = nullptr;
-	Framework::GameContext* gameContext_ = nullptr;
-	Framework::IActor* selectedActor_ = nullptr;
+	util::FixFPS* fixFPS_ = nullptr;
+	Tsumi::Framework::GameContext* gameContext_ = nullptr;
+	Tsumi::Framework::IActor* selectedActor_ = nullptr;
 };
 
 }

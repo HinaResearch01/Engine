@@ -3,7 +3,7 @@
 #include <Windows.h>
 #pragma comment(lib, "winmm.lib")
 
-using namespace Tsumi::Utils;
+using namespace tme::util;
 
 void FixFPS::Init() {
     // タイマー精度を上げる (1ms)

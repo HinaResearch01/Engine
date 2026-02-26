@@ -167,10 +167,10 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		const ShaderStageDesc& stageDesc = kv.second;
 
 		std::wstring filePath =
-			Utils::Func::Utf8ToWstring(stageDesc.file);
+			util::Utf8ToWstring(stageDesc.file);
 
 		std::wstring entry =
-			Utils::Func::Utf8ToWstring(
+			tme::util::Utf8ToWstring(
 			stageDesc.entry.empty() ? "main" : stageDesc.entry);
 
 		util::Logger::Info(
@@ -233,7 +233,7 @@ HRESULT ShaderLibrary::Compile(const std::string& name, const ShaderLoadModule& 
 		{
 			util::Logger::Warn(
 				"[ShaderLibrary] DXC message:",
-				Utils::Func::Utf8ToWstring(
+				tme::util::Utf8ToWstring(
 				errors->GetStringPointer()));
 		}
 

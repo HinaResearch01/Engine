@@ -7,7 +7,7 @@
 #include <codecvt> 
 #include <locale> 
 
-namespace Tsumi::Utils::Exception {
+namespace tme::util::Exception {
 
 // =============================================================
 //  DxException : DirectX用の例外クラス

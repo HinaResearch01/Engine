@@ -22,15 +22,15 @@ void DX12Manager::Init()
 {
 	try {
 		// ---- device ----
-		Utils::Exception::DX_CALL(device_->Create());
+		util::Exception::DX_CALL(device_->Create());
 
 		// ---- contexts ----
-		Utils::Exception::DX_CALL(graphicsCtx_->Create(bufferCount_));
-		Utils::Exception::DX_CALL(uploadCtx_->Create(bufferCount_));
-		Utils::Exception::DX_CALL(resourceCtx_->Create(1));
+		util::Exception::DX_CALL(graphicsCtx_->Create(bufferCount_));
+		util::Exception::DX_CALL(uploadCtx_->Create(bufferCount_));
+		util::Exception::DX_CALL(resourceCtx_->Create(1));
 
 		// ---- swapchain ----
-		Utils::Exception::DX_CALL(swapChain_->Create(desiredBufferCount_));
+		util::Exception::DX_CALL(swapChain_->Create(desiredBufferCount_));
 		bufferCount_ = swapChain_->GetBufferCount();
 
 		// ---- descriptors + frames ----
@@ -38,13 +38,13 @@ void DX12Manager::Init()
 		InitFrames();
 
 		// ---- framebuffer / sync ----
-		Utils::Exception::DX_CALL(framebuffer_->Init());
-		Utils::Exception::DX_CALL(frameSync_->Init());
+		util::Exception::DX_CALL(framebuffer_->Init());
+		util::Exception::DX_CALL(frameSync_->Init());
 
 		// ---- backbuffer's color black ----
 		framebuffer_->ClearAllBackBuffers(*graphicsCtx_);
 	}
-	catch (const Utils::Exception::DxException& e) {
+	catch (const util::Exception::DxException& e) {
 		OutputDebugStringA(e.what());
 		MessageBoxA(nullptr, e.what(), "Fatal DirectX Error", MB_OK | MB_ICONERROR);
 		std::terminate();

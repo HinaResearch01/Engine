@@ -79,7 +79,7 @@ private:
 	Tsumi::GUI::ImGuiManager* imgui_ = nullptr;
 
     std::unique_ptr<Tsumi::Framework::GameContext> gameCtx_;
-    std::unique_ptr<Tsumi::Utils::FixFPS> fixFPS_;
-    std::unique_ptr<Tsumi::Editor::EngineUI> engineUI_;
+    std::unique_ptr<tme::util::FixFPS> fixFPS_;
+    std::unique_ptr<tme::editor::EngineUI> engineUI_;
 };
 }
