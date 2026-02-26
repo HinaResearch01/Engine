@@ -34,7 +34,7 @@ void InputSystem::Init() {
 
 	// 排他制御レベルのセット
 	result = keyboard_->SetCooperativeLevel(
-		Tsumi::Win32::Win32Window::GetInstance()->GetHWND(),
+		tme::sys::Win32::Win32Window::GetInstance()->GetHWND(),
 		DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY
 	);
 	assert(SUCCEEDED(result));
@@ -49,7 +49,7 @@ void InputSystem::Init() {
 
 	// 排他制御レベルのセット
 	result = mouse_->SetCooperativeLevel(
-		Tsumi::Win32::Win32Window::GetInstance()->GetHWND(),
+		tme::sys::Win32::Win32Window::GetInstance()->GetHWND(),
 		DISCL_FOREGROUND | DISCL_NONEXCLUSIVE
 	);
 	assert(SUCCEEDED(result));

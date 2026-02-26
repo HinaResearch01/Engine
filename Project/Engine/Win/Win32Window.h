@@ -11,7 +11,7 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-namespace Tsumi::Win32 {
+namespace tme::sys::Win32 {
 
 struct Win32Desc {
     std::wstring windowTitle = L"Engine";

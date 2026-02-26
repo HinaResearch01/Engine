@@ -1,6 +1,6 @@
 #include "Win32Window.h"
 
-using namespace Tsumi::Win32;
+using namespace tme::sys::Win32;
 
 void Win32Window::CreateMainWindow(const Win32Desc& desc)
 {

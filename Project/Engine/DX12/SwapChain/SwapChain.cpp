@@ -6,6 +6,7 @@
 
 using namespace Tsumi::DX12;
 using Microsoft::WRL::ComPtr;
+using namespace tme;
 
 SwapChain::SwapChain(DX12Manager* ptr)
     : dx12Mgr_(ptr)
@@ -16,8 +17,8 @@ HRESULT SwapChain::Create(UINT desiredBufferCount)
 {
 	if (!dx12Mgr_) return E_POINTER;
 
-	HWND hwnd = Win32::Win32Window::GetInstance()->GetHWND();
-	auto winDesc = Win32::Win32Window::GetInstance()->GetDesc();
+	HWND hwnd = sys::Win32::Win32Window::GetInstance()->GetHWND();
+	auto winDesc = sys::Win32::Win32Window::GetInstance()->GetDesc();
 
 	DXGI_SWAP_CHAIN_DESC1 desc{};
 	desc.Width = winDesc.windowWidth;

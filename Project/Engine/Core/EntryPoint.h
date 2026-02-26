@@ -10,12 +10,12 @@
 #define ENGINE_ENTRY_POINT(Title) \
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) \
 { \
-    Tsumi::Win32::Win32Desc desc; \
+    tme::sys::Win32::Win32Desc desc; \
     desc.hInstance = hInstance; \
     desc.windowTitle = Title; \
     desc.windowWidth = 1280; \
     desc.windowHeight = 720; \
-    auto app = Tsumi::Application::GetInstance();\
+    auto app = tme::Application::GetInstance();\
     app->Init(desc); \
     app->Run(); \
     return 0; \
