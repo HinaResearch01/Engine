@@ -3,11 +3,13 @@
 #include "Resource/ResourceSystem.h"
 
 using namespace Tsumi::Framework;
+using namespace tme;
+using namespace sys;
 
 MaterialSystem::MaterialSystem(World& world)
 	: ISystem(world)
 {
-	resourceSys_ = Resource::ResourceSystem::GetInstance();
+	resourceSys_ = resource::ResourceSystem::GetInstance();
 }
 
 void MaterialSystem::Update(float)

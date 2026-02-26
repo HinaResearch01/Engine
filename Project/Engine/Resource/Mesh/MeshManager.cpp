@@ -10,8 +10,10 @@
 #include <cassert>
 #include <filesystem>
 
-using namespace Tsumi::Resource;
 using namespace Tsumi::DX12;
+using namespace tme;
+using namespace sys;
+using namespace resource;
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 namespace fs = std::filesystem;
@@ -19,7 +21,7 @@ namespace fs = std::filesystem;
 MeshManager::MeshManager()
 {
 	// DX12マネージャのインスタンス取得
-	dx12Mgr_ = DX12::DX12Manager::GetInstance();
+	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
 }
 
 HRESULT MeshManager::RegisterMesh(

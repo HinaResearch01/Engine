@@ -26,7 +26,7 @@ class DX12Manager;
 class CommandContext;
 }
 
-namespace Tsumi::Resource {
+namespace tme::sys::resource {
 
 struct TextureAsset {
 	std::string key; // 実キー（正規化パス）
@@ -187,7 +187,7 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> pendingUploads_;
 
 	mutable std::mutex mutex_;
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	Tsumi::DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

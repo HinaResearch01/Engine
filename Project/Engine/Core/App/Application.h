@@ -17,9 +17,6 @@ class ShaderLibrary;
 class RootSignatureLibrary;
 class PSOLibrary;
 }
-namespace Resource {
-class ResourceSystem;
-}
 }
 
 namespace tme {
@@ -28,6 +25,9 @@ namespace sys {
 namespace win {
 class Win32Window;
 struct Win32Desc;
+}
+namespace resource {
+class ResourceSystem;
 }
 }
 
@@ -67,7 +67,7 @@ public:
 private:
     bool isRunning_ = true;
 
-	tme::sys::win::Win32Window* window_ = nullptr;
+	sys::win::Win32Window* window_ = nullptr;
 
 	Tsumi::DX12::DX12Manager* dx12_ = nullptr;
 
@@ -75,13 +75,13 @@ private:
 	Tsumi::Graphic::RootSignatureLibrary* rootsigs_ = nullptr;
 	Tsumi::Graphic::PSOLibrary* psos_ = nullptr;
 
-	Tsumi::Resource::ResourceSystem* resourceMgr_ = nullptr;
+	sys::resource::ResourceSystem* resourceMgr_ = nullptr;
 
-	tme::gui::ImGuiManager* imgui_ = nullptr;
+	gui::ImGuiManager* imgui_ = nullptr;
 
     std::unique_ptr<Tsumi::Framework::GameContext> gameCtx_;
-    std::unique_ptr<tme::util::FixFPS> fixFPS_;
-    std::unique_ptr<tme::editor::EngineUI> engineUI_;
+    std::unique_ptr<util::FixFPS> fixFPS_;
+    std::unique_ptr<editor::EngineUI> engineUI_;
 };
 
 }

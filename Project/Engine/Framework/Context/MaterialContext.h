@@ -7,7 +7,7 @@
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
-namespace Tsumi::Resource { struct TextureAsset;  }
+namespace tme::sys::resource { struct TextureAsset;  }
 
 namespace Tsumi::Framework {
 
@@ -32,7 +32,7 @@ struct MaterialKeyHash {
 struct MaterialResolved {
 	GpuMaterialUVCB      uv;
 	GpuMaterialParamsCB  params;
-	Tsumi::Resource::TextureAsset* albedo = nullptr;
+	tme::sys::resource::TextureAsset* albedo = nullptr;
 };
 
 struct MaterialContext {

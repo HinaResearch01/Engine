@@ -10,6 +10,8 @@
 #include "Resource/Tex/TextureManager.h"
 
 using namespace Tsumi::Framework;
+using namespace tme;
+using namespace sys;
 
 uint64_t MakeSortKey(const RenderPacket& p, bool /*transparent*/)
 {
@@ -24,7 +26,7 @@ uint64_t MakeSortKey(const RenderPacket& p, bool /*transparent*/)
 RenderPrepareSystem::RenderPrepareSystem(World& world)
 	: ISystem(world)
 {
-	resourceSys_ = Resource::ResourceSystem::GetInstance();
+	resourceSys_ = resource::ResourceSystem::GetInstance();
 }
 
 void RenderPrepareSystem::Update(float)

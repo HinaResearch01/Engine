@@ -40,7 +40,7 @@ private:
 	/// </summary>
 	static HRESULT ParseScene(
 		const aiScene* scene,
-		std::vector<Tsumi::Resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
+		std::vector<tme::sys::resource::Vertex>& outVertices, std::vector<uint32_t>& outIndices);
 
 	/// <summary>
 	/// 既読チェック専用関数

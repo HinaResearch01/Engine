@@ -17,6 +17,8 @@
 
 using namespace Tsumi::Framework;
 using namespace Tsumi::Graphic;
+using namespace tme;
+using namespace sys;
 
 RenderSystem::RenderSystem(World& world)
 	: ISystem(world)

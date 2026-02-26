@@ -7,8 +7,10 @@
 #include <filesystem>
 #include <DirectXTex.h>
 
-using namespace Tsumi::Resource;
 using namespace Tsumi::DX12;
+using namespace tme;
+using namespace sys;
+using namespace resource;
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 namespace fs = std::filesystem;
@@ -52,7 +54,7 @@ static DXGI_FORMAT ChooseViewFormat(DXGI_FORMAT baseFormat, bool srgb)
 
 TextureManager::TextureManager()
 {
-	dx12Mgr_ = DX12::DX12Manager::GetInstance();
+	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();
 }
 
 HRESULT TextureManager::RegisterTexture(const std::string& key, const ScratchImage& image, DXGI_FORMAT viewFormat)

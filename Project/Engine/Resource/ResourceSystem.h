@@ -4,12 +4,11 @@
 
 // 前方宣言
 namespace Tsumi::DX12 { class DX12Manager; }
-namespace Tsumi::Resource {
+
+namespace tme::sys::resource {
+
 class MeshManager;
 class TextureManager;
-}
-
-namespace Tsumi::Resource {
 
 /* リソース管理クラス */
 class ResourceSystem {

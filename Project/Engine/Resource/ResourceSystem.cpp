@@ -4,8 +4,10 @@
 #include "Resource/Tex/TextureManager.h"
 #include <DirectXTex.h>
 
-using namespace Tsumi::Resource;
-
+using namespace tme;
+using namespace sys;
+using namespace resource;
+ 
 ResourceSystem::ResourceSystem()
 {
 	dx12Mgr_ = Tsumi::DX12::DX12Manager::GetInstance();

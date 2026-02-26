@@ -19,12 +19,12 @@ namespace Tsumi::DX12 {
 class DX12Manager;
 }
 
-namespace Tsumi::Resource {
+namespace tme::sys::resource {
 
 struct Vertex {
-	Math::Vec3f pos;
-	Math::Vec3f normal;
-	Math::Vec2f uv;
+	Tsumi::Math::Vec3f pos;
+	Tsumi::Math::Vec3f normal;
+	Tsumi::Math::Vec2f uv;
 };
 
 struct MeshAsset {
@@ -164,7 +164,7 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> pendingUploads_;
 
 	mutable std::mutex mutex_;
-	DX12::DX12Manager* dx12Mgr_ = nullptr;
+	Tsumi::DX12::DX12Manager* dx12Mgr_ = nullptr;
 };
 
 }

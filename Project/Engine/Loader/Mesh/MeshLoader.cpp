@@ -18,7 +18,9 @@
 #undef max
 
 using namespace Tsumi::Loader;
-using namespace Tsumi::Resource;
+using namespace tme;
+using namespace sys;
+using namespace resource;
 namespace fs = std::filesystem;
 
 static std::string MakeDefaultDiffuseAlias(const std::string& baseAlias)

@@ -24,7 +24,7 @@ Application::Application()
     shaders_ = Graphic::ShaderLibrary::GetInstance();
     rootsigs_ = Graphic::RootSignatureLibrary::GetInstance();
     psos_ = Graphic::PSOLibrary::GetInstance();
-    resourceMgr_ = Resource::ResourceSystem::GetInstance();
+    resourceMgr_ = sys::resource::ResourceSystem::GetInstance();
     imgui_ = gui::ImGuiManager::GetInstance();
 	gameCtx_ = std::make_unique<Framework::GameContext>();
 	fixFPS_ = std::make_unique<util::FixFPS>();

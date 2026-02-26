@@ -66,8 +66,8 @@ inline HRESULT AssetLoader::Load<tex>(const std::string& fullPath, const std::st
 
 inline HRESULT AssetLoader::SceneReset()
 {
-	using namespace Tsumi::Resource;
-	ResourceSystem::GetInstance()->SceneReset();
+	using namespace tme::sys::resource;
+	tme::sys::resource::ResourceSystem::GetInstance()->SceneReset();
 	return S_OK;
 }
 

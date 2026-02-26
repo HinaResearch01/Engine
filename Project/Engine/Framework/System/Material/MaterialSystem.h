@@ -11,7 +11,7 @@
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
-namespace Tsumi::Resource { class ResourceSystem; }
+namespace tme::sys::resource { class ResourceSystem; }
 
 namespace Tsumi::Framework {
 
@@ -49,7 +49,7 @@ public:
 private:
 	MaterialContext ctx_;
 
-	Resource::ResourceSystem* resourceSys_ = nullptr;
+	tme::sys::resource::ResourceSystem* resourceSys_ = nullptr;
 };
 
 }

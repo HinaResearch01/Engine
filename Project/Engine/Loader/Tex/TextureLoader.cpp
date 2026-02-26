@@ -15,7 +15,9 @@
 #include <format>
 
 using namespace Tsumi::Loader;
-using namespace Tsumi::Resource;
+using namespace tme;
+using namespace sys;
+using namespace resource;
 using namespace DirectX;
 namespace fs = std::filesystem;
 

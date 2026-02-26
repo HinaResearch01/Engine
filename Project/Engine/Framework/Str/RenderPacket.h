@@ -13,12 +13,12 @@ struct RenderPacket
 	SurfaceType surface{};
 
 	// Geometry
-	Tsumi::Resource::MeshAsset* mesh = nullptr;
+	tme::sys::resource::MeshAsset* mesh = nullptr;
 
 	// Material
 	GpuMaterialUVCB materialUVCB{};
 	GpuMaterialParamsCB materialParamsCB{};
-	Tsumi::Resource::TextureAsset* albedo = nullptr;
+	tme::sys::resource::TextureAsset* albedo = nullptr;
 
 	// Transform
 	GpuTransformCB xform{};

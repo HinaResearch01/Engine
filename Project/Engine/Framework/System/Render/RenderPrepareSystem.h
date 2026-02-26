@@ -15,7 +15,7 @@
 #include "Framework/Str/RenderSurfaceType.h"
 
 // 前方宣言
-namespace Tsumi::Resource {
+namespace tme::sys::resource {
 class ResourceSystem;
 struct MeshAsset;
 }
@@ -85,7 +85,7 @@ private:
 	ShadowPacket shadowPacket_{};
 	std::array<std::vector<RenderPacket>, static_cast<size_t>(SurfaceType::Count)> renderPackets_;
 
-	Resource::ResourceSystem* resourceSys_ = nullptr;
+	tme::sys::resource::ResourceSystem* resourceSys_ = nullptr;
 };
 
 }

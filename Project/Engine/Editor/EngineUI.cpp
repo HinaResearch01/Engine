@@ -143,7 +143,7 @@ void EngineUI::DrawInspector()
 
 void EngineUI::DrawResources()
 {
-	auto* resSys = Tsumi::Resource::ResourceSystem::GetInstance();
+	auto* resSys = tme::sys::resource::ResourceSystem::GetInstance();
 	
 	if (ImGui::TreeNode("Meshes")) {
 		auto names = resSys->GetMeshManager()->GetMeshNames();
