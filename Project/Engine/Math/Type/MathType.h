@@ -4,7 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace Tsumi::Math {
+namespace tme::math {
 
 struct UVTransform {
 	Vec2f scale = { 1.0f, 1.0f };

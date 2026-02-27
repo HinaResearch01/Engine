@@ -90,7 +90,7 @@ void RenderPrepareSystem::BuildShadowPacket()
 		if (ctx.enabled && i < ctx.cascadeCount)
 			cb.lightViewProj[i] = ctx.cascades[i].viewProj;
 		else
-			cb.lightViewProj[i] = Math::Mat4x4{};
+			cb.lightViewProj[i] = math::Mat4x4{};
 	}
 
 	// ---- split depths (far) ----

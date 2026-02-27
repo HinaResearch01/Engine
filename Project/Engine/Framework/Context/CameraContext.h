@@ -8,15 +8,15 @@ namespace Tsumi::Framework {
 struct CameraContext {
 	bool valid = false;
 
-	Math::Mat4x4 view{};
-	Math::Mat4x4 proj{};
-	Math::Mat4x4 viewProj{};
-	Math::Mat4x4 invView{};
-	Math::Mat4x4 invProj{};
-	Math::Mat4x4 invViewProj{};
+	tme::math::Mat4x4 view{};
+	tme::math::Mat4x4 proj{};
+	tme::math::Mat4x4 viewProj{};
+	tme::math::Mat4x4 invView{};
+	tme::math::Mat4x4 invProj{};
+	tme::math::Mat4x4 invViewProj{};
 
-	Math::Vec3f position{};
-	Math::Vec3f forward{};
+	tme::math::Vec3f position{};
+	tme::math::Vec3f forward{};
 	float fovY = 60.0f;
 	float aspectRatio = 16.0f / 9.0f;
 	float nearPlane = 0.1f;

@@ -32,7 +32,7 @@ void MaterialSystem::Update(float)
 
 		// ===== UV =====
 		r.uv.uvTransform =
-			Math::Func::MAT3x3::BuildUVMatrix(mc.uv);
+			math::func::MAT3x3::BuildUVMatrix(mc.uv);
 
 		// ===== PBR Params =====
 		r.params.baseColor = mc.baseColor;

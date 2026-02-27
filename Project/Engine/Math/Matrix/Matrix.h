@@ -6,7 +6,7 @@
 #include <cassert>
 #include "../Vector/Vector.h"
 
-namespace Tsumi::Math {
+namespace tme::math {
 
 // =============================
 // 3x3 Matrix

@@ -22,9 +22,9 @@ class DX12Manager;
 namespace tme::sys::resource {
 
 struct Vertex {
-	Tsumi::Math::Vec3f pos;
-	Tsumi::Math::Vec3f normal;
-	Tsumi::Math::Vec2f uv;
+	tme::math::Vec3f pos;
+	tme::math::Vec3f normal;
+	tme::math::Vec2f uv;
 };
 
 struct MeshAsset {

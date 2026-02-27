@@ -148,9 +148,9 @@ bool MeshLoader::TryResolveAlias(const std::string& key, const std::string& alia
 	return false;
 }
 
-Tsumi::Math::Mat4x4 MeshLoader::ToMat4x4(const aiMatrix4x4& a)
+math::Mat4x4 MeshLoader::ToMat4x4(const aiMatrix4x4& a)
 {
-	return Math::Mat4x4(
+	return math::Mat4x4(
 		a.a1, a.b1, a.c1, a.d1,
 		a.a2, a.b2, a.c2, a.d2,
 		a.a3, a.b3, a.c3, a.d3,
@@ -158,13 +158,13 @@ Tsumi::Math::Mat4x4 MeshLoader::ToMat4x4(const aiMatrix4x4& a)
 	);
 }
 
-Tsumi::Math::Vec3f MeshLoader::TransformPoint(const Math::Mat4x4& m, const Math::Vec3f& p)
+math::Vec3f MeshLoader::TransformPoint(const math::Mat4x4& m, const math::Vec3f& p)
 {
 	return m.TransformPoint(p);
 }
 
-Tsumi::Math::Vec3f MeshLoader::TransformNormal(const Math::Mat4x4& m, const Math::Vec3f& n)
+math::Vec3f MeshLoader::TransformNormal(const math::Mat4x4& m, const math::Vec3f& n)
 {
-	Math::Mat4x4 invT = m.Inverse().Transpose();
+	math::Mat4x4 invT = m.Inverse().Transpose();
 	return invT.TransformVector(n).Normalized();
 }

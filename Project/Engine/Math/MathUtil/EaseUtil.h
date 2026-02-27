@@ -4,19 +4,19 @@
 #include "../Matrix/Matrix.h"
 #include "../Constants/Constants.h"
 
-namespace Tsumi::Math::EaseFunc {
+namespace tme::math::func::ease {
 
 inline float InSine(float num)
 {
-	return 1.0f - cosf((num * Const::PI) / 2.0f);
+	return 1.0f - cosf((num * constant::PI) / 2.0f);
 }
 inline float OutSine(float num)
 {
-	return sinf((num * Const::PI) / 2.0f);
+	return sinf((num * constant::PI) / 2.0f);
 }
 inline float InOutSine(float num)
 {
-	return -(cosf(Const::PI * num) - 1.0f) / 2.0f;
+	return -(cosf(constant::PI * num) - 1.0f) / 2.0f;
 }
 inline float InQuad(float num)
 {
@@ -124,7 +124,7 @@ inline float InOutBack(float num)
 }
 inline float InElastic(float num)
 {
-	const float c4 = (2.0f * Const::PI) / 3.0f;
+	const float c4 = (2.0f * constant::PI) / 3.0f;
 
 	return num == 0.0f
 		? 0.0f
@@ -134,7 +134,7 @@ inline float InElastic(float num)
 }
 inline float OutElastic(float num)
 {
-	const float c4 = (2.0f * Const::PI) / 3.0f;
+	const float c4 = (2.0f * constant::PI) / 3.0f;
 
 	return num == 0.0f
 		? 0.0f
@@ -144,7 +144,7 @@ inline float OutElastic(float num)
 }
 inline float InOutElastic(float num)
 {
-	const float c5 = (2.0f * Const::PI) / 4.5f;
+	const float c5 = (2.0f * constant::PI) / 4.5f;
 
 	return num == 0.0f
 		? 0.0f

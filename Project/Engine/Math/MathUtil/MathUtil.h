@@ -16,7 +16,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace Tsumi::Math::Func {
+namespace tme::math::func {
 
 namespace NUM {
 // ラープ

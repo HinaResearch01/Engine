@@ -25,9 +25,9 @@ void TestCameraMoveComp::Update(float dt)
 	float speed = moveSpeed_ * dt;
 	if (input->IsHold(Input::Key::LSHIFT)) speed *= 5.0f;
 
-	Tsumi::Math::Vec3f forward = trans->forward; 
-	Tsumi::Math::Vec3f right = trans->right;     
-	Tsumi::Math::Vec3f up = { 0.0f, 1.0f, 0.0f };
+	tme::math::Vec3f forward = trans->forward; 
+	tme::math::Vec3f right = trans->right;     
+	tme::math::Vec3f up = { 0.0f, 1.0f, 0.0f };
 
 	bool isMoved = false;
 

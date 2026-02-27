@@ -66,7 +66,7 @@ private:
 	void BuildDefault(CameraContext& out);
 
 private:
-	Math::Mat4x4 MakeViewProj(const Math::Mat4x4& view, const Math::Mat4x4& proj);
+	tme::math::Mat4x4 MakeViewProj(const tme::math::Mat4x4& view, const tme::math::Mat4x4& proj);
 
 private:
 	CameraContext activeCtx_{};

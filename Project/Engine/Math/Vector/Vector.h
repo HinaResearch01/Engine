@@ -4,7 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace Tsumi::Math {
+namespace tme::math {
 
 // =============================
 // Vec3

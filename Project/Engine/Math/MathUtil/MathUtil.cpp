@@ -1,8 +1,9 @@
 #include "MathUtil.h"
 #include "../Constants/Constants.h"
 
-using namespace Tsumi::Math;
-using namespace Func;
+using namespace tme;
+using namespace math;
+using namespace func;
 
 float NUM::Lerp(const float& start, const float& end, float t)
 {
@@ -21,12 +22,12 @@ float NUM::APOneAsZeroCloser(float value)
 
 float NUM::ToRadians(float degrees)
 {
-	return degrees * (Const::PI / 180.0f);
+	return degrees * (constant::PI / 180.0f);
 }
 
 float NUM::ToDegrees(float radians)
 {
-	return radians * (180.0f / Const::PI);
+	return radians * (180.0f / constant::PI);
 }
 
 float NUM::ConvertToRange(const Vec2f& input, const Vec2f& output, float value)
@@ -253,8 +254,8 @@ Vec3f VEC3::TransformWithPerspective(const Vec3f& v, const Mat4x4& m)
 
 float VEC3::NormalizeAngle(float angle)
 {
-	while (angle < -Math::Const::PI) angle += Math::Const::Double_PI;
-	while (angle > Math::Const::PI) angle -= Math::Const::Double_PI;
+	while (angle < -constant::PI) angle += constant::Double_PI;
+	while (angle > constant::PI) angle -= constant::Double_PI;
 	return angle;
 }
 
@@ -264,8 +265,8 @@ float VEC3::ShortestAngle(float currentAngle, float targetAngle)
 	float angleDifference = targetAngle - currentAngle;
 
 	// 角度を -π から +π の範囲に正規化する
-	while (angleDifference > Math::Const::PI) angleDifference -= 2.0f * Math::Const::PI;
-	while (angleDifference < -Math::Const::PI) angleDifference += 2.0f * Math::Const::PI;
+	while (angleDifference > constant::PI) angleDifference -= 2.0f * constant::PI;
+	while (angleDifference < -constant::PI) angleDifference += 2.0f * constant::PI;
 
 	return angleDifference; // 最短回転角度を返す
 }

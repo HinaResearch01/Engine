@@ -7,39 +7,39 @@ namespace Tsumi::Framework {
 
 struct GpuDirectionalLightCB {
 	// 光の向き
-	Math::Vec3f directionWS;
+	tme::math::Vec3f directionWS;
 	int enabled = 0;
 
 	// 放射輝度（HDR）
-	Math::Vec3f radiance;
+	tme::math::Vec3f radiance;
 	float pad1;
 
 	// 環境光色 (Ambient)
-	Math::Vec3f ambientColor;
+	tme::math::Vec3f ambientColor;
 	float pad2;
 };
 
 struct GpuPointLightCB {
 	// 座標
-	Math::Vec3f positionWS;
+	tme::math::Vec3f positionWS;
 	float range;
 
 	// 放射輝度（HDR）
-	Math::Vec3f radiance;
+	tme::math::Vec3f radiance;
 	float _pad0;
 };
 
 struct GpuSpotLightCB {
 	// 座標
-	Math::Vec3f positionWS;
+	tme::math::Vec3f positionWS;
 	float range;
 
 	// 光の向き
-	Math::Vec3f directionWS;
+	tme::math::Vec3f directionWS;
 	float innerCos;
 
 	// 放射輝度（HDR）
-	Math::Vec3f radiance;
+	tme::math::Vec3f radiance;
 	float outerCos;
 
 	// 拡張
@@ -48,12 +48,12 @@ struct GpuSpotLightCB {
 	float shadowBias;
 	float _pad;
 
-	Math::Mat4x4 lightViewProj;
+	tme::math::Mat4x4 lightViewProj;
 };
 
 struct GpuShadowCSMCB
 {
-	Math::Mat4x4 lightViewProj[4];
+	tme::math::Mat4x4 lightViewProj[4];
 	float cascadeSplitDepths[4];
 	float shadowTexelSize[2];
 	float shadowBias;
@@ -62,7 +62,7 @@ struct GpuShadowCSMCB
 
 struct GpuShadowCasterCB
 {
-	Math::Mat4x4 lightViewProj{};
+	tme::math::Mat4x4 lightViewProj{};
 };
 
 struct GpuDebugCB

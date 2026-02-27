@@ -9,8 +9,9 @@
 
 using namespace Tsumi;
 using namespace Tsumi::Framework;
+using namespace tme;
 
-static Math::Vec3f NormalizeSafe(const Math::Vec3f& v, const Math::Vec3f& fallback)
+static math::Vec3f NormalizeSafe(const math::Vec3f& v, const math::Vec3f& fallback)
 {
 	const float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
 	if (len2 <= 1e-12f) return fallback;
@@ -63,9 +64,9 @@ void LightSystem::BuildLightContext(LightContext& out)
 		{
 			auto [tr, dl] = *it;
 
-			Math::Vec3f dirWS = NormalizeSafe(tr.world.GetForward(), { 0, -1, 0 });
+			math::Vec3f dirWS = NormalizeSafe(tr.world.GetForward(), { 0, -1, 0 });
 
-			Math::Vec3f radiance{
+			math::Vec3f radiance{
 				dl.color.x * dl.intensity,
 				dl.color.y * dl.intensity,
 				dl.color.z * dl.intensity
@@ -86,8 +87,8 @@ void LightSystem::BuildLightContext(LightContext& out)
 		if (pl.intensity <= 0.0f || pl.range <= 0.0f)
 			continue;
 
-		Math::Vec3f pos = tr.GetWorldPos();
-		Math::Vec3f radiance{
+		math::Vec3f pos = tr.GetWorldPos();
+		math::Vec3f radiance{
 			pl.color.x * pl.intensity,
 			pl.color.y * pl.intensity,
 			pl.color.z * pl.intensity
@@ -109,17 +110,17 @@ void LightSystem::BuildLightContext(LightContext& out)
 		if (sl.intensity <= 0.0f || sl.range <= 0.0f)
 			continue;
 
-		Math::Vec3f pos = tr.GetWorldPos();
-		Math::Vec3f dir = NormalizeSafe(tr.forward, { 0,-1,0 });
+		math::Vec3f pos = tr.GetWorldPos();
+		math::Vec3f dir = NormalizeSafe(tr.forward, { 0,-1,0 });
 
-		Math::Vec3f radiance{
+		math::Vec3f radiance{
 			sl.color.x * sl.intensity,
 			sl.color.y * sl.intensity,
 			sl.color.z * sl.intensity
 		};
 
-		float innerRad = Math::Func::NUM::ToRadians(sl.innerAngle);
-		float outerRad = Math::Func::NUM::ToRadians(sl.outerAngle);
+		float innerRad = math::func::NUM::ToRadians(sl.innerAngle);
+		float outerRad = math::func::NUM::ToRadians(sl.outerAngle);
 
 		SpotLightResolved r{};
 		r.positionWS = pos;

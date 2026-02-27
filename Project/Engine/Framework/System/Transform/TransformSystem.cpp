@@ -2,6 +2,7 @@
 #include "Framework/World/World.h"
 
 using namespace Tsumi::Framework;
+using namespace tme;
 
 TransformSystem::TransformSystem(World& world)
 	: ISystem(world)
@@ -55,10 +56,10 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	if (!tr.worldDirty) return;
 
 	// 1) local
-	const Math::Mat4x4 localMat =
-		Math::Func::MAT4x4::AffineMatrix(
+	const math::Mat4x4 localMat =
+		math::func::MAT4x4::AffineMatrix(
 		tr.srt.scale,
-		Math::Func::VEC3::ToRadians(tr.srt.rotate),
+		math::func::VEC3::ToRadians(tr.srt.rotate),
 		tr.srt.translate
 		);
 
@@ -72,13 +73,13 @@ void TransformSystem::UpdateComponent(TransformComponent& tr)
 	tr.worldInvTranspose = tr.world.Inverse().Transpose();
 
 	// 3) basis（正規直交化）
-	Math::Vec3f r{ tr.world.m[0][0], tr.world.m[0][1], tr.world.m[0][2] };
-	Math::Vec3f u{ tr.world.m[1][0], tr.world.m[1][1], tr.world.m[1][2] };
-	Math::Vec3f f{ tr.world.m[2][0], tr.world.m[2][1], tr.world.m[2][2] };
+	math::Vec3f r{ tr.world.m[0][0], tr.world.m[0][1], tr.world.m[0][2] };
+	math::Vec3f u{ tr.world.m[1][0], tr.world.m[1][1], tr.world.m[1][2] };
+	math::Vec3f f{ tr.world.m[2][0], tr.world.m[2][1], tr.world.m[2][2] };
 
 	r = r.Normalized();
-	u = (u - r * Math::Func::VEC3::Dot(u, r)).Normalized();
-	f = Math::Func::VEC3::Cross(r, u);
+	u = (u - r * math::func::VEC3::Dot(u, r)).Normalized();
+	f = math::func::VEC3::Cross(r, u);
 
 	tr.right = r;
 	tr.up = u;

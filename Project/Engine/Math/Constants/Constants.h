@@ -2,7 +2,7 @@
 
 #include "../Vector/Vector.h"
 
-namespace Tsumi::Math::Const {
+namespace tme::math::constant {
 // 円周率関連
 constexpr float PI = 3.14159265358979323846f;
 constexpr float Double_PI = PI * 2.0f;

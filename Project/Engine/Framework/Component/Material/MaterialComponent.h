@@ -18,7 +18,7 @@ public:
 	SurfaceType surface = SurfaceType::Opaque;
 
 	// PBR 
-	Math::Vec3f baseColor = { 1.0f, 1.0f, 1.0f };
+	tme::math::Vec3f baseColor = { 1.0f, 1.0f, 1.0f };
 	float alpha = 1.0f;
 	float roughness = 1.0f;
 	float metallic = 0.0f;
@@ -30,7 +30,7 @@ public:
 	std::string albedo;
 
 	// UV 
-	Math::UVTransform uv;
+	tme::math::UVTransform uv;
 
 	bool visible = true;
 

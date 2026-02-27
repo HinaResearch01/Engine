@@ -32,10 +32,10 @@ public:
 	}
 
 public:
-	Math::Vec3f color{ 1,1,1 };
+	tme::math::Vec3f color{ 1,1,1 };
 	float intensity = 2.5f;
 
-	Math::Vec3f ambient{ 0.1f, 0.1f, 0.1f };
+	tme::math::Vec3f ambient{ 0.1f, 0.1f, 0.1f };
 
 	// Sun Control Params
 	// Elevation (Pitch): 0 to 90

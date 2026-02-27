@@ -18,7 +18,7 @@ public:
 		std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 		std::uniform_real_distribution<float> speedDist(5.0f, 15.0f);
 
-		velocity_ = Tsumi::Math::Vec3f(dist(gen), 0.0f, dist(gen)).Normalized() * speedDist(gen);
+		velocity_ = tme::math::Vec3f(dist(gen), 0.0f, dist(gen)).Normalized() * speedDist(gen);
 	}
 
 	void Update(float dt) override {
@@ -45,5 +45,5 @@ public:
 	Tsumi::Framework::UpdatePhase Phase() const override { return Tsumi::Framework::UpdatePhase::Logic; }
 
 private:
-	Tsumi::Math::Vec3f velocity_;
+	tme::math::Vec3f velocity_;
 };

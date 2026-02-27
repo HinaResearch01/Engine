@@ -6,9 +6,9 @@
 namespace Tsumi::Framework {
 
 struct SRT {
-	Math::Vec3f scale{};
-	Math::Vec3f rotate{};
-	Math::Vec3f translate{};
+	tme::math::Vec3f scale{};
+	tme::math::Vec3f rotate{};
+	tme::math::Vec3f translate{};
 	SRT() :
 		scale{ 1.0f, 1.0f, 1.0f },
 		rotate{ 0.0f, 0.0f, 0.0f },
@@ -22,7 +22,7 @@ class TransformComponent : public IComponent {
 public:
 	void OnInspectorGui() override;
 
-	Math::Vec3f GetWorldPos() const {
+	tme::math::Vec3f GetWorldPos() const {
 		return { world.m[3][0], world.m[3][1], world.m[3][2] };
 	}
 
@@ -40,11 +40,11 @@ public:
 	bool worldDirty = true;
 
 	// 派生
-	Math::Mat4x4 world{};
-	Math::Mat4x4 worldInvTranspose{};
-	Math::Vec3f right{ 1,0,0 };
-	Math::Vec3f up{ 0,1,0 };
-	Math::Vec3f forward{ 0,0,1 };
+	tme::math::Mat4x4 world{};
+	tme::math::Mat4x4 worldInvTranspose{};
+	tme::math::Vec3f right{ 1,0,0 };
+	tme::math::Vec3f up{ 0,1,0 };
+	tme::math::Vec3f forward{ 0,0,1 };
 
 	// 階層
 	TransformComponent* parent = nullptr;

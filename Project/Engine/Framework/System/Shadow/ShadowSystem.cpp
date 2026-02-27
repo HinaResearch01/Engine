@@ -16,6 +16,7 @@
 
 using namespace Tsumi;
 using namespace Framework;
+using namespace tme;
 
 ShadowSystem::ShadowSystem(World& world)
 	: ISystem(world)
@@ -135,9 +136,9 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 	}
 
 	// Light dir
-	Math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe(chosenTR->forward, { 0,-1,0 });
+	math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe(chosenTR->forward, { 0,-1,0 });
 
-	Math::Vec3f up{ 0,1,0 };
+	math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
@@ -146,17 +147,17 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		const float cn = splits[ci];
 		const float cf = splits[ci + 1];
 
-		const Math::Mat4x4 cascadeProj =
-			Math::Func::MAT4x4::PerspectiveFovMatrix(cam.fovY, cam.aspectRatio, cn, cf);
+		const math::Mat4x4 cascadeProj =
+			math::func::MAT4x4::PerspectiveFovMatrix(cam.fovY, cam.aspectRatio, cn, cf);
 
-		const Math::Mat4x4 cascadeVP = cam.view * cascadeProj;
-		const Math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
+		const math::Mat4x4 cascadeVP = cam.view * cascadeProj;
+		const math::Mat4x4 invCascadeVP = cascadeVP.Inverse();
 
 		// ===== Bounding Sphere (View Space Calculation for Stability) =====
-		Math::Vec3f cornersVS[8]{};
+		math::Vec3f cornersVS[8]{};
 		ShadowDetail::ShadowMath::GetFrustumCornersWS(cascadeProj.Inverse(), 0.0f, 1.0f, cornersVS);
 
-		Math::Vec3f centerVS = ShadowDetail::ShadowMath::Average8(cornersVS);
+		math::Vec3f centerVS = ShadowDetail::ShadowMath::Average8(cornersVS);
 
 		float radius = 0.0f;
 		for (const auto& c : cornersVS) {
@@ -168,28 +169,28 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		radius = std::ceil(radius);
 
 		// Transform center to World Space
-		Math::Mat4x4 invView = cam.view.Inverse();
-		Math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
+		math::Mat4x4 invView = cam.view.Inverse();
+		math::Vec3f sphereCenterWS = invView.TransformPoint(centerVS);
 
 		// ===== Final Light View Matrix =====
 		// 💡 注意: 前半にあった centerLS のスナップ処理は削除しました（二重スナップ防止のため）
 		const float backDistance = 500.0f;
 		const float dist = radius + backDistance;
 
-		const Math::Vec3f lightPosWS = {
+		const math::Vec3f lightPosWS = {
 			sphereCenterWS.x - lightDirWS.x * dist,
 			sphereCenterWS.y - lightDirWS.y * dist,
 			sphereCenterWS.z - lightDirWS.z * dist
 		};
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, sphereCenterWS, up);
+		math::Mat4x4 lightView = math::func::MAT4x4::LookAtLH(lightPosWS, sphereCenterWS, up);
 
 		// ===== 固定サイズ Ortho =====
 		float r = radius;
 		float nearZ = dist - r;
 		float farZ = dist + r;
 
-		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+		math::Mat4x4 lightProj = math::func::MAT4x4::OrthographicMatrix(
 			-r,      // left
 			r,       // right
 			-r,      // bottom
@@ -203,11 +204,11 @@ bool ShadowSystem::BuildShadowContext(ShadowContext& out)
 		float ndcTexelSize = 2.0f / float(shadowMapSize);
 
 		// ② ワールド空間の原点 (0, 0, 0) を、現在のライトのプロジェクション空間へ変換
-		Math::Mat4x4 lightViewProj = lightView * lightProj;
+		math::Mat4x4 lightViewProj = lightView * lightProj;
 
 		// Vector4(0,0,0,1) と 行列 の乗算処理
-		Math::Vec4f originWS = { 0.0f, 0.0f, 0.0f, 1.0f };
-		Math::Vec4f originPS = originWS * lightViewProj;
+		math::Vec4f originWS = { 0.0f, 0.0f, 0.0f, 1.0f };
+		math::Vec4f originPS = originWS * lightViewProj;
 
 		// ③ テクセルサイズに対する「端数（ズレ）」を std::fmodf で計算
 		float offsetX = std::fmodf(originPS.x, ndcTexelSize);
@@ -284,14 +285,14 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 		auto& data = out.spotShadows[i];
 		data.lightIndex = 0;
 
-		Math::Vec3f pos = { entry.tr->world.m[3][0], entry.tr->world.m[3][1], entry.tr->world.m[3][2] };
-		Math::Vec3f fwd = entry.tr->forward;
-		Math::Vec3f up = entry.tr->up;
+		math::Vec3f pos = { entry.tr->world.m[3][0], entry.tr->world.m[3][1], entry.tr->world.m[3][2] };
+		math::Vec3f fwd = entry.tr->forward;
+		math::Vec3f up = entry.tr->up;
 
-		Math::Mat4x4 view = Math::Func::MAT4x4::LookAtLH(pos, pos + fwd, up);
+		math::Mat4x4 view = math::func::MAT4x4::LookAtLH(pos, pos + fwd, up);
 
 		float angleDeg = std::min(entry.sl->outerAngle * 2.0f, 179.0f);
-		float angle = Math::Func::NUM::ToRadians(angleDeg);
+		float angle = math::func::NUM::ToRadians(angleDeg);
 
 		// Use component params or fallback
 		float n = entry.sl->nearZ;
@@ -301,7 +302,7 @@ void ShadowSystem::BuildSpotShadowContext(ShadowContext& out)
 			f = entry.sh->farZ;
 		}
 
-		Math::Mat4x4 proj = Math::Func::MAT4x4::PerspectiveFovMatrix(angle, 1.0f, n, f);
+		math::Mat4x4 proj = math::func::MAT4x4::PerspectiveFovMatrix(angle, 1.0f, n, f);
 
 		data.viewProj = view * proj;
 	}
@@ -323,9 +324,9 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 
 	// 左上前（-1, 1, -1）あたりから原点を見下ろすようなライト方向にする
 	// ライトの方向ベクトルなので、光源からターゲットへの向き
-	Math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
+	math::Vec3f lightDirWS = ShadowDetail::ShadowMath::NormalizeSafe({ 1.0f, -1.0f, 1.0f }, { 0,-1,0 });
 
-	Math::Vec3f up{ 0,1,0 };
+	math::Vec3f up{ 0,1,0 };
 	const float dotUp = lightDirWS.x * up.x + lightDirWS.y * up.y + lightDirWS.z * up.z;
 	if (std::abs(dotUp) > 0.99f) up = { 1,0,0 };
 
@@ -348,18 +349,18 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 		float cf = splits[ci + 1];
 
 		// カメラに関係なく原点 (0,0,0) を見る
-		const Math::Vec3f centerWS = { 0.0f, 0.0f, 0.0f };
+		const math::Vec3f centerWS = { 0.0f, 0.0f, 0.0f };
 		const float dist = 50.0f;
-		const Math::Vec3f lightPosWS = {
+		const math::Vec3f lightPosWS = {
 			centerWS.x - lightDirWS.x * dist,
 			centerWS.y - lightDirWS.y * dist,
 			centerWS.z - lightDirWS.z * dist
 		};
 
-		Math::Mat4x4 lightView = Math::Func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
+		math::Mat4x4 lightView = math::func::MAT4x4::LookAtLH(lightPosWS, centerWS, up);
 
 		const float half = 150.0f;
-		Math::Mat4x4 lightProj = Math::Func::MAT4x4::OrthographicMatrix(
+		math::Mat4x4 lightProj = math::func::MAT4x4::OrthographicMatrix(
 			-half,   // left
 			half,    // right
 			-half,   // bottom
@@ -376,7 +377,7 @@ void ShadowSystem::BuildDefault(ShadowContext& out)
 	}
 }
 
-void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)
+void ShadowSystem::SnapOrthoToTexel(math::Mat4x4& lightView, float orthoWidth, float orthoHeight, uint32_t shadowMapSize)
 {
 	if (shadowMapSize == 0) return;
 
@@ -392,9 +393,9 @@ void ShadowSystem::SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth, f
 	lightView.m[3][1] = std::floor(lightView.m[3][1] / texelSizeY) * texelSizeY;
 }
 
-void ShadowSystem::CalculateBoundingSphere(const Math::Mat4x4& invViewProj, float nearZ, float farZ, Math::Vec3f& outCenter, float& outRadius)
+void ShadowSystem::CalculateBoundingSphere(const math::Mat4x4& invViewProj, float nearZ, float farZ, math::Vec3f& outCenter, float& outRadius)
 {
-	Math::Vec3f corners[8];
+	math::Vec3f corners[8];
 	ShadowDetail::ShadowMath::GetFrustumCornersWS(invViewProj, nearZ, farZ, corners);
 
 	// center = 平均
@@ -404,7 +405,7 @@ void ShadowSystem::CalculateBoundingSphere(const Math::Mat4x4& invViewProj, floa
 	outRadius = 0.0f;
 	for (int i = 0; i < 8; ++i)
 	{
-		Math::Vec3f d = {
+		math::Vec3f d = {
 			corners[i].x - outCenter.x,
 			corners[i].y - outCenter.y,
 			corners[i].z - outCenter.z

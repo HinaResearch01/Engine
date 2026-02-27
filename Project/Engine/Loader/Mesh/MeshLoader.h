@@ -52,17 +52,17 @@ private:
 	/// <summary>
 	/// transform を適用してメッシュをパース
 	/// </summary>
-	static Math::Mat4x4 ToMat4x4(const aiMatrix4x4& a);
+	static tme::math::Mat4x4 ToMat4x4(const aiMatrix4x4& a);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	static Math::Vec3f TransformPoint(const Math::Mat4x4& m, const Math::Vec3f& p);
+	static tme::math::Vec3f TransformPoint(const tme::math::Mat4x4& m, const tme::math::Vec3f& p);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	static Math::Vec3f TransformNormal(const Math::Mat4x4& m, const Math::Vec3f& n);
+	static tme::math::Vec3f TransformNormal(const tme::math::Mat4x4& m, const tme::math::Vec3f& n);
 };
 
 }

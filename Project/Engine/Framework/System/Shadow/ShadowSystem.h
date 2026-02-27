@@ -60,13 +60,13 @@ private:
 	///  CSM の Texel Snapping
 	/// Ortho の XY 範囲を texel グリッドにスナップして “泳ぎ” を抑える
 	/// </summary>
-	void SnapOrthoToTexel(Math::Mat4x4& lightView, float orthoWidth,
+	void SnapOrthoToTexel(tme::math::Mat4x4& lightView, float orthoWidth,
 		float orthoHeight, uint32_t shadowMapSize);
 
 	void CalculateBoundingSphere(
-		const Math::Mat4x4& invViewProj,
+		const tme::math::Mat4x4& invViewProj,
 		float nearZ, float farZ,
-		Math::Vec3f& outCenter,
+		tme::math::Vec3f& outCenter,
 		float& outRadius);
 
 private:

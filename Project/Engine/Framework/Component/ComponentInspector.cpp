@@ -116,14 +116,14 @@ void SpotLightComponent::OnInspectorGui()
 		ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 1000.0f);
 		ImGui::DragFloat("Range", &range, 0.5f, 0.0f, 1000.0f);
 		
-		float innerDeg = Math::Func::NUM::ToDegrees(std::acos(innerCos));
-		float outerDeg = Math::Func::NUM::ToDegrees(std::acos(outerCos));
+		float innerDeg = tme::math::func::NUM::ToDegrees(std::acos(innerCos));
+		float outerDeg = tme::math::func::NUM::ToDegrees(std::acos(outerCos));
 
 		if (ImGui::DragFloat("Inner Angle", &innerDeg, 0.1f, 0.0f, 180.0f)) {
-			innerCos = std::cos(Math::Func::NUM::ToRadians(innerDeg));
+			innerCos = std::cos(tme::math::func::NUM::ToRadians(innerDeg));
 		}
 		if (ImGui::DragFloat("Outer Angle", &outerDeg, 0.1f, 0.0f, 180.0f)) {
-			outerCos = std::cos(Math::Func::NUM::ToRadians(outerDeg));
+			outerCos = std::cos(tme::math::func::NUM::ToRadians(outerDeg));
 		}
 
 		ImGui::Separator();
